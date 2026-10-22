@@ -40,13 +40,17 @@ object DeviceMusicScanner {
             val sortOrder =
                 "${MediaStore.Audio.Media.TITLE} ASC"
 
-            context.contentResolver.query(
+            val cursor = context.contentResolver.query(
                 collection,
                 projection,
                 selection,
                 null,
                 sortOrder
-            )?.use { cursor ->
+            ) ?: throw IllegalStateException(
+                "MediaStore không trả về dữ liệu"
+            )
+
+            cursor.use { cursor ->
 
                 val idColumn = cursor.getColumnIndexOrThrow(
                     MediaStore.Audio.Media._ID

@@ -266,167 +266,172 @@ class MainActivity : ComponentActivity() {
 
             MaterialTheme {
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-
-                    Text(
-                        text = "MusicFlow",
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-
-                    Spacer(Modifier.height(12.dp))
-
-                    Text(status)
-
-                    Spacer(Modifier.height(24.dp))
-
-                    Text(
-                        text = songTitle,
-                        style = MaterialTheme.typography.titleLarge
-                    )
-
-                    Spacer(Modifier.height(8.dp))
-
-                    Text(
-                        text = "Bài $currentIndex / $queueCount"
-                    )
-
-                    Spacer(Modifier.height(28.dp))
-
-                    Button(
-                        enabled = controller != null,
-                        onClick = {
-                            pickAudio.launch(arrayOf("audio/*"))
-                        }
+                if (!showDeviceMusic) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
-                        Text("Chọn nhiều file MP3")
-                    }
-
-                    Spacer(Modifier.height(12.dp))
-
-                    Button(
-                        enabled = controller != null,
-                        onClick = {
-                            showDeviceMusic = true
-                        }
-                    ) {
-                        Text("Quét và xem nhạc thiết bị")
-                    }
-
-                    Spacer(Modifier.height(24.dp))
-
-                    Slider(
-                        value = displayedPosition,
-                        onValueChange = { value ->
-                            isDragging = true
-                            sliderValue = value
-                        },
-                        onValueChangeFinished = {
-
-                            controller?.seekTo(
-                                sliderValue.toLong()
-                            )
-
-                            isDragging = false
-                        },
-                        valueRange = 0f..sliderMaximum,
-                        enabled = hasMedia && durationMs > 0
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement =
-                            Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            formatTime(displayedPosition.toLong())
-                        )
 
                         Text(
-                            if (durationMs > 0)
-                                formatTime(durationMs)
-                            else "--:--"
+                            text = "MusicFlow",
+                            style = MaterialTheme.typography.headlineMedium
                         )
-                    }
 
-                    Spacer(Modifier.height(20.dp))
+                        Spacer(Modifier.height(12.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement =
-                            Arrangement.SpaceEvenly,
-                        verticalAlignment =
-                            Alignment.CenterVertically
-                    ) {
+                        Text(status)
+
+                        Spacer(Modifier.height(24.dp))
+
+                        Text(
+                            text = songTitle,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+
+                        Spacer(Modifier.height(8.dp))
+
+                        Text(
+                            text = "Bài $currentIndex / $queueCount"
+                        )
+
+                        Spacer(Modifier.height(28.dp))
 
                         Button(
-                            enabled = canPrevious,
+                            enabled = controller != null,
                             onClick = {
-                                controller?.seekToPreviousMediaItem()
+                                pickAudio.launch(arrayOf("audio/*"))
                             }
                         ) {
-                            Text("Trước")
+                            Text("Chọn nhiều file MP3")
                         }
 
+                        Spacer(Modifier.height(12.dp))
+
                         Button(
-                            enabled = hasMedia,
+                            enabled = controller != null,
                             onClick = {
-
-                                controller?.let { player ->
-
-                                    if (player.isPlaying) {
-                                        player.pause()
-                                    } else {
-
-                                        if (
-                                            player.playbackState ==
-                                            Player.STATE_ENDED
-                                        ) {
-                                            player.seekToDefaultPosition()
-                                        }
-
-                                        player.play()
-                                    }
-                                }
+                                showDeviceMusic = true
                             }
+                        ) {
+                            Text("Quét và xem nhạc thiết bị")
+                        }
+
+                        Spacer(Modifier.height(24.dp))
+
+                        Slider(
+                            value = displayedPosition,
+                            onValueChange = { value ->
+                                isDragging = true
+                                sliderValue = value
+                            },
+                            onValueChangeFinished = {
+
+                                controller?.seekTo(
+                                    sliderValue.toLong()
+                                )
+
+                                isDragging = false
+                            },
+                            valueRange = 0f..sliderMaximum,
+                            enabled = hasMedia && durationMs > 0
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement =
+                                Arrangement.SpaceBetween
                         ) {
                             Text(
-                                if (isPlaying) "Tạm dừng"
-                                else "Phát"
+                                formatTime(displayedPosition.toLong())
+                            )
+
+                            Text(
+                                if (durationMs > 0)
+                                    formatTime(durationMs)
+                                else "--:--"
                             )
                         }
 
-                        Button(
-                            enabled = canNext,
-                            onClick = {
-                                controller?.seekToNextMediaItem()
-                            }
+                        Spacer(Modifier.height(20.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement =
+                                Arrangement.SpaceEvenly,
+                            verticalAlignment =
+                                Alignment.CenterVertically
                         ) {
-                            Text("Tiếp")
+
+                            Button(
+                                enabled = canPrevious,
+                                onClick = {
+                                    controller?.seekToPreviousMediaItem()
+                                }
+                            ) {
+                                Text("Trước")
+                            }
+
+                            Button(
+                                enabled = hasMedia,
+                                onClick = {
+
+                                    controller?.let { player ->
+
+                                        if (player.isPlaying) {
+                                            player.pause()
+                                        } else {
+
+                                            if (
+                                                player.playbackState ==
+                                                Player.STATE_ENDED
+                                            ) {
+                                                player.seekToDefaultPosition()
+                                            }
+
+                                            player.play()
+                                        }
+                                    }
+                                }
+                            ) {
+                                Text(
+                                    if (isPlaying) "Tạm dừng"
+                                    else "Phát"
+                                )
+                            }
+
+                            Button(
+                                enabled = canNext,
+                                onClick = {
+                                    controller?.seekToNextMediaItem()
+                                }
+                            ) {
+                                Text("Tiếp")
+                            }
                         }
                     }
                 }
 
                 if (showDeviceMusic) {
 
-                    DeviceMusicDialog(
-
-                        onDismiss = {
+                    LibraryRoute(
+                        onBack = {
                             showDeviceMusic = false
                         },
 
-                        onSelect = { songs, selectedIndex ->
+                        onPickManual = {
+                            showDeviceMusic = false
+                            pickAudio.launch(arrayOf("audio/*"))
+                        },
+
+                        onSongSelected = { songs, selectedIndex ->
 
                             controller?.let { player ->
 
                                 val mediaItems = songs.map { song ->
-
                                     MediaItem.Builder()
                                         .setMediaId("device-${song.id}")
                                         .setUri(song.uri)
