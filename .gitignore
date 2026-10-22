@@ -1,0 +1,39 @@
+
+# Gradle and build output
+.gradle/
+**/build/
+.kotlin/
+
+# Local Android SDK settings
+local.properties
+
+# Android Studio
+.idea/
+*.iml
+captures/
+
+# Native build
+.externalNativeBuild/
+.cxx/
+
+# Generated application packages
+*.apk
+*.aab
+
+# Signing keys
+*.jks
+*.keystore
+
+# Secrets and private configuration
+.env
+.env.*
+secrets.properties
+google-services.json
+
+# Logs
+*.log
+*.hprof
+
+# Operating system
+.DS_Store
+Thumbs.db
