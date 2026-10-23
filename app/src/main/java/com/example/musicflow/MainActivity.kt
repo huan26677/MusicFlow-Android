@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.musicflow.ui.theme.MusicFlowTheme
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -23,6 +24,8 @@ import kotlinx.coroutines.withContext
 class MainActivity : ComponentActivity() {
 
     private lateinit var playerViewModel: PlayerViewModel
+
+    private var pickFilesJob: Job? = null
 
     private val pickAudio = registerForActivityResult(
         ActivityResultContracts.OpenMultipleDocuments()
@@ -43,16 +46,20 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            lifecycleScope.launch {
+            // Hủy yêu cầu đọc metadata của lần chọn trước.
+            pickFilesJob?.cancel()
 
-                // Truy vấn tên file ngoài luồng giao diện.
+            pickFilesJob = lifecycleScope.launch {
+
+                // Vẫn đọc metadata ngoài Main thread.
                 val files = withContext(Dispatchers.IO) {
                     selectedUris.map { uri ->
                         uri to getFileName(uri)
                     }
                 }
 
-                // Trở lại Main thread trước khi gọi bộ phát.
+                // Chỉ tác vụ chưa bị hủy mới được dùng
+                // để cập nhật hàng đợi phát nhạc.
                 playerViewModel.playPickedFiles(files)
             }
         }
