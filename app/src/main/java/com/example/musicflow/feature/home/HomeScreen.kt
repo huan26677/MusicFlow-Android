@@ -31,6 +31,7 @@ fun HomeRoute(
     state: PlayerUiState,
     onOpenLibrary: () -> Unit,
     onOpenSearch: () -> Unit,
+    onOpenPlaylists: () -> Unit,
     onOpenPlayer: () -> Unit,
     onRecentSongSelected: (List<RecentSong>, Int) -> Unit
 ) {
@@ -62,6 +63,7 @@ fun HomeRoute(
         historyState = historyState,
         onOpenLibrary = onOpenLibrary,
         onOpenSearch = onOpenSearch,
+        onOpenPlaylists = onOpenPlaylists,
         onOpenPlayer = onOpenPlayer,
         onRecentSongSelected = onRecentSongSelected,
         actionError = actionError,
@@ -77,6 +79,7 @@ fun HomeScreen(
     historyState: HomeHistoryUiState,
     onOpenLibrary: () -> Unit,
     onOpenSearch: () -> Unit,
+    onOpenPlaylists: () -> Unit,
     onOpenPlayer: () -> Unit,
     onRecentSongSelected: (List<RecentSong>, Int) -> Unit,
     actionError: String?,
@@ -130,6 +133,13 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Tìm kiếm bài hát")
+                }
+
+                OutlinedButton(
+                    onClick = onOpenPlaylists,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Danh sách phát của tôi")
                 }
             }
         }

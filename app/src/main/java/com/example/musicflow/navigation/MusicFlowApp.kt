@@ -31,6 +31,8 @@ import com.example.musicflow.core.playback.PlayerUiState
 import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.feature.home.HomeRoute
 import com.example.musicflow.feature.library.LibraryRoute
+import com.example.musicflow.feature.playlist.PlaylistListRoute
+import com.example.musicflow.feature.playlist.PlaylistDetailRoute
 import com.example.musicflow.feature.player.MiniPlayer
 import com.example.musicflow.feature.player.NowPlayingScreen
 import com.example.musicflow.feature.search.SearchRoute
@@ -50,6 +52,14 @@ data object AccountTab : NavKey
 
 @Serializable
 data object NowPlaying : NavKey
+
+@Serializable
+data object PlaylistsRoute : NavKey
+
+@Serializable
+data class PlaylistDetail(
+    val playlistId: String
+) : NavKey
 
 @Composable
 fun MusicFlowApp(
@@ -172,6 +182,12 @@ fun MusicFlowApp(
                             switchTab(SearchTab)
                         },
 
+                        onOpenPlaylists = {
+                            if (backStack.lastOrNull() != PlaylistsRoute) {
+                                backStack.add(PlaylistsRoute)
+                            }
+                        },
+
                         onOpenPlayer = {
                             openPlayer()
                         },
@@ -234,6 +250,32 @@ fun MusicFlowApp(
                         description =
                             "Đăng nhập, đăng ký và cài đặt " +
                                     "giao diện sẽ được thêm sau."
+                    )
+                }
+
+                entry<PlaylistsRoute> {
+                    PlaylistListRoute(
+                        onBack = {
+                            if (backStack.size > 1) {
+                                backStack.removeAt(backStack.lastIndex)
+                            }
+                        },
+                        onOpenPlaylist = { playlistId ->
+                            backStack.add(
+                                PlaylistDetail(playlistId)
+                            )
+                        }
+                    )
+                }
+
+                entry<PlaylistDetail> { route ->
+                    PlaylistDetailRoute(
+                        playlistId = route.playlistId,
+                        onBack = {
+                            if (backStack.size > 1) {
+                                backStack.removeAt(backStack.lastIndex)
+                            }
+                        }
                     )
                 }
 
