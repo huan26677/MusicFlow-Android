@@ -25,6 +25,7 @@ import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.feature.library.LibraryRoute
 import com.example.musicflow.feature.player.MiniPlayer
 import com.example.musicflow.feature.player.NowPlayingScreen
+import com.example.musicflow.feature.search.SearchRoute
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -155,11 +156,17 @@ fun MusicFlowApp(
                 }
 
                 entry<SearchTab> {
-                    PlaceholderScreen(
-                        title = "Tìm kiếm",
-                        description =
-                            "Bộ lọc nhạc online và nhạc " +
-                                    "thiết bị sẽ được thêm sau."
+                    SearchRoute(
+                        onSongSelected = { songs, index ->
+                            if (songs.isNotEmpty()) {
+                                onPlayDeviceSongs(songs, index)
+
+                                // Mở Now Playing như khi chọn bài từ Library.
+                                if (backStack.lastOrNull() != NowPlaying) {
+                                    backStack.add(NowPlaying)
+                                }
+                            }
+                        }
                     )
                 }
 
