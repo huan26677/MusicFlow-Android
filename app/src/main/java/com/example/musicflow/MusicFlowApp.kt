@@ -184,8 +184,15 @@ fun MusicFlowApp(
                         },
                         onPickManual = onPickFiles,
                         onSongSelected = { songs, index ->
-                            onPlayDeviceSongs(songs, index)
-                            openPlayer()
+                            if (songs.isNotEmpty()) {
+                                onPlayDeviceSongs(songs, index)
+
+                                // Mở Now Playing dựa trên hành động chọn bài,
+                                // không chờ StateFlow cập nhật hasMedia.
+                                if (backStack.lastOrNull() != NowPlaying) {
+                                    backStack.add(NowPlaying)
+                                }
+                            }
                         }
                     )
                 }

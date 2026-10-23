@@ -19,6 +19,8 @@ import androidx.core.content.ContextCompat
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 
 @Composable
 fun LibraryRoute(
@@ -63,6 +65,15 @@ fun LibraryRoute(
         ) { granted ->
             hasPermission = granted
         }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        val granted = ContextCompat.checkSelfPermission(
+            context,
+            permission
+        ) == PackageManager.PERMISSION_GRANTED
+
+        hasPermission = granted
+    }
 
     LaunchedEffect(Unit) {
         if (!hasPermission) {
