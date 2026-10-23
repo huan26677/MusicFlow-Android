@@ -30,10 +30,13 @@ data class SearchUiState(
 )
 
 class SearchViewModel(
-    private val repository: LocalMusicRepository
+    private val repository: LocalMusicRepository,
+    initialQuery: String
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(SearchUiState())
+    private val _uiState = MutableStateFlow(
+        SearchUiState(query = initialQuery)
+    )
 
     val uiState: StateFlow<SearchUiState> =
         _uiState.asStateFlow()
@@ -175,7 +178,8 @@ class SearchViewModel(
 
     companion object {
         fun factory(
-            repository: LocalMusicRepository
+            repository: LocalMusicRepository,
+            initialQuery: String
         ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
 
@@ -189,7 +193,10 @@ class SearchViewModel(
                     )
 
                     @Suppress("UNCHECKED_CAST")
-                    return SearchViewModel(repository) as T
+                    return SearchViewModel(
+                        repository = repository,
+                        initialQuery = initialQuery
+                    ) as T
                 }
             }
     }

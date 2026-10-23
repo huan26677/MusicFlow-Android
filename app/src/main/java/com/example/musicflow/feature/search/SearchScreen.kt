@@ -29,6 +29,8 @@ import com.example.musicflow.feature.library.SongRow
 
 @Composable
 fun SearchRoute(
+    initialQuery: String,
+    onQueryRemembered: (String) -> Unit,
     onSongSelected: (List<DeviceSong>, Int) -> Unit
 ) {
     val context = LocalContext.current
@@ -40,7 +42,10 @@ fun SearchRoute(
     }
 
     val factory = remember(repository) {
-        SearchViewModel.factory(repository)
+        SearchViewModel.factory(
+            repository = repository,
+            initialQuery = initialQuery
+        )
     }
 
     val searchViewModel: SearchViewModel =
@@ -89,7 +94,10 @@ fun SearchRoute(
     SearchScreen(
         state = state,
         hasPermission = hasPermission,
-        onQueryChange = searchViewModel::updateQuery,
+        onQueryChange = { query ->
+            searchViewModel.updateQuery(query)
+            onQueryRemembered(query)
+        },
         onRequestPermission = {
             permissionLauncher.launch(permission)
         },

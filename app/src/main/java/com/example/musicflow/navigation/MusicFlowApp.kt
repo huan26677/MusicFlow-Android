@@ -13,6 +13,10 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -58,6 +62,10 @@ fun MusicFlowApp(
     onCycleRepeat: () -> Unit
 
 ) {
+    var savedSearchQuery by rememberSaveable {
+        mutableStateOf("")
+    }
+
     val backStack = rememberNavBackStack(HomeTab)
 
     val currentRoute = backStack.last()
@@ -164,6 +172,10 @@ fun MusicFlowApp(
 
                 entry<SearchTab> {
                     SearchRoute(
+                        initialQuery = savedSearchQuery,
+                        onQueryRemembered = { query ->
+                            savedSearchQuery = query
+                        },
                         onSongSelected = { songs, index ->
                             if (songs.isNotEmpty()) {
                                 onPlayDeviceSongs(songs, index)
