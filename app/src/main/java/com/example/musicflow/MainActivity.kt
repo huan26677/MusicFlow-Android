@@ -2,6 +2,7 @@
 package com.example.musicflow
 
 import android.content.Intent
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
@@ -54,7 +55,11 @@ class MainActivity : ComponentActivity() {
                 // Vẫn đọc metadata ngoài Main thread.
                 val files = withContext(Dispatchers.IO) {
                     selectedUris.map { uri ->
-                        uri to getFileName(uri)
+                        PickedAudioFile(
+                            uri = uri,
+                            title = getFileName(uri),
+                            artist = getEmbeddedArtist(uri)
+                        )
                     }
                 }
 
@@ -86,6 +91,32 @@ class MainActivity : ComponentActivity() {
 
         } catch (_: Exception) {
             "Bài hát không tên"
+        }
+    }
+
+    private fun getEmbeddedArtist(uri: Uri): String? {
+        val retriever = MediaMetadataRetriever()
+
+        return try {
+            retriever.setDataSource(this, uri)
+
+            retriever.extractMetadata(
+                MediaMetadataRetriever.METADATA_KEY_ARTIST
+            )
+                ?.trim()
+                ?.takeIf {
+                    it.isNotEmpty() &&
+                        !it.equals("<unknown>", ignoreCase = true)
+                }
+
+        } catch (_: Exception) {
+            // Không có metadata hoặc file không hỗ trợ.
+            null
+
+        } finally {
+            runCatching {
+                retriever.release()
+            }
         }
     }
 

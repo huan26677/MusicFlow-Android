@@ -9,6 +9,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 
+data class PickedAudioFile(
+    val uri: Uri,
+    val title: String,
+    val artist: String?
+)
+
 class PlayerViewModel(
     private val playbackController: PlaybackController
 ) : ViewModel() {
@@ -16,15 +22,16 @@ class PlayerViewModel(
     val uiState = playbackController.uiState
 
     fun playPickedFiles(
-        files: List<Pair<Uri, String>>
+        files: List<PickedAudioFile>
     ) {
-        val items = files.map { (uri, name) ->
+        val items = files.map { file ->
             MediaItem.Builder()
-                .setMediaId(uri.toString())
-                .setUri(uri)
+                .setMediaId(file.uri.toString())
+                .setUri(file.uri)
                 .setMediaMetadata(
                     MediaMetadata.Builder()
-                        .setTitle(name)
+                        .setTitle(file.title)
+                        .setArtist(file.artist)
                         .build()
                 )
                 .build()
