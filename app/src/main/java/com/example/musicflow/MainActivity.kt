@@ -166,6 +166,13 @@ class MainActivity : ComponentActivity() {
                         )
                     },
 
+                    onPlayPlaylistTracks = { tracks, index ->
+                        playerViewModel.playPlaylistTracks(
+                            tracks = tracks,
+                            selectedIndex = index
+                        )
+                    },
+
                     onPlayPause = {
                         playerViewModel.togglePlayPause()
                     },

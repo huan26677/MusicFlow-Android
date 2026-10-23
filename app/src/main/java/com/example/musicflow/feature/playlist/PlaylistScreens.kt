@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -20,6 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.musicflow.core.history.local.RecentHistoryDatabase
 import com.example.musicflow.core.playlist.LocalPlaylist
 import com.example.musicflow.core.playlist.PlaylistRules
+import com.example.musicflow.core.playlist.PlaylistTrack
 import com.example.musicflow.core.playlist.RoomPlaylistRepository
 
 @Composable
@@ -329,7 +331,8 @@ fun PlaylistListRoute(
 @Composable
 fun PlaylistDetailRoute(
     playlistId: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onPlayTracks: (List<PlaylistTrack>, Int) -> Unit
 ) {
     val vm = rememberPlaylistViewModel()
 
@@ -346,6 +349,13 @@ fun PlaylistDetailRoute(
         initialValue = PlaylistTracksUiState.Loading
     )
 
+    val actionError by vm.actionError
+        .collectAsStateWithLifecycle()
+
+    var removeTarget by remember {
+        mutableStateOf<PlaylistTrack?>(null)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -354,6 +364,17 @@ fun PlaylistDetailRoute(
     ) {
         TextButton(onClick = onBack) {
             Text("‹ Danh sách phát")
+        }
+
+        if (actionError != null) {
+            Text(
+                text = actionError!!,
+                color = MaterialTheme.colorScheme.error
+            )
+
+            TextButton(onClick = vm::dismissError) {
+                Text("Đóng thông báo")
+            }
         }
 
         when (val current = playlistsState) {
@@ -402,8 +423,7 @@ fun PlaylistDetailRoute(
                             if (tracks.tracks.isEmpty()) {
                                 Text(
                                     "Playlist chưa có bài hát. " +
-                                            "Bạn sẽ có thể thêm bài từ " +
-                                            "Library và Search ở bước tiếp theo."
+                                        "Hãy thêm bài từ Library hoặc Search."
                                 )
                             } else {
                                 Text(
@@ -412,29 +432,59 @@ fun PlaylistDetailRoute(
                                         MaterialTheme.typography.bodySmall
                                 )
 
-                                LazyColumn(
-                                    modifier = Modifier.weight(1f)
+                                Button(
+                                    onClick = {
+                                        onPlayTracks(
+                                            tracks.tracks,
+                                            0
+                                        )
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    items(
+                                    Text("▶ Phát toàn bộ")
+                                }
+
+                                LazyColumn(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement =
+                                        Arrangement.spacedBy(4.dp)
+                                ) {
+                                    itemsIndexed(
                                         items = tracks.tracks,
-                                        key = { it.mediaId }
-                                    ) { track ->
+                                        key = { _, track -> track.mediaId }
+                                    ) { index, track ->
+
                                         ListItem(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable {
+                                                    onPlayTracks(
+                                                        tracks.tracks,
+                                                        index
+                                                    )
+                                                },
                                             headlineContent = {
                                                 Text(
-                                                    track.title,
+                                                    text = track.title,
                                                     maxLines = 1,
-                                                    overflow =
-                                                        TextOverflow.Ellipsis
+                                                    overflow = TextOverflow.Ellipsis
                                                 )
                                             },
                                             supportingContent = {
                                                 Text(
-                                                    track.artist,
+                                                    text = track.artist,
                                                     maxLines = 1,
-                                                    overflow =
-                                                        TextOverflow.Ellipsis
+                                                    overflow = TextOverflow.Ellipsis
                                                 )
+                                            },
+                                            trailingContent = {
+                                                TextButton(
+                                                    onClick = {
+                                                        removeTarget = track
+                                                    }
+                                                ) {
+                                                    Text("Xóa")
+                                                }
                                             }
                                         )
                                     }
@@ -445,5 +495,47 @@ fun PlaylistDetailRoute(
                 }
             }
         }
+    }
+
+    removeTarget?.let { track ->
+
+        AlertDialog(
+            onDismissRequest = {
+                removeTarget = null
+            },
+            title = {
+                Text("Xóa bài khỏi playlist?")
+            },
+            text = {
+                Text(
+                    "Xóa \"${track.title}\" khỏi danh sách phát? " +
+                        "File nhạc trên thiết bị và lịch sử nghe " +
+                        "sẽ không bị ảnh hưởng."
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        vm.removeTrack(
+                            playlistId = playlistId,
+                            mediaId = track.mediaId
+                        )
+
+                        removeTarget = null
+                    }
+                ) {
+                    Text("Xóa khỏi playlist")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        removeTarget = null
+                    }
+                ) {
+                    Text("Hủy")
+                }
+            }
+        )
     }
 }

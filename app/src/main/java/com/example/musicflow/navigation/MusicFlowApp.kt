@@ -29,6 +29,8 @@ import androidx.navigation3.ui.NavDisplay
 import com.example.musicflow.core.history.RecentSong
 import com.example.musicflow.core.playback.PlayerUiState
 import com.example.musicflow.core.media.DeviceSong
+import com.example.musicflow.core.playlist.PlaylistTrack
+
 import com.example.musicflow.feature.home.HomeRoute
 import com.example.musicflow.feature.library.LibraryRoute
 import com.example.musicflow.feature.playlist.PlaylistListRoute
@@ -67,6 +69,8 @@ fun MusicFlowApp(
     onPickFiles: () -> Unit,
     onPlayDeviceSongs: (List<DeviceSong>, Int) -> Unit,
     onPlayRecentSongs: (List<RecentSong>, Int) -> Unit,
+    onPlayPlaylistTracks: (List<PlaylistTrack>, Int) -> Unit,
+
     onPlayPause: () -> Unit,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
@@ -271,9 +275,20 @@ fun MusicFlowApp(
                 entry<PlaylistDetail> { route ->
                     PlaylistDetailRoute(
                         playlistId = route.playlistId,
+
                         onBack = {
                             if (backStack.size > 1) {
                                 backStack.removeAt(backStack.lastIndex)
+                            }
+                        },
+
+                        onPlayTracks = { tracks, index ->
+                            if (index in tracks.indices) {
+                                onPlayPlaylistTracks(tracks, index)
+
+                                if (backStack.lastOrNull() != NowPlaying) {
+                                    backStack.add(NowPlaying)
+                                }
                             }
                         }
                     )

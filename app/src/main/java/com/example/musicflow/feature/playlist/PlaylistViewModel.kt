@@ -216,6 +216,37 @@ class PlaylistViewModel(
         }
     }
 
+    fun removeTrack(
+        playlistId: String,
+        mediaId: String
+    ) {
+        if (playlistId.isBlank() || mediaId.isBlank()) {
+            _actionError.value = "Bài hát không hợp lệ."
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                val removed = repository.removeTrack(
+                    playlistId = playlistId,
+                    mediaId = mediaId
+                )
+
+                _actionError.value = if (removed) {
+                    null
+                } else {
+                    "Không thể xóa bài hát khỏi playlist."
+                }
+
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                _actionError.value =
+                    "Không thể xóa bài hát khỏi playlist."
+            }
+        }
+    }
+
     fun dismissError() {
         _actionError.value = null
     }
