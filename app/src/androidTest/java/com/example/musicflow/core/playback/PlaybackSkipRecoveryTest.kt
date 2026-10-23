@@ -76,10 +76,12 @@ class PlaybackSkipRecoveryTest {
         val playingSignal = CountDownLatch(1)
 
         lateinit var player: ExoPlayer
+        var playerCreated = false
 
         try {
             instrumentation.runOnMainSync {
                 player = ExoPlayer.Builder(context).build()
+                playerCreated = true
 
                 player.addListener(object : Player.Listener {
 
@@ -155,7 +157,7 @@ class PlaybackSkipRecoveryTest {
                 "PASS missingFileCanSkipToValidTrack"
             )
         } finally {
-            if (::player.isInitialized) {
+            if (playerCreated) {
                 instrumentation.runOnMainSync {
                     player.release()
                 }
@@ -168,10 +170,12 @@ class PlaybackSkipRecoveryTest {
     @Test
     fun noNextTrackDoesNotSkip() {
         lateinit var player: ExoPlayer
+        var playerCreated = false
 
         try {
             instrumentation.runOnMainSync {
                 player = ExoPlayer.Builder(context).build()
+                playerCreated = true
 
                 player.setMediaItem(
                     MediaItem.Builder()
@@ -192,7 +196,7 @@ class PlaybackSkipRecoveryTest {
                 "PASS noNextTrackDoesNotSkip"
             )
         } finally {
-            if (::player.isInitialized) {
+            if (playerCreated) {
                 instrumentation.runOnMainSync {
                     player.release()
                 }
