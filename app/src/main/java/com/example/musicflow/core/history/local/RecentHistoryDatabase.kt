@@ -7,14 +7,25 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
+import com.example.musicflow.core.playlist.local.PlaylistDao
+import com.example.musicflow.core.playlist.local.PlaylistEntity
+import com.example.musicflow.core.playlist.local.PlaylistTrackEntity
+import com.example.musicflow.core.playlist.local.PlaylistMigrations
+
 @Database(
-    entities = [RecentSongEntity::class],
-    version = 1,
+    entities = [
+        RecentSongEntity::class,
+        PlaylistEntity::class,
+        PlaylistTrackEntity::class
+    ],
+    version = 2,
     exportSchema = true
 )
 abstract class RecentHistoryDatabase : RoomDatabase() {
 
     abstract fun recentSongDao(): RecentSongDao
+
+    abstract fun playlistDao(): PlaylistDao
 
     companion object {
 
@@ -30,9 +41,14 @@ abstract class RecentHistoryDatabase : RoomDatabase() {
                     context.applicationContext,
                     RecentHistoryDatabase::class.java,
                     "musicflow_history.db"
-                ).build().also {
-                    INSTANCE = it
-                }
+                )
+                    .addMigrations(
+                        PlaylistMigrations.MIGRATION_1_2
+                    )
+                    .build()
+                    .also {
+                        INSTANCE = it
+                    }
             }
         }
     }
