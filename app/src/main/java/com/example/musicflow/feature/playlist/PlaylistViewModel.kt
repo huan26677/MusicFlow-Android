@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 
+import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.playlist.LocalPlaylist
 import com.example.musicflow.core.playlist.PlaylistRules
 import com.example.musicflow.core.playlist.PlaylistTrack
@@ -43,6 +44,19 @@ sealed interface PlaylistTracksUiState {
     data class Error(
         val message: String
     ) : PlaylistTracksUiState
+}
+
+sealed interface AddTrackUiState {
+    data object Idle : AddTrackUiState
+    data object Saving : AddTrackUiState
+
+    data class Success(
+        val playlistName: String
+    ) : AddTrackUiState
+
+    data class Error(
+        val message: String
+    ) : AddTrackUiState
 }
 
 class PlaylistViewModel(
@@ -86,6 +100,61 @@ class PlaylistViewModel(
 
     private val _actionError = MutableStateFlow<String?>(null)
     val actionError = _actionError.asStateFlow()
+
+    private val _addTrackState =
+        MutableStateFlow<AddTrackUiState>(AddTrackUiState.Idle)
+
+    val addTrackState = _addTrackState.asStateFlow()
+
+    fun addDeviceSong(
+        playlistId: String,
+        playlistName: String,
+        song: DeviceSong
+    ) {
+        if (_addTrackState.value == AddTrackUiState.Saving) {
+            return
+        }
+
+        _addTrackState.value = AddTrackUiState.Saving
+
+        viewModelScope.launch {
+            try {
+                val track = PlaylistTrack(
+                    mediaId = "device-${song.id}",
+                    audioUri = song.uri.toString(),
+                    title = song.title,
+                    artist = song.artist,
+                    addedAtMs = System.currentTimeMillis()
+                )
+
+                val added = repository.addTrack(
+                    playlistId = playlistId,
+                    track = track
+                )
+
+                _addTrackState.value = if (added) {
+                    AddTrackUiState.Success(playlistName)
+                } else {
+                    AddTrackUiState.Error(
+                        "Bài hát đã có trong playlist " +
+                            "hoặc playlist không còn tồn tại."
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                _addTrackState.value = AddTrackUiState.Error(
+                    "Không thể thêm bài hát vào playlist."
+                )
+            }
+        }
+    }
+
+    fun resetAddTrackState() {
+        if (_addTrackState.value != AddTrackUiState.Saving) {
+            _addTrackState.value = AddTrackUiState.Idle
+        }
+    }
 
     fun create(rawName: String) {
         if (PlaylistRules.normalizedNameOrNull(rawName) == null) {

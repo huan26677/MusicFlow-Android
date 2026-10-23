@@ -23,6 +23,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.media.MediaStoreLocalMusicRepository
+import com.example.musicflow.feature.playlist.PlaylistPickerDialog
+import com.example.musicflow.feature.playlist.rememberPlaylistViewModel
 
 @Composable
 fun LibraryRoute(
@@ -42,6 +44,12 @@ fun LibraryRoute(
 
     val libraryViewModel: LibraryViewModel =
         viewModel(factory = factory)
+
+    val playlistViewModel = rememberPlaylistViewModel()
+
+    var selectedPlaylistSong by remember {
+        mutableStateOf<DeviceSong?>(null)
+    }
 
     val uiState by libraryViewModel.uiState
         .collectAsStateWithLifecycle()
@@ -101,8 +109,21 @@ fun LibraryRoute(
                 permissionLauncher.launch(permission)
             }
         },
-        onSongSelected = onSongSelected
+        onSongSelected = onSongSelected,
+        onAddToPlaylist = { song ->
+            selectedPlaylistSong = song
+        }
     )
+
+    selectedPlaylistSong?.let { song ->
+        PlaylistPickerDialog(
+            song = song,
+            viewModel = playlistViewModel,
+            onDismiss = {
+                selectedPlaylistSong = null
+            }
+        )
+    }
 }
 
 @Composable
@@ -112,7 +133,8 @@ fun LibraryScreen(
     onBack: () -> Unit,
     onPickManual: () -> Unit,
     onRefresh: () -> Unit,
-    onSongSelected: (List<DeviceSong>, Int) -> Unit
+    onSongSelected: (List<DeviceSong>, Int) -> Unit,
+    onAddToPlaylist: (DeviceSong) -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize()
@@ -215,6 +237,9 @@ fun LibraryScreen(
                                             uiState.songs,
                                             index
                                         )
+                                    },
+                                    onAddToPlaylist = {
+                                        onAddToPlaylist(song)
                                     }
                                 )
                             }

@@ -1,16 +1,18 @@
+
 package com.example.musicflow.feature.library
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+
 import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.ui.components.SongArtwork
 
@@ -18,58 +20,81 @@ import com.example.musicflow.ui.components.SongArtwork
 fun SongRow(
     song: DeviceSong,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onAddToPlaylist: (() -> Unit)? = null
 ) {
-    TextButton(
-        onClick = onClick,
+    Row(
         modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(
-            horizontal = 8.dp,
-            vertical = 8.dp
-        )
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            SongArtwork(
-                uri = song.uri,
-                modifier = Modifier
-                    .size(52.dp)
-                    .clip(RoundedCornerShape(10.dp))
+        // Vùng chính vẫn dùng để phát bài hát.
+        TextButton(
+            onClick = onClick,
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(
+                horizontal = 8.dp,
+                vertical = 8.dp
             )
-
-            Spacer(Modifier.width(12.dp))
-
-            Column(
-                modifier = Modifier.weight(1f)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = song.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                SongArtwork(
+                    uri = song.uri,
+                    modifier = Modifier
+                        .size(52.dp)
+                        .clip(RoundedCornerShape(10.dp))
                 )
 
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.width(12.dp))
+
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = song.title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Spacer(Modifier.height(4.dp))
+
+                    Text(
+                        text = song.artist,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Spacer(Modifier.width(8.dp))
 
                 Text(
-                    text = song.artist,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    text = formatSongDuration(song.durationMs),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+        }
 
-            Spacer(Modifier.width(8.dp))
-
-            Text(
-                text = formatSongDuration(song.durationMs),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+        // Nút riêng, không nằm bên trong TextButton phát nhạc.
+        if (onAddToPlaylist != null) {
+            IconButton(
+                onClick = onAddToPlaylist,
+                modifier = Modifier.semantics {
+                    contentDescription =
+                        "Thêm ${song.title} vào playlist"
+                }
+            ) {
+                Text(
+                    text = "+",
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
         }
     }
 }
@@ -88,7 +113,6 @@ private fun formatSongDuration(durationMs: Long): String {
 
     return if (totalMinutes >= 60L) {
         val hours = totalMinutes / 60L
-
         val minutes = (totalMinutes % 60L)
             .toString()
             .padStart(2, '0')

@@ -23,7 +23,7 @@ import com.example.musicflow.core.playlist.PlaylistRules
 import com.example.musicflow.core.playlist.RoomPlaylistRepository
 
 @Composable
-private fun rememberPlaylistViewModel(): PlaylistViewModel {
+internal fun rememberPlaylistViewModel(): PlaylistViewModel {
     val context = LocalContext.current.applicationContext
 
     val repository = remember(context) {
