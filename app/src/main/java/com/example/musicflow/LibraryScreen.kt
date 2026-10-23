@@ -208,40 +208,15 @@ fun LibraryScreen(
                                 key = { _, song -> song.id }
                             ) { index, song ->
 
-                                TextButton(
+                                SongRow(
+                                    song = song,
                                     onClick = {
                                         onSongSelected(
                                             uiState.songs,
                                             index
                                         )
-                                    },
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        SongArtwork(
-                                            uri = song.uri,
-                                            modifier = Modifier
-                                                .size(44.dp)
-                                                .clip(RoundedCornerShape(8.dp))
-                                        )
-
-                                        Spacer(Modifier.width(12.dp))
-
-                                        Column(
-                                            modifier = Modifier.weight(1f)
-                                        ) {
-                                            Text(song.title)
-
-                                            Text(
-                                                text = song.artist,
-                                                style = MaterialTheme.typography.bodySmall
-                                            )
-                                        }
                                     }
-                                }
+                                )
                             }
                         }
                     }
