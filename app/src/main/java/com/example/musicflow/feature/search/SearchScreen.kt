@@ -210,6 +210,17 @@ fun SearchScreen(
                 )
             }
 
+            state.isFiltering -> {
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Text(
+                    text = "Đang tìm bài hát...",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+
             state.results.isEmpty() -> {
                 Text("Không tìm thấy bài hát phù hợp.")
             }

@@ -24,6 +24,7 @@ data class SearchUiState(
     val songs: List<DeviceSong> = emptyList(),
     val results: List<DeviceSong> = emptyList(),
     val isLoading: Boolean = false,
+    val isFiltering: Boolean = false,
     val isLoaded: Boolean = false,
     val error: String? = null
 )
@@ -50,6 +51,7 @@ class SearchViewModel(
                     songs = emptyList(),
                     results = emptyList(),
                     isLoading = true,
+                    isFiltering = false,
                     isLoaded = false,
                     error = null
                 )
@@ -63,6 +65,7 @@ class SearchViewModel(
                     it.copy(
                         songs = songs,
                         isLoading = false,
+                        isFiltering = it.query.isNotBlank(),
                         isLoaded = true,
                         error = null
                     )
@@ -92,14 +95,19 @@ class SearchViewModel(
     fun updateQuery(query: String) {
         filterJob?.cancel()
 
-        _uiState.update {
-            it.copy(
+        _uiState.update { current ->
+            current.copy(
                 query = query,
-                results = emptyList()
+                results = emptyList(),
+                isFiltering = query.isNotBlank() &&
+                    current.isLoaded
             )
         }
 
-        if (!query.isBlank() && _uiState.value.isLoaded) {
+        if (
+            query.isNotBlank() &&
+            _uiState.value.isLoaded
+        ) {
             scheduleFilter(
                 query = query,
                 songs = _uiState.value.songs
@@ -132,7 +140,10 @@ class SearchViewModel(
                     current.isLoaded &&
                     current.songs === songs
                 ) {
-                    current.copy(results = results)
+                    current.copy(
+                        results = results,
+                        isFiltering = false
+                    )
                 } else {
                     current
                 }
@@ -155,6 +166,7 @@ class SearchViewModel(
                 songs = emptyList(),
                 results = emptyList(),
                 isLoading = false,
+                isFiltering = false,
                 isLoaded = false,
                 error = message
             )
