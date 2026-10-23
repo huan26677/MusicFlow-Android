@@ -188,7 +188,13 @@ fun NowPlayingScreen(
                 enabled = state.canNext,
                 onClick = onNext
             ) {
-                Text("Tiếp")
+                Text(
+                    if (state.playbackErrorMessage != null) {
+                        "Bỏ qua"
+                    } else {
+                        "Tiếp"
+                    }
+                )
             }
         }
 

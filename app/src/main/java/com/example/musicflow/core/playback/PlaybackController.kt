@@ -5,6 +5,8 @@ import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
+
 
 import androidx.core.content.ContextCompat
 import androidx.media3.common.C
@@ -293,7 +295,26 @@ class PlaybackController(context: Context) {
     }
 
     fun next() {
-        controller?.seekToNextMediaItem()
+        val player = controller ?: return
+
+        Log.i(
+            "MusicFlowSkip",
+            "REQUEST index=${player.currentMediaItemIndex} " +
+                "count=${player.mediaItemCount} " +
+                "state=${player.playbackState} " +
+                "error=${player.playerError?.errorCode ?: 0}"
+        )
+
+        val handled = PlaybackSkipRecovery.next(player)
+
+        Log.i(
+            "MusicFlowSkip",
+            "RESULT handled=$handled " +
+                "index=${player.currentMediaItemIndex} " +
+                "state=${player.playbackState}"
+        )
+
+        updateState(player)
     }
 
     fun previous() {
