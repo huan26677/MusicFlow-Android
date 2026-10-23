@@ -136,6 +136,14 @@ class MainActivity : ComponentActivity() {
 
                     onSeek = { position ->
                         playerViewModel.seekTo(position)
+                    },
+
+                    onToggleShuffle = {
+                        playerViewModel.toggleShuffle()
+                    },
+
+                    onCycleRepeat = {
+                        playerViewModel.cycleRepeat()
                     }
                 )
             }

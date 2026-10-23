@@ -27,7 +27,10 @@ data class PlayerUiState(
     val currentIndex: Int = 0,
     val queueCount: Int = 0,
     val canNext: Boolean = false,
-    val canPrevious: Boolean = false
+    val canPrevious: Boolean = false,
+    val artist: String = "Không rõ nghệ sĩ",
+    val shuffleEnabled: Boolean = false,
+    val repeatMode: Int = Player.REPEAT_MODE_OFF
 )
 
 class PlaybackController(context: Context) {
@@ -162,7 +165,18 @@ class PlaybackController(context: Context) {
             },
             queueCount = player.mediaItemCount,
             canNext = player.hasNextMediaItem(),
-            canPrevious = player.hasPreviousMediaItem()
+            canPrevious = player.hasPreviousMediaItem(),
+
+            artist = player.currentMediaItem
+                ?.mediaMetadata
+                ?.artist
+                ?.toString()
+                ?.takeIf { it.isNotBlank() }
+                ?: "Không rõ nghệ sĩ",
+
+            shuffleEnabled = player.shuffleModeEnabled,
+
+            repeatMode = player.repeatMode
         )
     }
 
@@ -243,6 +257,46 @@ class PlaybackController(context: Context) {
         }
 
         player.seekTo(target)
+        updateState(player)
+    }
+
+
+    fun toggleShuffle() {
+        val player = controller ?: return
+
+        if (!player.isCommandAvailable(
+                Player.COMMAND_SET_SHUFFLE_MODE
+            )
+        ) return
+
+        player.setShuffleModeEnabled(
+            !player.shuffleModeEnabled
+        )
+
+        updateState(player)
+    }
+
+    fun cycleRepeat() {
+        val player = controller ?: return
+
+        if (!player.isCommandAvailable(
+                Player.COMMAND_SET_REPEAT_MODE
+            )
+        ) return
+
+        val nextMode = when (player.repeatMode) {
+            Player.REPEAT_MODE_OFF ->
+                Player.REPEAT_MODE_ALL
+
+            Player.REPEAT_MODE_ALL ->
+                Player.REPEAT_MODE_ONE
+
+            else ->
+                Player.REPEAT_MODE_OFF
+        }
+
+        player.setRepeatMode(nextMode)
+
         updateState(player)
     }
 

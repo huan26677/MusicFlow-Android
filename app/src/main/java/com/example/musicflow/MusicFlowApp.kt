@@ -41,7 +41,10 @@ fun MusicFlowApp(
     onPlayPause: () -> Unit,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
-    onSeek: (Long) -> Unit
+    onSeek: (Long) -> Unit,
+    onToggleShuffle: () -> Unit,
+    onCycleRepeat: () -> Unit
+
 ) {
     val backStack = rememberNavBackStack(HomeTab)
 
@@ -207,16 +210,29 @@ fun MusicFlowApp(
                 }
 
                 entry<NowPlaying> {
-                    PlayerTestScreen(
+                    NowPlayingScreen(
                         state = state,
+
+                        onBack = {
+                            if (backStack.size > 1) {
+                                backStack.removeAt(
+                                    backStack.lastIndex
+                                )
+                            }
+                        },
+
                         onPickFiles = onPickFiles,
+
                         onOpenLibrary = {
                             switchTab(LibraryTab)
                         },
+
                         onPlayPause = onPlayPause,
                         onPrevious = onPrevious,
                         onNext = onNext,
-                        onSeek = onSeek
+                        onSeek = onSeek,
+                        onToggleShuffle = onToggleShuffle,
+                        onCycleRepeat = onCycleRepeat
                     )
                 }
             }

@@ -65,6 +65,12 @@ class PlayerViewModel(
     fun previous() =
         playbackController.previous()
 
+    fun toggleShuffle() =
+        playbackController.toggleShuffle()
+
+    fun cycleRepeat() =
+        playbackController.cycleRepeat()
+
     fun seekTo(positionMs: Long) =
         playbackController.seekTo(positionMs)
 
