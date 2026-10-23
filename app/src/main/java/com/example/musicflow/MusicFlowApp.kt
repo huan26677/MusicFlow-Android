@@ -1,23 +1,26 @@
 
 package com.example.musicflow
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-
-import androidx.media3.common.util.UnstableApi
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -74,48 +77,13 @@ fun MusicFlowApp(
             if (!isNowPlaying) {
                 Column {
                     if (state.hasMedia) {
-                        Surface(
-                            color = MaterialTheme.colorScheme
-                                .surfaceContainerHigh
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { openPlayer() }
-                                    .padding(
-                                        horizontal = 16.dp,
-                                        vertical = 8.dp
-                                    ),
-                                verticalAlignment =
-                                    Alignment.CenterVertically
-                            ) {
-                                SongArtwork(
-                                    uri = state.artworkUri,
-                                    modifier = Modifier
-                                        .size(44.dp)
-                                        .clip(RoundedCornerShape(8.dp))
-                                )
-
-                                Spacer(Modifier.width(12.dp))
-
-                                Text(
-                                    text = state.title,
-                                    modifier = Modifier.weight(1f),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-
-                                TextButton(onClick = onPlayPause) {
-                                    Text(
-                                        if (state.isPlaying) {
-                                            "Tạm dừng"
-                                        } else {
-                                            "Phát"
-                                        }
-                                    )
-                                }
-                            }
-                        }
+                        MiniPlayer(
+                            state = state,
+                            onOpenPlayer = {
+                                openPlayer()
+                            },
+                            onPlayPause = onPlayPause
+                        )
                     }
 
                     NavigationBar {
