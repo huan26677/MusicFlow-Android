@@ -77,4 +77,27 @@ object PlaylistRules {
             it.mediaId == mediaId
         }
     }
+
+    fun moveTrack(
+        existing: List<PlaylistTrack>,
+        mediaId: String,
+        offset: Int
+    ): List<PlaylistTrack>? {
+        if (offset != -1 && offset != 1) return null
+
+        val from = existing.indexOfFirst {
+            it.mediaId == mediaId
+        }
+
+        if (from == -1) return null
+
+        val to = from + offset
+        if (to !in existing.indices) return null
+
+        return existing.toMutableList().apply {
+            val item = this[from]
+            this[from] = this[to]
+            this[to] = item
+        }
+    }
 }

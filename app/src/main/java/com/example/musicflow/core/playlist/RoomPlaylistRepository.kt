@@ -151,4 +151,60 @@ class RoomPlaylistRepository(
 
         true
     }
+
+    suspend fun moveTrack(
+        playlistId: String,
+        mediaId: String,
+        offset: Int
+    ): Boolean = database.withTransaction {
+        if (playlistId.isBlank() || mediaId.isBlank()) {
+            return@withTransaction false
+        }
+
+        val before = dao.getTracks(playlistId)
+
+        val after = PlaylistRules.moveTrack(
+            existing = before.map { it.toModel() },
+            mediaId = mediaId,
+            offset = offset
+        ) ?: return@withTransaction false
+
+        val from = before.indexOfFirst {
+            it.mediaId == mediaId
+        }
+
+        val selected = before[from]
+
+        val neighborId = after[from].mediaId
+        val neighbor = before.first {
+            it.mediaId == neighborId
+        }
+
+        val updatedSelected = dao.updateTrackPosition(
+            playlistId = playlistId,
+            mediaId = selected.mediaId,
+            position = neighbor.position
+        )
+
+        val updatedNeighbor = dao.updateTrackPosition(
+            playlistId = playlistId,
+            mediaId = neighbor.mediaId,
+            position = selected.position
+        )
+
+        if (updatedSelected != 1 || updatedNeighbor != 1) {
+            error("Không thể cập nhật thứ tự playlist.")
+        }
+
+        if (
+            dao.touchPlaylist(
+                id = playlistId,
+                timeMs = System.currentTimeMillis()
+            ) != 1
+        ) {
+            error("Playlist không còn tồn tại.")
+        }
+
+        true
+    }
 }

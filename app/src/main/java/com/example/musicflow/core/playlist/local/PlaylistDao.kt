@@ -82,4 +82,15 @@ interface PlaylistDao {
         playlistId: String,
         mediaId: String
     ): Int
+
+    @Query(
+        "UPDATE playlist_tracks SET position = :position " +
+            "WHERE playlistId = :playlistId " +
+            "AND mediaId = :mediaId"
+    )
+    suspend fun updateTrackPosition(
+        playlistId: String,
+        mediaId: String,
+        position: Int
+    ): Int
 }

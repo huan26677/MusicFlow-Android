@@ -247,6 +247,33 @@ class PlaylistViewModel(
         }
     }
 
+    fun moveTrack(
+        playlistId: String,
+        mediaId: String,
+        offset: Int
+    ) {
+        viewModelScope.launch {
+            try {
+                val moved = repository.moveTrack(
+                    playlistId = playlistId,
+                    mediaId = mediaId,
+                    offset = offset
+                )
+
+                _actionError.value = if (moved) {
+                    null
+                } else {
+                    "Không thể thay đổi thứ tự bài hát."
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                _actionError.value =
+                    "Không thể thay đổi thứ tự bài hát."
+            }
+        }
+    }
+
     fun dismissError() {
         _actionError.value = null
     }

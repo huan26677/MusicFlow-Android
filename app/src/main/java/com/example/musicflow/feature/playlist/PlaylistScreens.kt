@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -478,12 +480,48 @@ fun PlaylistDetailRoute(
                                                 )
                                             },
                                             trailingContent = {
-                                                TextButton(
-                                                    onClick = {
-                                                        removeTarget = track
-                                                    }
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically
                                                 ) {
-                                                    Text("Xóa")
+                                                    IconButton(
+                                                        enabled = index > 0,
+                                                        onClick = {
+                                                            vm.moveTrack(
+                                                                playlistId = playlistId,
+                                                                mediaId = track.mediaId,
+                                                                offset = -1
+                                                            )
+                                                        },
+                                                        modifier = Modifier.semantics {
+                                                            contentDescription = "Đưa ${track.title} lên"
+                                                        }
+                                                    ) {
+                                                        Text("↑")
+                                                    }
+
+                                                    IconButton(
+                                                        enabled = index < tracks.tracks.lastIndex,
+                                                        onClick = {
+                                                            vm.moveTrack(
+                                                                playlistId = playlistId,
+                                                                mediaId = track.mediaId,
+                                                                offset = 1
+                                                            )
+                                                        },
+                                                        modifier = Modifier.semantics {
+                                                            contentDescription = "Đưa ${track.title} xuống"
+                                                        }
+                                                    ) {
+                                                        Text("↓")
+                                                    }
+
+                                                    TextButton(
+                                                        onClick = {
+                                                            removeTarget = track
+                                                        }
+                                                    ) {
+                                                        Text("Xóa")
+                                                    }
                                                 }
                                             }
                                         )
