@@ -36,7 +36,7 @@ class PlaylistReorderDatabaseTest {
         items.map { it.mediaId }
 
     @Test
-    fun reorderPersistsAfterDatabaseReopen() = runBlocking {
+    fun reorderPersistsAfterDatabaseReopen() = runBlocking<Unit> {
         val dbName =
             "playlist_reorder_${System.nanoTime()}.db"
 
@@ -131,7 +131,7 @@ class PlaylistReorderDatabaseTest {
 
     @Test
     fun reorderDoesNotAffectOtherPlaylistOrHistory() =
-        runBlocking {
+        runBlocking<Unit> {
             val database = Room.inMemoryDatabaseBuilder(
                 context,
                 RecentHistoryDatabase::class.java
