@@ -11,6 +11,7 @@ import com.example.musicflow.core.history.RecentSong
 import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.playback.PlaybackController
 import com.example.musicflow.core.playlist.PlaylistTrack
+import com.example.musicflow.core.playlist.PlaylistMediaItems
 
 data class PickedAudioFile(
     val uri: Uri,
@@ -99,25 +100,10 @@ class PlayerViewModel(
         tracks: List<PlaylistTrack>,
         selectedIndex: Int = 0
     ) {
-        if (selectedIndex !in tracks.indices) {
-            return
-        }
-
-        val items = tracks.map { track ->
-            MediaItem.Builder()
-                .setMediaId(track.mediaId)
-                .setUri(Uri.parse(track.audioUri))
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setTitle(track.title)
-                        .setArtist(track.artist)
-                        .build()
-                )
-                .build()
-        }
+        if (selectedIndex !in tracks.indices) return
 
         playbackController.playQueue(
-            items = items,
+            items = PlaylistMediaItems.fromTracks(tracks),
             startIndex = selectedIndex
         )
     }
