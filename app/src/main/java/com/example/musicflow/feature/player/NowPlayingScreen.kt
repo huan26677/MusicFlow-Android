@@ -176,10 +176,10 @@ fun NowPlayingScreen(
                 onClick = onPlayPause
             ) {
                 Text(
-                    if (state.isPlaying) {
-                        "Tạm dừng"
-                    } else {
-                        "Phát"
+                    when {
+                        state.playbackErrorMessage != null -> "Thử lại"
+                        state.isPlaying -> "Tạm dừng"
+                        else -> "Phát"
                     }
                 )
             }
@@ -233,8 +233,22 @@ fun NowPlayingScreen(
         Text(
             text = state.status,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = if (state.playbackErrorMessage != null) {
+                MaterialTheme.colorScheme.error
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            }
         )
+
+        if (state.playbackErrorMessage != null) {
+            Text(
+                text = "Bạn có thể thử lại hoặc quay về " +
+                    "Library / danh sách phát để chọn bài khác. " +
+                    "Nếu file đã bị xóa, hãy xóa mục đó khỏi playlist.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
 
         Spacer(Modifier.height(24.dp))
 

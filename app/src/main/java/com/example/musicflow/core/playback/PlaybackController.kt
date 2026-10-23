@@ -24,6 +24,7 @@ data class PlayerUiState(
     val isPlaying: Boolean = false,
     val title: String = "Chưa chọn bài hát",
     val status: String = "Đang kết nối bộ phát...",
+    val playbackErrorMessage: String? = null,
     val positionMs: Long = 0L,
     val durationMs: Long = 0L,
     val currentIndex: Int = 0,
@@ -127,10 +128,12 @@ class PlaybackController(context: Context) {
 
         val hasMedia = player.mediaItemCount > 0
 
+        val errorMessage = player.playerError?.let { error ->
+            PlaybackErrorText.fromCode(error.errorCode)
+        }
+
         val status = when {
-            player.playerError != null ->
-                "Lỗi phát nhạc: " +
-                        player.playerError?.errorCodeName
+            errorMessage != null -> errorMessage
 
             player.playbackState == Player.STATE_BUFFERING ->
                 "Đang tải bài hát..."
@@ -190,6 +193,7 @@ class PlaybackController(context: Context) {
                 ?.toString()
                 ?: "Chưa chọn bài hát",
             status = status,
+            playbackErrorMessage = errorMessage,
             positionMs = player.currentPosition
                 .coerceAtLeast(0L),
             durationMs = duration,
@@ -262,9 +266,26 @@ class PlaybackController(context: Context) {
         if (player.isPlaying) {
             player.pause()
         } else {
-            if (player.playbackState == Player.STATE_ENDED) {
-                player.seekToDefaultPosition()
+            when (player.playbackState) {
+
+                Player.STATE_IDLE -> {
+                    if (
+                        player.mediaItemCount > 0 &&
+                        player.isCommandAvailable(
+                            Player.COMMAND_PREPARE
+                        )
+                    ) {
+                        player.prepare()
+                    } else {
+                        return
+                    }
+                }
+
+                Player.STATE_ENDED -> {
+                    player.seekToDefaultPosition()
+                }
             }
+
             player.play()
         }
 
