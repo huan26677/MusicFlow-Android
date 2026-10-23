@@ -1,12 +1,10 @@
-
-package com.example.musicflow
+package com.example.musicflow.core.playback
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
-
 import java.io.ByteArrayOutputStream
 
 object SessionArtworkReader {

@@ -1,8 +1,10 @@
-package com.example.musicflow
+package com.example.musicflow.feature.library
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.musicflow.core.media.DeviceSong
+import com.example.musicflow.core.media.LocalMusicRepository
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job

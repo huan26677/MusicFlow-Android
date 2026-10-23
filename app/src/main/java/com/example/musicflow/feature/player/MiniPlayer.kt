@@ -1,5 +1,4 @@
-
-package com.example.musicflow
+package com.example.musicflow.feature.player
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,6 +14,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.musicflow.core.playback.PlayerUiState
+import com.example.musicflow.ui.components.SongArtwork
 
 @Composable
 fun MiniPlayer(

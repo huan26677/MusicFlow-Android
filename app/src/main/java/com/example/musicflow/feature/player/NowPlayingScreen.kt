@@ -1,7 +1,5 @@
+package com.example.musicflow.feature.player
 
-package com.example.musicflow
-
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,9 +13,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 import androidx.media3.common.Player
+import com.example.musicflow.core.playback.PlayerUiState
+import com.example.musicflow.ui.components.SongArtwork
 
 @Composable
 fun NowPlayingScreen(

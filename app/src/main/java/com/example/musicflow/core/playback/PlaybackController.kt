@@ -1,5 +1,4 @@
-
-package com.example.musicflow
+package com.example.musicflow.core.playback
 
 import android.content.ComponentName
 import android.content.ContentUris

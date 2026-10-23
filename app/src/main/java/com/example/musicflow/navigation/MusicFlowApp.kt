@@ -1,5 +1,4 @@
-
-package com.example.musicflow
+package com.example.musicflow.navigation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,6 +20,11 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.example.musicflow.core.playback.PlayerUiState
+import com.example.musicflow.core.media.DeviceSong
+import com.example.musicflow.feature.library.LibraryRoute
+import com.example.musicflow.feature.player.MiniPlayer
+import com.example.musicflow.feature.player.NowPlayingScreen
 import kotlinx.serialization.Serializable
 
 @Serializable

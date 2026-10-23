@@ -1,5 +1,4 @@
-
-package com.example.musicflow
+package com.example.musicflow.feature.library
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.musicflow.core.media.DeviceSong
+import com.example.musicflow.ui.components.SongArtwork
 
 @Composable
 fun SongRow(

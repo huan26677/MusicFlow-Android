@@ -1,5 +1,4 @@
-
-package com.example.musicflow
+package com.example.musicflow.feature.player
 
 import android.content.Context
 import android.net.Uri
@@ -8,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import com.example.musicflow.core.media.DeviceSong
+import com.example.musicflow.core.playback.PlaybackController
 
 data class PickedAudioFile(
     val uri: Uri,

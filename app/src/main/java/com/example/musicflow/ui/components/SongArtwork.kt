@@ -1,5 +1,4 @@
-
-package com.example.musicflow
+package com.example.musicflow.ui.components
 
 import android.content.Context
 import android.graphics.Bitmap
