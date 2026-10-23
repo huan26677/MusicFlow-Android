@@ -1,6 +1,7 @@
 
 package com.example.musicflow
 
+import com.example.musicflow.ui.theme.MusicFlowTheme
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -93,7 +94,6 @@ class MainActivity : ComponentActivity() {
             PlayerViewModel.factory(applicationContext)
         )[PlayerViewModel::class.java]
 
-        // Chỉ cập nhật tiến trình khi Activity ở trạng thái STARTED.
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
@@ -104,79 +104,47 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-
             val playerState by playerViewModel.uiState
                 .collectAsStateWithLifecycle()
 
-            var showLibrary by rememberSaveable {
-                mutableStateOf(false)
-            }
+            MusicFlowTheme {
+                MusicFlowApp(
+                    state = playerState,
 
-            BackHandler(enabled = showLibrary) {
-                showLibrary = false
-            }
+                    onPickFiles = {
+                        pickAudio.launch(arrayOf("audio/*"))
+                    },
 
-            MaterialTheme {
+                    onPlayDeviceSongs = { songs, index ->
+                        playerViewModel.playDeviceSongs(
+                            songs,
+                            index
+                        )
+                    },
 
-                if (showLibrary) {
+                    onPlayPause = {
+                        playerViewModel.togglePlayPause()
+                    },
 
-                    LibraryRoute(
-                        onBack = {
-                            showLibrary = false
-                        },
+                    onPrevious = {
+                        playerViewModel.previous()
+                    },
 
-                        onPickManual = {
-                            showLibrary = false
-                            pickAudio.launch(arrayOf("audio/*"))
-                        },
+                    onNext = {
+                        playerViewModel.next()
+                    },
 
-                        onSongSelected = { songs, selectedIndex ->
-                            playerViewModel.playDeviceSongs(
-                                songs,
-                                selectedIndex
-                            )
-
-                            showLibrary = false
-                        }
-                    )
-
-                } else {
-
-                    PlayerTestScreen(
-                        state = playerState,
-
-                        onPickFiles = {
-                            pickAudio.launch(arrayOf("audio/*"))
-                        },
-
-                        onOpenLibrary = {
-                            showLibrary = true
-                        },
-
-                        onPlayPause = {
-                            playerViewModel.togglePlayPause()
-                        },
-
-                        onPrevious = {
-                            playerViewModel.previous()
-                        },
-
-                        onNext = {
-                            playerViewModel.next()
-                        },
-
-                        onSeek = { position ->
-                            playerViewModel.seekTo(position)
-                        }
-                    )
-                }
+                    onSeek = { position ->
+                        playerViewModel.seekTo(position)
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun PlayerTestScreen(
+fun PlayerTestScreen(
     state: PlayerUiState,
     onPickFiles: () -> Unit,
     onOpenLibrary: () -> Unit,
