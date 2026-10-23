@@ -1,23 +1,73 @@
 
 package com.example.musicflow.feature.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+
+import com.example.musicflow.core.history.RecentSong
+import com.example.musicflow.core.history.RoomRecentHistoryRepository
+import com.example.musicflow.core.history.local.RecentHistoryDatabase
 import com.example.musicflow.core.playback.PlayerUiState
+
+@Composable
+fun HomeRoute(
+    state: PlayerUiState,
+    onOpenLibrary: () -> Unit,
+    onOpenSearch: () -> Unit,
+    onOpenPlayer: () -> Unit,
+    onRecentSongSelected: (List<RecentSong>, Int) -> Unit
+) {
+    val context = LocalContext.current
+
+    val repository = remember(context) {
+        RoomRecentHistoryRepository(
+            RecentHistoryDatabase.getInstance(
+                context.applicationContext
+            )
+        )
+    }
+
+    val factory = remember(repository) {
+        HomeViewModel.factory(repository)
+    }
+
+    val homeViewModel: HomeViewModel =
+        viewModel(factory = factory)
+
+    val historyState by homeViewModel.historyState
+        .collectAsStateWithLifecycle()
+
+    HomeScreen(
+        state = state,
+        historyState = historyState,
+        onOpenLibrary = onOpenLibrary,
+        onOpenSearch = onOpenSearch,
+        onOpenPlayer = onOpenPlayer,
+        onRecentSongSelected = onRecentSongSelected
+    )
+}
 
 @Composable
 fun HomeScreen(
     state: PlayerUiState,
+    historyState: HomeHistoryUiState,
     onOpenLibrary: () -> Unit,
     onOpenSearch: () -> Unit,
-    onOpenPlayer: () -> Unit
+    onOpenPlayer: () -> Unit,
+    onRecentSongSelected: (List<RecentSong>, Int) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -98,9 +148,7 @@ fun HomeScreen(
                         style = MaterialTheme.typography.bodySmall
                     )
 
-                    TextButton(
-                        onClick = onOpenPlayer
-                    ) {
+                    TextButton(onClick = onOpenPlayer) {
                         Text("Mở Now Playing")
                     }
                 }
@@ -111,6 +159,85 @@ fun HomeScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+
+        Text(
+            text = "Nghe gần đây",
+            style = MaterialTheme.typography.titleLarge
+        )
+
+        when (val history = historyState) {
+
+            HomeHistoryUiState.Loading -> {
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text("Đang tải lịch sử nghe nhạc...")
+            }
+
+            HomeHistoryUiState.Empty -> {
+                Text(
+                    text = "Chưa có bài hát nào trong lịch sử. " +
+                            "Hãy mở Library hoặc Search để nghe nhạc.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            is HomeHistoryUiState.Error -> {
+                Text(
+                    text = history.message,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
+            is HomeHistoryUiState.Success -> {
+                Text(
+                    text = "${history.songs.size} bài hát gần đây",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column {
+                        history.songs.forEachIndexed { index, song ->
+                            ListItem(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        onRecentSongSelected(
+                                            history.songs,
+                                            index
+                                        )
+                                    },
+                                leadingContent = {
+                                    Text("${index + 1}")
+                                },
+                                headlineContent = {
+                                    Text(
+                                        text = song.title,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                },
+                                supportingContent = {
+                                    Text(
+                                        text = song.artist,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            )
+
+                            if (index < history.songs.lastIndex) {
+                                HorizontalDivider()
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

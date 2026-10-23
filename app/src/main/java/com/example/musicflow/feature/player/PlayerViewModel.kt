@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import com.example.musicflow.core.history.RecentSong
 import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.playback.PlaybackController
 
@@ -61,6 +62,35 @@ class PlayerViewModel(
         playbackController.playQueue(
             items,
             selectedIndex
+        )
+    }
+
+    fun playRecentSongs(
+        songs: List<RecentSong>,
+        selectedIndex: Int
+    ) {
+        if (selectedIndex !in songs.indices) {
+            return
+        }
+
+        val items = songs.map { song ->
+            MediaItem.Builder()
+                // Giữ mediaId gốc để lịch sử không tạo
+                // bản ghi khác khi phát lại cùng bài.
+                .setMediaId(song.mediaId)
+                .setUri(Uri.parse(song.audioUri))
+                .setMediaMetadata(
+                    MediaMetadata.Builder()
+                        .setTitle(song.title)
+                        .setArtist(song.artist)
+                        .build()
+                )
+                .build()
+        }
+
+        playbackController.playQueue(
+            items = items,
+            startIndex = selectedIndex
         )
     }
 

@@ -26,9 +26,10 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.example.musicflow.core.history.RecentSong
 import com.example.musicflow.core.playback.PlayerUiState
 import com.example.musicflow.core.media.DeviceSong
-import com.example.musicflow.feature.home.HomeScreen
+import com.example.musicflow.feature.home.HomeRoute
 import com.example.musicflow.feature.library.LibraryRoute
 import com.example.musicflow.feature.player.MiniPlayer
 import com.example.musicflow.feature.player.NowPlayingScreen
@@ -55,6 +56,7 @@ fun MusicFlowApp(
     state: PlayerUiState,
     onPickFiles: () -> Unit,
     onPlayDeviceSongs: (List<DeviceSong>, Int) -> Unit,
+    onPlayRecentSongs: (List<RecentSong>, Int) -> Unit,
     onPlayPause: () -> Unit,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
@@ -159,16 +161,30 @@ fun MusicFlowApp(
             entryProvider = entryProvider {
 
                 entry<HomeTab> {
-                    HomeScreen(
+                    HomeRoute(
                         state = state,
+
                         onOpenLibrary = {
                             switchTab(LibraryTab)
                         },
+
                         onOpenSearch = {
                             switchTab(SearchTab)
                         },
+
                         onOpenPlayer = {
                             openPlayer()
+                        },
+
+                        onRecentSongSelected = { songs, index ->
+                            if (index in songs.indices) {
+                                onPlayRecentSongs(songs, index)
+
+                                // Mở Now Playing ngay sau khi chọn bài.
+                                if (backStack.lastOrNull() != NowPlaying) {
+                                    backStack.add(NowPlaying)
+                                }
+                            }
                         }
                     )
                 }

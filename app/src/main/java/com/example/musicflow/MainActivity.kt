@@ -159,6 +159,13 @@ class MainActivity : ComponentActivity() {
                         )
                     },
 
+                    onPlayRecentSongs = { songs, index ->
+                        playerViewModel.playRecentSongs(
+                            songs = songs,
+                            selectedIndex = index
+                        )
+                    },
+
                     onPlayPause = {
                         playerViewModel.togglePlayPause()
                     },
