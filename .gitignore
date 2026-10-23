@@ -34,6 +34,10 @@ google-services.json
 *.log
 *.hprof
 
+# Cho phép lưu log kiểm thử MusicFlow
+!qa-logs/
+!qa-logs/*.log
+
 # Operating system
 .DS_Store
 Thumbs.db
