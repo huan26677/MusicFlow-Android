@@ -26,6 +26,9 @@ interface RecentSongDao {
         songs: List<RecentSongEntity>
     )
 
+    @Query("DELETE FROM recent_songs WHERE mediaId = :mediaId")
+    suspend fun deleteByMediaId(mediaId: String)
+
     @Query("DELETE FROM recent_songs")
     suspend fun deleteAll()
 }

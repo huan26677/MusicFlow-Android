@@ -9,11 +9,14 @@ import com.example.musicflow.core.history.RecentSong
 import com.example.musicflow.core.history.RoomRecentHistoryRepository
 
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 sealed interface HomeHistoryUiState {
     data object Loading : HomeHistoryUiState
@@ -57,6 +60,44 @@ class HomeViewModel(
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = HomeHistoryUiState.Loading
             )
+
+    private val _actionError = MutableStateFlow<String?>(null)
+
+    val actionError = _actionError.asStateFlow()
+
+    fun removeRecentSong(mediaId: String) {
+        if (mediaId.isBlank()) return
+
+        viewModelScope.launch {
+            try {
+                repository.remove(mediaId)
+                _actionError.value = null
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                _actionError.value =
+                    "Không thể xóa bài hát khỏi lịch sử."
+            }
+        }
+    }
+
+    fun clearRecentHistory() {
+        viewModelScope.launch {
+            try {
+                repository.clear()
+                _actionError.value = null
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                _actionError.value =
+                    "Không thể xóa lịch sử nghe nhạc."
+            }
+        }
+    }
+
+    fun dismissActionError() {
+        _actionError.value = null
+    }
 
     companion object {
 

@@ -52,6 +52,16 @@ class RoomRecentHistoryRepository(
         }
     }
 
+    suspend fun remove(mediaId: String) {
+        if (mediaId.isBlank()) return
+
+        dao.deleteByMediaId(mediaId)
+    }
+
+    suspend fun clear() {
+        dao.deleteAll()
+    }
+
     fun observeRecent(): Flow<List<RecentSong>> {
         return dao.observeAll().map { entities ->
             entities.map { it.toRecentSong() }

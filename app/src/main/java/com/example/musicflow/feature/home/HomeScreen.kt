@@ -8,7 +8,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
@@ -50,13 +54,20 @@ fun HomeRoute(
     val historyState by homeViewModel.historyState
         .collectAsStateWithLifecycle()
 
+    val actionError by homeViewModel.actionError
+        .collectAsStateWithLifecycle()
+
     HomeScreen(
         state = state,
         historyState = historyState,
         onOpenLibrary = onOpenLibrary,
         onOpenSearch = onOpenSearch,
         onOpenPlayer = onOpenPlayer,
-        onRecentSongSelected = onRecentSongSelected
+        onRecentSongSelected = onRecentSongSelected,
+        actionError = actionError,
+        onDismissActionError = homeViewModel::dismissActionError,
+        onRemoveRecentSong = homeViewModel::removeRecentSong,
+        onClearHistory = homeViewModel::clearRecentHistory
     )
 }
 
@@ -67,8 +78,16 @@ fun HomeScreen(
     onOpenLibrary: () -> Unit,
     onOpenSearch: () -> Unit,
     onOpenPlayer: () -> Unit,
-    onRecentSongSelected: (List<RecentSong>, Int) -> Unit
+    onRecentSongSelected: (List<RecentSong>, Int) -> Unit,
+    actionError: String?,
+    onDismissActionError: () -> Unit,
+    onRemoveRecentSong: (String) -> Unit,
+    onClearHistory: () -> Unit
 ) {
+    var showClearDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -161,10 +180,35 @@ fun HomeScreen(
             )
         }
 
-        Text(
-            text = "Nghe gần đây",
-            style = MaterialTheme.typography.titleLarge
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Nghe gần đây",
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            if (historyState is HomeHistoryUiState.Success) {
+                TextButton(
+                    onClick = { showClearDialog = true }
+                ) {
+                    Text("Xóa tất cả")
+                }
+            }
+        }
+
+        if (actionError != null) {
+            Text(
+                text = actionError,
+                color = MaterialTheme.colorScheme.error
+            )
+
+            TextButton(onClick = onDismissActionError) {
+                Text("Đóng thông báo")
+            }
+        }
 
         when (val history = historyState) {
 
@@ -228,6 +272,15 @@ fun HomeScreen(
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
+                                },
+                                trailingContent = {
+                                    TextButton(
+                                        onClick = {
+                                            onRemoveRecentSong(song.mediaId)
+                                        }
+                                    ) {
+                                        Text("Xóa")
+                                    }
                                 }
                             )
 
@@ -239,5 +292,41 @@ fun HomeScreen(
                 }
             }
         }
+    }
+
+    if (showClearDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showClearDialog = false
+            },
+            title = {
+                Text("Xóa lịch sử nghe nhạc?")
+            },
+            text = {
+                Text(
+                    "Toàn bộ danh sách Nghe gần đây sẽ bị xóa. " +
+                        "Các file nhạc trên thiết bị không bị ảnh hưởng."
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showClearDialog = false
+                        onClearHistory()
+                    }
+                ) {
+                    Text("Xóa lịch sử")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showClearDialog = false
+                    }
+                ) {
+                    Text("Hủy")
+                }
+            }
+        )
     }
 }
