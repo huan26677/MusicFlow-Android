@@ -86,22 +86,13 @@ fun NowPlayingScreen(
 
         Spacer(Modifier.height(24.dp))
 
-        Box(
+        SongArtwork(
+            uri = state.artworkUri,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(220.dp)
                 .clip(RoundedCornerShape(28.dp))
-                .background(
-                    MaterialTheme.colorScheme.primaryContainer
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "♫",
-                fontSize = 96.sp,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
+        )
 
         Spacer(Modifier.height(28.dp))
 

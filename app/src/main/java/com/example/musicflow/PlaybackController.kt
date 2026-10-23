@@ -2,7 +2,10 @@
 package com.example.musicflow
 
 import android.content.ComponentName
+import android.content.ContentUris
 import android.content.Context
+import android.net.Uri
+import android.provider.MediaStore
 
 import androidx.core.content.ContextCompat
 import androidx.media3.common.C
@@ -30,7 +33,8 @@ data class PlayerUiState(
     val canPrevious: Boolean = false,
     val artist: String = "Không rõ nghệ sĩ",
     val shuffleEnabled: Boolean = false,
-    val repeatMode: Int = Player.REPEAT_MODE_OFF
+    val repeatMode: Int = Player.REPEAT_MODE_OFF,
+    val artworkUri: Uri? = null
 )
 
 class PlaybackController(context: Context) {
@@ -145,6 +149,38 @@ class PlaybackController(context: Context) {
                 "Bộ phát sẵn sàng"
         }
 
+        val currentItem = player.currentMediaItem
+        val mediaId = currentItem?.mediaId.orEmpty()
+
+        val artworkUri: Uri? = when {
+            // Bài hát được chọn từ MediaStore.
+            mediaId.startsWith("device-") -> {
+                val id = mediaId
+                    .removePrefix("device-")
+                    .toLongOrNull()
+
+                id?.let {
+                    ContentUris.withAppendedId(
+                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        it
+                    )
+                }
+            }
+
+            // MP3 được chọn bằng File Picker.
+            mediaId.startsWith("content://") -> {
+                Uri.parse(mediaId)
+            }
+
+            // Dự phòng nếu MediaController cung cấp URI.
+            else -> {
+                currentItem
+                    ?.localConfiguration
+                    ?.uri
+                    ?.takeIf { it.scheme == "content" }
+            }
+        }
+
         _uiState.value = PlayerUiState(
             connected = true,
             hasMedia = hasMedia,
@@ -176,7 +212,8 @@ class PlaybackController(context: Context) {
 
             shuffleEnabled = player.shuffleModeEnabled,
 
-            repeatMode = player.repeatMode
+            repeatMode = player.repeatMode,
+            artworkUri = artworkUri
         )
     }
 
