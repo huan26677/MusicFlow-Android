@@ -28,6 +28,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.musicflow.core.playback.PlayerUiState
 import com.example.musicflow.core.media.DeviceSong
+import com.example.musicflow.feature.home.HomeScreen
 import com.example.musicflow.feature.library.LibraryRoute
 import com.example.musicflow.feature.player.MiniPlayer
 import com.example.musicflow.feature.player.NowPlayingScreen
@@ -158,14 +159,16 @@ fun MusicFlowApp(
             entryProvider = entryProvider {
 
                 entry<HomeTab> {
-                    PlaceholderScreen(
-                        title = "MusicFlow",
-                        description =
-                            "Trang chủ nhạc online sẽ được " +
-                                    "kết nối với Supabase.",
-                        actionLabel = "Mở nhạc thiết bị",
-                        onAction = {
+                    HomeScreen(
+                        state = state,
+                        onOpenLibrary = {
                             switchTab(LibraryTab)
+                        },
+                        onOpenSearch = {
+                            switchTab(SearchTab)
+                        },
+                        onOpenPlayer = {
+                            openPlayer()
                         }
                     )
                 }
