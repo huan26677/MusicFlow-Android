@@ -1,10 +1,13 @@
 package com.example.musicflow.core.playback
 
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
@@ -30,6 +33,8 @@ import kotlinx.coroutines.withContext
 class PlaybackService : MediaSessionService() {
 
     private var mediaSession: MediaSession? = null
+
+    private var runtimeAutoSkip: PlaybackRuntimeAutoSkip? = null
 
     private val artworkScope = CoroutineScope(
         SupervisorJob() + Dispatchers.Main.immediate
@@ -72,7 +77,13 @@ class PlaybackService : MediaSessionService() {
             updateCurrentArtwork()
         }
 
-        override fun onEvents(
+    override fun onPlayerError(
+        error: PlaybackException
+    ) {
+        runtimeAutoSkip?.onPlayerError(error)
+    }
+
+    override fun onEvents(
             player: Player,
             events: Player.Events
         ) {
@@ -109,6 +120,16 @@ class PlaybackService : MediaSessionService() {
             .build()
 
         val restored = queueStore.restoreInto(player)
+
+        val mainHandler = Handler(
+            Looper.getMainLooper()
+        )
+
+        runtimeAutoSkip = PlaybackRuntimeAutoSkip(
+            player
+        ) { action ->
+            mainHandler.post(action)
+        }
 
         mediaSession = MediaSession.Builder(
             this,
@@ -304,6 +325,9 @@ class PlaybackService : MediaSessionService() {
     }
 
     override fun onDestroy() {
+        runtimeAutoSkip?.dispose()
+        runtimeAutoSkip = null
+
         artworkRequestId++
         artworkJob?.cancel()
         artworkScope.cancel()
