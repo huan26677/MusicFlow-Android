@@ -3,6 +3,8 @@ package com.example.musicflow.core.playback
 import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 
 import androidx.media3.common.MediaItem
@@ -386,6 +388,133 @@ class PlaybackRuntimeAutoSkipTest {
                     it.release()
                 }
             }
+        }
+    }
+
+    @Test
+    fun injectedErrorExercisesRecoveryBranches() {
+        val validFile = createWav()
+
+        val skipped = CountDownLatch(1)
+        val exhausted = CountDownLatch(1)
+
+        val handler = Handler(Looper.getMainLooper())
+
+        var player: ExoPlayer? = null
+        var recovery: PlaybackRuntimeAutoSkip? = null
+
+        try {
+            instrumentation.runOnMainSync {
+                val exo = ExoPlayer.Builder(context).build()
+                player = exo
+
+                val items = listOf("first", "second").map {
+                    MediaItem.Builder()
+                        .setMediaId(it)
+                        .setUri(Uri.fromFile(validFile))
+                        .build()
+                }
+
+                exo.setMediaItems(items, 0, 0L)
+
+                // Khi còn STATE_IDLE, play() ghi nhận
+                // ý định phát mà chưa tải nguồn âm thanh.
+                exo.play()
+
+                var postedActions = 0
+
+                recovery = PlaybackRuntimeAutoSkip(
+                    exo
+                ) { action ->
+                    handler.post {
+                        action()
+                        postedActions++
+
+                        when (postedActions) {
+                            1 -> skipped.countDown()
+                            2 -> exhausted.countDown()
+                        }
+                    }
+                }
+
+                recovery!!.onPlayerError(
+                    PlaybackException(
+                        "QA injected file-not-found",
+                        null,
+                        PlaybackException
+                            .ERROR_CODE_IO_FILE_NOT_FOUND
+                    )
+                )
+            }
+
+            assertTrue(
+                "Nhánh SKIPPED_ERROR không chạy",
+                skipped.await(10, TimeUnit.SECONDS)
+            )
+
+            instrumentation.runOnMainSync {
+                val exo = checkNotNull(player)
+
+                assertEquals(
+                    1,
+                    exo.currentMediaItemIndex
+                )
+
+                assertEquals(
+                    "second",
+                    exo.currentMediaItem?.mediaId
+                )
+
+                // Đưa Player về IDLE ở bài cuối
+                // trước khi mô phỏng lỗi tiếp theo.
+                exo.pause()
+                exo.stop()
+                exo.seekTo(1, 0L)
+                exo.play()
+
+                recovery!!.onPlayerError(
+                    PlaybackException(
+                        "QA injected last-track failure",
+                        null,
+                        PlaybackException
+                            .ERROR_CODE_IO_NO_PERMISSION
+                    )
+                )
+            }
+
+            assertTrue(
+                "Nhánh QUEUE_EXHAUSTED không chạy",
+                exhausted.await(10, TimeUnit.SECONDS)
+            )
+
+            instrumentation.runOnMainSync {
+                val exo = checkNotNull(player)
+
+                assertEquals(
+                    1,
+                    exo.currentMediaItemIndex
+                )
+
+                assertFalse(exo.isPlaying)
+                assertFalse(exo.playWhenReady)
+
+                assertEquals(
+                    Player.STATE_IDLE,
+                    exo.playbackState
+                )
+            }
+
+            Log.i(
+                "MusicFlowAutoSkipTest",
+                "PASS injectedRecoveryBranches"
+            )
+        } finally {
+            instrumentation.runOnMainSync {
+                recovery?.dispose()
+                player?.release()
+            }
+
+            validFile.delete()
         }
     }
 }
