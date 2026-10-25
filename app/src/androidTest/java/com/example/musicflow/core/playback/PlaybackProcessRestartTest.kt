@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Process
 import android.util.Log
 
 import androidx.media3.common.MediaItem
@@ -277,6 +278,11 @@ class PlaybackProcessRestartTest {
 
             Log.i(
                 "MusicFlowRestartIT",
+                "PREPARE_PROCESS_PID=${Process.myPid()}"
+            )
+
+            Log.i(
+                "MusicFlowRestartIT",
                 "PHASE_PREPARE_PASS"
             )
         } finally {
@@ -292,6 +298,11 @@ class PlaybackProcessRestartTest {
         assertTrue(
             "Không có dữ liệu từ pha chuẩn bị",
             qaPrefs.getBoolean("armed", false)
+        )
+
+        Log.i(
+            "MusicFlowRestartIT",
+            "VERIFY_PROCESS_PID=${Process.myPid()}"
         )
 
         var future: ListenableFuture<MediaController>? = null

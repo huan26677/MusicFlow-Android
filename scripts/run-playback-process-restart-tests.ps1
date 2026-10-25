@@ -114,8 +114,79 @@ function Run-Phase(
     return $passed
 }
 
+function Get-PhasePid([string]$marker) {
+    $lines = @(
+        & $adbPath -s $serial logcat `
+            -d -v brief -s `
+            "MusicFlowRestartIT:I" `
+            "*:S" 2>$null |
+            ForEach-Object { $_.ToString() }
+    )
+
+    $matchedLine = $lines |
+        Where-Object { $_ -match "$marker=" } |
+        Select-Object -Last 1
+
+    if ($matchedLine -match "$marker=(\d+)") {
+        return $matches[1]
+    }
+
+    return ""
+}
+
 function Ensure-TestRunner {
     Write-Log "=== INSTALL_TEST_RUNNER ==="
+    # connectedDebugAndroidTest có thể gỡ APK ứng dụng
+    # sau khi hoàn thành. Cần cài lại ứng dụng trước.
+    $appApk = Join-Path `
+        $root "app\build\outputs\apk\debug\app-debug.apk"
+
+    if (!(Test-Path $appApk)) {
+        Write-Log "ERROR=MAIN_APP_APK_NOT_FOUND"
+        return $false
+    }
+
+    Write-Log "MAIN_APP_APK=$appApk"
+
+    $appOutput = @(
+        & $adbPath -s $serial install -r -t `
+            $appApk 2>&1 |
+            ForEach-Object {
+                $_.ToString()
+            }
+    )
+
+    $appInstallCode = $LASTEXITCODE
+
+    foreach ($line in $appOutput) {
+        Write-Log $line
+    }
+
+    if ($appInstallCode -ne 0) {
+        Write-Log "TARGET_APP_INSTALLED=False"
+        return $false
+    }
+
+    $targetPackages = @(
+        & $adbPath -s $serial `
+            shell pm path $package 2>&1 |
+            ForEach-Object {
+                $_.ToString()
+            }
+    )
+
+    $targetReady = @(
+        $targetPackages | Where-Object {
+            $_ -match '^package:'
+        }
+    ).Count -gt 0
+
+    Write-Log "TARGET_APP_INSTALLED=$targetReady"
+
+    if (!$targetReady) {
+        return $false
+    }
+
 
     $apkRoot = Join-Path `
         $root "app\build\outputs\apk\androidTest"
@@ -283,7 +354,7 @@ try {
                             "prepare"
                     }
 
-                    $oldPid = Get-AppPid
+                    $oldPid = Get-PhasePid "PREPARE_PROCESS_PID"
                     Write-Log "OLD_PID=$oldPid"
 
                     $processStopped = Stop-App
@@ -301,7 +372,7 @@ try {
                             "verify"
                     }
 
-                    $newPid = Get-AppPid
+                    $newPid = Get-PhasePid "VERIFY_PROCESS_PID"
                     Write-Log "NEW_PID=$newPid"
 
                     $newProcess = (
