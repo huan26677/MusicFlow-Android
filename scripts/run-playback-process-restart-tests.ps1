@@ -106,9 +106,14 @@ function Run-Phase(
     $passed = (
         $code -eq 0 -and
         $content -match 'OK \(1 test\)' -and
-        $content -match 'INSTRUMENTATION_CODE: -1' -and
-        $content -notmatch 'FAILURES!!!'
+        $content -notmatch (
+            'FAILURES!!!|' +
+            'INSTRUMENTATION_FAILED|' +
+            'INSTRUMENTATION_STATUS: Error='
+        )
     )
+
+    Write-Log "PHASE_${name}_EXIT_CODE=$code"
 
     Write-Log "PHASE_${name}_RESULT=$passed"
     return $passed

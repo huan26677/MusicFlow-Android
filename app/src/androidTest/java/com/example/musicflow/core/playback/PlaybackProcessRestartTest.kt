@@ -391,7 +391,9 @@ class PlaybackProcessRestartTest {
                         }
                     }
                 )
+            }
 
+            instrumentation.runOnMainSync {
                 controller.prepare()
                 controller.play()
             }
