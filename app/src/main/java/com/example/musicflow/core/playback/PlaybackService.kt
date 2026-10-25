@@ -15,6 +15,8 @@ import com.example.musicflow.core.history.RoomRecentHistoryRepository
 import com.example.musicflow.core.history.local.RecentHistoryDatabase
 
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -52,6 +54,14 @@ class PlaybackService : MediaSessionService() {
         )
     }
 
+    private val queueStore by lazy {
+        PlaybackQueueStore(applicationContext)
+    }
+
+    private val queueScope = CoroutineScope(
+        SupervisorJob() + Dispatchers.Main.immediate
+    )
+
     private val playerListener = object : Player.Listener {
 
         override fun onMediaItemTransition(
@@ -72,6 +82,18 @@ class PlaybackService : MediaSessionService() {
             ) {
                 maybeRecordRecentlyPlayed(player)
             }
+
+            if (
+                events.contains(Player.EVENT_TIMELINE_CHANGED) ||
+                events.contains(Player.EVENT_MEDIA_ITEM_TRANSITION) ||
+                events.contains(Player.EVENT_POSITION_DISCONTINUITY) ||
+                events.contains(Player.EVENT_PLAY_WHEN_READY_CHANGED) ||
+                events.contains(Player.EVENT_PLAYBACK_STATE_CHANGED) ||
+                events.contains(Player.EVENT_SHUFFLE_MODE_ENABLED_CHANGED) ||
+                events.contains(Player.EVENT_REPEAT_MODE_CHANGED)
+            ) {
+                queueStore.saveFromPlayer(player)
+            }
         }
     }
 
@@ -86,12 +108,29 @@ class PlaybackService : MediaSessionService() {
             .setHandleAudioBecomingNoisy(true)
             .build()
 
+        val restored = queueStore.restoreInto(player)
+
         mediaSession = MediaSession.Builder(
             this,
             player
         ).build()
 
         player.addListener(playerListener)
+
+        queueScope.launch {
+            while (isActive) {
+                delay(5_000)
+
+                if (player.isPlaying) {
+                    queueStore.saveFromPlayer(player)
+                }
+            }
+        }
+
+        Log.i(
+            "MusicFlowQueue",
+            "SERVICE_CREATED restored=$restored"
+        )
     }
 
     private fun updateCurrentArtwork() {
@@ -255,9 +294,13 @@ class PlaybackService : MediaSessionService() {
         artworkJob?.cancel()
         artworkScope.cancel()
         historyScope.cancel()
+        queueScope.cancel()
 
         mediaSession?.let { session ->
             session.player.removeListener(playerListener)
+
+            queueStore.saveFromPlayer(session.player)
+
             session.player.release()
             session.release()
         }

@@ -1,6 +1,7 @@
 package com.example.musicflow.core.playback
 
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.ParcelFileDescriptor
@@ -26,6 +27,8 @@ import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+
+import org.json.JSONObject
 
 import org.junit.Assert.*
 import org.junit.Test
@@ -304,6 +307,37 @@ class PlaybackServiceIntegrationTest {
             Log.i(
                 "MusicFlowServiceIT",
                 "PASS servicePlaysFirstTrack"
+            )
+
+            withTimeout(15_000) {
+                while (true) {
+                    val raw = context.getSharedPreferences(
+                        "musicflow_playback_queue_v1",
+                        Context.MODE_PRIVATE
+                    ).getString("snapshot", null)
+
+                    val correctlySaved = runCatching {
+                        val saved = JSONObject(checkNotNull(raw))
+                        val tracks = saved.getJSONArray("items")
+
+                        val ids = (0 until tracks.length()).map {
+                            tracks.getJSONObject(it)
+                                .getString("mediaId")
+                        }
+
+                        ids == expectedIds &&
+                            saved.getInt("index") == 0
+                    }.getOrDefault(false)
+
+                    if (correctlySaved) break
+
+                    delay(100)
+                }
+            }
+
+            Log.i(
+                "MusicFlowServiceIT",
+                "PASS servicePersistsPlaybackQueue"
             )
 
             withTimeout(15_000) {
