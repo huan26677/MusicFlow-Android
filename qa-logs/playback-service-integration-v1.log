@@ -1,21 +1,21 @@
 ﻿MusicFlow Playback Service Integration v1
-DATE=2026-10-25T13:21:55.9359320+07:00
-COMMIT=9c49ed4
+DATE=2026-10-25T13:27:28.2399877+07:00
+COMMIT=7a9a535
 === JVM_TESTS ===
-Calculating task graph as configuration cache cannot be reused because JVM has changed.
+Reusing configuration cache.
 > Task :app:preBuild UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
-> Task :app:mapDebugSourceSetPaths UP-TO-DATE
 > Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
-> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
 > Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
 > Task :app:generateDebugResources UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
 > Task :app:checkDebugAarMetadata UP-TO-DATE
 > Task :app:processDebugNavigationResources UP-TO-DATE
-> Task :app:packageDebugResources UP-TO-DATE
 > Task :app:compileDebugNavigationResources UP-TO-DATE
-> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
 > Task :app:parseDebugLocalResources UP-TO-DATE
 > Task :app:mergeDebugResources UP-TO-DATE
 > Task :app:generateDebugRFile UP-TO-DATE
@@ -28,168 +28,120 @@ Calculating task graph as configuration cache cannot be reused because JVM has c
 > Task :app:compileDebugJavaWithJavac NO-SOURCE
 > Task :app:processDebugJavaRes UP-TO-DATE
 > Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
-> Task :app:kspDebugUnitTestKotlin SKIPPED
 > Task :app:bundleDebugClassesToRuntimeJar UP-TO-DATE
+> Task :app:kspDebugUnitTestKotlin SKIPPED
 > Task :app:compileDebugUnitTestKotlin UP-TO-DATE
-> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
 > Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
 > Task :app:testDebugUnitTest UP-TO-DATE
 
-BUILD SUCCESSFUL in 2s
+BUILD SUCCESSFUL in 1s
 25 actionable tasks: 25 up-to-date
-Configuration cache entry stored.
+Configuration cache entry reused.
 RESULT JVM_TESTS exitCode=0
 === ANDROID_TESTS ===
-Calculating task graph as configuration cache cannot be reused because JVM has changed.
-> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
-> Task :app:generateDebugAssets UP-TO-DATE
+Reusing configuration cache.
 > Task :app:preBuild UP-TO-DATE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:preDebugAndroidTestBuild SKIPPED
-> Task :app:mapDebugSourceSetPaths UP-TO-DATE
-> Task :app:extractDeepLinksDebug UP-TO-DATE
-> Task :app:javaPreCompileDebug UP-TO-DATE
-> Task :app:generateDebugResources UP-TO-DATE
-> Task :app:generateDebugAndroidTestResources UP-TO-DATE
-> Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
 > Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
 > Task :app:packageDebugResources UP-TO-DATE
-> Task :app:generateDebugGlobalSynthetics UP-TO-DATE
 > Task :app:packageDebugAndroidTestResources UP-TO-DATE
+> Task :app:generateDebugGlobalSynthetics UP-TO-DATE
 > Task :app:processDebugNavigationResources UP-TO-DATE
-> Task :app:checkDebugAarMetadata UP-TO-DATE
 > Task :app:parseDebugAndroidTestLocalResources UP-TO-DATE
 > Task :app:parseDebugLocalResources UP-TO-DATE
-> Task :app:mergeDebugResources UP-TO-DATE
 > Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
 > Task :app:generateDebugRFile UP-TO-DATE
 > Task :app:generateDebugAndroidTestRFile UP-TO-DATE
-> Task :app:mergeDebugJniLibFolders UP-TO-DATE
 > Task :app:validateSigningDebug UP-TO-DATE
-> Task :app:desugarDebugFileDependencies UP-TO-DATE
-> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
 > Task :app:writeDebugAppMetadata UP-TO-DATE
-> Task :app:processDebugManifest UP-TO-DATE
 > Task :app:writeDebugSigningConfigVersions UP-TO-DATE
-> Task :app:processDebugManifestForPackage UP-TO-DATE
-> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
 > Task :app:generateDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
 > Task :app:desugarDebugAndroidTestFileDependencies UP-TO-DATE
 > Task :app:kspDebugKotlin UP-TO-DATE
-> Task :app:processDebugResources UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
 > Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
 > Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
-> Task :app:mergeDebugAssets UP-TO-DATE
-> Task :app:compressDebugAssets UP-TO-DATE
-> Task :app:mergeDebugNativeLibs UP-TO-DATE
-> Task :app:stripDebugDebugSymbols UP-TO-DATE
-> Task :app:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
-> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
 > Task :app:mergeDebugAndroidTestAssets UP-TO-DATE
-> Task :app:mergeLibDexDebug UP-TO-DATE
-> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
 > Task :app:compressDebugAndroidTestAssets UP-TO-DATE
-> Task :app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
 > Task :app:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
 > Task :app:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
-> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:mergeLibDexDebug UP-TO-DATE
 > Task :app:mergeLibDexDebugAndroidTest UP-TO-DATE
-> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
 > Task :app:mergeDebugAndroidTestManifest UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
 > Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :app:mergeExtDexDebugAndroidTest UP-TO-DATE
 > Task :app:compileDebugKotlin UP-TO-DATE
 > Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:processDebugJavaRes UP-TO-DATE
 > Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
 > Task :app:kspDebugAndroidTestKotlin SKIPPED
-> Task :app:mergeExtDexDebug UP-TO-DATE
-> Task :app:processDebugJavaRes UP-TO-DATE
-> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:dexBuilderDebug UP-TO-DATE
+> Task :app:mergeProjectDexDebug UP-TO-DATE
 > Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:packageDebug UP-TO-DATE
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
 > Task :app:compileDebugAndroidTestKotlin UP-TO-DATE
-> Task :app:compileDebugAndroidTestJavaWithJavac NO-SOURCE
-> Task :app:mergeExtDexDebugAndroidTest UP-TO-DATE
 > Task :app:processDebugAndroidTestJavaRes UP-TO-DATE
-> Task :app:processDebugAndroidTestResources UP-TO-DATE
+> Task :app:compileDebugAndroidTestJavaWithJavac NO-SOURCE
 > Task :app:mergeDebugAndroidTestJavaResource UP-TO-DATE
 > Task :app:dexBuilderDebugAndroidTest
 > Task :app:mergeProjectDexDebugAndroidTest
 > Task :app:packageDebugAndroidTest
 > Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
-> Task :app:dexBuilderDebug
-> Task :app:mergeProjectDexDebug UP-TO-DATE
-> Task :app:packageDebug
-> Task :app:createDebugApkListingFileRedirect
 Starting 13 tests on Pixel_5(AVD) - 11
-
-com.example.musicflow.core.playback.PlaybackServiceIntegrationTest > playbackServiceIntegration[Pixel_5(AVD) - 11] [31mFAILED [0m
-	java.lang.IllegalStateException: MediaController method is called from a wrong thread. See javadoc of MediaController for details.
-	at com.google.common.base.Preconditions.checkState(Preconditions.java:513)
-Tests on Pixel_5(AVD) - 11 failed: There was 1 failure(s).
 Finished 13 tests on Pixel_5(AVD) - 11
-Execute com.example.musicflow.core.playback.PlaybackServiceIntegrationTest.playbackServiceIntegration: FAILED
-java.lang.IllegalStateException: java.lang.IllegalStateException: MediaController method is called from a wrong thread. See javadoc of MediaController for details.
-at com.google.common.base.Preconditions.checkState(Preconditions.java:513)
-at androidx.media3.session.MediaController.verifyApplicationThread(MediaController.java:2269)
-at androidx.media3.session.MediaController.release(MediaController.java:716)
-at androidx.media3.session.MediaController.releaseFuture(MediaController.java:766)
-at com.example.musicflow.core.playback.PlaybackServiceIntegrationTest$playbackServiceIntegration$1.invokeSuspend(PlaybackServiceIntegrationTest.kt:450)
-at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
-at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
-at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
-at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
-at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source:1)
-at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
-at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source:1)
-at com.example.musicflow.core.playback.PlaybackServiceIntegrationTest.playbackServiceIntegration(PlaybackServiceIntegrationTest.kt:86)
-System.Management.Automation.RemoteException
-java.lang.IllegalStateException: MediaController method is called from a wrong thread. See javadoc of MediaController for details.
-at com.google.common.base.Preconditions.checkState(Preconditions.java:513)
-at androidx.media3.session.MediaController.verifyApplicationThread(MediaController.java:2269)
-at androidx.media3.session.MediaController.release(MediaController.java:716)
-at androidx.media3.session.MediaController.releaseFuture(MediaController.java:766)
-at com.example.musicflow.core.playback.PlaybackServiceIntegrationTest$playbackServiceIntegration$1.invokeSuspend(PlaybackServiceIntegrationTest.kt:450)
-at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
-at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
-at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
-at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
-at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
-at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source:1)
-at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
-at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source:1)
-at com.example.musicflow.core.playback.PlaybackServiceIntegrationTest.playbackServiceIntegration(PlaybackServiceIntegrationTest.kt:86)
-> Task :app:connectedDebugAndroidTest FAILED
-System.Management.Automation.RemoteException
-FAILURE: Build failed with an exception.
-System.Management.Automation.RemoteException
-* What went wrong:
-Execution failed for task ':app:connectedDebugAndroidTest' (registered by plugin 'com.android.internal.application').
-> There were failing tests. See the report at: file:///E:/Du_An/MusicFlow/app/build/reports/androidTests/connected/debug/index.html
-System.Management.Automation.RemoteException
-* Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
-> Run with --scan to get full insights from a Build Scan (powered by Develocity).
-> Get more help at https://help.gradle.org.
-System.Management.Automation.RemoteException
-BUILD FAILED in 24s
-69 actionable tasks: 7 executed, 62 up-to-date
-Configuration cache entry stored.
-RESULT ANDROID_TESTS exitCode=1
+> Task :app:connectedDebugAndroidTest
+
+BUILD SUCCESSFUL in 15s
+69 actionable tasks: 4 executed, 65 up-to-date
+Configuration cache entry reused.
+RESULT ANDROID_TESTS exitCode=0
 === SERVICE_DIAGNOSTICS ===
+--------- beginning of kernel
 --------- beginning of main
 --------- beginning of system
---------- beginning of kernel
-I/MusicFlowServiceIT( 5880): PASS roomReorderToQueue
-I/MusicFlowServiceIT( 5880): PASS mediaControllerConnected
-I/MusicFlowServiceIT( 5880): PASS servicePlaysFirstTrack
-I/MusicFlowServiceIT( 5880): PASS serviceWritesRecentlyPlayed
-I/MusicFlowServiceIT( 5880): PASS backgroundPlaybackAfterHome
-I/MusicFlowServiceIT( 5880): PASS nextThroughMediaSession
-I/MusicFlowServiceIT( 5880): PASS nextTrackRecordedInHistory
-I/MusicFlowServiceIT( 5880): PASS previousThroughMediaSession
-I/MusicFlowServiceIT( 5880): PASS playlistOrderUnchanged
-I/MusicFlowServiceIT( 5880): PASS playbackServiceIntegration
+I/MusicFlowServiceIT( 6500): PASS roomReorderToQueue
+I/MusicFlowServiceIT( 6500): PASS mediaControllerConnected
+I/MusicFlowServiceIT( 6500): PASS servicePlaysFirstTrack
+I/MusicFlowServiceIT( 6500): PASS serviceWritesRecentlyPlayed
+I/MusicFlowServiceIT( 6500): PASS backgroundPlaybackAfterHome
+I/MusicFlowServiceIT( 6500): PASS nextThroughMediaSession
+I/MusicFlowServiceIT( 6500): PASS nextTrackRecordedInHistory
+I/MusicFlowServiceIT( 6500): PASS previousThroughMediaSession
+I/MusicFlowServiceIT( 6500): PASS playlistOrderUnchanged
+I/MusicFlowServiceIT( 6500): PASS playbackServiceIntegration
+I/MusicFlowServiceIT( 6500): PASS historyRestored
 SERVICE_TEST_PASS_MARKER=True
-HISTORY_RESTORED_MARKER=False
-FINAL_RESULT=FAIL
+HISTORY_RESTORED_MARKER=True
+FINAL_RESULT=PASS

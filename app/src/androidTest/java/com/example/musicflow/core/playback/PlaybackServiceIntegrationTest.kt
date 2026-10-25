@@ -99,6 +99,14 @@ class PlaybackServiceIntegrationTest {
             RecentHistoryDatabase.getInstance(context)
         )
 
+        val oldTestIds = history.getRecent()
+            .map { it.mediaId }
+            .filter { it.startsWith("qa-service-") }
+
+        for (mediaId in oldTestIds) {
+            history.remove(mediaId)
+        }
+
         val previousHistory = history.getRecent()
 
         var future: ListenableFuture<MediaController>? = null
@@ -447,9 +455,9 @@ class PlaybackServiceIntegrationTest {
             }
 
             future?.let { connecting ->
-                MediaController.releaseFuture(
-                    connecting
-                )
+                instrumentation.runOnMainSync {
+                    MediaController.releaseFuture(connecting)
+                }
             }
 
             activity?.let { screen ->
