@@ -175,6 +175,11 @@ class PlaybackQueueStore(
                 "Cannot restore saved queue",
                 e
             )
+
+            // Không thử khôi phục cùng snapshot hỏng
+            // ở mọi lần khởi động sau.
+            clear()
+
             false
         }
     }

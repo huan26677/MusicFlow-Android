@@ -117,6 +117,20 @@ class PlaybackService : MediaSessionService() {
 
         player.addListener(playerListener)
 
+        if (restored) {
+            queueScope.launch {
+                val removed = PlaybackQueueRecovery(
+                    applicationContext,
+                    queueStore
+                ).pruneUnavailable(player)
+
+                Log.i(
+                    "MusicFlowQueueRecovery",
+                    "CHECK_FINISHED removed=$removed"
+                )
+            }
+        }
+
         queueScope.launch {
             while (isActive) {
                 delay(5_000)
