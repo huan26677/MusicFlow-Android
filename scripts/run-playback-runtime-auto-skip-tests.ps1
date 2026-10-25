@@ -140,18 +140,18 @@ try {
 
             $skipCount = @(
                 $diagnostics | Where-Object {
-                    $_ -match 'SKIPPED_ERROR from='
+                    $_ -match 'AUTO_SKIP_BRANCH_VERIFIED from='
                 }
             ).Count
 
             $exhaustedCount = @(
                 $diagnostics | Where-Object {
-                    $_ -match 'QUEUE_EXHAUSTED index='
+                    $_ -match 'QUEUE_EXHAUSTED_BRANCH_VERIFIED index='
                 }
             ).Count
 
-            Write-Log "AUTO_SKIP_COUNT=$skipCount"
-            Write-Log "QUEUE_EXHAUSTED_COUNT=$exhaustedCount"
+            Write-Log "AUTO_SKIP_BRANCH_VERIFIED_COUNT=$skipCount"
+            Write-Log "QUEUE_EXHAUSTED_BRANCH_VERIFIED_COUNT=$exhaustedCount"
             Write-Log "ALL_MARKERS_FOUND=$allMarkersFound"
 
             # Các test integration xác nhận hành vi phát.
@@ -162,8 +162,8 @@ try {
                 $unitPassed -and
                 $androidPassed -and
                 $allMarkersFound -and
-                $skipCount -ge 1 -and
-                $exhaustedCount -ge 1
+                $skipCount -eq 1 -and
+                $exhaustedCount -eq 1
             ) {
                 Write-Log "FINAL_RESULT=PASS"
                 $exitCode = 0

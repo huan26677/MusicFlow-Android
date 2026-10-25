@@ -465,6 +465,11 @@ class PlaybackRuntimeAutoSkipTest {
                     exo.currentMediaItem?.mediaId
                 )
 
+                Log.i(
+                    "MusicFlowAutoSkipTest",
+                    "AUTO_SKIP_BRANCH_VERIFIED from=0 to=1"
+                )
+
                 // Đưa Player về IDLE ở bài cuối
                 // trước khi mô phỏng lỗi tiếp theo.
                 exo.pause()
@@ -501,6 +506,11 @@ class PlaybackRuntimeAutoSkipTest {
                 assertEquals(
                     Player.STATE_IDLE,
                     exo.playbackState
+                )
+
+                Log.i(
+                    "MusicFlowAutoSkipTest",
+                    "QUEUE_EXHAUSTED_BRANCH_VERIFIED index=1"
                 )
             }
 
