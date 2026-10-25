@@ -1,25 +1,25 @@
 ﻿MusicFlow Process Restart Recovery v1
-DATE=2026-10-25T13:52:48.1053829+07:00
-COMMIT=1f13264
+DATE=2026-10-25T13:58:19.7405356+07:00
+COMMIT=8b54fc2
 EMULATOR=emulator-5554
 === JVM_TESTS ===
 Reusing configuration cache.
 > Task :app:preBuild UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
-> Task :app:preDebugUnitTestBuild UP-TO-DATE
 > Task :app:mapDebugSourceSetPaths UP-TO-DATE
-> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
 > Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
-> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
-> Task :app:generateDebugResources UP-TO-DATE
 > Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
 > Task :app:packageDebugResources UP-TO-DATE
 > Task :app:checkDebugAarMetadata UP-TO-DATE
 > Task :app:processDebugNavigationResources UP-TO-DATE
-> Task :app:mergeDebugResources UP-TO-DATE
 > Task :app:compileDebugNavigationResources UP-TO-DATE
 > Task :app:parseDebugLocalResources UP-TO-DATE
 > Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
 > Task :app:processDebugMainManifest UP-TO-DATE
 > Task :app:processDebugManifest UP-TO-DATE
 > Task :app:processDebugManifestForPackage UP-TO-DATE
@@ -32,8 +32,8 @@ Reusing configuration cache.
 > Task :app:kspDebugUnitTestKotlin SKIPPED
 > Task :app:bundleDebugClassesToRuntimeJar UP-TO-DATE
 > Task :app:compileDebugUnitTestKotlin UP-TO-DATE
-> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
 > Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
 > Task :app:testDebugUnitTest UP-TO-DATE
 
 BUILD SUCCESSFUL in 1s
@@ -43,65 +43,65 @@ RESULT JVM_TESTS exitCode=0
 === ANDROID_TESTS ===
 Reusing configuration cache.
 > Task :app:generateDebugAndroidTestAssets UP-TO-DATE
-> Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:preBuild UP-TO-DATE
+> Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:preDebugAndroidTestBuild SKIPPED
-> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
 > Task :app:generateDebugResources UP-TO-DATE
 > Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
 > Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
 > Task :app:generateDebugAndroidTestResources UP-TO-DATE
 > Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
-> Task :app:packageDebugResources UP-TO-DATE
-> Task :app:extractDeepLinksDebug UP-TO-DATE
 > Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
 > Task :app:generateDebugGlobalSynthetics UP-TO-DATE
 > Task :app:desugarDebugFileDependencies UP-TO-DATE
 > Task :app:packageDebugAndroidTestResources UP-TO-DATE
-> Task :app:mergeDebugJniLibFolders UP-TO-DATE
-> Task :app:parseDebugAndroidTestLocalResources UP-TO-DATE
-> Task :app:checkDebugDuplicateClasses UP-TO-DATE
-> Task :app:mergeDebugAssets UP-TO-DATE
 > Task :app:processDebugNavigationResources UP-TO-DATE
-> Task :app:parseDebugLocalResources UP-TO-DATE
-> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
 > Task :app:checkDebugAarMetadata UP-TO-DATE
-> Task :app:generateDebugAndroidTestRFile UP-TO-DATE
-> Task :app:compileDebugNavigationResources UP-TO-DATE
-> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:parseDebugAndroidTestLocalResources UP-TO-DATE
 > Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
 > Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:generateDebugAndroidTestRFile UP-TO-DATE
 > Task :app:writeDebugAppMetadata UP-TO-DATE
-> Task :app:generateDebugRFile UP-TO-DATE
 > Task :app:writeDebugSigningConfigVersions UP-TO-DATE
 > Task :app:generateDebugAndroidTestGlobalSynthetics UP-TO-DATE
-> Task :app:mergeDebugAndroidTestAssets UP-TO-DATE
 > Task :app:desugarDebugAndroidTestFileDependencies UP-TO-DATE
-> Task :app:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
 > Task :app:processDebugMainManifest UP-TO-DATE
-> Task :app:mergeDebugNativeLibs UP-TO-DATE
-> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
-> Task :app:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
-> Task :app:mergeExtDexDebug UP-TO-DATE
-> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
 > Task :app:processDebugManifest UP-TO-DATE
-> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:kspDebugKotlin UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
 > Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
-> Task :app:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:compressDebugAndroidTestAssets UP-TO-DATE
 > Task :app:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
 > Task :app:validateSigningDebugAndroidTest UP-TO-DATE
-> Task :app:processDebugManifestForPackage UP-TO-DATE
 > Task :app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
-> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
-> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
-> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
-> Task :app:kspDebugKotlin UP-TO-DATE
-> Task :app:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
 > Task :app:mergeDebugAndroidTestManifest UP-TO-DATE
 > Task :app:processDebugAndroidTestManifest UP-TO-DATE
-> Task :app:processDebugResources UP-TO-DATE
+> Task :app:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
 > Task :app:processDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :app:mergeExtDexDebugAndroidTest UP-TO-DATE
 > Task :app:compileDebugKotlin UP-TO-DATE
 > Task :app:compileDebugJavaWithJavac NO-SOURCE
 > Task :app:processDebugJavaRes UP-TO-DATE
@@ -124,10 +124,16 @@ Starting 19 tests on Pixel_5(AVD) - 11
 Finished 19 tests on Pixel_5(AVD) - 11
 > Task :app:connectedDebugAndroidTest
 
-BUILD SUCCESSFUL in 15s
+BUILD SUCCESSFUL in 14s
 69 actionable tasks: 1 executed, 68 up-to-date
 Configuration cache entry reused.
 RESULT ANDROID_TESTS exitCode=0
+=== INSTALL_TEST_RUNNER ===
+TEST_APK=E:\Du_An\MusicFlow\app\build\outputs\apk\androidTest\debug\app-debug-androidTest.apk
+Performing Streamed Install
+Success
+instrumentation:com.example.musicflow.test/androidx.test.runner.AndroidJUnitRunner (target=com.example.musicflow)
+TEST_RUNNER_AVAILABLE=True
 === FORCE_STOP ===
 PROCESS_STOPPED=True
 === PHASE_INITIAL_CLEANUP ===
@@ -139,6 +145,9 @@ android.util.AndroidException: INSTRUMENTATION_FAILED: com.example.musicflow.tes
 	at com.android.commands.am.Am.main(Am.java:50)
 	at com.android.internal.os.RuntimeInit.nativeFinishInit(Native Method)
 	at com.android.internal.os.RuntimeInit.main(RuntimeInit.java:399)
+INSTRUMENTATION_STATUS: Error=Unable to find instrumentation target package: com.example.musicflow
+INSTRUMENTATION_STATUS: id=ActivityManagerService
+INSTRUMENTATION_STATUS_CODE: -1
 PHASE_INITIAL_CLEANUP_RESULT=False
 === FORCE_STOP ===
 PROCESS_STOPPED=True
@@ -158,33 +167,34 @@ android.util.AndroidException: INSTRUMENTATION_FAILED: com.example.musicflow.tes
 	at com.android.commands.am.Am.main(Am.java:50)
 	at com.android.internal.os.RuntimeInit.nativeFinishInit(Native Method)
 	at com.android.internal.os.RuntimeInit.main(RuntimeInit.java:399)
-INSTRUMENTATION_STATUS: Error=Unable to find instrumentation info for: ComponentInfo{com.example.musicflow.test/androidx.test.runner.AndroidJUnitRunner}
+INSTRUMENTATION_STATUS: Error=Unable to find instrumentation target package: com.example.musicflow
 INSTRUMENTATION_STATUS: id=ActivityManagerService
+INSTRUMENTATION_STATUS_CODE: -1
 PHASE_CLEANUP_RESULT=False
 === RESTART_DIAGNOSTICS ===
 --------- beginning of system
 --------- beginning of main
 --------- beginning of kernel
-W/MusicFlowQueue( 7589): Cannot restore saved queue
-W/MusicFlowQueue( 7589): org.json.JSONException: Expected ':' after invalid-json at character 13 of {invalid-json
-W/MusicFlowQueue( 7589): 	at org.json.JSONTokener.syntaxError(JSONTokener.java:460)
-W/MusicFlowQueue( 7589): 	at org.json.JSONTokener.readObject(JSONTokener.java:388)
-W/MusicFlowQueue( 7589): 	at org.json.JSONTokener.nextValue(JSONTokener.java:104)
-W/MusicFlowQueue( 7589): 	at org.json.JSONObject.<init>(JSONObject.java:165)
-W/MusicFlowQueue( 7589): 	at org.json.JSONObject.<init>(JSONObject.java:182)
-W/MusicFlowQueue( 7589): 	at com.example.musicflow.core.playback.PlaybackQueueStore.restoreInto(PlaybackQueueStore.kt:105)
-W/MusicFlowQueue( 7589): 	at com.example.musicflow.core.playback.PlaybackQueuePersistenceTest.corruptedSnapshotDoesNotCrashPlayer$lambda$9(PlaybackQueuePersistenceTest.kt:413)
-W/MusicFlowQueue( 7589): 	at com.example.musicflow.core.playback.PlaybackQueuePersistenceTest$$ExternalSyntheticLambda3.run(D8$$SyntheticClass:0)
-W/MusicFlowQueue( 7589): 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:462)
-W/MusicFlowQueue( 7589): 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
-W/MusicFlowQueue( 7589): 	at android.app.Instrumentation$SyncRunnable.run(Instrumentation.java:2223)
-W/MusicFlowQueue( 7589): 	at android.os.Handler.handleCallback(Handler.java:938)
-W/MusicFlowQueue( 7589): 	at android.os.Handler.dispatchMessage(Handler.java:99)
-W/MusicFlowQueue( 7589): 	at android.os.Looper.loop(Looper.java:223)
-W/MusicFlowQueue( 7589): 	at android.app.ActivityThread.main(ActivityThread.java:7656)
-W/MusicFlowQueue( 7589): 	at java.lang.reflect.Method.invoke(Native Method)
-W/MusicFlowQueue( 7589): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
-W/MusicFlowQueue( 7589): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
+W/MusicFlowQueue( 7960): Cannot restore saved queue
+W/MusicFlowQueue( 7960): org.json.JSONException: Expected ':' after invalid-json at character 13 of {invalid-json
+W/MusicFlowQueue( 7960): 	at org.json.JSONTokener.syntaxError(JSONTokener.java:460)
+W/MusicFlowQueue( 7960): 	at org.json.JSONTokener.readObject(JSONTokener.java:388)
+W/MusicFlowQueue( 7960): 	at org.json.JSONTokener.nextValue(JSONTokener.java:104)
+W/MusicFlowQueue( 7960): 	at org.json.JSONObject.<init>(JSONObject.java:165)
+W/MusicFlowQueue( 7960): 	at org.json.JSONObject.<init>(JSONObject.java:182)
+W/MusicFlowQueue( 7960): 	at com.example.musicflow.core.playback.PlaybackQueueStore.restoreInto(PlaybackQueueStore.kt:105)
+W/MusicFlowQueue( 7960): 	at com.example.musicflow.core.playback.PlaybackQueuePersistenceTest.corruptedSnapshotDoesNotCrashPlayer$lambda$9(PlaybackQueuePersistenceTest.kt:413)
+W/MusicFlowQueue( 7960): 	at com.example.musicflow.core.playback.PlaybackQueuePersistenceTest$$ExternalSyntheticLambda3.run(D8$$SyntheticClass:0)
+W/MusicFlowQueue( 7960): 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:462)
+W/MusicFlowQueue( 7960): 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+W/MusicFlowQueue( 7960): 	at android.app.Instrumentation$SyncRunnable.run(Instrumentation.java:2223)
+W/MusicFlowQueue( 7960): 	at android.os.Handler.handleCallback(Handler.java:938)
+W/MusicFlowQueue( 7960): 	at android.os.Handler.dispatchMessage(Handler.java:99)
+W/MusicFlowQueue( 7960): 	at android.os.Looper.loop(Looper.java:223)
+W/MusicFlowQueue( 7960): 	at android.app.ActivityThread.main(ActivityThread.java:7656)
+W/MusicFlowQueue( 7960): 	at java.lang.reflect.Method.invoke(Native Method)
+W/MusicFlowQueue( 7960): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
+W/MusicFlowQueue( 7960): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
 PREPARED=False
 PROCESS_RESTARTED=False
 RECOVERED_PAUSED=False

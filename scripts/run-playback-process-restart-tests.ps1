@@ -114,6 +114,66 @@ function Run-Phase(
     return $passed
 }
 
+function Ensure-TestRunner {
+    Write-Log "=== INSTALL_TEST_RUNNER ==="
+
+    $apkRoot = Join-Path `
+        $root "app\build\outputs\apk\androidTest"
+
+    $apk = Get-ChildItem `
+        -Path $apkRoot `
+        -Filter "*.apk" `
+        -File `
+        -Recurse `
+        -ErrorAction SilentlyContinue |
+        Sort-Object LastWriteTime -Descending |
+        Select-Object -First 1
+
+    if (!$apk) {
+        Write-Log "ERROR=ANDROID_TEST_APK_NOT_FOUND"
+        return $false
+    }
+
+    Write-Log "TEST_APK=$($apk.FullName)"
+
+    $output = @(
+        & $adbPath -s $serial `
+            install -r -t $apk.FullName 2>&1 |
+            ForEach-Object { $_.ToString() }
+    )
+
+    $installCode = $LASTEXITCODE
+
+    foreach ($line in $output) {
+        Write-Log $line
+    }
+
+    if ($installCode -ne 0) {
+        Write-Log "TEST_APK_INSTALL=False"
+        return $false
+    }
+
+    $available = @(
+        & $adbPath -s $serial `
+            shell pm list instrumentation 2>&1 |
+            ForEach-Object { $_.ToString() }
+    )
+
+    foreach ($line in $available) {
+        Write-Log $line
+    }
+
+    $found = @(
+        $available | Where-Object {
+            $_.Contains($runner)
+        }
+    ).Count -gt 0
+
+    Write-Log "TEST_RUNNER_AVAILABLE=$found"
+
+    return $found
+}
+
 try {
     Write-Log "DATE=$(Get-Date -Format o)"
     Write-Log "COMMIT=$(& git rev-parse --short HEAD)"
@@ -182,7 +242,17 @@ try {
                 )
             }
 
+            $runnerReady = $false
+
             if ($unitPassed -and $androidPassed) {
+                $runnerReady = Ensure-TestRunner
+            }
+
+            if (
+                $unitPassed -and
+                $androidPassed -and
+                $runnerReady
+            ) {
                 $initialStop = Stop-App
 
                 $initialCleanup = $false
