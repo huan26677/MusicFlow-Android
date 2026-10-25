@@ -22,6 +22,15 @@ class PlaybackRuntimeAutoSkip(
     private var recoveryPending = false
     private var disposed = false
 
+    private fun queueIdentity(): List<Pair<String, String?>> {
+        return (0 until player.mediaItemCount).map { index ->
+            val item = player.getMediaItemAt(index)
+
+            item.mediaId to
+                item.localConfiguration?.uri?.toString()
+        }
+    }
+
     fun dispose() {
         disposed = true
         recoveryPending = false
@@ -57,6 +66,7 @@ class PlaybackRuntimeAutoSkip(
         }
 
         val failedId = player.currentMediaItem?.mediaId
+        val originalQueue = queueIdentity()
 
         recoveryPending = true
 
@@ -71,7 +81,8 @@ class PlaybackRuntimeAutoSkip(
             if (
                 !player.playWhenReady ||
                 player.currentMediaItemIndex != failedIndex ||
-                player.currentMediaItem?.mediaId != failedId
+                player.currentMediaItem?.mediaId != failedId ||
+                queueIdentity() != originalQueue
             ) {
                 Log.i(
                     "MusicFlowAutoSkip",

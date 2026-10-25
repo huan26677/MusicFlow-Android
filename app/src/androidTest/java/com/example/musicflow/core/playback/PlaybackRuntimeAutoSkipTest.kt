@@ -28,6 +28,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(AndroidJUnit4::class)
 class PlaybackRuntimeAutoSkipTest {
@@ -527,5 +528,250 @@ class PlaybackRuntimeAutoSkipTest {
             validFile.delete()
         }
     }
+    @Test
+    fun realServiceReceivesExoPlayerError() {
+        val missing = File(
+            context.cacheDir,
+            "qa_runtime_v2_${System.nanoTime()}.wav"
+        )
+
+        assertFalse(missing.exists())
+
+        val errorSeen = CountDownLatch(1)
+        val errorCode = AtomicInteger(-1)
+
+        withController { controller ->
+            instrumentation.runOnMainSync {
+                controller.addListener(
+                    object : Player.Listener {
+                        override fun onPlayerError(
+                            error: PlaybackException
+                        ) {
+                            errorCode.set(error.errorCode)
+                            errorSeen.countDown()
+                        }
+                    }
+                )
+
+                controller.repeatMode =
+                    Player.REPEAT_MODE_OFF
+
+                controller.shuffleModeEnabled = false
+
+                controller.setMediaItem(
+                    MediaItem.Builder()
+                        .setMediaId("qa-v2-real-error")
+                        .setUri(Uri.fromFile(missing))
+                        .build()
+                )
+
+                controller.prepare()
+                controller.play()
+            }
+
+            assertTrue(
+                "Không nhận được lỗi từ ExoPlayer thật",
+                errorSeen.await(
+                    15,
+                    TimeUnit.SECONDS
+                )
+            )
+
+            assertEquals(
+                PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND,
+                errorCode.get()
+            )
+        }
+
+        Log.i(
+            "MusicFlowAutoSkipTest",
+            "PASS realServiceExoPlayerErrorObserved"
+        )
+    }
+
+
+
+    @Test
+    fun pauseWhileRecoveryPendingCancelsSkip() {
+        instrumentation.runOnMainSync {
+            val exo = ExoPlayer.Builder(context).build()
+            var recovery: PlaybackRuntimeAutoSkip? = null
+
+            try {
+                val items = listOf("first", "second").map {
+                    MediaItem.Builder()
+                        .setMediaId(it)
+                        .setUri(
+                            Uri.parse(
+                                "file:///qa_v2_$it.wav"
+                            )
+                        )
+                        .build()
+                }
+
+                exo.setMediaItems(items, 0, 0L)
+
+                exo.play()
+                assertTrue(exo.playWhenReady)
+
+                var pendingAction: (() -> Unit)? = null
+
+                recovery = PlaybackRuntimeAutoSkip(
+                    exo
+                ) { action ->
+                    pendingAction = action
+                }
+
+                recovery.onPlayerError(
+                    PlaybackException(
+                        "QA injected error before Pause",
+                        null,
+                        PlaybackException
+                            .ERROR_CODE_IO_FILE_NOT_FOUND
+                    )
+                )
+
+                assertNotNull(pendingAction)
+
+                exo.pause()
+
+                checkNotNull(pendingAction).invoke()
+
+                assertEquals(
+                    0,
+                    exo.currentMediaItemIndex
+                )
+
+                assertEquals(
+                    "first",
+                    exo.currentMediaItem?.mediaId
+                )
+
+                assertFalse(exo.isPlaying)
+                assertFalse(exo.playWhenReady)
+
+                assertEquals(
+                    Player.STATE_IDLE,
+                    exo.playbackState
+                )
+            } finally {
+                recovery?.dispose()
+                exo.release()
+            }
+        }
+
+        Log.i(
+            "MusicFlowAutoSkipTest",
+            "PASS pendingPauseCancelsAutoSkip"
+        )
+    }
+
+
+    @Test
+    fun queueReplacementWhilePendingCancelsSkip() {
+        instrumentation.runOnMainSync {
+            val exo = ExoPlayer.Builder(context).build()
+            var recovery: PlaybackRuntimeAutoSkip? = null
+
+            try {
+                fun makeItems(prefix: String) =
+                    listOf("first", "second").map { id ->
+                        MediaItem.Builder()
+                            .setMediaId(id)
+                            .setUri(
+                                Uri.parse(
+                                    "file:///qa_v2_${prefix}_$id.wav"
+                                )
+                            )
+                            .build()
+                    }
+
+                val oldItems = makeItems("old")
+                val newItems = makeItems("new")
+
+                exo.setMediaItems(oldItems, 0, 0L)
+                exo.play()
+
+                assertTrue(exo.playWhenReady)
+
+                var pendingAction: (() -> Unit)? = null
+
+                recovery = PlaybackRuntimeAutoSkip(
+                    exo
+                ) { action ->
+                    pendingAction = action
+                }
+
+                recovery.onPlayerError(
+                    PlaybackException(
+                        "QA injected error before queue replace",
+                        null,
+                        PlaybackException
+                            .ERROR_CODE_IO_NO_PERMISSION
+                    )
+                )
+
+                assertNotNull(pendingAction)
+
+                exo.setMediaItems(
+                    newItems,
+                    0,
+                    0L
+                )
+
+                exo.play()
+
+                assertTrue(
+                    "Queue mới phải còn playWhenReady=true",
+                    exo.playWhenReady
+                )
+
+                assertEquals(
+                    "first",
+                    exo.currentMediaItem?.mediaId
+                )
+
+                assertEquals(
+                    newItems[0].localConfiguration?.uri,
+                    exo.currentMediaItem
+                        ?.localConfiguration?.uri
+                )
+
+                checkNotNull(pendingAction).invoke()
+
+                assertEquals(
+                    0,
+                    exo.currentMediaItemIndex
+                )
+
+                assertEquals(
+                    newItems[0].localConfiguration?.uri,
+                    exo.currentMediaItem
+                        ?.localConfiguration?.uri
+                )
+
+                assertEquals(
+                    2,
+                    exo.mediaItemCount
+                )
+
+                assertEquals(
+                    Player.STATE_IDLE,
+                    exo.playbackState
+                )
+            } finally {
+                recovery?.dispose()
+                exo.release()
+            }
+        }
+
+        Log.i(
+            "MusicFlowAutoSkipTest",
+            "PASS replacedQueueCancelsAutoSkip"
+        )
+    }
+
+
+
 }
 

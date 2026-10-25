@@ -1,0 +1,175 @@
+﻿MusicFlow Runtime Recovery Integration v2
+DATE=2026-10-25T15:14:53.4138192+07:00
+COMMIT=5e4b1c9
+EMULATOR=emulator-5554
+=== JVM_TESTS ===
+Reusing configuration cache.
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:kspDebugKotlin UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:kspDebugUnitTestKotlin SKIPPED
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :app:testDebugUnitTest
+
+BUILD SUCCESSFUL in 3s
+25 actionable tasks: 3 executed, 22 up-to-date
+Configuration cache entry reused.
+RESULT JVM_TESTS exitCode=0
+=== ANDROID_TESTS ===
+Reusing configuration cache.
+> Task :app:preBuild UP-TO-DATE
+> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:packageDebugAndroidTestResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:generateDebugGlobalSynthetics UP-TO-DATE
+> Task :app:parseDebugAndroidTestLocalResources UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:generateDebugAndroidTestRFile UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:generateDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:kspDebugKotlin UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :app:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :app:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :app:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :app:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:mergeDebugAndroidTestManifest UP-TO-DATE
+> Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :app:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:kspDebugAndroidTestKotlin SKIPPED
+> Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:compileDebugAndroidTestKotlin UP-TO-DATE
+> Task :app:compileDebugAndroidTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugAndroidTestJavaRes UP-TO-DATE
+> Task :app:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :app:dexBuilderDebug
+> Task :app:mergeProjectDexDebug
+> Task :app:dexBuilderDebugAndroidTest
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :app:mergeProjectDexDebugAndroidTest
+> Task :app:packageDebugAndroidTest
+> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+Starting 31 tests on Pixel_5(AVD) - 11
+Pixel_5(AVD) - 11 Tests 15/31 completed. (0 skipped) (0 failed)
+Pixel_5(AVD) - 11 Tests 22/31 completed. (0 skipped) (0 failed)
+> Task :app:connectedDebugAndroidTest
+
+Finished 31 tests on Pixel_5(AVD) - 11
+
+BUILD SUCCESSFUL in 40s
+69 actionable tasks: 7 executed, 62 up-to-date
+Configuration cache entry reused.
+RESULT ANDROID_TESTS exitCode=0
+=== RUNTIME_V2_DIAGNOSTICS ===
+--------- beginning of main
+--------- beginning of system
+--------- beginning of kernel
+I/MusicFlowRuntimeV2(12460): SERVICE_PLAYER_ERROR code=2005
+I/MusicFlowRuntimeV2(12460): SERVICE_FORWARDED_ERROR code=2005
+I/MusicFlowRuntimeV2(12460): SERVICE_PLAYER_ERROR code=2005
+I/MusicFlowRuntimeV2(12460): SERVICE_FORWARDED_ERROR code=2005
+I/MusicFlowRuntimeV2(12460): SERVICE_PLAYER_ERROR code=2005
+I/MusicFlowRuntimeV2(12460): SERVICE_FORWARDED_ERROR code=2005
+I/MusicFlowAutoSkipTest(12460): PASS allMissingStopsWithoutLoop
+I/MusicFlowRuntimeV2(12460): SERVICE_PLAYER_ERROR code=2005
+I/MusicFlowRuntimeV2(12460): SERVICE_FORWARDED_ERROR code=2005
+I/MusicFlowRuntimeV2(12460): SERVICE_PLAYER_ERROR code=2005
+I/MusicFlowRuntimeV2(12460): SERVICE_FORWARDED_ERROR code=2005
+I/MusicFlowAutoSkipTest(12460): PASS consecutiveMissingAutoSkipped
+I/MusicFlowAutoSkipTest(12460): AUTO_SKIP_BRANCH_VERIFIED from=0 to=1
+I/MusicFlowAutoSkipTest(12460): QUEUE_EXHAUSTED_BRANCH_VERIFIED index=1
+I/MusicFlowAutoSkipTest(12460): PASS injectedRecoveryBranches
+I/MusicFlowAutoSkipTest(12460): PASS pendingPauseCancelsAutoSkip
+I/MusicFlowAutoSkipTest(12460): PASS replacedQueueCancelsAutoSkip
+I/MusicFlowAutoSkipTest(12460): PASS pausedPlayerDoesNotAutoSkip
+I/MusicFlowRuntimeV2(12460): SERVICE_PLAYER_ERROR code=2005
+I/MusicFlowRuntimeV2(12460): SERVICE_FORWARDED_ERROR code=2005
+I/MusicFlowAutoSkipTest(12460): PASS realServiceExoPlayerErrorObserved
+I/MusicFlowRuntimeV2(12460): SERVICE_PLAYER_ERROR code=2005
+I/MusicFlowRuntimeV2(12460): SERVICE_FORWARDED_ERROR code=2005
+I/MusicFlowAutoSkipTest(12460): PASS singleMissingAutoSkipped
+MARKER PASS singleMissingAutoSkipped=True
+MARKER PASS consecutiveMissingAutoSkipped=True
+MARKER PASS allMissingStopsWithoutLoop=True
+MARKER PASS pausedPlayerDoesNotAutoSkip=True
+MARKER PASS injectedRecoveryBranches=True
+MARKER PASS realServiceExoPlayerErrorObserved=True
+MARKER PASS pendingPauseCancelsAutoSkip=True
+MARKER PASS replacedQueueCancelsAutoSkip=True
+SERVICE_ERROR_COUNT=7
+SERVICE_FORWARDED_COUNT=7
+SKIP_BRANCH_COUNT=1
+EXHAUSTED_BRANCH_COUNT=1
+ALL_MARKERS_FOUND=True
+FINAL_RESULT=PASS

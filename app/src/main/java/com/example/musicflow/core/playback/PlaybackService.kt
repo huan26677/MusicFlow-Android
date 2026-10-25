@@ -80,7 +80,19 @@ class PlaybackService : MediaSessionService() {
     override fun onPlayerError(
         error: PlaybackException
     ) {
-        runtimeAutoSkip?.onPlayerError(error)
+        Log.i(
+            "MusicFlowRuntimeV2",
+            "SERVICE_PLAYER_ERROR code=${error.errorCode}"
+        )
+
+        runtimeAutoSkip?.let { recovery ->
+            recovery.onPlayerError(error)
+
+            Log.i(
+                "MusicFlowRuntimeV2",
+                "SERVICE_FORWARDED_ERROR code=${error.errorCode}"
+            )
+        }
     }
 
     override fun onEvents(
