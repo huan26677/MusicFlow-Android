@@ -118,11 +118,52 @@ try {
     # The 3 phase-specific tests are skipped by JUnit Assume during the general suite.
     # Their real assertions are executed below in separate instrumented processes.
     $regressionText = Get-Content $logFile -Raw
-    $match = [regex]::Match($regressionText, 'Finished\s+(\d+)\s+tests\s+on')
-    $count = if ($match.Success) { [int]$match.Groups[1].Value } else { -1 }
-    Write-Log "REGRESSION_TEST_COUNT=$count"
-    if ($count -ne 50) { throw "UNEXPECTED_REGRESSION_TEST_COUNT" }
 
+    $startMatch = [regex]::Match(
+        $regressionText,
+        'Starting\s+(\d+)\s+tests\s+on'
+    )
+
+    $finishMatch = [regex]::Match(
+        $regressionText,
+        'Finished\s+(\d+)\s+tests\s+on'
+    )
+
+    $startCount = if ($startMatch.Success) {
+        [int]$startMatch.Groups[1].Value
+    } else {
+        -1
+    }
+
+    $finishCount = if ($finishMatch.Success) {
+        [int]$finishMatch.Groups[1].Value
+    } else {
+        -1
+    }
+
+    Write-Log "REGRESSION_START_COUNT=$startCount"
+    Write-Log "REGRESSION_FINISHED_COUNT=$finishCount"
+
+    if ($startCount -ne 50 -or !$finishMatch.Success) {
+        throw "UNEXPECTED_REGRESSION_TEST_COUNT"
+    }
+
+    $phaseTests = @(
+        'cleanupSafDocument',
+        'prepareSafDocument',
+        'verifySafAfterForceStop'
+    )
+
+    foreach ($method in $phaseTests) {
+        if (
+            $regressionText -notmatch
+            "SafPermissionRestartTest > $method.*SKIPPED"
+        ) {
+            throw "EXPECTED_PHASE_SKIP_MISSING_$method"
+        }
+    }
+
+    Write-Log "SAF_PHASE_TESTS_SKIPPED=3"
     if (!(Ensure-Installed)) { throw "INSTRUMENTATION_INSTALL_FAILED" }
     if (!(Stop-App)) { throw "INITIAL_STOP_FAILED" }
     if (!(Run-Phase 'INITIAL_CLEANUP' 'cleanupSafDocument' 'cleanup')) {

@@ -219,6 +219,19 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
 
+### 2026-10-27 — SAF Permission Persistence v1 — QA FAIL
+
+- Commit: `69cf5f2d7b4757e76c76f96c74fff2971cc8a019`
+- Log: `qa-logs/saf-permission-v1.log`
+- JVM: PASS.
+- Android regression: BUILD SUCCESSFUL, exitCode=0.
+- Ba bài SAF theo pha: chưa thực thi.
+- Nguyên nhân: script đếm 53 ở dòng Finished,
+  trong khi kỳ vọng 50 ở dòng Starting.
+- Đã xác định sửa lỗi đếm test, giữ nguyên assertions.
+- Bước tiếp theo: chạy lại SAF QA v1.
+- Mốc PASS gần nhất: Background/System Controls v2.
+
 ### 2026-10-27 — Background/System Controls v2 — PASS
 
 - Commit: `1ab915f572bbf48d67b91a69cc916803fc62ab0e`
