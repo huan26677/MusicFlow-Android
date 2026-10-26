@@ -17,6 +17,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.musicflow.core.favorites.LocalFavoritesStore
@@ -41,6 +45,9 @@ fun LibraryRoute(
     }
 
     val favoriteSongUris by favoritesStore.songUris
+        .collectAsStateWithLifecycle()
+
+    val favoriteAlbumIds by favoritesStore.albumIds
         .collectAsStateWithLifecycle()
 
     val repository = remember {
@@ -125,6 +132,10 @@ fun LibraryRoute(
         favoriteSongUris = favoriteSongUris,
         onToggleFavorite = { song ->
             favoritesStore.toggleSong(song.uri)
+        },
+        favoriteAlbumIds = favoriteAlbumIds,
+        onToggleAlbum = { albumId ->
+            favoritesStore.toggleAlbum(albumId)
         }
     )
 
@@ -149,9 +160,15 @@ fun LibraryScreen(
     onSongSelected: (List<DeviceSong>, Int) -> Unit,
     onAddToPlaylist: (DeviceSong) -> Unit,
     favoriteSongUris: Set<String> = emptySet(),
-    onToggleFavorite: (DeviceSong) -> Unit = {}
+    onToggleFavorite: (DeviceSong) -> Unit = {},
+    favoriteAlbumIds: Set<String> = emptySet(),
+    onToggleAlbum: (Long) -> Unit = {}
 ) {
     var favoritesOnly by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    var showAlbums by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -209,6 +226,22 @@ fun LibraryScreen(
                 )
 
             } else {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = !showAlbums,
+                        onClick = { showAlbums = false },
+                        label = { Text("Bài hát") }
+                    )
+
+                    FilterChip(
+                        selected = showAlbums,
+                        onClick = { showAlbums = true },
+                        label = { Text("Album") }
+                    )
+                }
+
                 when (uiState) {
 
                     LibraryUiState.Idle -> {
@@ -237,7 +270,18 @@ fun LibraryScreen(
                     }
 
                     is LibraryUiState.Success -> {
-                        val visibleSongs = if (favoritesOnly) {
+                        if (showAlbums) {
+                            AlbumFavoritesContent(
+                                songs = uiState.songs,
+                                favoriteAlbumIds = favoriteAlbumIds,
+                                favoriteSongUris = favoriteSongUris,
+                                onToggleAlbum = onToggleAlbum,
+                                onToggleFavorite = onToggleFavorite,
+                                onSongSelected = onSongSelected,
+                                onAddToPlaylist = onAddToPlaylist
+                            )
+                        } else {
+                            val visibleSongs = if (favoritesOnly) {
                             uiState.songs.filter {
                                 it.uri.toString() in favoriteSongUris
                             }
@@ -290,6 +334,141 @@ fun LibraryScreen(
                                 )
                             }
                         }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ColumnScope.AlbumFavoritesContent(
+    songs: List<DeviceSong>,
+    favoriteAlbumIds: Set<String>,
+    favoriteSongUris: Set<String>,
+    onToggleAlbum: (Long) -> Unit,
+    onToggleFavorite: (DeviceSong) -> Unit,
+    onSongSelected: (List<DeviceSong>, Int) -> Unit,
+    onAddToPlaylist: (DeviceSong) -> Unit
+) {
+    var favoritesOnly by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    var expandedAlbumId by rememberSaveable {
+        mutableStateOf<Long?>(null)
+    }
+
+    val groups = songs
+        .filter { it.albumId != null }
+        .groupBy { it.albumId!! }
+        .toList()
+        .sortedBy { it.second.first().album.lowercase() }
+
+    val albums = if (favoritesOnly) {
+        groups.filter {
+            it.first.toString() in favoriteAlbumIds
+        }
+    } else {
+        groups
+    }
+
+    FilterChip(
+        selected = favoritesOnly,
+        onClick = { favoritesOnly = !favoritesOnly },
+        label = {
+            Text(
+                if (favoritesOnly) "Album yêu thích"
+                else "Chỉ hiện album yêu thích"
+            )
+        }
+    )
+
+    Text("${albums.size} album")
+
+    if (albums.isEmpty()) {
+        Text("Không có album phù hợp.")
+    }
+
+    LazyColumn(
+        modifier = Modifier.weight(1f),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        items(albums, key = { it.first }) { (albumId, tracks) ->
+            val isFavorite =
+                albumId.toString() in favoriteAlbumIds
+
+            Column {
+                ListItem(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            expandedAlbumId =
+                                if (expandedAlbumId == albumId) {
+                                    null
+                                } else {
+                                    albumId
+                                }
+                        },
+                    headlineContent = {
+                        Text(tracks.first().album)
+                    },
+                    supportingContent = {
+                        Text(
+                            "${tracks.first().artist} · " +
+                                "${tracks.size} bài hát"
+                        )
+                    },
+                    trailingContent = {
+                        IconButton(
+                            onClick = { onToggleAlbum(albumId) },
+                            modifier = Modifier.semantics {
+                                contentDescription =
+                                    if (isFavorite) {
+                                        "Bỏ yêu thích album"
+                                    } else {
+                                        "Yêu thích album"
+                                    }
+                            }
+                        ) {
+                            Text(
+                                if (isFavorite) "♥" else "♡",
+                                color = if (isFavorite) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme
+                                        .onSurfaceVariant
+                                }
+                            )
+                        }
+                    }
+                )
+
+                if (expandedAlbumId == albumId) {
+                    TextButton(
+                        onClick = {
+                            onSongSelected(tracks, 0)
+                        }
+                    ) {
+                        Text("Phát toàn bộ album")
+                    }
+
+                    tracks.forEachIndexed { index, song ->
+                        SongRow(
+                            song = song,
+                            onClick = {
+                                onSongSelected(tracks, index)
+                            },
+                            onAddToPlaylist = {
+                                onAddToPlaylist(song)
+                            },
+                            isFavorite = song.uri.toString()
+                                in favoriteSongUris,
+                            onToggleFavorite = {
+                                onToggleFavorite(song)
+                            }
+                        )
                     }
                 }
             }

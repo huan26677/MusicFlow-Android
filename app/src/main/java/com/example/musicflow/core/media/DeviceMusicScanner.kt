@@ -12,7 +12,9 @@ data class DeviceSong(
     val uri: Uri,
     val title: String,
     val artist: String,
-    val durationMs: Long
+    val durationMs: Long,
+    val albumId: Long? = null,
+    val album: String = "Không rõ album"
 )
 
 object DeviceMusicScanner {
@@ -30,7 +32,9 @@ object DeviceMusicScanner {
                 MediaStore.Audio.Media.TITLE,
                 MediaStore.Audio.Media.DISPLAY_NAME,
                 MediaStore.Audio.Media.ARTIST,
-                MediaStore.Audio.Media.DURATION
+                MediaStore.Audio.Media.DURATION,
+                MediaStore.Audio.Media.ALBUM_ID,
+                MediaStore.Audio.Media.ALBUM
             )
 
             // Chỉ lấy file Android phân loại là nhạc.
@@ -72,6 +76,13 @@ object DeviceMusicScanner {
                     MediaStore.Audio.Media.DURATION
                 )
 
+                val albumIdColumn = cursor.getColumnIndexOrThrow(
+                    MediaStore.Audio.Media.ALBUM_ID
+                )
+                val albumColumn = cursor.getColumnIndexOrThrow(
+                    MediaStore.Audio.Media.ALBUM
+                )
+
                 while (cursor.moveToNext()) {
 
                     val id = cursor.getLong(idColumn)
@@ -101,6 +112,20 @@ object DeviceMusicScanner {
                         cursor.getLong(durationColumn)
                     }
 
+                    val albumId = if (cursor.isNull(albumIdColumn)) {
+                        null
+                    } else {
+                        cursor.getLong(albumIdColumn).takeIf { it > 0L }
+                    }
+
+                    val albumName = cursor.getString(albumColumn)
+                        ?.trim()
+                        ?.takeIf {
+                            it.isNotEmpty() &&
+                                !it.equals("<unknown>", ignoreCase = true)
+                        }
+                        ?: "Không rõ album"
+
                     val songUri =
                         ContentUris.withAppendedId(
                             collection,
@@ -113,7 +138,9 @@ object DeviceMusicScanner {
                             uri = songUri,
                             title = title,
                             artist = artist,
-                            durationMs = duration
+                            durationMs = duration,
+                            albumId = albumId,
+                            album = albumName
                         )
                     )
                 }
