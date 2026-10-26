@@ -8,11 +8,13 @@ import android.os.ParcelFileDescriptor
 import android.util.Log
 import android.Manifest
 import android.app.Activity
+import android.app.Application
 import android.app.Instrumentation
 import android.content.ContentValues
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.SystemClock
+import android.os.Bundle
 import android.provider.MediaStore
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.core.content.ContextCompat
@@ -614,11 +616,36 @@ class PlaybackServiceIntegrationTest {
                 true
             )
 
-            val activityMonitor = instrumentation.addMonitor(
-                MainActivity::class.java.name,
-                null,
-                false
-            )
+            val application = context.applicationContext as Application
+            val resumedActivity = AtomicReference<MainActivity?>(null)
+
+            val callbacks = object : Application.ActivityLifecycleCallbacks {
+                override fun onActivityCreated(
+                    activity: Activity, state: Bundle?
+                ) {
+                    if (activity is MainActivity) {
+                        Log.i("MusicFlowMvpE2E", "ACTIVITY_CREATED")
+                    }
+                }
+
+                override fun onActivityStarted(activity: Activity) {}
+
+                override fun onActivityResumed(activity: Activity) {
+                    if (activity is MainActivity) {
+                        resumedActivity.set(activity)
+                        Log.i("MusicFlowMvpE2E", "ACTIVITY_RESUMED")
+                    }
+                }
+
+                override fun onActivityPaused(activity: Activity) {}
+                override fun onActivityStopped(activity: Activity) {}
+                override fun onActivitySaveInstanceState(
+                    activity: Activity, state: Bundle
+                ) {}
+                override fun onActivityDestroyed(activity: Activity) {}
+            }
+
+            application.registerActivityLifecycleCallbacks(callbacks)
 
             try {
                 context.startActivity(
@@ -629,14 +656,19 @@ class PlaybackServiceIntegrationTest {
                         )
                 )
 
-                activity = instrumentation.waitForMonitorWithTimeout(
-                    activityMonitor,
-                    15_000L
-                ) as? MainActivity
+                val deadline = SystemClock.uptimeMillis() + 15_000L
 
-                assertNotNull("MainActivity không khởi động", activity)
+                while (
+                    resumedActivity.get() == null &&
+                    SystemClock.uptimeMillis() < deadline
+                ) {
+                    SystemClock.sleep(100)
+                }
+
+                activity = resumedActivity.get()
+                assertNotNull("MainActivity chưa RESUMED", activity)
             } finally {
-                instrumentation.removeMonitor(activityMonitor)
+                application.unregisterActivityLifecycleCallbacks(callbacks)
             }
 
             fun clickText(text: String) {

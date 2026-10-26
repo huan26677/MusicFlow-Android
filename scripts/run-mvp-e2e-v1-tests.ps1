@@ -102,7 +102,7 @@ try {
 
     $diagnostics = @(
         & $adb -s $serial logcat -d -v brief -s `
-            "MusicFlowMvpE2E:I" "*:S" 2>&1
+            "MusicFlowMvpE2E:I" "AndroidRuntime:E" "*:S" 2>&1
     )
 
     $diagnostics | ForEach-Object {
