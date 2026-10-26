@@ -151,7 +151,7 @@ try {
 
     $logText = Get-Content $logFile -Raw
     $match = [regex]::Match(
-        $logText, 'Finished\\s+(\\d+)\\s+tests\\s+on'
+        $logText, 'Finished\s+(\d+)\s+tests\s+on'
     )
 
     $count = if ($match.Success) {
