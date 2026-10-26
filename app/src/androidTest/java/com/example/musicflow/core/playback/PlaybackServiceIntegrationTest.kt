@@ -19,6 +19,10 @@ import android.provider.MediaStore
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.core.content.ContextCompat
 import androidx.test.core.app.ActivityScenario
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import org.junit.Rule
 
 import androidx.lifecycle.Lifecycle
 import androidx.media3.common.PlaybackException
@@ -62,6 +66,9 @@ class PlaybackServiceIntegrationTest {
         InstrumentationRegistry.getInstrumentation()
 
     private val context = instrumentation.targetContext
+
+    @get:Rule
+    val composeRule = createEmptyComposeRule()
 
     private fun createWav(): File {
         val rate = 8000
@@ -624,36 +631,11 @@ class PlaybackServiceIntegrationTest {
                 Log.i("MusicFlowMvpE2E", "ACTIVITY_LAUNCHED")
             }
 
-            fun clickText(text: String) {
-                val deadline = SystemClock.uptimeMillis() + 15000
+            composeRule.onNodeWithText("Mở thư viện thiết bị")
+                .performClick()
 
-                while (SystemClock.uptimeMillis() < deadline) {
-                    val nodes = instrumentation.uiAutomation
-                        .rootInActiveWindow
-                        ?.findAccessibilityNodeInfosByText(text)
-                        .orEmpty()
-
-                    for (node in nodes) {
-                        var current: AccessibilityNodeInfo? = node
-
-                        while (current != null && !current.isClickable) {
-                            current = current.parent
-                        }
-
-                        if (current?.performAction(
-                                AccessibilityNodeInfo.ACTION_CLICK
-                            ) == true
-                        ) return
-                    }
-
-                    SystemClock.sleep(200)
-                }
-
-                throw AssertionError("Không tìm thấy nút: $text")
-            }
-
-            clickText("Mở thư viện thiết bị")
-            clickText("Chọn MP3")
+            composeRule.onNodeWithText("Chọn MP3")
+                .performClick()
 
             assertTrue(
                 "MainActivity chưa mở ACTION_OPEN_DOCUMENT",
