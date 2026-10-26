@@ -50,7 +50,7 @@ class PlayerViewModel(
     ) {
         val items = songs.map { song ->
             MediaItem.Builder()
-                .setMediaId("device-${song.id}")
+                .setMediaId(song.mediaId ?: "device-${song.id}")
                 .setUri(song.uri)
                 .setMediaMetadata(
                     MediaMetadata.Builder()

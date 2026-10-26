@@ -2,7 +2,9 @@ package com.example.musicflow.feature.library
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,6 +26,7 @@ import androidx.compose.ui.semantics.semantics
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.musicflow.core.favorites.LocalFavoritesStore
+import com.example.musicflow.core.favorites.FavoriteSongDetails
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -47,6 +50,9 @@ fun LibraryRoute(
     }
 
     val favoriteSongUris by favoritesStore.songUris
+        .collectAsStateWithLifecycle()
+
+    val favoriteSongDetails by favoritesStore.songDetails
         .collectAsStateWithLifecycle()
 
     val favoriteAlbumIds by favoritesStore.albumIds
@@ -104,7 +110,7 @@ fun LibraryRoute(
     }
 
     LaunchedEffect(Unit) {
-        if (!hasPermission) {
+        if (!hasPermission && !initialFavoritesOnly) {
             permissionLauncher.launch(permission)
         }
     }
@@ -134,8 +140,13 @@ fun LibraryRoute(
             selectedPlaylistSong = song
         },
         favoriteSongUris = favoriteSongUris,
+        favoriteSongDetails = favoriteSongDetails,
         onToggleFavorite = { song ->
-            favoritesStore.toggleSong(song.uri)
+            favoritesStore.toggleSong(
+                uri = song.uri,
+                title = song.title,
+                artist = song.artist
+            )
         },
         favoriteAlbumIds = favoriteAlbumIds,
         onToggleAlbum = { albumId ->
@@ -164,6 +175,7 @@ fun LibraryScreen(
     onSongSelected: (List<DeviceSong>, Int) -> Unit,
     onAddToPlaylist: (DeviceSong) -> Unit,
     favoriteSongUris: Set<String> = emptySet(),
+    favoriteSongDetails: Map<String, FavoriteSongDetails> = emptyMap(),
     onToggleFavorite: (DeviceSong) -> Unit = {},
     favoriteAlbumIds: Set<String> = emptySet(),
     onToggleAlbum: (Long) -> Unit = {},
@@ -176,6 +188,58 @@ fun LibraryScreen(
 
     var showAlbums by rememberSaveable(initialShowAlbums) {
         mutableStateOf(initialShowAlbums)
+    }
+
+    val scannedSongs = (uiState as? LibraryUiState.Success)
+        ?.songs.orEmpty()
+
+    val pickedFavorites = remember(
+        favoriteSongUris,
+        favoriteSongDetails,
+        scannedSongs
+    ) {
+        val scannedUris = scannedSongs
+            .map { it.uri.toString() }
+            .toSet()
+
+        favoriteSongUris.mapNotNull { rawUri ->
+            val uri = Uri.parse(rawUri)
+
+            if (
+                uri.scheme != "content" ||
+                uri.authority == MediaStore.AUTHORITY ||
+                rawUri in scannedUris
+            ) {
+                null
+            } else {
+                val details = favoriteSongDetails[rawUri]
+
+                DeviceSong(
+                    id = -1L - (
+                        rawUri.hashCode().toLong() and 0xffffffffL
+                    ),
+                    uri = uri,
+                    title = details?.title
+                        ?: uri.lastPathSegment
+                        ?: "File âm thanh đã chọn",
+                    artist = details?.artist
+                        ?: "Không rõ nghệ sĩ",
+                    durationMs = 0L,
+                    mediaId = rawUri
+                )
+            }
+        }.sortedBy { it.title.lowercase() }
+    }
+
+    val displayUiState = if (
+        favoritesOnly &&
+        !showAlbums &&
+        uiState !is LibraryUiState.Loading &&
+        uiState !is LibraryUiState.Error
+    ) {
+        LibraryUiState.Success(scannedSongs)
+    } else {
+        uiState
     }
 
     Surface(
@@ -215,7 +279,7 @@ fun LibraryScreen(
                 }
             }
 
-            if (!hasPermission) {
+            if (!hasPermission && (!favoritesOnly || showAlbums)) {
                 Text(
                     "MusicFlow cần quyền đọc âm thanh " +
                             "để quét thư viện thiết bị."
@@ -248,7 +312,7 @@ fun LibraryScreen(
                     )
                 }
 
-                when (uiState) {
+                when (val current = displayUiState) {
 
                     LibraryUiState.Idle -> {
                         Text("Chưa quét thư viện.")
@@ -278,7 +342,7 @@ fun LibraryScreen(
                     is LibraryUiState.Success -> {
                         if (showAlbums) {
                             AlbumFavoritesContent(
-                                songs = uiState.songs,
+                                songs = current.songs,
                                 favoriteAlbumIds = favoriteAlbumIds,
                                 favoriteSongUris = favoriteSongUris,
                                 onToggleAlbum = onToggleAlbum,
@@ -289,11 +353,11 @@ fun LibraryScreen(
                             )
                         } else {
                             val visibleSongs = if (favoritesOnly) {
-                            uiState.songs.filter {
+                            current.songs.filter {
                                 it.uri.toString() in favoriteSongUris
-                            }
+                            } + pickedFavorites
                         } else {
-                            uiState.songs
+                            current.songs
                         }
 
                         FilterChip(
@@ -320,7 +384,7 @@ fun LibraryScreen(
                         ) {
                             itemsIndexed(
                                 items = visibleSongs,
-                                key = { _, song -> song.id }
+                                key = { _, song -> song.uri.toString() }
                             ) { index, song ->
 
                                 SongRow(

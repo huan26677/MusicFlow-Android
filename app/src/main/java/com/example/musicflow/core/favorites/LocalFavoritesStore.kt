@@ -2,8 +2,14 @@ package com.example.musicflow.core.favorites
 
 import android.content.Context
 import android.net.Uri
+import org.json.JSONObject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+
+data class FavoriteSongDetails(
+    val title: String,
+    val artist: String
+)
 
 class LocalFavoritesStore private constructor(
     context: Context
@@ -21,6 +27,30 @@ class LocalFavoritesStore private constructor(
     )
 
     val songUris = _songUris.asStateFlow()
+
+    private fun loadSongDetails(): Map<String, FavoriteSongDetails> {
+        val json = runCatching {
+            JSONObject(prefs.getString("song_details", "{}") ?: "{}")
+        }.getOrElse { JSONObject() }
+
+        return json.keys().asSequence().mapNotNull { uri ->
+            val item = json.optJSONObject(uri)
+                ?: return@mapNotNull null
+
+            uri to FavoriteSongDetails(
+                title = item.optString("title").ifBlank {
+                    "Bài hát yêu thích"
+                },
+                artist = item.optString("artist").ifBlank {
+                    "Không rõ nghệ sĩ"
+                }
+            )
+        }.toMap()
+    }
+
+    private val _songDetails = MutableStateFlow(loadSongDetails())
+
+    val songDetails = _songDetails.asStateFlow()
 
     private val _albumIds = MutableStateFlow(
         prefs.getStringSet("album_ids", emptySet())
@@ -51,18 +81,46 @@ class LocalFavoritesStore private constructor(
     }
 
     @Synchronized
-    fun toggleSong(uri: Uri) {
+    fun toggleSong(
+        uri: Uri,
+        title: String? = null,
+        artist: String? = null
+    ) {
         val key = uri.toString()
         val updated = _songUris.value.toMutableSet()
+        val details = _songDetails.value.toMutableMap()
 
-        if (!updated.add(key)) {
+        if (updated.add(key)) {
+            if (!title.isNullOrBlank()) {
+                details[key] = FavoriteSongDetails(
+                    title = title.trim(),
+                    artist = artist?.trim()
+                        ?.takeIf { it.isNotEmpty() }
+                        ?: "Không rõ nghệ sĩ"
+                )
+            }
+        } else {
             updated.remove(key)
+            details.remove(key)
+        }
+
+        val json = JSONObject()
+
+        details.forEach { (savedUri, info) ->
+            json.put(
+                savedUri,
+                JSONObject()
+                    .put("title", info.title)
+                    .put("artist", info.artist)
+            )
         }
 
         prefs.edit()
             .putStringSet("song_uris", updated.toSet())
+            .putString("song_details", json.toString())
             .apply()
 
+        _songDetails.value = details.toMap()
         _songUris.value = updated.toSet()
     }
 

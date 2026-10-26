@@ -120,7 +120,7 @@ class PlaylistViewModel(
         viewModelScope.launch {
             try {
                 val track = PlaylistTrack(
-                    mediaId = "device-${song.id}",
+                    mediaId = song.mediaId ?: "device-${song.id}",
                     audioUri = song.uri.toString(),
                     title = song.title,
                     artist = song.artist,

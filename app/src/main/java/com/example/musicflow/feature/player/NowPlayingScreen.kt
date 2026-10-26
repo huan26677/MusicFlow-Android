@@ -135,7 +135,11 @@ fun NowPlayingScreen(
         OutlinedButton(
             onClick = {
                 favoriteUri?.let { uri ->
-                    favoritesStore.toggleSong(uri)
+                    favoritesStore.toggleSong(
+                    uri = uri,
+                    title = state.title,
+                    artist = state.artist
+                )
                 }
             },
             enabled = state.hasMedia && favoriteUri != null

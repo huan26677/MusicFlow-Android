@@ -14,7 +14,8 @@ data class DeviceSong(
     val artist: String,
     val durationMs: Long,
     val albumId: Long? = null,
-    val album: String = "Không rõ album"
+    val album: String = "Không rõ album",
+    val mediaId: String? = null
 )
 
 object DeviceMusicScanner {

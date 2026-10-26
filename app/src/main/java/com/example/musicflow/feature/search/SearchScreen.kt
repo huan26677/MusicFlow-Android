@@ -132,7 +132,11 @@ fun SearchRoute(
         },
         favoriteSongUris = favoriteSongUris,
         onToggleFavorite = { song ->
-            favoritesStore.toggleSong(song.uri)
+            favoritesStore.toggleSong(
+                uri = song.uri,
+                title = song.title,
+                artist = song.artist
+            )
         }
     )
 
