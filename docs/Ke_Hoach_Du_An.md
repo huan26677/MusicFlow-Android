@@ -9,14 +9,14 @@
 | Mục | Trạng thái đã đối chiếu |
 |---|---|
 | Tình trạng toàn dự án | **ĐANG PHÁT TRIỂN — CHƯA NGHIỆM THU MVP/RELEASE** |
-| Mốc kỹ thuật gần nhất | **Favorites Batch v1 — PASS** |
+| Mốc kỹ thuật gần nhất | **Background Playback & System Controls v1 — PASS** |
 | JVM unit tests (mốc v1) | **PASS** |
-| Android instrumented tests (mốc v1) | **44/44 PASS** — Pixel_5, Android 11 (API 30) |
-| Marker | **14/14 PASS** |
-| Kết quả log | `FINAL_RESULT=PASS` (Favorites Batch v1) |
-| Commit chứa vòng QA v1 | `511f93ea157aef56b2115d22e15870fba52e87b9` |
-| Commit HEAD tại thời điểm rà soát | `511f93ea` (commit QA Favorites Batch v1) |
-| Log gần nhất đã xác nhận | `qa-logs/favorites-batch-v1.log` |
+| Android instrumented tests (mốc v1) | **45/45 PASS** — Pixel_5, Android 11 (API 30) |
+| Marker | **18/18 PASS** |
+| Kết quả log | `FINAL_RESULT=PASS` (Background Playback & System Controls v1) |
+| Commit chứa vòng QA v1 | `663e3ba08565598ceb46a323bfdc41f2c42b7e43` |
+| Commit HEAD tại thời điểm rà soát | `663e3ba0` (commit QA Background Playback v1) |
+| Log gần nhất đã xác nhận | `qa-logs/background-controls-v1.log` |
 | Bước đang phát triển tiếp | **MVP End-to-End Acceptance v1 — CHƯA BẮT ĐẦU** |
 | Ngày rà soát | **2026-10-27**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
@@ -85,6 +85,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | Playback Runtime Recovery Integration v2 | 31 | **PASS** | `1aec374` · `qa-logs/playback-runtime-recovery-v2.log` |
 | Playback Runtime Recovery Race Hardening v3 | 36 | **PASS** | `qa-logs/playback-runtime-recovery-v3.log` — SHA sau khi push cần đối chiếu |
 | Favorites + Album + Theme Batch v1 | 44 | **PASS tự động** — JVM PASS, 14/14 marker; SAF thực sau restart còn cần nghiệm thu thủ công | `511f93ea` · `qa-logs/favorites-batch-v1.log` |
+| Background Playback & System Controls v1 | 45 | **PASS tự động** — JVM PASS, 18/18 marker | `663e3ba0` · `qa-logs/background-controls-v1.log` |
 
 **Không cộng** các con số 9 + 11 + ... + 31: đây là số lượng test của **các lần chạy tăng dần** với nhiều bài trùng nhau.
 
@@ -216,6 +217,35 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-27 — Background Playback & System Controls v1 — PASS
+
+- Commit: `663e3ba08565598ceb46a323bfdc41f2c42b7e43`
+- Script: `scripts/run-background-controls-v1-tests.ps1`
+- Log: `qa-logs/background-controls-v1.log`
+- JVM: PASS.
+- Android: 45/45 PASS.
+- Marker: 18/18 PASS.
+- FINAL_RESULT=PASS.
+
+Đã xác nhận:
+- Phát nhạc khi Activity xuống nền.
+- Thông báo MediaSession xuất hiện.
+- Playback tiếp tục sau khi Activity bị hủy.
+- Play/Pause/Next/Previous qua MediaController.
+- Các kiểm thử hồi quy trước đó đều PASS.
+
+Giới hạn:
+- Chưa kiểm thử thao tác nút trực tiếp trên thông báo/màn hình khóa.
+- Chưa nghiệm thu audio focus và tai nghe Bluetooth thật.
+- Chưa kiểm thử trên nhiều phiên bản Android.
+
+Bước tiếp theo:
+Background/System Controls v2 — lockscreen, notification actions,
+audio focus và tình huống ngắt kết nối thiết bị âm thanh.
+
+Trạng thái toàn dự án: ĐANG PHÁT TRIỂN.
+
 
 ### 2026-10-27 — Favorites + Album + Theme Batch v1 — QA TỰ ĐỘNG PASS
 
