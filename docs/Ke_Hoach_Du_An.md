@@ -216,6 +216,17 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-26 — MVP E2E v1, lần kiểm thử đầu — FAIL
+- Commit: `e4ed4a4accdf31eee03b0290f6c6ccc3bb7899f3`.
+- Log: `qa-logs/mvp-e2e-v1.log`.
+- JVM: PASS.
+- Android: FAIL tại bước biên dịch Kotlin, chưa chạy tests.
+- Nguyên nhân: import không hợp lệ `androidx.compose.ui.test.onNode`.
+- Cách sửa: xóa dòng import sai trong `ExampleInstrumentedTest.kt`.
+- Trạng thái: chờ chạy lại QA.
+- Mốc Runtime Recovery v3: giữ nguyên PASS 36/36.
+
 ### 2026-10-26 12:41:36 +07:00 — Playback Runtime Recovery Race Hardening v3 — PASS
 - Baseline HEAD trước sửa: `e0141a8d7d5d55ca8bf6bf2aa30492e9458db253`.
 - HEAD lúc chạy test: `313269e` (SHA commit source/test/log cần đối chiếu sau khi push).
