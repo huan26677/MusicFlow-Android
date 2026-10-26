@@ -57,7 +57,7 @@ $backlogPrefix = if ($Result -eq 'PASS') { '**P0 — đã hoàn thành**' } else
 $backlogLine = "| $backlogPrefix | **Playback Runtime Recovery Race Hardening v3** | $status | Xem ``$logName``; yêu cầu 5 marker v3 + regression v2 |"
 $content = Replace-OneLine $content $backlogPattern $backlogLine
 if ($Result -eq 'PASS') {
-    $content = Replace-OneLine $content '(?m)^\| \*\*P0(?: — kế tiếp)?\*\* \| \*\*MVP End-to-End Acceptance v1\*\* \|.*$' '| **P0 — kế tiếp** | **MVP End-to-End Acceptance v1** — Library/Search/Picker → Player → Playlist/History → restart | CHƯA NGHIỆM THU | Script UI/integration tests có assertions và log cho từng flow |'
+    $content = Replace-OneLine $content '(?m)^\| \*\*P0(?: — kế tiếp)?\*\* \| \*\*MVP End-to-End Acceptance v1\*\*.*$' '| **P0 — kế tiếp** | **MVP End-to-End Acceptance v1** — Library/Search/Picker → Player → Playlist/History → restart | CHƯA NGHIỆM THU | Script UI/integration tests có assertions và log cho từng flow |'
 }
 
 if ($Result -eq 'PASS' -and $content -notmatch '\| Playback Runtime Recovery Race Hardening v3 \| 36 \|') {

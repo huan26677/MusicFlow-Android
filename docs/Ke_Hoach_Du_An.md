@@ -1,4 +1,4 @@
-# Kế hoạch, tiến độ và tiêu chí hoàn thành — MusicFlow Android
+﻿# Kế hoạch, tiến độ và tiêu chí hoàn thành — MusicFlow Android
 
 > **TÀI LIỆU BÀN GIAO CHÍNH THỨC GIỮA CÁC CUỘC TRÒ CHUYỆN**  
 > Đường dẫn trong repository: `docs/Ke_Hoach_Du_An.md`  
@@ -9,16 +9,16 @@
 | Mục | Trạng thái đã đối chiếu |
 |---|---|
 | Tình trạng toàn dự án | **ĐANG PHÁT TRIỂN — CHƯA NGHIỆM THU MVP/RELEASE** |
-| Mốc kỹ thuật gần nhất | **Playback Runtime Recovery Integration v2 — PASS** |
-| JVM unit tests (mốc v2) | **PASS** (`exitCode=0`) |
-| Android instrumented tests (mốc v2) | **31/31 PASS** — Pixel_5 emulator, Android 11 / API 30 |
+| Mốc kỹ thuật gần nhất | **Playback Runtime Recovery Race Hardening v3 — PASS** |
+| JVM unit tests (mốc v3) | **PASS** (`exitCode=0`) |
+| Android instrumented tests (mốc v3) | **36/36 PASS** — Pixel_5 emulator |
 | Bằng chứng Service nhận/chuyển lỗi | `SERVICE_ERROR_COUNT=7`, `SERVICE_FORWARDED_COUNT=7` |
 | Nhánh phục hồi được kiểm tra | `SKIP_BRANCH_COUNT=1`, `EXHAUSTED_BRANCH_COUNT=1` |
-| Kết quả log | `ALL_MARKERS_FOUND=True`, `FINAL_RESULT=PASS` |
+| Kết quả log | `ALL_MARKERS_FOUND=True`, `FINAL_RESULT=PASS` (v3) |
 | Commit chứa vòng QA v2 | `1aec374d25046c75f39e81cc242f42165e56dc26` |
-| Commit HEAD tại thời điểm rà soát | `6a13defe1fba5cc3231123cee0375aae23b0d341` (`update tien do`) |
-| Log gần nhất đã xác nhận | `qa-logs/playback-runtime-recovery-v2.log` |
-| Bước đang phát triển tiếp | **Playback Runtime Recovery Race Hardening v3 — ĐANG SỬA**. Vòng QA đầu tiên FAIL do chưa có emulator phù hợp và lỗi mã hóa script PowerShell; chưa có kết quả Android v3. |
+| Commit HEAD tại thời điểm rà soát | `313269e` (HEAD lúc chạy QA, trước commit kết quả) |
+| Log gần nhất đã xác nhận | `qa-logs/playback-runtime-recovery-v3.log` (QA v3 PASS; v2 PASS lưu ở mục 4) |
+| Bước đang phát triển tiếp | **MVP End-to-End Acceptance v1 — CHƯA BẮT ĐẦU** |
 | Ngày rà soát | **2026-10-25**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -84,6 +84,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | Playback Queue Hardening v1 | 23 | **PASS** | `a3b9ec9` · `qa-logs/playback-queue-hardening-v1.log` |
 | Playback Runtime Error Auto-Skip v1 | 28 | **PASS** | `5e4b1c9` · `qa-logs/playback-runtime-auto-skip-v1.log` |
 | Playback Runtime Recovery Integration v2 | 31 | **PASS** | `1aec374` · `qa-logs/playback-runtime-recovery-v2.log` |
+| Playback Runtime Recovery Race Hardening v3 | 36 | **PASS** | `qa-logs/playback-runtime-recovery-v3.log` — SHA sau khi push cần đối chiếu |
 
 **Không cộng** các con số 9 + 11 + ... + 31: đây là số lượng test của **các lần chạy tăng dần** với nhiều bài trùng nhau.
 
@@ -103,8 +104,8 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 
 | Ưu tiên | Bước / việc cần làm | Trạng thái | Điều kiện kết thúc bước |
 |---|---|---|---|
-| **P0 — kế tiếp** | **Playback Runtime Recovery Race Hardening v3** | **CHƯA BẮT ĐẦU** | Test có kiểm soát cho Pause→Play nhanh, thay queue trùng `mediaId`/URI, lệnh đến muộn, dispose; không skip sai; toàn bộ test cũ + mới PASS; log riêng `FINAL_RESULT=PASS` |
-| **P0** | **MVP End-to-End Acceptance v1** — các hành trình Library/Search/Picker → Player → Playlist/History → đóng/mở app | CHƯA NGHIỆM THU | Script tự động chạy UI/integration tests, assert đúng dữ liệu + hành vi + không crash; bằng chứng log cho từng flow bắt buộc |
+| **P0 — đã hoàn thành** | **Playback Runtime Recovery Race Hardening v3** | **PASS — 36/36 Android tests** | Xem `qa-logs/playback-runtime-recovery-v3.log`; yêu cầu 5 marker v3 + regression v2 |
+| **P0 — kế tiếp** | **MVP End-to-End Acceptance v1** — Library/Search/Picker → Player → Playlist/History → restart | CHƯA NGHIỆM THU | Script UI/integration tests có assertions và log cho từng flow |
 | **P0** | **Background Playback / System Controls QA** | CHƯA NGHIỆM THU TỔNG HỢP | Test lifecycle, audio focus, điều khiển từ MediaSession/notification/lock screen trong phạm vi khả thi; mọi điều kiện đã chốt đạt PASS |
 | **P0** | **Android Compatibility & Permissions Matrix** | CHƯA XÁC MINH | Bộ test tự động trên các API đại diện, đề xuất **29 / 30 / 33 / 36**, hoặc có ngoại lệ phạm vi được chủ dự án chấp nhận; file picker, MediaStore, URI và quyền đạt PASS |
 | **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
@@ -112,17 +113,22 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **P1** | Hiệu năng và dữ liệu lớn | CHƯA NGHIỆM THU | Dataset cố định; ngưỡng thời gian/độ ổn định được chốt; không crash/ANR, không mất dữ liệu |
 | **Theo quyết định** | Phát hành Google Play | CHƯA CHỐT PHẠM VI | Chỉ mở milestone nếu chọn hình thức phân phối này |
 
-### 5.1. Đặc tả bước thực hiện ngay — Runtime Recovery Race Hardening v3
+### 5.1. Playback Runtime Recovery Race Hardening v3 — PASS
 
-**Lý do:** `PlaybackRuntimeAutoSkip` hiện so sánh `playWhenReady`, chỉ số và snapshot `(mediaId, uri)` trước lúc xử lý callback đã xếp lịch. Một chuỗi thao tác **Pause→Play** hoặc thay queue bằng **nội dung y hệt** có thể giữ nguyên các giá trị này dù phiên phát đã thay đổi. Đây là **rủi ro nhận thấy khi đọc mã**, **chưa phải lỗi đã tái hiện**.
-
-**Quy trình:**
-
-1. Đọc lại HEAD, `PlaybackRuntimeAutoSkip.kt`, `PlaybackService.kt`, `PlaybackRuntimeAutoSkipTest.kt` và log v2.
-2. Viết test deterministic **tái hiện trước**: giữ callback lỗi trong hàng chờ, Pause→Play rồi thả callback; thay queue bằng cùng bài/cùng URI rồi thả callback; thay chỉ số/seek nếu liên quan; dispose trước khi xử lý.
-3. Nếu test chứng minh lỗi, sửa nhỏ nhất có thể (ví dụ theo dõi phiên bản/đời queue hoặc thế hệ yêu cầu phát) và bảo đảm không ảnh hưởng phát nhạc bình thường. **Không mặc định bug tồn tại khi chưa có test.**
-4. Chạy JVM + toàn bộ Android instrumented tests qua **một script PowerShell**, xuất `qa-logs/playback-runtime-recovery-v3.log` và marker PASS/FAIL cụ thể.
-5. Sau khi log được kiểm tra: cập nhật mục 0, bảng mốc, backlog và nhật ký ở cuối file này rồi **mới** hướng dẫn người dùng commit/push.
+- Ngày kiểm thử: 2026-10-26.
+- Source: `PlaybackRuntimeAutoSkip.kt`.
+- Android tests: 36/36 PASS.
+- JVM tests: PASS.
+- Log: `qa-logs/playback-runtime-recovery-v3.log`.
+- Các trường hợp đã kiểm tra:
+  - Pause rồi Play trước callback phục hồi.
+  - Thay queue bằng nội dung giống hệt.
+  - Seek trong cùng bài hát.
+  - Dispose khi còn callback chờ.
+  - Auto-Skip bình thường khi không có thao tác mới.
+- Kiểm thử hồi quy v2: PASS.
+- Giới hạn: các bài race v3 dùng lỗi tiêm có kiểm soát; chưa phải nghiệm thu toàn bộ MVP.
+- Bước tiếp theo: MVP End-to-End Acceptance v1.
 
 ## 6. Định nghĩa hoàn thành (Definition of Done — DoD)
 
@@ -210,6 +216,17 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+### 2026-10-26 12:41:36 +07:00 — Playback Runtime Recovery Race Hardening v3 — PASS
+- Baseline HEAD trước sửa: `e0141a8d7d5d55ca8bf6bf2aa30492e9458db253`.
+- HEAD lúc chạy test: `313269e` (SHA commit source/test/log cần đối chiếu sau khi push).
+- Mã nguồn: `PlaybackRuntimeAutoSkip.kt`; test: `PlaybackRuntimeRaceHardeningTest.kt`.
+- Script: `scripts/run-playback-runtime-recovery-v3-tests.ps1`.
+- Log: `qa-logs/playback-runtime-recovery-v3.log`.
+- Android: 36 tests; kết quả: **PASS**. JVM và marker chi tiết theo log.
+- Kịch bản race: Pause→Play, queue giống hệt, Seek cùng index, dispose, và uninterrupted skip.
+- Giới hạn: mới có test chủ động tiêm lỗi cho các race; test Service thực tế cũ là regression. Không coi kết quả này là nghiệm thu MVP.
+- Hành động kế tiếp: MVP End-to-End Acceptance v1.
+
 
 ### 2026-10-26 — Runtime Recovery Race Hardening v3 — FAIL môi trường
 - Commit chứa thay đổi v3: `da2c5d487ea192c201d41d9168cd53c758098704`.
@@ -264,3 +281,4 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 > **Tiếp tục dự án MusicFlow Android.** Đọc file `docs/Ke_Hoach_Du_An.md` trên GitHub `huan26677/MusicFlow-Android`, sau đó kiểm tra HEAD, source và log QA mới nhất. Không làm lại mốc PASS. Hãy tiếp tục milestone đang mở trong backlog, chỉ ra patch Kotlin và một script PowerShell kiểm thử tự động. Sau mỗi lần thử/sửa/hoàn thành, cung cấp cập nhật file kế hoạch (PASS/FAIL, commit, log, việc đã làm, bước tiếp theo) **trước** ba lệnh Git. Không tự sửa hoặc push repository khi chưa được phép. Chỉ đưa ba lệnh Git: `git add .`, `git commit -m "..."`, `git push`.
 
 **File này được duy trì bằng commit**; việc tạo hoặc tải một bản Markdown riêng lẻ không cập nhật GitHub cho đến khi người dùng thực sự thay thế file trong `docs/` và push.
+
