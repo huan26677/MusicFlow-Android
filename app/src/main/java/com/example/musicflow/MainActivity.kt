@@ -24,6 +24,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
 
@@ -141,12 +145,41 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
+            val preferences = remember {
+                getSharedPreferences("musicflow_settings", MODE_PRIVATE)
+            }
+
+            var themeMode by remember {
+                mutableStateOf(
+                    preferences.getString("theme_mode", "system")
+                        ?.takeIf { it in setOf("system", "dark", "light") }
+                        ?: "system"
+                )
+            }
+
+            val systemDark = isSystemInDarkTheme()
+
+            val useDarkTheme = when (themeMode) {
+                "dark" -> true
+                "light" -> false
+                else -> systemDark
+            }
+
             val playerState by playerViewModel.uiState
                 .collectAsStateWithLifecycle()
 
-            MusicFlowTheme {
+            MusicFlowTheme(darkTheme = useDarkTheme) {
                 MusicFlowApp(
                     state = playerState,
+                    themeMode = themeMode,
+                    onThemeModeChange = { selected ->
+                        if (selected in setOf("system", "dark", "light")) {
+                            preferences.edit()
+                                .putString("theme_mode", selected)
+                                .apply()
+                            themeMode = selected
+                        }
+                    },
 
                     onPickFiles = {
                         pickAudio.launch(arrayOf("audio/*"))
