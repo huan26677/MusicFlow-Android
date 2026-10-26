@@ -616,7 +616,10 @@ class PlaybackServiceIntegrationTest {
             }
 
             monitor = instrumentation.addMonitor(
-                IntentFilter(Intent.ACTION_OPEN_DOCUMENT),
+                IntentFilter(Intent.ACTION_OPEN_DOCUMENT).apply {
+    addCategory(Intent.CATEGORY_OPENABLE)
+    addDataType("*/*")
+},
                 Instrumentation.ActivityResult(
                     Activity.RESULT_OK,
                     pickerResult
@@ -637,10 +640,9 @@ class PlaybackServiceIntegrationTest {
             composeRule.onNodeWithText("Chọn MP3")
                 .performClick()
 
-            assertTrue(
-                "MainActivity chưa mở ACTION_OPEN_DOCUMENT",
-                checkNotNull(monitor).hits > 0
-            )
+            composeRule.waitUntil(10_000L) {
+                (monitor?.hits ?: 0) > 0
+            }
             Log.i("MusicFlowMvpE2E", "PASS pickerIntentIntercepted")
 
         val token = SessionToken(
