@@ -27,15 +27,25 @@ import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.media.MediaStoreLocalMusicRepository
 import com.example.musicflow.feature.library.SongRow
 import com.example.musicflow.feature.playlist.PlaylistPickerDialog
+import com.example.musicflow.core.favorites.LocalFavoritesStore
 import com.example.musicflow.feature.playlist.rememberPlaylistViewModel
 
 @Composable
 fun SearchRoute(
     initialQuery: String,
     onQueryRemembered: (String) -> Unit,
-    onSongSelected: (List<DeviceSong>, Int) -> Unit
+    onSongSelected: (List<DeviceSong>, Int) -> Unit,
+    favoriteSongUris: Set<String> = emptySet(),
+    onToggleFavorite: (DeviceSong) -> Unit = {}
 ) {
     val context = LocalContext.current
+
+    val favoritesStore = remember(context) {
+        LocalFavoritesStore.getInstance(context)
+    }
+
+    val favoriteSongUris by favoritesStore.songUris
+        .collectAsStateWithLifecycle()
 
     val repository = remember(context) {
         MediaStoreLocalMusicRepository(
@@ -119,6 +129,10 @@ fun SearchRoute(
         onSongSelected = onSongSelected,
         onAddToPlaylist = { song ->
             selectedPlaylistSong = song
+        },
+        favoriteSongUris = favoriteSongUris,
+        onToggleFavorite = { song ->
+            favoritesStore.toggleSong(song.uri)
         }
     )
 
@@ -280,6 +294,10 @@ fun SearchScreen(
                             },
                             onAddToPlaylist = {
                                 onAddToPlaylist(song)
+                            },
+                            isFavorite = song.uri.toString() in favoriteSongUris,
+                            onToggleFavorite = {
+                                onToggleFavorite(song)
                             }
                         )
                     }

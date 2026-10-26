@@ -16,8 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.compose.runtime.saveable.rememberSaveable
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.musicflow.core.favorites.LocalFavoritesStore
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -33,6 +35,13 @@ fun LibraryRoute(
     onSongSelected: (List<DeviceSong>, Int) -> Unit
 ) {
     val context = LocalContext.current
+
+    val favoritesStore = remember(context) {
+        LocalFavoritesStore.getInstance(context)
+    }
+
+    val favoriteSongUris by favoritesStore.songUris
+        .collectAsStateWithLifecycle()
 
     val repository = remember {
         MediaStoreLocalMusicRepository(context.applicationContext)
@@ -112,6 +121,10 @@ fun LibraryRoute(
         onSongSelected = onSongSelected,
         onAddToPlaylist = { song ->
             selectedPlaylistSong = song
+        },
+        favoriteSongUris = favoriteSongUris,
+        onToggleFavorite = { song ->
+            favoritesStore.toggleSong(song.uri)
         }
     )
 
@@ -134,8 +147,14 @@ fun LibraryScreen(
     onPickManual: () -> Unit,
     onRefresh: () -> Unit,
     onSongSelected: (List<DeviceSong>, Int) -> Unit,
-    onAddToPlaylist: (DeviceSong) -> Unit
+    onAddToPlaylist: (DeviceSong) -> Unit,
+    favoriteSongUris: Set<String> = emptySet(),
+    onToggleFavorite: (DeviceSong) -> Unit = {}
 ) {
+    var favoritesOnly by rememberSaveable {
+        mutableStateOf(false)
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -218,7 +237,30 @@ fun LibraryScreen(
                     }
 
                     is LibraryUiState.Success -> {
-                        Text("${uiState.songs.size} bài hát")
+                        val visibleSongs = if (favoritesOnly) {
+                            uiState.songs.filter {
+                                it.uri.toString() in favoriteSongUris
+                            }
+                        } else {
+                            uiState.songs
+                        }
+
+                        FilterChip(
+                            selected = favoritesOnly,
+                            onClick = { favoritesOnly = !favoritesOnly },
+                            label = {
+                                Text(
+                                    if (favoritesOnly) "Đang xem yêu thích"
+                                    else "Chỉ hiện yêu thích"
+                                )
+                            }
+                        )
+
+                        if (visibleSongs.isEmpty()) {
+                            Text("Chưa có bài hát yêu thích phù hợp.")
+                        }
+
+                        Text("${visibleSongs.size} bài hát")
 
                         LazyColumn(
                             modifier = Modifier.weight(1f),
@@ -226,7 +268,7 @@ fun LibraryScreen(
                                 Arrangement.spacedBy(4.dp)
                         ) {
                             itemsIndexed(
-                                items = uiState.songs,
+                                items = visibleSongs,
                                 key = { _, song -> song.id }
                             ) { index, song ->
 
@@ -234,12 +276,16 @@ fun LibraryScreen(
                                     song = song,
                                     onClick = {
                                         onSongSelected(
-                                            uiState.songs,
+                                            visibleSongs,
                                             index
                                         )
                                     },
                                     onAddToPlaylist = {
                                         onAddToPlaylist(song)
+                                    },
+                                    isFavorite = song.uri.toString() in favoriteSongUris,
+                                    onToggleFavorite = {
+                                        onToggleFavorite(song)
                                     }
                                 )
                             }

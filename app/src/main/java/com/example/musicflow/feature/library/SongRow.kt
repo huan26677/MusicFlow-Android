@@ -21,7 +21,9 @@ fun SongRow(
     song: DeviceSong,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onAddToPlaylist: (() -> Unit)? = null
+    onAddToPlaylist: (() -> Unit)? = null,
+    isFavorite: Boolean = false,
+    onToggleFavorite: (() -> Unit)? = null
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -77,6 +79,30 @@ fun SongRow(
                     text = formatSongDuration(song.durationMs),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        if (onToggleFavorite != null) {
+            IconButton(
+                onClick = onToggleFavorite,
+                modifier = Modifier.semantics {
+                    contentDescription =
+                        if (isFavorite) {
+                            "Bỏ yêu thích ${song.title}"
+                        } else {
+                            "Yêu thích ${song.title}"
+                        }
+                }
+            ) {
+                Text(
+                    text = if (isFavorite) "♥" else "♡",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = if (isFavorite) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
                 )
             }
         }
