@@ -6,6 +6,16 @@ import android.content.Intent
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import android.Manifest
+import android.app.Activity
+import android.app.Instrumentation
+import android.content.ContentValues
+import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.os.SystemClock
+import android.provider.MediaStore
+import android.view.accessibility.AccessibilityNodeInfo
+import androidx.core.content.ContextCompat
 
 import androidx.lifecycle.Lifecycle
 import androidx.media3.common.PlaybackException
@@ -525,5 +535,192 @@ class PlaybackServiceIntegrationTest {
             }
         }
     }
+    @Test
+    fun mvpPickerResultStartsRealPlayback() {
+        val resolver = context.contentResolver
+        val source = createWav()
+        val name = "musicflow_picker_${System.nanoTime()}.wav"
+
+        var audioUri: Uri? = null
+        var monitor: Instrumentation.ActivityMonitor? = null
+        var activity: MainActivity? = null
+        var future: ListenableFuture<MediaController>? = null
+        var controller: MediaController? = null
+
+        try {
+            val permission = if (android.os.Build.VERSION.SDK_INT >= 33) {
+                Manifest.permission.READ_MEDIA_AUDIO
+            } else {
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            }
+
+            if (ContextCompat.checkSelfPermission(
+                    context, permission
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ParcelFileDescriptor.AutoCloseInputStream(
+                    instrumentation.uiAutomation.executeShellCommand(
+                        "pm grant ${context.packageName} $permission"
+                    )
+                ).use { it.readBytes() }
+            }
+
+            assertEquals(
+                PackageManager.PERMISSION_GRANTED,
+                ContextCompat.checkSelfPermission(context, permission)
+            )
+
+            val values = ContentValues().apply {
+                put(MediaStore.Audio.Media.DISPLAY_NAME, name)
+                put(MediaStore.Audio.Media.MIME_TYPE, "audio/wav")
+                put(MediaStore.Audio.Media.RELATIVE_PATH, "Music/MusicFlowQA/")
+                put(MediaStore.Audio.Media.IS_MUSIC, 1)
+                put(MediaStore.Audio.Media.IS_PENDING, 1)
+            }
+
+            val uri = checkNotNull(
+                resolver.insert(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    values
+                )
+            )
+            audioUri = uri
+
+            resolver.openOutputStream(uri, "w").use { output ->
+                checkNotNull(output)
+                source.inputStream().use { it.copyTo(output) }
+            }
+
+            resolver.update(
+                uri,
+                ContentValues().apply {
+                    put(MediaStore.Audio.Media.IS_PENDING, 0)
+                },
+                null,
+                null
+            )
+
+            val pickerResult = Intent().apply {
+                data = uri
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+
+            monitor = instrumentation.addMonitor(
+                IntentFilter(Intent.ACTION_OPEN_DOCUMENT),
+                Instrumentation.ActivityResult(
+                    Activity.RESULT_OK,
+                    pickerResult
+                ),
+                true
+            )
+
+            activity = instrumentation.startActivitySync(
+                Intent(context, MainActivity::class.java)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            ) as MainActivity
+
+            fun clickText(text: String) {
+                val deadline = SystemClock.uptimeMillis() + 15000
+
+                while (SystemClock.uptimeMillis() < deadline) {
+                    val nodes = instrumentation.uiAutomation
+                        .rootInActiveWindow
+                        ?.findAccessibilityNodeInfosByText(text)
+                        .orEmpty()
+
+                    for (node in nodes) {
+                        var current: AccessibilityNodeInfo? = node
+
+                        while (current != null && !current.isClickable) {
+                            current = current.parent
+                        }
+
+                        if (current?.performAction(
+                                AccessibilityNodeInfo.ACTION_CLICK
+                            ) == true
+                        ) return
+                    }
+
+                    SystemClock.sleep(200)
+                }
+
+                throw AssertionError("Không tìm thấy nút: $text")
+            }
+
+            clickText("Mở thư viện thiết bị")
+            clickText("Chọn MP3")
+
+            assertTrue(
+                "MainActivity chưa mở ACTION_OPEN_DOCUMENT",
+                checkNotNull(monitor).hits > 0
+            )
+            Log.i("MusicFlowMvpE2E", "PASS pickerIntentIntercepted")
+
+        val token = SessionToken(
+            context,
+            ComponentName(context, PlaybackService::class.java)
+        )
+        future = MediaController.Builder(context, token).buildAsync()
+        val media = future.get(20, TimeUnit.SECONDS)
+        controller = media
+
+        val deadline = SystemClock.uptimeMillis() + 20000
+        var playingCorrectFile = false
+
+        while (
+            !playingCorrectFile &&
+            SystemClock.uptimeMillis() < deadline
+        ) {
+            instrumentation.runOnMainSync {
+                playingCorrectFile =
+                    media.isPlaying &&
+                    media.mediaItemCount == 1 &&
+                    media.currentMediaItem?.mediaId == uri.toString() &&
+                    media.currentMediaItem?.mediaMetadata
+                        ?.title?.toString() == name
+            }
+
+            if (!playingCorrectFile) SystemClock.sleep(150)
+        }
+
+        assertTrue(
+            "File được chọn chưa phát đúng qua MediaSession",
+            playingCorrectFile
+        )
+        Log.i("MusicFlowMvpE2E", "PASS pickerResultPlaysThroughService")
+
+    } finally {
+        controller?.let { media ->
+            instrumentation.runOnMainSync {
+                media.pause()
+                media.stop()
+                media.clearMediaItems()
+            }
+        }
+
+        future?.let { connecting ->
+            instrumentation.runOnMainSync {
+                MediaController.releaseFuture(connecting)
+            }
+        }
+
+        activity?.let { screen ->
+            instrumentation.runOnMainSync { screen.finish() }
+        }
+
+        monitor?.let { instrumentation.removeMonitor(it) }
+
+        runBlocking {
+            audioUri?.let {
+                RoomRecentHistoryRepository(
+                    RecentHistoryDatabase.getInstance(context)
+                ).remove(it.toString())
+            }
+        }
+
+        audioUri?.let { resolver.delete(it, null, null) }
+        source.delete()
+    }
+}
 }
 

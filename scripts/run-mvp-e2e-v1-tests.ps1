@@ -116,7 +116,9 @@ try {
         "PASS searchUiToMediaSession",
         "PASS uiPlaybackWritesHistory",
         "PASS realMediaStoreScan",
-        "PASS realMediaStoreUiPlayback"
+        "PASS realMediaStoreUiPlayback",
+        "PASS pickerIntentIntercepted",
+        "PASS pickerResultPlaysThroughService"
     )
 
     $markersOk = $true
@@ -148,7 +150,7 @@ try {
     $passed = (
         $jvmOk -and
         $androidOk -and
-        $count -eq 38 -and
+        $count -eq 39 -and
         $markersOk
     )
 }
