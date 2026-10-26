@@ -18,6 +18,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.core.content.ContextCompat
+import androidx.test.core.app.ActivityScenario
 
 import androidx.lifecycle.Lifecycle
 import androidx.media3.common.PlaybackException
@@ -545,7 +546,7 @@ class PlaybackServiceIntegrationTest {
 
         var audioUri: Uri? = null
         var monitor: Instrumentation.ActivityMonitor? = null
-        var activity: MainActivity? = null
+        var scenario: ActivityScenario<MainActivity>? = null
         var future: ListenableFuture<MediaController>? = null
         var controller: MediaController? = null
 
@@ -616,59 +617,11 @@ class PlaybackServiceIntegrationTest {
                 true
             )
 
-            val application = context.applicationContext as Application
-            val resumedActivity = AtomicReference<MainActivity?>(null)
+            val launched = ActivityScenario.launch(MainActivity::class.java)
+            scenario = launched
 
-            val callbacks = object : Application.ActivityLifecycleCallbacks {
-                override fun onActivityCreated(
-                    activity: Activity, state: Bundle?
-                ) {
-                    if (activity is MainActivity) {
-                        Log.i("MusicFlowMvpE2E", "ACTIVITY_CREATED")
-                    }
-                }
-
-                override fun onActivityStarted(activity: Activity) {}
-
-                override fun onActivityResumed(activity: Activity) {
-                    if (activity is MainActivity) {
-                        resumedActivity.set(activity)
-                        Log.i("MusicFlowMvpE2E", "ACTIVITY_RESUMED")
-                    }
-                }
-
-                override fun onActivityPaused(activity: Activity) {}
-                override fun onActivityStopped(activity: Activity) {}
-                override fun onActivitySaveInstanceState(
-                    activity: Activity, state: Bundle
-                ) {}
-                override fun onActivityDestroyed(activity: Activity) {}
-            }
-
-            application.registerActivityLifecycleCallbacks(callbacks)
-
-            try {
-                context.startActivity(
-                    Intent(context, MainActivity::class.java)
-                        .addFlags(
-                            Intent.FLAG_ACTIVITY_NEW_TASK or
-                                Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        )
-                )
-
-                val deadline = SystemClock.uptimeMillis() + 15_000L
-
-                while (
-                    resumedActivity.get() == null &&
-                    SystemClock.uptimeMillis() < deadline
-                ) {
-                    SystemClock.sleep(100)
-                }
-
-                activity = resumedActivity.get()
-                assertNotNull("MainActivity chưa RESUMED", activity)
-            } finally {
-                application.unregisterActivityLifecycleCallbacks(callbacks)
+            launched.onActivity {
+                Log.i("MusicFlowMvpE2E", "ACTIVITY_LAUNCHED")
             }
 
             fun clickText(text: String) {
@@ -756,9 +709,7 @@ class PlaybackServiceIntegrationTest {
             }
         }
 
-        activity?.let { screen ->
-            instrumentation.runOnMainSync { screen.finish() }
-        }
+        scenario?.close()
 
         monitor?.let { instrumentation.removeMonitor(it) }
 
