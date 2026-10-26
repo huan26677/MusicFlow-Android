@@ -9,17 +9,16 @@
 | Mục | Trạng thái đã đối chiếu |
 |---|---|
 | Tình trạng toàn dự án | **ĐANG PHÁT TRIỂN — CHƯA NGHIỆM THU MVP/RELEASE** |
-| Mốc kỹ thuật gần nhất | **Playback Runtime Recovery Race Hardening v3 — PASS** |
-| JVM unit tests (mốc v3) | **PASS** (`exitCode=0`) |
-| Android instrumented tests (mốc v3) | **36/36 PASS** — Pixel_5 emulator |
-| Bằng chứng Service nhận/chuyển lỗi | `SERVICE_ERROR_COUNT=7`, `SERVICE_FORWARDED_COUNT=7` |
-| Nhánh phục hồi được kiểm tra | `SKIP_BRANCH_COUNT=1`, `EXHAUSTED_BRANCH_COUNT=1` |
-| Kết quả log | `ALL_MARKERS_FOUND=True`, `FINAL_RESULT=PASS` (v3) |
-| Commit chứa vòng QA v2 | `1aec374d25046c75f39e81cc242f42165e56dc26` |
-| Commit HEAD tại thời điểm rà soát | `313269e` (HEAD lúc chạy QA, trước commit kết quả) |
-| Log gần nhất đã xác nhận | `qa-logs/playback-runtime-recovery-v3.log` (QA v3 PASS; v2 PASS lưu ở mục 4) |
+| Mốc kỹ thuật gần nhất | **Favorites Batch v1 — PASS** |
+| JVM unit tests (mốc v1) | **PASS** |
+| Android instrumented tests (mốc v1) | **44/44 PASS** — Pixel_5, Android 11 (API 30) |
+| Marker | **14/14 PASS** |
+| Kết quả log | `FINAL_RESULT=PASS` (Favorites Batch v1) |
+| Commit chứa vòng QA v1 | `511f93ea157aef56b2115d22e15870fba52e87b9` |
+| Commit HEAD tại thời điểm rà soát | `511f93ea` (commit QA Favorites Batch v1) |
+| Log gần nhất đã xác nhận | `qa-logs/favorites-batch-v1.log` |
 | Bước đang phát triển tiếp | **MVP End-to-End Acceptance v1 — CHƯA BẮT ĐẦU** |
-| Ngày rà soát | **2026-10-25**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
+| Ngày rà soát | **2026-10-27**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
 
@@ -85,6 +84,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | Playback Runtime Error Auto-Skip v1 | 28 | **PASS** | `5e4b1c9` · `qa-logs/playback-runtime-auto-skip-v1.log` |
 | Playback Runtime Recovery Integration v2 | 31 | **PASS** | `1aec374` · `qa-logs/playback-runtime-recovery-v2.log` |
 | Playback Runtime Recovery Race Hardening v3 | 36 | **PASS** | `qa-logs/playback-runtime-recovery-v3.log` — SHA sau khi push cần đối chiếu |
+| Favorites + Album + Theme Batch v1 | 44 | **PASS tự động** — JVM PASS, 14/14 marker; SAF thực sau restart còn cần nghiệm thu thủ công | `511f93ea` · `qa-logs/favorites-batch-v1.log` |
 
 **Không cộng** các con số 9 + 11 + ... + 31: đây là số lượng test của **các lần chạy tăng dần** với nhiều bài trùng nhau.
 
@@ -176,7 +176,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 1. **Đầu mỗi chat / đầu mỗi bước:** đọc file này; kiểm tra HEAD và vài commit gần nhất; đọc log của mốc đang làm; xem chính xác source/test/script liên quan. Tiếp tục từ trạng thái thực tế, không làm lại bước PASS.
 2. **Lệnh “Kiểm tra tiếp” / “Kiểm tra [mốc]”:** dùng GitHub để đọc commit + log mới. Kết luận PASS chỉ nếu script chạy thành công **và** assertions/markers của mốc đủ; nếu FAIL nêu nguyên nhân, vị trí sửa tối thiểu và script chạy lại. Không che FAIL bằng cách bỏ điều kiện test.
 3. **Lệnh “Bước tiếp theo”:** lấy backlog mục 5, đối chiếu mã hiện hành, chọn đúng một milestone; đưa code/test/script cụ thể để người dùng áp dụng.
-4. **Kiểm thử:** ưu tiên JVM, Android instrumented tests, Android Emulator qua **một script PowerShell**, một log cố định cho mỗi milestone; không bắt người dùng kiểm thử thủ công. Chạy các test cũ để phát hiện hồi quy.
+4. **Kiểm thử:** ưu tiên JVM, Android instrumented tests, Android Emulator qua **một script PowerShell**, một log cố định cho mỗi milestone; không bắt người dùng kiểm thử thủ công. Chạy các test cũ để phát hiện hồi quy. **Chỉ tạo script kiểm thử tổng hợp khi hoàn thành nhóm chức năng lớn**; chức năng đặc thù cần kiểm thử sớm có thể viết test riêng và tích hợp vào script tổng hợp sau.
 5. **Quyền thay đổi:** mặc định trợ lý **chỉ đọc/phân tích/chuẩn bị patch hoặc file**. Không tự ý sửa, commit hay push repository nếu người dùng chưa cho phép. Một file tải về không đồng nghĩa repo đã thay đổi.
 6. **Lệnh Git:** khi cần hướng dẫn push, **chỉ ba lệnh** dưới đây; không thêm `git status`, `git pull`, `git log`, `git rev-parse`, v.v. vào hướng dẫn cho người dùng:
 
@@ -216,6 +216,34 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-27 — Favorites + Album + Theme Batch v1 — QA TỰ ĐỘNG PASS
+
+- Commit: `511f93ea157aef56b2115d22e15870fba52e87b9`
+- Log: `qa-logs/favorites-batch-v1.log`
+- Script: `scripts/run-favorites-batch-v1-tests.ps1`
+- JVM: PASS.
+- Android: 44/44 PASS — Pixel_5, Android 11 (API 30).
+- Marker: 14/14 PASS.
+- FINAL_RESULT=PASS.
+
+Đã kiểm thử:
+- Favorites bài hát và album, lưu dữ liệu cục bộ.
+- Lọc Favorites trong Library.
+- Điều hướng Favorites từ Home.
+- Hiển thị Favorites SAF không cần quyền MediaStore.
+- Giao diện tối được duy trì sau khi khởi động lại.
+- Hồi quy các chức năng playback và file picker trước đó.
+
+Giới hạn:
+- Chưa xác nhận phát lại file SAF thật sau khi khởi động lại.
+- Chưa kiểm thử trên ma trận nhiều phiên bản Android.
+- Emulator ghi nhận crash ở tiến trình hệ thống com.android.bluetooth;
+  không phải crash của MusicFlow, cần theo dõi khi kiểm thử Bluetooth.
+
+Trạng thái: Mốc QA tự động PASS; chưa nghiệm thu toàn bộ MVP.
+Bước tiếp theo: Hoàn thiện nghiệm thu SAF và background/system controls.
+
 
 ### 2026-10-26 — MVP E2E v1, lần kiểm thử đầu — FAIL
 - Commit: `e4ed4a4accdf31eee03b0290f6c6ccc3bb7899f3`.
