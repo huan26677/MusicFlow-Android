@@ -334,7 +334,7 @@ fun LibraryScreen(
 
                     is LibraryUiState.Error -> {
                         Text(
-                            text = uiState.message,
+                            text = current.message,
                             color = MaterialTheme.colorScheme.error
                         )
                     }

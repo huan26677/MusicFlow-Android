@@ -1,0 +1,72 @@
+﻿MusicFlow Favorites Batch v1
+DATE=2026-10-27T04:20:35.9465259+07:00
+EMULATOR=emulator-5554
+Reusing configuration cache.
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:kspDebugKotlin
+
+> Task :app:compileDebugKotlin
+e: file:///E:/Du_An/MusicFlow/app/src/main/java/com/example/musicflow/feature/search/SearchScreen.kt:133:9 No parameter with name 'favoriteSongUris' found.
+e: file:///E:/Du_An/MusicFlow/app/src/main/java/com/example/musicflow/feature/search/SearchScreen.kt:134:9 No parameter with name 'onToggleFavorite' found.
+e: file:///E:/Du_An/MusicFlow/app/src/main/java/com/example/musicflow/feature/search/SearchScreen.kt:134:30 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///E:/Du_An/MusicFlow/app/src/main/java/com/example/musicflow/feature/search/SearchScreen.kt:136:28 Unresolved reference 'uri'.
+e: file:///E:/Du_An/MusicFlow/app/src/main/java/com/example/musicflow/feature/search/SearchScreen.kt:137:30 Unresolved reference 'title'.
+e: file:///E:/Du_An/MusicFlow/app/src/main/java/com/example/musicflow/feature/search/SearchScreen.kt:138:31 Unresolved reference 'artist'.
+e: file:///E:/Du_An/MusicFlow/app/src/main/java/com/example/musicflow/feature/search/SearchScreen.kt:302:65 Unresolved reference 'favoriteSongUris'.
+e: file:///E:/Du_An/MusicFlow/app/src/main/java/com/example/musicflow/feature/search/SearchScreen.kt:304:33 Unresolved reference 'onToggleFavorite'.
+
+> Task :app:compileDebugKotlin FAILED
+System.Management.Automation.RemoteException
+FAILURE: Build failed with an exception.
+System.Management.Automation.RemoteException
+* What went wrong:
+Execution failed for task ':app:compileDebugKotlin' (registered by plugin 'com.android.internal.application').
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+System.Management.Automation.RemoteException
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+System.Management.Automation.RemoteException
+BUILD FAILED in 17s
+19 actionable tasks: 2 executed, 17 up-to-date
+Configuration cache entry reused.
+RESULT JVM_TESTS exitCode=1
+--------- beginning of kernel
+MARKER PASS libraryUiToMediaSession=False
+MARKER PASS nextPreviousFromUi=False
+MARKER PASS pauseResumeFromUi=False
+MARKER PASS searchUiToMediaSession=False
+MARKER PASS uiPlaybackWritesHistory=False
+MARKER PASS realMediaStoreScan=False
+MARKER PASS realMediaStoreUiPlayback=False
+MARKER PASS pickerIntentIntercepted=False
+MARKER PASS pickerResultPlaysThroughService=False
+MARKER PASS favoritesPersistence=False
+MARKER PASS favoriteLibraryAndAlbum=False
+MARKER PASS safFavoriteWithoutMediaStorePermission=False
+MARKER PASS homeFavoritesShortcuts=False
+MARKER PASS themePersistsAfterRestart=False
+ANDROID_TEST_COUNT=-1
+FINAL_RESULT=FAIL
