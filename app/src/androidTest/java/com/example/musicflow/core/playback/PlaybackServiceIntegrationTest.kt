@@ -614,10 +614,27 @@ class PlaybackServiceIntegrationTest {
                 true
             )
 
-            activity = instrumentation.startActivitySync(
-                Intent(context, MainActivity::class.java)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            ) as MainActivity
+            val activityMonitor = instrumentation.addMonitor(
+                MainActivity::class.java.name,
+                null,
+                false
+            )
+
+            try {
+                context.startActivity(
+                    Intent(context, MainActivity::class.java)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+
+                activity = instrumentation.waitForMonitorWithTimeout(
+                    activityMonitor,
+                    15_000L
+                ) as? MainActivity
+
+                assertNotNull("MainActivity không khởi động", activity)
+            } finally {
+                instrumentation.removeMonitor(activityMonitor)
+            }
 
             fun clickText(text: String) {
                 val deadline = SystemClock.uptimeMillis() + 15000
