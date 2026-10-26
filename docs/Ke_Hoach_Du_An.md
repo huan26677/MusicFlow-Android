@@ -18,7 +18,7 @@
 | Commit chứa vòng QA v2 | `1aec374d25046c75f39e81cc242f42165e56dc26` |
 | Commit HEAD tại thời điểm rà soát | `6a13defe1fba5cc3231123cee0375aae23b0d341` (`update tien do`) |
 | Log gần nhất đã xác nhận | `qa-logs/playback-runtime-recovery-v2.log` |
-| Bước đang phát triển tiếp | **Chưa bắt đầu**. Ưu tiên **Playback Runtime Recovery Race Hardening v3** |
+| Bước đang phát triển tiếp | **Playback Runtime Recovery Race Hardening v3 — ĐANG SỬA**. Vòng QA đầu tiên FAIL do chưa có emulator phù hợp và lỗi mã hóa script PowerShell; chưa có kết quả Android v3. |
 | Ngày rà soát | **2026-10-25**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -210,6 +210,17 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-26 — Runtime Recovery Race Hardening v3 — FAIL môi trường
+- Commit chứa thay đổi v3: `da2c5d487ea192c201d41d9168cd53c758098704`.
+- Log: `qa-logs/playback-runtime-recovery-v3.log`.
+- JVM: CHƯA CHẠY.
+- Android: CHƯA CHẠY.
+- Kết quả script: `FINAL_RESULT=FAIL`.
+- Nguyên nhân: `REQUIRES_ONE_EMULATOR` và lỗi mã hóa Unicode trong script cập nhật kế hoạch.
+- Đã chuẩn bị sửa: tự khởi động/chờ Emulator và lưu script PowerShell bằng UTF-8 BOM.
+- Bước tiếp theo: chạy lại toàn bộ QA v3, xác nhận 36/36 tests và các marker.
+- Giữ nguyên kết quả Playback Runtime Recovery v2 PASS.
 
 ### 2026-10-25 — Đối chiếu tiến độ và Definition of Done
 - HEAD tại thời điểm đọc GitHub: `6a13defe1fba5cc3231123cee0375aae23b0d341` (`update tien do`).

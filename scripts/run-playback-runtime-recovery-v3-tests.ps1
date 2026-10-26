@@ -40,12 +40,84 @@ try {
     if (!(Test-Path $adbPath)) {
         Write-Log 'ERROR=ADB_NOT_FOUND'
     } else {
-        $devices = @(& $adbPath devices | Where-Object { $_ -match '^emulator-\d+\s+device\s*$' } | ForEach-Object { ($_ -split '\s+')[0] })
-        if ($devices.Count -ne 1) {
-            Write-Log 'ERROR=REQUIRES_ONE_EMULATOR'
+$devices = @(
+    & $adbPath devices |
+        Where-Object {
+            $_ -match '^emulator-\d+\s+device\s*$'
+        } |
+        ForEach-Object { ($_ -split '\s+')[0] }
+)
+
+$canWait = $true
+
+if ($devices.Count -eq 0) {
+    $sdkRoot = if ($env:ANDROID_HOME) {
+        $env:ANDROID_HOME
+    } elseif ($env:ANDROID_SDK_ROOT) {
+        $env:ANDROID_SDK_ROOT
+    } else {
+        Join-Path $env:LOCALAPPDATA 'Android\Sdk'
+    }
+
+    $emulatorExe = Join-Path $sdkRoot 'emulator\emulator.exe'
+
+    if (!(Test-Path $emulatorExe)) {
+        Write-Log "ERROR=EMULATOR_EXE_NOT_FOUND path=$emulatorExe"
+        $canWait = $false
+    } else {
+        $avdNames = @(
+            & $emulatorExe -list-avds 2>$null |
+                ForEach-Object { $_.Trim() }
+        )
+
+        if ($avdNames -notcontains 'Pixel_5') {
+            Write-Log "ERROR=PIXEL_5_AVD_NOT_FOUND available=$($avdNames -join ',')"
+            $canWait = $false
         } else {
-            $serial = $devices[0]
-            Write-Log "EMULATOR=$serial"
+            Write-Log 'STARTING_AVD=Pixel_5'
+            Start-Process -FilePath $emulatorExe `
+                -ArgumentList @('-avd', 'Pixel_5') |
+                Out-Null
+        }
+    }
+}
+
+$serial = $null
+
+if ($canWait) {
+    for ($attempt = 0; $attempt -lt 120; $attempt++) {
+        $devices = @(
+            & $adbPath devices |
+                Where-Object {
+                    $_ -match '^emulator-\d+\s+device\s*$'
+                } |
+                ForEach-Object { ($_ -split '\s+')[0] }
+        )
+
+        if ($devices.Count -gt 1) {
+            Write-Log "ERROR=MULTIPLE_EMULATORS count=$($devices.Count)"
+            break
+        }
+
+        if ($devices.Count -eq 1) {
+            $bootResult = @(
+                & $adbPath -s $devices[0] shell getprop sys.boot_completed 2>$null
+            )
+
+            if (($bootResult -join '').Trim() -eq '1') {
+                $serial = $devices[0]
+                break
+            }
+        }
+
+        Start-Sleep -Seconds 2
+    }
+}
+
+if ($null -eq $serial) {
+    Write-Log 'ERROR=EMULATOR_NOT_READY'
+} else {
+    Write-Log "EMULATOR=$serial"
             & $adbPath -s $serial logcat -c 2>$null
 
             $jvmOk = Run-Gradle 'JVM_TESTS' @(':app:testDebugUnitTest', '--console=plain')
