@@ -34,9 +34,7 @@ import com.example.musicflow.feature.playlist.rememberPlaylistViewModel
 fun SearchRoute(
     initialQuery: String,
     onQueryRemembered: (String) -> Unit,
-    onSongSelected: (List<DeviceSong>, Int) -> Unit,
-    favoriteSongUris: Set<String> = emptySet(),
-    onToggleFavorite: (DeviceSong) -> Unit = {}
+    onSongSelected: (List<DeviceSong>, Int) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -159,7 +157,9 @@ fun SearchScreen(
     onRequestPermission: () -> Unit,
     onRefresh: () -> Unit,
     onSongSelected: (List<DeviceSong>, Int) -> Unit,
-    onAddToPlaylist: (DeviceSong) -> Unit
+    onAddToPlaylist: (DeviceSong) -> Unit,
+    favoriteSongUris: Set<String> = emptySet(),
+    onToggleFavorite: (DeviceSong) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
