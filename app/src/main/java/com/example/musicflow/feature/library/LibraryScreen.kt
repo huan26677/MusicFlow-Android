@@ -36,7 +36,9 @@ import com.example.musicflow.feature.playlist.rememberPlaylistViewModel
 fun LibraryRoute(
     onBack: () -> Unit,
     onPickManual: () -> Unit,
-    onSongSelected: (List<DeviceSong>, Int) -> Unit
+    onSongSelected: (List<DeviceSong>, Int) -> Unit,
+    initialFavoritesOnly: Boolean = false,
+    initialShowAlbums: Boolean = false
 ) {
     val context = LocalContext.current
 
@@ -118,6 +120,8 @@ fun LibraryRoute(
         hasPermission = hasPermission,
         onBack = onBack,
         onPickManual = onPickManual,
+        initialFavoritesOnly = initialFavoritesOnly,
+        initialShowAlbums = initialShowAlbums,
         onRefresh = {
             if (hasPermission) {
                 libraryViewModel.refresh()
@@ -162,14 +166,16 @@ fun LibraryScreen(
     favoriteSongUris: Set<String> = emptySet(),
     onToggleFavorite: (DeviceSong) -> Unit = {},
     favoriteAlbumIds: Set<String> = emptySet(),
-    onToggleAlbum: (Long) -> Unit = {}
+    onToggleAlbum: (Long) -> Unit = {},
+    initialFavoritesOnly: Boolean = false,
+    initialShowAlbums: Boolean = false
 ) {
-    var favoritesOnly by rememberSaveable {
-        mutableStateOf(false)
+    var favoritesOnly by rememberSaveable(initialFavoritesOnly) {
+        mutableStateOf(initialFavoritesOnly)
     }
 
-    var showAlbums by rememberSaveable {
-        mutableStateOf(false)
+    var showAlbums by rememberSaveable(initialShowAlbums) {
+        mutableStateOf(initialShowAlbums)
     }
 
     Surface(
@@ -278,7 +284,8 @@ fun LibraryScreen(
                                 onToggleAlbum = onToggleAlbum,
                                 onToggleFavorite = onToggleFavorite,
                                 onSongSelected = onSongSelected,
-                                onAddToPlaylist = onAddToPlaylist
+                                onAddToPlaylist = onAddToPlaylist,
+                                initialFavoritesOnly = initialFavoritesOnly
                             )
                         } else {
                             val visibleSongs = if (favoritesOnly) {
@@ -350,10 +357,11 @@ private fun ColumnScope.AlbumFavoritesContent(
     onToggleAlbum: (Long) -> Unit,
     onToggleFavorite: (DeviceSong) -> Unit,
     onSongSelected: (List<DeviceSong>, Int) -> Unit,
-    onAddToPlaylist: (DeviceSong) -> Unit
+    onAddToPlaylist: (DeviceSong) -> Unit,
+    initialFavoritesOnly: Boolean = false
 ) {
-    var favoritesOnly by rememberSaveable {
-        mutableStateOf(false)
+    var favoritesOnly by rememberSaveable(initialFavoritesOnly) {
+        mutableStateOf(initialFavoritesOnly)
     }
 
     var expandedAlbumId by rememberSaveable {

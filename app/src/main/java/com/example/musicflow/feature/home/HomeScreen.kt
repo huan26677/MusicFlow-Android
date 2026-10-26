@@ -25,6 +25,7 @@ import com.example.musicflow.core.history.RecentSong
 import com.example.musicflow.core.history.RoomRecentHistoryRepository
 import com.example.musicflow.core.history.local.RecentHistoryDatabase
 import com.example.musicflow.core.playback.PlayerUiState
+import com.example.musicflow.core.favorites.LocalFavoritesStore
 
 @Composable
 fun HomeRoute(
@@ -33,9 +34,21 @@ fun HomeRoute(
     onOpenSearch: () -> Unit,
     onOpenPlaylists: () -> Unit,
     onOpenPlayer: () -> Unit,
-    onRecentSongSelected: (List<RecentSong>, Int) -> Unit
+    onRecentSongSelected: (List<RecentSong>, Int) -> Unit,
+    onOpenFavoriteSongs: () -> Unit,
+    onOpenFavoriteAlbums: () -> Unit
 ) {
     val context = LocalContext.current
+
+    val favoritesStore = remember(context) {
+        LocalFavoritesStore.getInstance(context)
+    }
+
+    val favoriteSongUris by favoritesStore.songUris
+        .collectAsStateWithLifecycle()
+
+    val favoriteAlbumIds by favoritesStore.albumIds
+        .collectAsStateWithLifecycle()
 
     val repository = remember(context) {
         RoomRecentHistoryRepository(
@@ -66,6 +79,10 @@ fun HomeRoute(
         onOpenPlaylists = onOpenPlaylists,
         onOpenPlayer = onOpenPlayer,
         onRecentSongSelected = onRecentSongSelected,
+        favoriteSongCount = favoriteSongUris.size,
+        favoriteAlbumCount = favoriteAlbumIds.size,
+        onOpenFavoriteSongs = onOpenFavoriteSongs,
+        onOpenFavoriteAlbums = onOpenFavoriteAlbums,
         actionError = actionError,
         onDismissActionError = homeViewModel::dismissActionError,
         onRemoveRecentSong = homeViewModel::removeRecentSong,
@@ -82,6 +99,10 @@ fun HomeScreen(
     onOpenPlaylists: () -> Unit,
     onOpenPlayer: () -> Unit,
     onRecentSongSelected: (List<RecentSong>, Int) -> Unit,
+    favoriteSongCount: Int = 0,
+    favoriteAlbumCount: Int = 0,
+    onOpenFavoriteSongs: () -> Unit = {},
+    onOpenFavoriteAlbums: () -> Unit = {},
     actionError: String?,
     onDismissActionError: () -> Unit,
     onRemoveRecentSong: (String) -> Unit,
@@ -140,6 +161,27 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Danh sách phát của tôi")
+                }
+
+                HorizontalDivider()
+
+                Text(
+                    text = "Yêu thích của tôi",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                OutlinedButton(
+                    onClick = onOpenFavoriteSongs,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("♥ Bài hát yêu thích ($favoriteSongCount)")
+                }
+
+                OutlinedButton(
+                    onClick = onOpenFavoriteAlbums,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("♥ Album yêu thích ($favoriteAlbumCount)")
                 }
             }
         }

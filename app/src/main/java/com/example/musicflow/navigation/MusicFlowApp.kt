@@ -54,6 +54,11 @@ data object SearchTab : NavKey
 data object LibraryTab : NavKey
 
 @Serializable
+data class FavoritesRoute(
+    val showAlbums: Boolean
+) : NavKey
+
+@Serializable
 data object AccountTab : NavKey
 
 @Serializable
@@ -148,7 +153,8 @@ fun MusicFlowApp(
                             }
 
                             NavigationBarItem(
-                                selected = currentRoute == tab,
+                                selected = currentRoute == tab ||
+                                    (tab == LibraryTab && currentRoute is FavoritesRoute),
                                 onClick = { switchTab(tab) },
                                 icon = { Text(symbol) },
                                 label = { Text(label) }
@@ -186,6 +192,14 @@ fun MusicFlowApp(
 
                         onOpenLibrary = {
                             switchTab(LibraryTab)
+                        },
+
+                        onOpenFavoriteSongs = {
+                            backStack.add(FavoritesRoute(showAlbums = false))
+                        },
+
+                        onOpenFavoriteAlbums = {
+                            backStack.add(FavoritesRoute(showAlbums = true))
                         },
 
                         onOpenSearch = {
@@ -246,6 +260,33 @@ fun MusicFlowApp(
 
                                 // Mở Now Playing dựa trên hành động chọn bài,
                                 // không chờ StateFlow cập nhật hasMedia.
+                                if (backStack.lastOrNull() != NowPlaying) {
+                                    backStack.add(NowPlaying)
+                                }
+                            }
+                        }
+                    )
+                }
+
+                entry<FavoritesRoute> { route ->
+                    LibraryRoute(
+                        initialFavoritesOnly = true,
+                        initialShowAlbums = route.showAlbums,
+
+                        onBack = {
+                            if (backStack.size > 1) {
+                                backStack.removeAt(backStack.lastIndex)
+                            } else {
+                                switchTab(HomeTab)
+                            }
+                        },
+
+                        onPickManual = onPickFiles,
+
+                        onSongSelected = { songs, index ->
+                            if (index in songs.indices) {
+                                onPlayDeviceSongs(songs, index)
+
                                 if (backStack.lastOrNull() != NowPlaying) {
                                     backStack.add(NowPlaying)
                                 }
