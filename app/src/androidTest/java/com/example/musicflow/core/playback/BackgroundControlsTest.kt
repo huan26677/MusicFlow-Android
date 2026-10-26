@@ -7,6 +7,9 @@ import android.content.Context
 import android.net.Uri
 import android.os.SystemClock
 import android.util.Log
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import androidx.lifecycle.Lifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -308,6 +311,298 @@ class BackgroundControlsTest {
 
             scenario?.close()
             files.forEach { it.delete() }
+        }
+    }
+
+    private fun notificationActionsV2(): List<Notification.Action> {
+        val manager = context.getSystemService(
+            Context.NOTIFICATION_SERVICE
+        ) as NotificationManager
+
+        val notification = manager.activeNotifications
+            .firstOrNull { posted ->
+                posted.packageName == context.packageName &&
+                    posted.notification.extras
+                        .getCharSequence(Notification.EXTRA_TITLE)
+                        ?.toString()
+                        ?.contains("MusicFlow V2") == true
+            }
+            ?.notification
+
+        return notification?.actions?.toList().orEmpty()
+    }
+
+    private fun sendNotificationActionV2(
+        index: Int,
+        minimumActions: Int = index + 1
+    ) {
+        assertTrue(
+            "Thông báo chưa có đủ nút điều khiển",
+            awaitCondition {
+                notificationActionsV2().size >= minimumActions
+            }
+        )
+
+        val action = notificationActionsV2()
+            .getOrNull(index)
+
+        assertNotNull("Không có nút tại vị trí $index", action)
+
+        checkNotNull(action?.actionIntent).send()
+    }
+
+    @Test
+    fun notificationButtonsControlPlaybackV2() {
+        val files = List(3) { createWav() }
+
+        val items = files.mapIndexed { index, file ->
+            MediaItem.Builder()
+                .setMediaId("qa-v2-actions-${index + 1}")
+                .setUri(Uri.fromFile(file))
+                .setMediaMetadata(
+                    MediaMetadata.Builder()
+                        .setTitle("MusicFlow V2 Track ${index + 1}")
+                        .setArtist("MusicFlow QA")
+                        .build()
+                )
+                .build()
+        }
+
+        var scenario: ActivityScenario<MainActivity>? = null
+        var future: ListenableFuture<MediaController>? = null
+        var controller: MediaController? = null
+
+        try {
+            scenario = ActivityScenario.launch(
+                MainActivity::class.java
+            )
+
+            val token = SessionToken(
+                context,
+                ComponentName(context, PlaybackService::class.java)
+            )
+
+            future = MediaController.Builder(context, token)
+                .buildAsync()
+
+            val media = future.get(20, TimeUnit.SECONDS)
+            controller = media
+
+            instrumentation.runOnMainSync {
+                media.setMediaItems(items, 1, 0L)
+                media.prepare()
+                media.play()
+            }
+
+            assertTrue(
+                "Bài thứ hai chưa phát",
+                awaitCondition {
+                    val state = snapshot(media)
+                    state.playing &&
+                        state.mediaId == "qa-v2-actions-2"
+                }
+            )
+
+            scenario.moveToState(Lifecycle.State.CREATED)
+
+            // Media3 mặc định: Previous / Play-Pause / Next.
+            // Test này dành cho thông báo Android 11.
+            sendNotificationActionV2(
+                index = 1,
+                minimumActions = 3
+            )
+
+            assertTrue(
+                "Nút Pause trên thông báo không hoạt động",
+                awaitCondition {
+                    !snapshot(media).playing
+                }
+            )
+
+            sendNotificationActionV2(
+                index = 1,
+                minimumActions = 3
+            )
+
+            assertTrue(
+                "Nút Play trên thông báo không hoạt động",
+                awaitCondition {
+                    snapshot(media).playing
+                }
+            )
+
+            sendNotificationActionV2(
+                index = 2,
+                minimumActions = 3
+            )
+
+            assertTrue(
+                "Nút Next trên thông báo không hoạt động",
+                awaitCondition {
+                    val state = snapshot(media)
+                    state.playing &&
+                        state.mediaId == "qa-v2-actions-3"
+                }
+            )
+
+            sendNotificationActionV2(
+                index = 0
+            )
+
+            assertTrue(
+                "Nút Previous trên thông báo không hoạt động",
+                awaitCondition {
+                    val state = snapshot(media)
+                    state.playing &&
+                        state.mediaId == "qa-v2-actions-2"
+                }
+            )
+
+            Log.i(
+                "MusicFlowSystemV2QA",
+                "PASS notificationButtonCommands"
+            )
+
+        } finally {
+            controller?.let { media ->
+                instrumentation.runOnMainSync {
+                    media.pause()
+                    media.stop()
+                    media.clearMediaItems()
+                }
+            }
+
+            future?.let {
+                instrumentation.runOnMainSync {
+                    MediaController.releaseFuture(it)
+                }
+            }
+
+            scenario?.close()
+            files.forEach { it.delete() }
+        }
+    }
+
+    @Test
+    fun transientAudioFocusLossV2() {
+        val file = createWav()
+
+        val audioManager = context.getSystemService(
+            Context.AUDIO_SERVICE
+        ) as AudioManager
+
+        val focusListener =
+            AudioManager.OnAudioFocusChangeListener { }
+
+        val focusRequest = AudioFocusRequest.Builder(
+            AudioManager.AUDIOFOCUS_GAIN_TRANSIENT
+        )
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(
+                        AudioAttributes.CONTENT_TYPE_SPEECH
+                    )
+                    .build()
+            )
+            .setOnAudioFocusChangeListener(focusListener)
+            .build()
+
+        var focusGranted = false
+        var scenario: ActivityScenario<MainActivity>? = null
+        var future: ListenableFuture<MediaController>? = null
+        var controller: MediaController? = null
+
+        try {
+            scenario = ActivityScenario.launch(
+                MainActivity::class.java
+            )
+
+            val token = SessionToken(
+                context,
+                ComponentName(context, PlaybackService::class.java)
+            )
+
+            future = MediaController.Builder(context, token)
+                .buildAsync()
+
+            val media = future.get(20, TimeUnit.SECONDS)
+            controller = media
+
+            val item = MediaItem.Builder()
+                .setMediaId("qa-v2-audio-focus")
+                .setUri(Uri.fromFile(file))
+                .setMediaMetadata(
+                    MediaMetadata.Builder()
+                        .setTitle("MusicFlow V2 Focus")
+                        .build()
+                )
+                .build()
+
+            instrumentation.runOnMainSync {
+                media.setMediaItem(item)
+                media.prepare()
+                media.play()
+            }
+
+            assertTrue(
+                "Playback chưa bắt đầu",
+                awaitCondition {
+                    snapshot(media).playing
+                }
+            )
+
+            val result = audioManager.requestAudioFocus(
+                focusRequest
+            )
+
+            focusGranted =
+                result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+
+            assertTrue(
+                "Không chiếm được audio focus tạm thời",
+                focusGranted
+            )
+
+            assertTrue(
+                "MusicFlow không nhường audio focus",
+                awaitCondition {
+                    !snapshot(media).playing
+                }
+            )
+
+            assertEquals(
+                "Hàng đợi thay đổi khi mất audio focus",
+                "qa-v2-audio-focus",
+                snapshot(media).mediaId
+            )
+
+            Log.i(
+                "MusicFlowSystemV2QA",
+                "PASS transientAudioFocusLoss"
+            )
+
+        } finally {
+            controller?.let { media ->
+                instrumentation.runOnMainSync {
+                    media.pause()
+                    media.stop()
+                    media.clearMediaItems()
+                }
+            }
+
+            if (focusGranted) {
+                audioManager.abandonAudioFocusRequest(focusRequest)
+            }
+
+            future?.let {
+                instrumentation.runOnMainSync {
+                    MediaController.releaseFuture(it)
+                }
+            }
+
+            scenario?.close()
+            file.delete()
         }
     }
 }
