@@ -9,15 +9,15 @@
 | Mục | Trạng thái đã đối chiếu |
 |---|---|
 | Tình trạng toàn dự án | **ĐANG PHÁT TRIỂN — CHƯA NGHIỆM THU MVP/RELEASE** |
-| Mốc kỹ thuật gần nhất | **Background Playback & System Controls v1 — PASS** |
-| JVM unit tests (mốc v1) | **PASS** |
-| Android instrumented tests (mốc v1) | **45/45 PASS** — Pixel_5, Android 11 (API 30) |
-| Marker | **18/18 PASS** |
-| Kết quả log | `FINAL_RESULT=PASS` (Background Playback & System Controls v1) |
-| Commit chứa vòng QA v1 | `663e3ba08565598ceb46a323bfdc41f2c42b7e43` |
-| Commit HEAD tại thời điểm rà soát | `663e3ba0` (commit QA Background Playback v1) |
-| Log gần nhất đã xác nhận | `qa-logs/background-controls-v1.log` |
-| Bước đang phát triển tiếp | **MVP End-to-End Acceptance v1 — CHƯA BẮT ĐẦU** |
+| Mốc kỹ thuật gần nhất | **Background/System Controls v2 — PASS** |
+| JVM unit tests (mốc v2) | **PASS** |
+| Android instrumented tests (mốc v2) | **47/47 PASS** — Pixel_5, Android 11 (API 30) |
+| Marker | **20/20 PASS** |
+| Kết quả log | `FINAL_RESULT=PASS` (Background/System Controls v2) |
+| Commit chứa vòng QA v2 | `1ab915f572bbf48d67b91a69cc916803fc62ab0e` |
+| Commit HEAD tại thời điểm rà soát | `1ab915f5` (commit QA Background/System Controls v2) |
+| Log gần nhất đã xác nhận | `qa-logs/background-controls-v2.log` |
+| Bước đang phát triển tiếp | **MVP E2E mở rộng — SAF permissions và kiểm thử các phiên bản Android** |
 | Ngày rà soát | **2026-10-27**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -86,6 +86,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | Playback Runtime Recovery Race Hardening v3 | 36 | **PASS** | `qa-logs/playback-runtime-recovery-v3.log` — SHA sau khi push cần đối chiếu |
 | Favorites + Album + Theme Batch v1 | 44 | **PASS tự động** — JVM PASS, 14/14 marker; SAF thực sau restart còn cần nghiệm thu thủ công | `511f93ea` · `qa-logs/favorites-batch-v1.log` |
 | Background Playback & System Controls v1 | 45 | **PASS tự động** — JVM PASS, 18/18 marker | `663e3ba0` · `qa-logs/background-controls-v1.log` |
+| Background/System Controls v2 | 47 | **PASS tự động** — JVM PASS, 20/20 marker; notification actions và transient audio focus | `1ab915f5` · `qa-logs/background-controls-v2.log` |
 
 **Không cộng** các con số 9 + 11 + ... + 31: đây là số lượng test của **các lần chạy tăng dần** với nhiều bài trùng nhau.
 
@@ -107,7 +108,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 |---|---|---|---|
 | **P0 — đã hoàn thành** | **Playback Runtime Recovery Race Hardening v3** | **PASS — 36/36 Android tests** | Xem `qa-logs/playback-runtime-recovery-v3.log`; yêu cầu 5 marker v3 + regression v2 |
 | **P0 — kế tiếp** | **MVP End-to-End Acceptance v1** — Library/Search/Picker → Player → Playlist/History → restart | CHƯA NGHIỆM THU | Script UI/integration tests có assertions và log cho từng flow |
-| **P0** | **Background Playback / System Controls QA** | CHƯA NGHIỆM THU TỔNG HỢP | Test lifecycle, audio focus, điều khiển từ MediaSession/notification/lock screen trong phạm vi khả thi; mọi điều kiện đã chốt đạt PASS |
+| **P0** | **Background Playback / System Controls QA** | V2 QA TỰ ĐỘNG PASS (API 30) — còn lockscreen và Bluetooth thực tế | Test lifecycle, audio focus, điều khiển từ MediaSession/notification/lock screen trong phạm vi khả thi; mọi điều kiện đã chốt đạt PASS |
 | **P0** | **Android Compatibility & Permissions Matrix** | CHƯA XÁC MINH | Bộ test tự động trên các API đại diện, đề xuất **29 / 30 / 33 / 36**, hoặc có ngoại lệ phạm vi được chủ dự án chấp nhận; file picker, MediaStore, URI và quyền đạt PASS |
 | **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
 | **P1** | UI/accessibility/empty-state/error-state | CHƯA NGHIỆM THU | UI tests hoặc ảnh chụp kiểm tra tự động cho các trạng thái bắt buộc; tiêu chí khả dụng được xác nhận |
@@ -217,6 +218,38 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-27 — Background/System Controls v2 — PASS
+
+- Commit: `1ab915f572bbf48d67b91a69cc916803fc62ab0e`
+- Script: `scripts/run-background-controls-v2-tests.ps1`
+- Log: `qa-logs/background-controls-v2.log`
+- JVM: PASS.
+- Android: 47/47 PASS — Pixel 5 Emulator, Android 11.
+- QA markers: 20/20 PASS.
+- FINAL_RESULT=PASS.
+
+Kết quả:
+- Các nút Play/Pause/Next/Previous trên thông báo hoạt động.
+- MusicFlow nhường audio focus khi có yêu cầu tạm thời.
+- 45 bài kiểm thử trước đó PASS.
+- Không cần thay đổi PlaybackService.
+
+Giới hạn:
+- Chưa nghiệm thu điều khiển trực tiếp trên màn hình khóa.
+- Chưa kiểm thử tai nghe Bluetooth và thay đổi đầu ra âm thanh thực tế.
+- Chưa xác nhận trên Android 13, 14, 15 và 16.
+- Emulator có crash ở tiến trình hệ thống com.android.bluetooth;
+  không có bằng chứng crash của tiến trình MusicFlow.
+
+Trạng thái:
+- Background/System Controls v2: QA tự động PASS.
+- Toàn dự án: ĐANG PHÁT TRIỂN, chưa nghiệm thu MVP/Release.
+
+Bước tiếp theo:
+- MVP E2E mở rộng: SAF URI permission persistence.
+- Kiểm thử Android Compatibility & Permissions Matrix.
+- Hoàn thiện nghiệm thu lockscreen/Bluetooth trên thiết bị phù hợp.
 
 ### 2026-10-27 — Background Playback & System Controls v1 — PASS
 
