@@ -114,7 +114,9 @@ try {
         "PASS nextPreviousFromUi",
         "PASS pauseResumeFromUi",
         "PASS searchUiToMediaSession",
-        "PASS uiPlaybackWritesHistory"
+        "PASS uiPlaybackWritesHistory",
+        "PASS realMediaStoreScan",
+        "PASS realMediaStoreUiPlayback"
     )
 
     $markersOk = $true
@@ -146,7 +148,7 @@ try {
     $passed = (
         $jvmOk -and
         $androidOk -and
-        $count -eq 37 -and
+        $count -eq 38 -and
         $markersOk
     )
 }

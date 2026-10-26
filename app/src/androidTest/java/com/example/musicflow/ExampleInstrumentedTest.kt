@@ -43,6 +43,10 @@ import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.concurrent.TimeUnit
+import android.content.ContentUris
+import android.content.ContentValues
+import android.provider.MediaStore
+import com.example.musicflow.core.media.DeviceMusicScanner
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -311,6 +315,130 @@ fun mvpLibrarySearchToRealPlayer() {
             }
 
             files.forEach { it.delete() }
+        }
+    }
+}
+@Test
+fun mvpRealMediaStoreToPlayer() {
+    val context = InstrumentationRegistry
+        .getInstrumentation().targetContext
+    val resolver = context.contentResolver
+    val source = createQaWav()
+
+    val values = ContentValues().apply {
+        put(
+            MediaStore.Audio.Media.DISPLAY_NAME,
+            "musicflow_qa_${System.nanoTime()}.wav"
+        )
+        put(MediaStore.Audio.Media.MIME_TYPE, "audio/wav")
+        put(
+            MediaStore.Audio.Media.RELATIVE_PATH,
+            "Music/MusicFlowQA/"
+        )
+        put(MediaStore.Audio.Media.IS_MUSIC, 1)
+        put(MediaStore.Audio.Media.IS_PENDING, 1)
+    }
+
+    var uri: Uri? = null
+    var playback: PlaybackController? = null
+
+    try {
+        val mediaUri = checkNotNull(
+            resolver.insert(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                values
+            )
+        )
+        uri = mediaUri
+
+        resolver.openOutputStream(mediaUri, "w").use { output ->
+            checkNotNull(output)
+            source.inputStream().use { input ->
+                input.copyTo(output)
+            }
+        }
+
+        val publish = ContentValues().apply {
+            put(MediaStore.Audio.Media.IS_PENDING, 0)
+        }
+        assertEquals(1, resolver.update(mediaUri, publish, null, null))
+
+        var scanned: DeviceSong? = null
+
+        runBlocking {
+            withTimeout(15000) {
+                while (scanned == null) {
+                    scanned = DeviceMusicScanner.scan(context)
+                        .firstOrNull { it.uri == mediaUri }
+                    if (scanned == null) delay(200)
+                }
+            }
+        }
+
+        val song = checkNotNull(scanned)
+        assertEquals(ContentUris.parseId(mediaUri), song.id)
+
+        Log.i("MusicFlowMvpE2E", "PASS realMediaStoreScan")
+
+        val controller = PlaybackController(context)
+        playback = controller
+        val vm = PlayerViewModel(controller)
+
+        composeRule.setContent {
+            LibraryScreen(
+                uiState = LibraryUiState.Success(listOf(song)),
+                hasPermission = true,
+                onBack = {},
+                onPickManual = {},
+                onRefresh = {},
+                onSongSelected = { songs, index ->
+                    vm.playDeviceSongs(songs, index)
+                },
+                onAddToPlaylist = {}
+            )
+        }
+
+        composeRule.onNodeWithText(song.title).performClick()
+
+        composeRule.waitUntil(20_000) {
+            val state = controller.uiState.value
+            state.isPlaying &&
+                state.title == song.title &&
+                state.queueCount == 1 &&
+                state.currentIndex == 1
+        }
+
+        Log.i("MusicFlowMvpE2E", "PASS realMediaStoreUiPlayback")
+    } finally {
+        try {
+            if (playback != null) {
+                val token = SessionToken(
+                    context,
+                    ComponentName(context, PlaybackService::class.java)
+                )
+                val future = MediaController.Builder(
+                    context, token
+                ).buildAsync()
+
+                try {
+                    val media = future.get(15, TimeUnit.SECONDS)
+                    composeRule.runOnUiThread {
+                        media.pause()
+                        media.stop()
+                        media.clearMediaItems()
+                    }
+                } finally {
+                    composeRule.runOnUiThread {
+                        MediaController.releaseFuture(future)
+                    }
+                }
+            }
+        } finally {
+            composeRule.runOnUiThread {
+                playback?.release()
+            }
+            uri?.let { resolver.delete(it, null, null) }
+            source.delete()
         }
     }
 }
