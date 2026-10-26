@@ -36,7 +36,8 @@ data class PlayerUiState(
     val artist: String = "Không rõ nghệ sĩ",
     val shuffleEnabled: Boolean = false,
     val repeatMode: Int = Player.REPEAT_MODE_OFF,
-    val artworkUri: Uri? = null
+    val artworkUri: Uri? = null,
+    val audioUri: Uri? = null
 )
 
 class PlaybackController(context: Context) {
@@ -156,33 +157,27 @@ class PlaybackController(context: Context) {
         val currentItem = player.currentMediaItem
         val mediaId = currentItem?.mediaId.orEmpty()
 
-        val artworkUri: Uri? = when {
-            // Bài hát được chọn từ MediaStore.
+        val audioUri: Uri? = when {
             mediaId.startsWith("device-") -> {
-                val id = mediaId
-                    .removePrefix("device-")
+                mediaId.removePrefix("device-")
                     .toLongOrNull()
-
-                id?.let {
-                    ContentUris.withAppendedId(
-                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                        it
-                    )
-                }
+                    ?.let { id ->
+                        ContentUris.withAppendedId(
+                            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                            id
+                        )
+                    }
             }
 
-            // MP3 được chọn bằng File Picker.
             mediaId.startsWith("content://") -> {
                 Uri.parse(mediaId)
             }
 
-            // Dự phòng nếu MediaController cung cấp URI.
-            else -> {
-                currentItem
-                    ?.localConfiguration
-                    ?.uri
-                    ?.takeIf { it.scheme == "content" }
-            }
+            else -> currentItem?.localConfiguration?.uri
+        }
+
+        val artworkUri = audioUri?.takeIf {
+            it.scheme == "content"
         }
 
         _uiState.value = PlayerUiState(
@@ -218,7 +213,8 @@ class PlaybackController(context: Context) {
             shuffleEnabled = player.shuffleModeEnabled,
 
             repeatMode = player.repeatMode,
-            artworkUri = artworkUri
+            artworkUri = artworkUri,
+            audioUri = audioUri
         )
     }
 

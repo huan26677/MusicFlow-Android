@@ -8,6 +8,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.musicflow.core.favorites.LocalFavoritesStore
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
@@ -31,6 +34,22 @@ fun NowPlayingScreen(
     onToggleShuffle: () -> Unit,
     onCycleRepeat: () -> Unit
 ) {
+    val context = LocalContext.current
+
+    val favoritesStore = remember(context) {
+        LocalFavoritesStore.getInstance(context)
+    }
+
+    val favoriteSongUris by favoritesStore.songUris
+        .collectAsStateWithLifecycle()
+
+    val favoriteUri = state.audioUri?.takeIf {
+        it.scheme == "content"
+    }
+
+    val isFavorite = favoriteUri != null &&
+        favoriteUri.toString() in favoriteSongUris
+
     var isDragging by remember {
         mutableStateOf(false)
     }
@@ -110,6 +129,25 @@ fun NowPlayingScreen(
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
+        Spacer(Modifier.height(12.dp))
+
+        OutlinedButton(
+            onClick = {
+                favoriteUri?.let { uri ->
+                    favoritesStore.toggleSong(uri)
+                }
+            },
+            enabled = state.hasMedia && favoriteUri != null
+        ) {
+            Text(
+                if (isFavorite) {
+                    "♥ Đã yêu thích"
+                } else {
+                    "♡ Yêu thích"
+                }
+            )
+        }
 
         Spacer(Modifier.height(8.dp))
 
