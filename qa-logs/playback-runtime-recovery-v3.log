@@ -1,0 +1,56 @@
+﻿MusicFlow Runtime Recovery Race Hardening v3
+DATE=2026-10-26T08:20:06.2660313+07:00
+COMMIT=e0141a8
+ERROR=REQUIRES_ONE_EMULATOR
+FINAL_RESULT=FAIL
+PLAN_UPDATE_ERROR=At E:\Du_An\MusicFlow\scripts\update-runtime-recovery-v3-plan.ps1:28 char:93
++ ... *PASS â€” 36/36 Android tests**' } else { "**FAIL â€” Android tests:  ...
++                                                           ~~~~~~~
+Unexpected token 'Android' in expression or statement.
+
+At E:\Du_An\MusicFlow\scripts\update-runtime-recovery-v3-plan.ps1:45 char:149
++ ... g gáº§n nháº¥t Ä‘Ã£ xÃ¡c nháº­n | ``$logName`` (QA v3 $Result; v2 PAS ...
++                                                                  ~
+Missing closing ')' in expression.
+
+At E:\Du_An\MusicFlow\scripts\update-runtime-recovery-v3-plan.ps1:28 char:79
++ ... ult -eq 'PASS') { '**PASS â€” 36/36 Android tests**' } else { "**FAIL ...
++                                                                 ~
+Missing closing '}' in statement block or type definition.
+
+At E:\Du_An\MusicFlow\scripts\update-runtime-recovery-v3-plan.ps1:45 char:175
++ ... ¡c nháº­n | ``$logName`` (QA v3 $Result; v2 PASS lÆ°u á»Ÿ má»¥c 4) |"
++                                                                      ~
+Unexpected token ')' in expression or statement.
+
+At E:\Du_An\MusicFlow\scripts\update-runtime-recovery-v3-plan.ps1:45 char:177
++ ... ¡c nháº­n | ``$logName`` (QA v3 $Result; v2 PASS lÆ°u á»Ÿ má»¥c 4) |"
++                                                                        ~
+An empty pipe element is not allowed.
+
+At E:\Du_An\MusicFlow\scripts\update-runtime-recovery-v3-plan.ps1:48 char:172
++ ...  nháº¥t | **Playback Runtime Recovery Race Hardening v3 â€” PASS** |'
++                                                                 ~~~~~~
+Unexpected token 'PASS**' in expression or statement.
+
+At E:\Du_An\MusicFlow\scripts\update-runtime-recovery-v3-plan.ps1:48 char:180
++ ...  nháº¥t | **Playback Runtime Recovery Race Hardening v3 â€” PASS** |'
++                                                                         ~
+Expressions are only allowed as the first element of a pipeline.
+
+At E:\Du_An\MusicFlow\scripts\update-runtime-recovery-v3-plan.ps1:49 char:42
++     $content = Replace-OneLine $content '^\| JVM unit tests \(má»‘c ( ...
++                                          ~~
+Unexpected token '^\' in expression or statement.
+
+At E:\Du_An\MusicFlow\scripts\update-runtime-recovery-v3-plan.ps1:49 char:144
++ ... 3)\) \|.*$' '| JVM unit tests (má»‘c v3) | **PASS** (`exitCode=0`) |'
++                                                                         ~
+Expressions are only allowed as the first element of a pipeline.
+
+At E:\Du_An\MusicFlow\scripts\update-runtime-recovery-v3-plan.ps1:50 char:42
++     $content = Replace-OneLine $content '^\| Android instrumented tes ...
++                                          ~~
+Unexpected token '^\' in expression or statement.
+
+Not all parse errors were reported.  Correct the reported errors and try again.
