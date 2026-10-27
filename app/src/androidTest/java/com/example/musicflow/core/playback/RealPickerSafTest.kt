@@ -3,7 +3,9 @@ package com.example.musicflow.core.playback
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.graphics.Rect
 import android.net.Uri
+import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import android.provider.DocumentsContract
 import android.util.Log
@@ -157,7 +159,26 @@ class RealPickerSafTest {
                 node.contentDescription?.toString().orEmpty()
                     .take(100)
 
-            if (text.isNotBlank() || description.isNotBlank()) {
+            val actionLabels = setOf(
+                "open", "select", "má»Ÿ", "chá»n",
+                "recent", "gáº§n Ä‘Ã¢y"
+            )
+
+            val isQaFile =
+                text.startsWith("musicflow_real_picker_")
+            val isActionLabel =
+                text.lowercase() in actionLabels
+            val isImportantView =
+                (node.viewIdResourceName ?: "")
+                    .contains("title", ignoreCase = true) ||
+                    (node.viewIdResourceName ?: "")
+                        .contains("button", ignoreCase = true)
+
+            if (
+                (text.isNotBlank() || description.isNotBlank()) &&
+                (isQaFile || isActionLabel || isImportantView)
+            ) {
+
                 Log.i(
                     "MusicFlowRealPickerQA",
                     "$stage UI depth=$depth " +
@@ -178,6 +199,69 @@ class RealPickerSafTest {
         visit(root, 0)
     }
 
+    private fun findDocumentTitleNode(
+        node: AccessibilityNodeInfo?,
+        title: String
+    ): AccessibilityNodeInfo? {
+        if (node == null) return null
+
+        if (
+            node.viewIdResourceName == "android:id/title" &&
+            node.text?.toString() == title
+        ) {
+            return node
+        }
+
+        for (i in 0 until node.childCount) {
+            findDocumentTitleNode(
+                node.getChild(i),
+                title
+            )?.let { return it }
+        }
+
+        return null
+    }
+
+    private fun longPressDocumentTitle(
+        node: AccessibilityNodeInfo
+    ): Boolean {
+        val bounds = Rect()
+        node.getBoundsInScreen(bounds)
+
+        if (bounds.width() <= 0 || bounds.height() <= 0) {
+            Log.w(
+                "MusicFlowRealPickerQA",
+                "INVALID_DOCUMENT_TITLE_BOUNDS"
+            )
+            return false
+        }
+
+        val x = bounds.centerX()
+        val y = bounds.centerY()
+
+        Log.i(
+            "MusicFlowRealPickerQA",
+            "LONG_PRESS_DOCUMENT_TITLE x=$x y=$y"
+        )
+
+        // Nháº¥n giá»¯ báº±ng sá»± kiá»‡n cháº¡m Android thá»±c táº¿.
+        // KhÃ´ng báº¥m vÃ o nÃºt Preview.
+        val command =
+            "input touchscreen swipe $x $y $x $y 900"
+
+        ParcelFileDescriptor.AutoCloseInputStream(
+            instrumentation.uiAutomation.executeShellCommand(
+                command
+            )
+        ).use { input ->
+            while (input.read() != -1) {
+                // Äá»c háº¿t output.
+            }
+        }
+
+        return true
+    }
+
     private fun selectRealDocument(title: String): Boolean {
         val deadline =
             SystemClock.uptimeMillis() + 30_000L
@@ -188,9 +272,7 @@ class RealPickerSafTest {
             val root =
                 instrumentation.uiAutomation.rootInActiveWindow
 
-            val file = findNode(root) {
-                it.contains(title, ignoreCase = true)
-            }
+            val file = findDocumentTitleNode(root, title)
 
             if (file != null) {
                 logPickerUi("BEFORE_SELECTION")
@@ -199,7 +281,8 @@ class RealPickerSafTest {
                 // Æ¯u tiÃªn nháº¥n giá»¯ Ä‘á»ƒ vÃ o cháº¿ Ä‘á»™ chá»n.
                 val longPressed = longClickNode(file)
 
-                val selected = longPressed || clickNode(file)
+                val selected = longPressed ||
+                    longPressDocumentTitle(file)
 
                 Log.i(
                     "MusicFlowRealPickerQA",
@@ -227,6 +310,19 @@ class RealPickerSafTest {
 
                     val currentPackage =
                         activeRoot?.packageName?.toString()
+
+                    if (
+                        currentPackage != null &&
+                        currentPackage != context.packageName &&
+                        currentPackage != "com.google.android.documentsui"
+                    ) {
+                        Log.e(
+                            "MusicFlowRealPickerQA",
+                            "UNEXPECTED_PICKER_PACKAGE=$currentPackage"
+                        )
+
+                        return false
+                    }
 
                     if (currentPackage != lastPackage) {
                         Log.i(

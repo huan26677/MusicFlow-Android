@@ -38,8 +38,8 @@ try {
         $emulator = Join-Path $sdk "emulator\emulator.exe"
         if (!(Test-Path $emulator)) { throw "EMULATOR_NOT_FOUND" }
         $avds = @(& $emulator -list-avds)
-        if ($avds -notcontains "Pixel_5") { throw "PIXEL_5_AVD_NOT_FOUND" }
-        Start-Process $emulator -ArgumentList @("-avd", "Pixel_5")
+        if ($avds -notcontains "Pixel_5_API_30") { throw "PIXEL_5_API_30_AVD_NOT_FOUND" }
+        Start-Process $emulator -ArgumentList @("-avd", "Pixel_5_API_30")
     }
 
     $serial = $null

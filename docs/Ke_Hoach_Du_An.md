@@ -15,7 +15,7 @@
 | Marker | **24/24 PASS** |
 | Kết quả log | `FINAL_RESULT=PASS` (Android 10 Compatibility v1) |
 | Commit chứa vòng QA v2 | `74b9026c1cdb70c9d2ed0563bb747d1a047a061a` |
-| Commit HEAD tại thời điểm rà soát | `eef7b07a` (Real Picker SAF v1 — đang sửa bài kiểm thử) |
+| Commit HEAD tại thời điểm rà soát | `c8b10a7c` (Real Picker SAF v1 — đang sửa bài kiểm thử) |
 | Log gần nhất đã xác nhận | `qa-logs/android10-saf-compat-v1.log` |
 | Bước đang phát triển tiếp | **Real Picker SAF v1 — FAIL, tiếp tục kiểm tra DocumentsUI** |
 | Ngày rà soát | **2026-10-27**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
@@ -222,6 +222,37 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-27 — Real Picker SAF v1 — FAIL lần 3
+
+- Commit: `c8b10a7c8fbe0f1028f7ed8f71e4c3303df2c047`
+- Log: `qa-logs/real-picker-saf-v1.log`
+- Android: API 30.
+- JVM: PASS.
+- Android regression: 1 bài FAIL.
+- Tạo tài liệu WAV: PASS.
+- DocumentsUI hiển thị file: PASS.
+- Nhấn giữ qua Accessibility: thất bại.
+- Bấm ngắn: mở YouTube Music thay vì trả về MusicFlow.
+- FINAL_RESULT=FAIL.
+
+Nguyên nhân đã xác định:
+Hàm tìm file có thể chọn nhầm preview_icon,
+do contentDescription cũng chứa tên file.
+
+Đã chuẩn bị sửa:
+- Chỉ chọn android:id/title có tên file chính xác.
+- Sử dụng thao tác nhấn giữ thực tế.
+- Không fallback sang bấm preview.
+- Ghi lỗi nếu chuyển sang ứng dụng ngoài.
+- Sửa tên AVD trong script kiểm thử.
+
+Bước tiếp theo:
+Chạy lại Real Picker SAF v1 và xác nhận
+DocumentsUI trả URI về MusicFlow.
+
+Mốc PASS gần nhất: Android 10 Compatibility v1.
+Toàn dự án: ĐANG PHÁT TRIỂN, chưa nghiệm thu MVP.
 
 ### 2026-10-27 — Real Picker SAF v1 — FAIL lần 2
 
