@@ -385,7 +385,61 @@ class RealPickerSafTest {
             composeRule.onNodeWithText("Mở thư viện thiết bị")
                 .performClick()
             Log.i("MusicFlowRealPickerQA", "PASS composeUiReady")
+
+            // LibraryRoute asks for media permission when first opened.
+            // Deny it so this test continues to exercise the SAF-only path.
+            val dialogDeadline = SystemClock.uptimeMillis() + 12_000L
+            var libraryStableSince = 0L
+            var permissionDialogSeen = false
+            var permissionDialogDenied = false
+            var previousPackage = ""
+            while (SystemClock.uptimeMillis() < dialogDeadline) {
+                val root = instrumentation.uiAutomation.rootInActiveWindow
+                val foregroundPackage = root?.packageName?.toString().orEmpty()
+                if (foregroundPackage != previousPackage) {
+                    Log.i("MusicFlowRealPickerQA", "LIBRARY_FOREGROUND=$foregroundPackage")
+                    previousPackage = foregroundPackage
+                }
+                if (foregroundPackage.contains("permissioncontroller", ignoreCase = true)) {
+                    libraryStableSince = 0L
+                    permissionDialogSeen = true
+                    val denyButton = findNode(root) { label ->
+                        val normalized = label.trim().lowercase()
+                        normalized == "deny" ||
+                            (normalized.contains("allow") && normalized.contains("don")) ||
+                            (normalized.contains("cho ph") && normalized.startsWith("kh"))
+                    }
+                    if (clickNode(denyButton)) {
+                        permissionDialogDenied = true
+                        Log.i("MusicFlowRealPickerQA", "MEDIA_PERMISSION_DENIED_FOR_SAF_TEST")
+                    }
+                } else if (foregroundPackage == context.packageName) {
+                    if (libraryStableSince == 0L) {
+                        libraryStableSince = SystemClock.uptimeMillis()
+                    }
+                    if (SystemClock.uptimeMillis() - libraryStableSince >= 1400L) {
+                        break
+                    }
+                } else {
+                    libraryStableSince = 0L
+                }
+                SystemClock.sleep(200)
+            }
+            val readyPackage = instrumentation.uiAutomation.rootInActiveWindow
+                ?.packageName?.toString()
+            Log.i(
+                "MusicFlowRealPickerQA",
+                "LIBRARY_PERMISSION_CHECK seen=$permissionDialogSeen " +
+                    "denied=$permissionDialogDenied current=$readyPackage"
+            )
+            assertEquals(
+                "The Android permission dialog or another window still covers Library",
+                context.packageName,
+                readyPackage
+            )
+            composeRule.waitForIdle()
             composeRule.onNodeWithText("Chọn MP3").performClick()
+            Log.i("MusicFlowRealPickerQA", "PASS libraryPickerButtonClicked")
 
             assertTrue(
                 "Document was not selectable in real OpenMultipleDocuments UI",

@@ -222,6 +222,16 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+### 2026-10-28 - Real Picker SAF library permission dialog diagnosis
+
+- GitHub main reviewed: dfd8e452084eef3da967ff294ae86fb22fb82e7f.
+- Fast QA: Kotlin compile PASS, exactly 1 test executed, final FAIL.
+- Actual failure: No compose hierarchies found at second UI action (Choose MP3).
+- PASS composeUiReady was logged immediately after Home->Library click.
+- LibraryRoute can request READ_EXTERNAL_STORAGE on Android 11.
+- Added diagnosis for foreground package and denial of permission prompt to preserve SAF-only testing.
+- Fast QA remains the only required run until it PASS; full regression later.
+- Playback + persisted READ not yet verified. No MVP/release acceptance.
 ### 2026-10-28 - Real Picker SAF Compose rule fix
 
 - Reviewed main 19e39627 and qa-logs/real-picker-saf-fast-v1.log.
