@@ -15,7 +15,7 @@
 | Marker | **24/24 PASS** |
 | Kết quả log | `FINAL_RESULT=PASS` (Android 10 Compatibility v1) |
 | Commit chứa vòng QA v2 | `74b9026c1cdb70c9d2ed0563bb747d1a047a061a` |
-| Commit HEAD tại thời điểm rà soát | `38bba835` (Real Picker SAF v1 — đang sửa bài kiểm thử) |
+| Commit HEAD tại thời điểm rà soát | `dbd721d6` (Real Picker SAF v1 — đang sửa bài kiểm thử) |
 | Log gần nhất đã xác nhận | `qa-logs/android10-saf-compat-v1.log` |
 | Bước đang phát triển tiếp | **Real Picker SAF v1 — FAIL, tiếp tục kiểm tra DocumentsUI** |
 | Ngày rà soát | **2026-10-27**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
@@ -222,6 +222,32 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-27 — Real Picker SAF v1 — FAIL lần 5
+
+- Commit: `dbd721d67825650703973213de29f3f715c866d4`
+- Log: `qa-logs/real-picker-saf-v1.log`
+- Android: API 30.
+- Kotlin compilation: PASS.
+- JVM: PASS.
+- Android regression: 1 bài FAIL.
+- UiAutomation DOWN/UP: PASS.
+- Long press: chưa làm DocumentsUI hoàn tất chọn file.
+- Accessibility row click: không tìm được phần tử phù hợp.
+- Playback và persisted READ: chưa xác nhận.
+- FINAL_RESULT=FAIL.
+
+Thay đổi tiếp theo:
+- Thử chạm ngắn đúng vị trí tên file.
+- Không chạm biểu tượng Preview.
+- Chỉ công nhận thành công khi picker quay về MusicFlow.
+- Giữ nguyên assertion playback và persisted READ.
+
+Bước tiếp theo:
+Chạy lại Real Picker SAF v1.
+
+Mốc PASS gần nhất: Android 10 Compatibility v1.
+Trạng thái toàn dự án: CHƯA NGHIỆM THU MVP.
 
 ### 2026-10-27 — Real Picker SAF v1 — FAIL lần 4
 

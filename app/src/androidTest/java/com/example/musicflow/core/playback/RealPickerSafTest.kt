@@ -120,27 +120,6 @@ class RealPickerSafTest {
         return false
     }
 
-    private fun longClickNode(
-        node: AccessibilityNodeInfo?
-    ): Boolean {
-        var current = node
-
-        while (current != null) {
-            if (
-                current.isLongClickable &&
-                current.performAction(
-                    AccessibilityNodeInfo.ACTION_LONG_CLICK
-                )
-            ) {
-                return true
-            }
-
-            current = current.parent
-        }
-
-        return false
-    }
-
     private fun logPickerUi(stage: String) {
         val root =
             instrumentation.uiAutomation.rootInActiveWindow
@@ -230,16 +209,13 @@ class RealPickerSafTest {
         return null
     }
 
-    private fun longPressDocumentTitle(
+    private fun tapDocumentTitle(
         node: AccessibilityNodeInfo
     ): Boolean {
         val bounds = Rect()
         node.getBoundsInScreen(bounds)
 
-        if (
-            bounds.isEmpty ||
-            !node.isVisibleToUser
-        ) {
+        if (bounds.isEmpty || !node.isVisibleToUser) {
             Log.e(
                 "MusicFlowRealPickerQA",
                 "DOCUMENT_TITLE_NOT_VISIBLE"
@@ -247,93 +223,53 @@ class RealPickerSafTest {
             return false
         }
 
-        val x = bounds.centerX().toFloat()
-        val y = bounds.centerY().toFloat()
-
-        val automation = instrumentation.uiAutomation
+        val x = bounds.exactCenterX()
+        val y = bounds.exactCenterY()
         val downTime = SystemClock.uptimeMillis()
 
-        fun inject(action: Int): Boolean {
-            val event = MotionEvent.obtain(
-                downTime,
-                SystemClock.uptimeMillis(),
-                action,
-                x,
-                y,
-                0
+        val down = MotionEvent.obtain(
+            downTime,
+            downTime,
+            MotionEvent.ACTION_DOWN,
+            x, y, 0
+        )
+
+        val up = MotionEvent.obtain(
+            downTime,
+            downTime + 100L,
+            MotionEvent.ACTION_UP,
+            x, y, 0
+        )
+
+        down.source = InputDevice.SOURCE_TOUCHSCREEN
+        up.source = InputDevice.SOURCE_TOUCHSCREEN
+
+        return try {
+            val downOk =
+                instrumentation.uiAutomation
+                    .injectInputEvent(down, true)
+
+            SystemClock.sleep(100)
+
+            val upOk =
+                instrumentation.uiAutomation
+                    .injectInputEvent(up, true)
+
+            Log.i(
+                "MusicFlowRealPickerQA",
+                "TITLE_TAP down=$downOk up=$upOk"
             )
 
-            event.source = InputDevice.SOURCE_TOUCHSCREEN
-
-            return try {
-                automation.injectInputEvent(event, true)
-            } finally {
-                event.recycle()
-            }
+            downOk && upOk
+        } finally {
+            down.recycle()
+            up.recycle()
         }
-
-        val downOk = inject(MotionEvent.ACTION_DOWN)
-
-        // Äáº£m báº£o vÆ°á»£t ngÆ°á»¡ng long press.
-        SystemClock.sleep(1200)
-
-        val upOk = inject(MotionEvent.ACTION_UP)
-
-        val success = downOk && upOk
-
-        Log.i(
-            "MusicFlowRealPickerQA",
-            "TOUCH_LONG_PRESS " +
-                "x=$x y=$y " +
-                "down=$downOk up=$upOk " +
-                "success=$success"
-        )
-
-        return success
-    }
-
-    private fun clickDocumentRow(
-        titleNode: AccessibilityNodeInfo
-    ): Boolean {
-        var current = titleNode.parent
-
-        while (current != null) {
-            val id = current.viewIdResourceName.orEmpty()
-            val description =
-                current.contentDescription?.toString().orEmpty()
-
-            if (
-                current.isClickable &&
-                !id.contains("preview", ignoreCase = true) &&
-                !description.startsWith(
-                    "Preview the file",
-                    ignoreCase = true
-                )
-            ) {
-                Log.i(
-                    "MusicFlowRealPickerQA",
-                    "DOCUMENT_ROW_ACTION id=$id"
-                )
-
-                return current.performAction(
-                    AccessibilityNodeInfo.ACTION_CLICK
-                )
-            }
-
-            current = current.parent
-        }
-
-        Log.w(
-            "MusicFlowRealPickerQA",
-            "DOCUMENT_ROW_ACTION_NOT_FOUND"
-        )
-
-        return false
     }
 
     private fun selectRealDocument(title: String): Boolean {
         val deadline =
-            SystemClock.uptimeMillis() + 30_000L
+            SystemClock.uptimeMillis() + 25_000L
 
         var visitedRecent = false
 
@@ -344,68 +280,24 @@ class RealPickerSafTest {
             val file = findDocumentTitleNode(root, title)
 
             if (file != null) {
-                logPickerUi("BEFORE_SELECTION")
+                logPickerUi("BEFORE_TAP")
 
-                // OpenMultipleDocuments há»— trá»£ chá»n nhiá»u file.
-                // Æ¯u tiÃªn nháº¥n giá»¯ Ä‘á»ƒ vÃ o cháº¿ Ä‘á»™ chá»n.
-                val longPressed = longClickNode(file)
-
-                val selected = longPressed ||
-                    longPressDocumentTitle(file)
-
-                Log.i(
-                    "MusicFlowRealPickerQA",
-                    "FILE_SELECTION_ACTION " +
-                        "longPress=$longPressed success=$selected"
+                assertTrue(
+                    "KhÃ´ng gá»­i Ä‘Æ°á»£c thao tÃ¡c cháº¡m tÃªn file",
+                    tapDocumentTitle(file)
                 )
 
-                if (!selected) return false
+                SystemClock.sleep(500)
+                logPickerUi("AFTER_TAP")
 
-                SystemClock.sleep(400)
-                logPickerUi("AFTER_SELECTION")
-
-                // Náº¿u long press khÃ´ng táº¡o nÃºt Open/Select,
-                // thá»­ click pháº§n tá»­ cha cá»§a chÃ­nh tÃªn file.
-                val selectionRoot =
-                    instrumentation.uiAutomation.rootInActiveWindow
-
-                val hasOpenAction = findNode(selectionRoot) {
-                    val label = it.trim().lowercase()
-
-                    label == "open" ||
-                        label == "select" ||
-                        label == "má»Ÿ" ||
-                        label == "chá»n"
-                } != null
-
-                if (
-                    selectionRoot?.packageName?.toString() ==
-                        "com.google.android.documentsui" &&
-                    !hasOpenAction
-                ) {
-                    val currentTitle = findDocumentTitleNode(
-                        selectionRoot,
-                        title
-                    )
-
-                    if (currentTitle != null) {
-                        val rowClicked = clickDocumentRow(currentTitle)
-
-                        Log.i(
-                            "MusicFlowRealPickerQA",
-                            "ROW_CLICK_FALLBACK=$rowClicked"
-                        )
-                    }
-                }
-
-                val confirmDeadline =
-                    SystemClock.uptimeMillis() + 15_000L
-
-                var confirmClicked = false
+                var confirmationClicked = false
                 var lastPackage: String? = null
 
+                val returnDeadline =
+                    SystemClock.uptimeMillis() + 15_000L
+
                 while (
-                    SystemClock.uptimeMillis() < confirmDeadline
+                    SystemClock.uptimeMillis() < returnDeadline
                 ) {
                     val activeRoot =
                         instrumentation.uiAutomation
@@ -413,19 +305,6 @@ class RealPickerSafTest {
 
                     val currentPackage =
                         activeRoot?.packageName?.toString()
-
-                    if (
-                        currentPackage != null &&
-                        currentPackage != context.packageName &&
-                        currentPackage != "com.google.android.documentsui"
-                    ) {
-                        Log.e(
-                            "MusicFlowRealPickerQA",
-                            "UNEXPECTED_PICKER_PACKAGE=$currentPackage"
-                        )
-
-                        return false
-                    }
 
                     if (currentPackage != lastPackage) {
                         Log.i(
@@ -443,33 +322,39 @@ class RealPickerSafTest {
                         return true
                     }
 
-                    if (!confirmClicked) {
+                    if (
+                        currentPackage != null &&
+                        currentPackage !=
+                            "com.google.android.documentsui"
+                    ) {
+                        Log.e(
+                            "MusicFlowRealPickerQA",
+                            "UNEXPECTED_PICKER_PACKAGE=$currentPackage"
+                        )
+                        return false
+                    }
+
+                    if (!confirmationClicked) {
                         val confirmation = findNode(activeRoot) {
                             val label = it.trim().lowercase()
 
                             label == "open" ||
+                                label.startsWith("open (") ||
                                 label == "select" ||
+                                label.startsWith("select (") ||
                                 label == "má»Ÿ" ||
                                 label == "chá»n"
                         }
 
                         if (confirmation != null) {
+                            confirmationClicked =
+                                clickNode(confirmation)
+
                             Log.i(
                                 "MusicFlowRealPickerQA",
-                                "CONFIRM_TARGET " +
-                                    "text=${confirmation.text} " +
-                                    "id=${confirmation.viewIdResourceName} " +
-                                    "class=${confirmation.className}"
+                                "PICKER_CONFIRM_CLICKED=" +
+                                    confirmationClicked
                             )
-
-                            confirmClicked = clickNode(confirmation)
-
-                            if (confirmClicked) {
-                                Log.i(
-                                    "MusicFlowRealPickerQA",
-                                    "PICKER_CONFIRM_CLICKED"
-                                )
-                            }
                         }
                     }
 
@@ -478,11 +363,10 @@ class RealPickerSafTest {
 
                 logPickerUi("PICKER_TIMEOUT")
 
-                Log.w(
+                Log.e(
                     "MusicFlowRealPickerQA",
                     "PICKER_NOT_RETURNED_TO_APP"
                 )
-
                 return false
             }
 
@@ -492,13 +376,16 @@ class RealPickerSafTest {
                 clickNode(findNode(root) {
                     it.trim().equals("Recent", true) ||
                         it.trim().equals("Gáº§n Ä‘Ã¢y", true)
-                })
+                })) 
             }
 
             SystemClock.sleep(200)
         }
 
-        logPickerUi("DOCUMENT_NOT_FOUND")
+        Log.e(
+            "MusicFlowRealPickerQA",
+            "DOCUMENT_TITLE_NOT_FOUND"
+        )
         return false
     }
 
