@@ -15,7 +15,7 @@
 | Marker | **24/24 PASS** |
 | Kết quả log | `FINAL_RESULT=PASS` (Android 10 Compatibility v1) |
 | Commit chứa vòng QA v2 | `74b9026c1cdb70c9d2ed0563bb747d1a047a061a` |
-| Commit HEAD tại thời điểm rà sow | `39f29adaa3452885cdfab26ff49188b598249643` (Real Picker SAF v1 — sửa cú pháp) |
+| Commit HEAD tại thời điểm rà sow | `9231b73a` (Fast QA: second Compose picker action FAIL; accessibility fix pending) |
 | Log gần nhất đã xác nhận | `qa-logs/android10-saf-compat-v1.log` |
 | Bước đang phát triển tiếp | **Real Picker SAF v1 — FAIL, tiếp tục kiểm tra DocumentsUI** |
 | Ngày rà soát | **2026-10-27**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
@@ -222,6 +222,16 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+### 2026-10-28 - Real Picker SAF accessibility click diagnosis
+
+- Reviewed main 9231b73a and qa-logs/real-picker-saf-fast-v1.log.
+- Compile: PASS. Fast QA: one instrumentation test executed, FAIL.
+- Source WAV preparation: PASS; initial Home->Library click: PASS.
+- Permissioncontroller not observed; foreground was com.example.musicflow.
+- Failure at second Compose UI click (Choose MP3): No compose hierarchies found.
+- Test-only change: use clickNamedAction for the Library picker button and log accessibility foreground if it fails.
+- Next step: run isolated Fast QA only, assisted with manual DocumentsUI selection when it opens.
+- Playback and persisted READ are NOT YET verified. Previous Android compatibility PASS baselines unchanged.
 ### 2026-10-28 - Real Picker SAF library permission dialog diagnosis
 
 - GitHub main reviewed: dfd8e452084eef3da967ff294ae86fb22fb82e7f.

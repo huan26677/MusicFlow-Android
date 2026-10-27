@@ -148,7 +148,8 @@ class RealPickerSafTest {
             val isQaFile =
                 text.startsWith("musicflow_real_picker_")
             val isActionLabel =
-                text.lowercase() in actionLabels
+                text.lowercase() in actionLabels ||
+                text.equals("Chọn MP3", ignoreCase = true)
             val isImportantView =
                 (node.viewIdResourceName ?: "").let { id ->
                     id.contains(
@@ -437,8 +438,25 @@ class RealPickerSafTest {
                 context.packageName,
                 readyPackage
             )
-            composeRule.waitForIdle()
-            composeRule.onNodeWithText("Chọn MP3").performClick()
+            // DocumentsUI/permission transitions may detach Compose semantics briefly.
+            // Use Android accessibility for this one second-stage UI action.
+            val pickerClicked = clickNamedAction(20_000L) { actionLabel ->
+                actionLabel.trim().equals("Chọn MP3", ignoreCase = true)
+            }
+            val pickerForeground = instrumentation.uiAutomation
+                .rootInActiveWindow?.packageName?.toString()
+            Log.i(
+                "MusicFlowRealPickerQA",
+                "LIBRARY_PICKER_ACCESSIBILITY_CLICKED=$pickerClicked " +
+                    "package=$pickerForeground"
+            )
+            if (!pickerClicked) {
+                logPickerUi("LIBRARY_PICKER_CLICK_FAILED")
+            }
+            assertTrue(
+                "Library picker button not accessible/clickable",
+                pickerClicked
+            )
             Log.i("MusicFlowRealPickerQA", "PASS libraryPickerButtonClicked")
 
             assertTrue(

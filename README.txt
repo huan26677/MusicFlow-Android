@@ -1,15 +1,20 @@
-# MusicFlow Real Picker SAF - Library Permission Dialog v1
+MusicFlow - Real Picker SAF accessibility fix v1
 
-Source review: GitHub main dfd8e452. On isolated Android 11 API30 Fast QA, the test clicked Home->Library and then failed trying to find the Compose UI when a permission dialog likely covered the screen.
+GitHub HEAD reviewed: 9231b73aaa02754d24ffb8a5aecb004d856fcff9
+Issue: Fast QA compiles and starts exactly one test, but second Compose UI
+click cannot find any Compose hierarchy even though foreground is MusicFlow.
+The Android permission dialog was not seen.
 
-Extract this archive inside E:\Du_An\MusicFlow (so the new file is in scripts).
+Unzip the package into E:\Du_An\MusicFlow so the PS1 appears in scripts\.
+Run in that project directory:
 
-1. powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\fix-real-picker-library-permission-v1.ps1
-2. powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run-real-picker-saf-fast-v1-tests.ps1 -CompileOnly
-3. powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run-real-picker-saf-fast-v1-tests.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\fix-real-picker-accessibility-v1.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run-real-picker-saf-fast-v1-tests.ps1 -CompileOnly
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run-real-picker-saf-fast-v1-tests.ps1
 
-Only one Android test runs in Fast QA. Keep the emulator visible, and manually choose the generated musicflow_real_picker_*.wav file if DocumentsUI opens.
+When DocumentsUI appears, choose the newly created musicflow_real_picker_*.wav
+file with your mouse. This is still a MANUAL_ASSISTED QA run.
 
-Expected diagnostic markers: LIBRARY_FOREGROUND, LIBRARY_PERMISSION_CHECK, PASS libraryPickerButtonClicked. PASS is not claimed without playback + persisted READ assertions and FINAL_RESULT=PASS.
-
-Script is ASCII encoded for Windows PowerShell 5.1 and preserves UTF-8 Kotlin/Markdown content. No production code changes.
+Do not run Full QA until Fast QA passes and both playback and persisted
+READ markers are present. Updated source file is backed up to TEMP.
+The patch aborts if expected source content does not match.
