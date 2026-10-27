@@ -223,6 +223,15 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+### 2026-10-28 — SAF Multi-file v1
+
+- Commit ban đầu: d1ed6fc1
+- Kiểm tra: chọn 2 WAV, thứ tự queue, persisted READ, Next
+- Log: qa-logs/real-picker-saf-multi-v1.log
+- Trạng thái: PENDING QA
+- Real Picker SAF v1: PASS, giữ nguyên
+
+
 ### 2026-10-28 - Real Picker SAF accessibility click diagnosis
 
 - Reviewed main 9231b73a and qa-logs/real-picker-saf-fast-v1.log.

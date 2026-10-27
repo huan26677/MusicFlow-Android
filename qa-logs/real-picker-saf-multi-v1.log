@@ -1,0 +1,25 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20261028015642
+Username: DESKTOP-7A3VQLP\HUAN_PC
+RunAs User: DESKTOP-7A3VQLP\HUAN_PC
+Configuration Name: 
+Machine: DESKTOP-7A3VQLP (Microsoft Windows NT 10.0.19044.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 14792
+PSVersion: 5.1.19041.7802
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.19041.7802
+BuildVersion: 10.0.19041.7802
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is .\qa-logs\real-picker-saf-multi-v1.log
+
+
+**********************
+Windows PowerShell transcript end
+End time: 20261028015706
+**********************
