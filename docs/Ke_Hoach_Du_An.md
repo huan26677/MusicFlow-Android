@@ -15,9 +15,9 @@
 | Marker | **24/24 PASS** |
 | Kết quả log | `FINAL_RESULT=PASS` (Android 10 Compatibility v1) |
 | Commit chứa vòng QA v2 | `74b9026c1cdb70c9d2ed0563bb747d1a047a061a` |
-| Commit HEAD tại thời điểm rà sow | `ddf30296` (Fast QA: RealPickerSafTest.kt sửa xong; openAudioPickerForQa đã hoạt động) |
+| Commit HEAD tại thời điểm rà sow | `2a1286df` (SAF Multi-file v1 — Fast QA PASS) |
 | Log gần nhất đã xác nhận | `qa-logs/real-picker-saf-fast-v1.log` |
-| Bước đang phát triển tiếp | **Real Picker SAF v1 — PASS (manual-assisted); tiếp tục full regression** |
+| Bước đang phát triển tiếp | **SAF Multi-file v1 — Fast QA PASS; tiếp tục Full Regression** |
 | Ngày rà Sox | **2026-10-28**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -225,11 +225,13 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 ## 8. Nhật ký thay đổi — giữ lịch sử
 ### 2026-10-28 — SAF Multi-file v1
 
-- Commit ban đầu: d1ed6fc1
-- Kiểm tra: chọn 2 WAV, thứ tự queue, persisted READ, Next
-- Log: qa-logs/real-picker-saf-multi-v1.log
-- Trạng thái: PENDING QA
-- Real Picker SAF v1: PASS, giữ nguyên
+- Fast QA: PASS — Android API 30
+- Queue 2 file: PASS
+- Thứ tự theo picker: PASS
+- Persisted READ: PASS
+- Next: PASS
+- Full Regression: PENDING
+- MVP: Chưa nghiệm thu
 
 
 ### 2026-10-28 - Real Picker SAF accessibility click diagnosis

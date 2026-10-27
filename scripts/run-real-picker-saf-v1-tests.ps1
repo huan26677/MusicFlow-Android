@@ -90,7 +90,9 @@ try {
         'PASS survivesActivityDestroy', 'PASS controllerControlsWithoutUi',
         'PASS notificationButtonCommands', 'PASS transientAudioFocusLoss',
         'PASS sourcePreparedWithoutPersistedRead',
-        'PASS realPickerPlayback', 'PASS realPickerPersistedRead'
+        'PASS realPickerPlayback', 'PASS realPickerPersistedRead',
+        'PASS multiSourcesPrepared', 'PASS multiQueue',
+        'PASS multiPersistedRead', 'PASS multiNext'
     )
     $markersOk = $true
     foreach ($marker in $markers) {
@@ -114,8 +116,8 @@ try {
         Write-Log "PHASE_TEST_SKIP_${method}=$skipped"
         if (!$skipped) { $skipsOk = $false }
     }
-    $passed = $jvmOk -and $androidOk -and $startCount -eq 51 -and
-        $finishCount -eq 54 -and $skipsOk -and $markersOk
+    $passed = $jvmOk -and $androidOk -and $startCount -eq 52 -and
+        $finishCount -eq 55 -and $skipsOk -and $markersOk
 }
 catch {
     Write-Log "ERROR=$($_.Exception.Message)"
