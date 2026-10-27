@@ -373,10 +373,12 @@ class RealPickerSafTest {
             if (!visitedRecent) {
                 visitedRecent = true
 
-                clickNode(findNode(root) {
-                    it.trim().equals("Recent", true) ||
-                        it.trim().equals("Gáº§n Ä‘Ã¢y", true)
-                })) 
+                clickNode(
+    findNode(root) {
+        it.trim().equals("Recent", true) ||
+            it.trim().equals("Gần đây", true)
+    }
+) 
             }
 
             SystemClock.sleep(200)
