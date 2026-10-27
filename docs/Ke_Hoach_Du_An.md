@@ -15,7 +15,7 @@
 | Marker | **24/24 PASS** |
 | Kết quả log | `FINAL_RESULT=PASS` (Android 10 Compatibility v1) |
 | Commit chứa vòng QA v2 | `74b9026c1cdb70c9d2ed0563bb747d1a047a061a` |
-| Commit HEAD tại thời điểm rà soát | `c8b10a7c` (Real Picker SAF v1 — đang sửa bài kiểm thử) |
+| Commit HEAD tại thời điểm rà soát | `38bba835` (Real Picker SAF v1 — đang sửa bài kiểm thử) |
 | Log gần nhất đã xác nhận | `qa-logs/android10-saf-compat-v1.log` |
 | Bước đang phát triển tiếp | **Real Picker SAF v1 — FAIL, tiếp tục kiểm tra DocumentsUI** |
 | Ngày rà soát | **2026-10-27**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
@@ -222,6 +222,35 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-27 — Real Picker SAF v1 — FAIL lần 4
+
+- Commit: `38bba835b76d17a80f83bda33e3bc263e40363ec`
+- Log: `qa-logs/real-picker-saf-v1.log`
+- Android: API 30.
+- JVM: PASS.
+- Android instrumentation: 1 test FAIL.
+- Tìm đúng android:id/title: PASS.
+- Long press bằng lệnh shell: chưa tạo được lựa chọn.
+- DocumentsUI vẫn hiển thị sau thao tác.
+- Playback và persisted READ: chưa được xác nhận.
+- FINAL_RESULT=FAIL.
+
+Đã chuẩn bị:
+- Thay shell swipe bằng UiAutomation.injectInputEvent.
+- Ghi kết quả DOWN/UP.
+- Thêm fallback bấm phần tử cha của tên file.
+- Giảm log chứa tên file không thuộc QA.
+- Giữ nguyên kiểm tra playback và quyền URI.
+
+Bước tiếp theo:
+Chạy lại Real Picker SAF v1.
+
+Mốc PASS gần nhất:
+Android 10 Compatibility v1.
+
+Toàn dự án:
+ĐANG PHÁT TRIỂN — CHƯA NGHIỆM THU MVP/RELEASE.
 
 ### 2026-10-27 — Real Picker SAF v1 — FAIL lần 3
 
