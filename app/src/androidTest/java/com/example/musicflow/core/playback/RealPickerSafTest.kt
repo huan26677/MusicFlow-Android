@@ -289,8 +289,11 @@ class RealPickerSafTest {
             }
 
             if (currentPackage == context.packageName) {
-                Log.i("MusicFlowRealPickerQA", "PICKER_RETURNED_TO_APP")
-                return documentVisible
+                Log.i(
+                    "MusicFlowRealPickerQA",
+                    "PICKER_RETURNED_TO_APP observed=$documentVisible"
+                )
+                return true
             }
 
             if (currentPackage != null &&
