@@ -91,6 +91,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | Android 13 SAF Compatibility v1 | 50 regression + 3 test theo pha | **PASS** — API 33, SAF persisted read và Favorites playback sau force-stop | `7e2e7b59` · `qa-logs/android13-saf-compat-v1.log` |
 | Android 16 Compatibility v1 | 50 regression + 3 test theo pha | **PASS** — API 36, SAF persistence, Favorites playback và background lifecycle | `69bf34f9` · `qa-logs/android16-saf-compat-v1.log` |
 | Android 10 Compatibility v1 | 50 regression + 3 test theo pha | **PASS** — API 29, SAF persistence và Favorites playback | `74b9026c` · `qa-logs/android10-saf-compat-v1.log` |
+| Real Picker SAF v1 | 51 PASS, 3 test theo pha SKIPPED | **PASS — manual-assisted, API 30** | `19f418ae` · `qa-logs/real-picker-saf-v1.log` |
 
 **Không cộng** các con số 9 + 11 + ... + 31: đây là số lượng test của **các lần chạy tăng dần** với nhiều bài trùng nhau.
 
@@ -251,19 +252,17 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - Do not change PlaybackService or previous PASS baselines.
 - Next run: scripts/run-real-picker-saf-fast-v1-tests.ps1 -CompileOnly; then scripts/run-real-picker-saf-fast-v1-tests.ps1.
 - Real Picker SAF is NOT yet PASS; perform full regression only after isolated Fast QA PASS.
-### 2026-10-28 — Real Picker SAF v1
+### 2026-10-28 — Real Picker SAF v1 — PASS
 
-- Commit: ddf30296
-- Fast QA: PASS
-- Kotlin Compile: PASS
-- Android: 1/1 test PASS (API 30)
+- Commit: 19f418ae
+- JVM: PASS
+- Android API 30: 51 PASS, 3 SKIPPED
 - Real DocumentsUI: PASS (manual-assisted)
 - Playback: PASS
 - Persisted READ: PASS
-- Full Regression: PENDING
-- MVP: Chưa nghiệm thu
-
-### 2026-10-27 — Real Picker SAF v1 — Lỗi cú pháp
+- FINAL_RESULT=PASS
+- Ghi nhận riêng: com.android.bluetooth crash trên Emulator
+- Chưa nghiệm thu toàn bộ MVP
 
 - Commit: `39f29adaa3452885cdfab26ff49188b598249643`
 - Log: `qa-logs/real-picker-saf-v1.log`
