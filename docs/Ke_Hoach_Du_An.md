@@ -222,6 +222,15 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+### 2026-10-28 - Real Picker SAF Compose rule fix
+
+- Reviewed main 19e39627 and qa-logs/real-picker-saf-fast-v1.log.
+- FAST QA compile: PASS; 1 Android instrumentation test started.
+- FAIL at RealPickerSafTest.kt:387: No compose hierarchies found.
+- Prepared change: createAndroidComposeRule<MainActivity>(), remove manual ActivityScenario.launch, synchronize Compose before opening picker.
+- Do not change PlaybackService or previous PASS baselines.
+- Next run: scripts/run-real-picker-saf-fast-v1-tests.ps1 -CompileOnly; then scripts/run-real-picker-saf-fast-v1-tests.ps1.
+- Real Picker SAF is NOT yet PASS; perform full regression only after isolated Fast QA PASS.
 ### 2026-10-28 - Real Picker SAF isolated QA repair
 
 - Reviewed GitHub main d5ed525c: broken Kotlin source includes leftover code below selectRealDocument().

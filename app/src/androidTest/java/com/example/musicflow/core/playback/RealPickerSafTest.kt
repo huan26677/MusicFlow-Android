@@ -13,12 +13,12 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.view.InputDevice
 import android.view.MotionEvent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
-import androidx.test.core.app.ActivityScenario
+
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.musicflow.MainActivity
@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicReference
 @RunWith(AndroidJUnit4::class)
 class RealPickerSafTest {
 
-    @get:Rule val composeRule = createEmptyComposeRule()
+    @get:Rule val composeRule = createAndroidComposeRule<MainActivity>()
 
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val context = instrumentation.targetContext
@@ -316,14 +316,13 @@ class RealPickerSafTest {
         val createError = AtomicReference<String?>(null)
         val finishedCreate = CountDownLatch(1)
 
-        var scenario: ActivityScenario<MainActivity>? = null
+
         var future: ListenableFuture<MediaController>? = null
         var controller: MediaController? = null
 
         try {
-            val launched = ActivityScenario.launch(MainActivity::class.java)
-            scenario = launched
-            launched.onActivity { activity ->
+            val activity = composeRule.activity
+            instrumentation.runOnMainSync {
                 val launcher = activity.activityResultRegistry.register(
                     "musicflow-real-picker-source-v1",
                     ActivityResultContracts.CreateDocument("audio/wav")
@@ -382,8 +381,10 @@ class RealPickerSafTest {
             val media = future.get(20, TimeUnit.SECONDS)
             controller = media
 
+            composeRule.waitForIdle()
             composeRule.onNodeWithText("Mở thư viện thiết bị")
                 .performClick()
+            Log.i("MusicFlowRealPickerQA", "PASS composeUiReady")
             composeRule.onNodeWithText("Chọn MP3").performClick()
 
             assertTrue(
@@ -496,7 +497,7 @@ class RealPickerSafTest {
                     MediaController.releaseFuture(connecting)
                 }
             }
-            scenario?.close()
+
             created.get()?.let { uri ->
                 runBlocking {
                     runCatching {
