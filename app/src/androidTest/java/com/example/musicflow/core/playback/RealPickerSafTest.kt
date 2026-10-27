@@ -172,13 +172,15 @@ class RealPickerSafTest {
                 text.lowercase() in actionLabels
             val isImportantView =
                 (node.viewIdResourceName ?: "").let { id ->
-                    id.contains("option_menu", ignoreCase = true) ||
-                    id.contains("button", ignoreCase = true)
+                    id.contains(
+                        "option_menu",
+                        ignoreCase = true
+                    ) ||
+                    id.contains(
+                        "button",
+                        ignoreCase = true
+                    )
                 }
-
-                    .contains("title", ignoreCase = true) ||
-                    (node.viewIdResourceName ?: "")
-                        .contains("button", ignoreCase = true)
 
             if (
                 (text.isNotBlank() || description.isNotBlank()) &&
