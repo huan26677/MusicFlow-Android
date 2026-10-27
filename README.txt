@@ -1,20 +1,22 @@
-MusicFlow Real OpenMultipleDocuments SAF v1 — patch đề xuất (CHƯA CHẠY QA)
+MusicFlow: tách QA để sửa lỗi nhanh (2026-10-27)
 
-Sao chép đúng cấu trúc thư mục vào E:\Du_An\MusicFlow.
-Tệp được thêm:
-- app/src/androidTest/java/com/example/musicflow/core/playback/RealPickerSafTest.kt
-- scripts/run-real-picker-saf-v1-tests.ps1
+Nguồn đối chiếu: GitHub main commit d5ed525c, nơi RealPickerSafTest.kt còn đoạn hàm cũ sau selectRealDocument(), gây hàng loạt lỗi Kotlin compile.
 
-Chuẩn bị: một Android 11 (API 30) Emulator với AVD Pixel_5 và đóng những Emulator khác.
-Chạy tại thư mục gốc: powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run-real-picker-saf-v1-tests.ps1
-Log: qa-logs/real-picker-saf-v1.log
+CÀI ĐẶT
+1. Giải nén nội dung ZIP vào E:\Du_An\MusicFlow (giữ cấu trúc scripts/).
+2. Trong PowerShell tại E:\Du_An\MusicFlow, chạy:
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\fix-real-picker-and-split-qa-v1.ps1
 
-Bộ kiểm thử dự kiến: 51 bài thông thường, 3 bài SAF giai đoạn được skip như thiết kế;
-23 marker (20 cũ + 3 mới) bắt buộc PASS.
-Bài mới dùng ACTION_CREATE_DOCUMENT để tạo file âm thanh test nhưng dùng UI MusicFlow
-và ACTION_OPEN_DOCUMENT thật để chọn lại file; kiểm tra callback production lưu READ grant,
-phát nhạc đúng URI. Chưa kiểm chứng persisted grant sau force-stop của URI từ picker.
-Bài SAF Permission Persistence v1 đã kiểm tra force-stop đối với URI CreateDocument.
+KIỂM TRA NHANH (không cần Emulator)
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run-real-picker-saf-fast-v1-tests.ps1 -CompileOnly
 
-Chưa có log PASS; có thể cần điều chỉnh thao tác DocumentsUI theo API/system image cụ thể.
-Không sửa logic Media3/PlaybackService; không xóa assertions khi test FAIL.
+KIỂM TRA RIÊNG REAL PICKER (Android 11 API 30 Emulator)
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run-real-picker-saf-fast-v1-tests.ps1
+   Chọn bằng chuột file musicflow_real_picker_*.wav mới tạo khi DocumentsUI xuất hiện.
+   Log: qa-logs/real-picker-saf-fast-v1.log
+
+KIỂM TRA ĐẦY ĐỦ - CHỈ SAU KHI FAST PASS
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run-real-picker-saf-v1-tests.ps1
+   Log: qa-logs/real-picker-saf-v1.log
+
+Lưu ý: PASS nhanh không thay thế PASS hồi quy đầy đủ. Lệnh CompileOnly xác nhận mã biên dịch, không được dùng làm bằng chứng picker hoạt động. Script sửa Kotlin được thiết kế để dừng nếu không tìm được đúng version và vị trí test. Nếu GitHub có commit mới sửa cùng hàm, cần kiểm tra trước khi áp dụng.
