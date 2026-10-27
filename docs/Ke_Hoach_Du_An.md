@@ -15,10 +15,10 @@
 | Marker | **24/24 PASS** |
 | Kết quả log | `FINAL_RESULT=PASS` (Android 10 Compatibility v1) |
 | Commit chứa vòng QA v2 | `74b9026c1cdb70c9d2ed0563bb747d1a047a061a` |
-| Commit HEAD tại thời điểm rà sow | `9231b73a` (Fast QA: second Compose picker action FAIL; accessibility fix pending) |
-| Log gần nhất đã xác nhận | `qa-logs/android10-saf-compat-v1.log` |
-| Bước đang phát triển tiếp | **Real Picker SAF v1 — FAIL, tiếp tục kiểm tra DocumentsUI** |
-| Ngày rà soát | **2026-10-27**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
+| Commit HEAD tại thời điểm rà sow | `ddf30296` (Fast QA: RealPickerSafTest.kt sửa xong; openAudioPickerForQa đã hoạt động) |
+| Log gần nhất đã xác nhận | `qa-logs/real-picker-saf-fast-v1.log` |
+| Bước đang phát triển tiếp | **Real Picker SAF v1 — PASS (manual-assisted); tiếp tục full regression** |
+| Ngày rà Sox | **2026-10-28**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
 
@@ -251,15 +251,17 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - Do not change PlaybackService or previous PASS baselines.
 - Next run: scripts/run-real-picker-saf-fast-v1-tests.ps1 -CompileOnly; then scripts/run-real-picker-saf-fast-v1-tests.ps1.
 - Real Picker SAF is NOT yet PASS; perform full regression only after isolated Fast QA PASS.
-### 2026-10-28 - Real Picker SAF isolated QA repair
+### 2026-10-28 — Real Picker SAF v1
 
-- Reviewed GitHub main d5ed525c: broken Kotlin source includes leftover code below selectRealDocument().
-- Replaced one complete function region and kept playback / persisted READ assertions unchanged.
-- Compile only: scripts/run-real-picker-saf-fast-v1-tests.ps1 -CompileOnly.
-- Isolated device QA: scripts/run-real-picker-saf-fast-v1-tests.ps1; log qa-logs/real-picker-saf-fast-v1.log.
-- Full regression: scripts/run-real-picker-saf-v1-tests.ps1 after fast PASS.
-- Current Real Picker SAF status: PENDING; do not claim PASS before a successful log.
-- Prior Android API 29/30/33/36 PASS results remain historical baselines, not substitute for release regression.
+- Commit: ddf30296
+- Fast QA: PASS
+- Kotlin Compile: PASS
+- Android: 1/1 test PASS (API 30)
+- Real DocumentsUI: PASS (manual-assisted)
+- Playback: PASS
+- Persisted READ: PASS
+- Full Regression: PENDING
+- MVP: Chưa nghiệm thu
 
 ### 2026-10-27 — Real Picker SAF v1 — Lỗi cú pháp
 
