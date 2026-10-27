@@ -116,9 +116,74 @@ class RealPickerSafTest {
         return false
     }
 
+    private fun longClickNode(
+        node: AccessibilityNodeInfo?
+    ): Boolean {
+        var current = node
+
+        while (current != null) {
+            if (
+                current.isLongClickable &&
+                current.performAction(
+                    AccessibilityNodeInfo.ACTION_LONG_CLICK
+                )
+            ) {
+                return true
+            }
+
+            current = current.parent
+        }
+
+        return false
+    }
+
+    private fun logPickerUi(stage: String) {
+        val root =
+            instrumentation.uiAutomation.rootInActiveWindow
+
+        Log.i(
+            "MusicFlowRealPickerQA",
+            "$stage ROOT_PACKAGE=${root?.packageName}"
+        )
+
+        var recorded = 0
+
+        fun visit(node: AccessibilityNodeInfo?, depth: Int) {
+            if (node == null || recorded >= 70) return
+
+            val text = node.text?.toString().orEmpty()
+                .take(100)
+            val description =
+                node.contentDescription?.toString().orEmpty()
+                    .take(100)
+
+            if (text.isNotBlank() || description.isNotBlank()) {
+                Log.i(
+                    "MusicFlowRealPickerQA",
+                    "$stage UI depth=$depth " +
+                        "text=$text desc=$description " +
+                        "id=${node.viewIdResourceName} " +
+                        "class=${node.className} " +
+                        "clickable=${node.isClickable} " +
+                        "selected=${node.isSelected}"
+                )
+                recorded++
+            }
+
+            for (i in 0 until node.childCount) {
+                visit(node.getChild(i), depth + 1)
+            }
+        }
+
+        visit(root, 0)
+    }
+
     private fun selectRealDocument(title: String): Boolean {
-        val deadline = SystemClock.uptimeMillis() + 25_000L
+        val deadline =
+            SystemClock.uptimeMillis() + 30_000L
+
         var visitedRecent = false
+
         while (SystemClock.uptimeMillis() < deadline) {
             val root =
                 instrumentation.uiAutomation.rootInActiveWindow
@@ -126,16 +191,32 @@ class RealPickerSafTest {
             val file = findNode(root) {
                 it.contains(title, ignoreCase = true)
             }
-            if (file != null && clickNode(file)) {
+
+            if (file != null) {
+                logPickerUi("BEFORE_SELECTION")
+
+                // OpenMultipleDocuments há»— trá»£ chá»n nhiá»u file.
+                // Æ¯u tiÃªn nháº¥n giá»¯ Ä‘á»ƒ vÃ o cháº¿ Ä‘á»™ chá»n.
+                val longPressed = longClickNode(file)
+
+                val selected = longPressed || clickNode(file)
+
                 Log.i(
                     "MusicFlowRealPickerQA",
-                    "DOCUMENT_ROW_CLICKED"
+                    "FILE_SELECTION_ACTION " +
+                        "longPress=$longPressed success=$selected"
                 )
 
-                val confirmDeadline =
-                    SystemClock.uptimeMillis() + 12_000L
+                if (!selected) return false
 
-                var confirmationClicked = false
+                SystemClock.sleep(400)
+                logPickerUi("AFTER_SELECTION")
+
+                val confirmDeadline =
+                    SystemClock.uptimeMillis() + 15_000L
+
+                var confirmClicked = false
+                var lastPackage: String? = null
 
                 while (
                     SystemClock.uptimeMillis() < confirmDeadline
@@ -144,10 +225,18 @@ class RealPickerSafTest {
                         instrumentation.uiAutomation
                             .rootInActiveWindow
 
-                    val activePackage =
+                    val currentPackage =
                         activeRoot?.packageName?.toString()
 
-                    if (activePackage == context.packageName) {
+                    if (currentPackage != lastPackage) {
+                        Log.i(
+                            "MusicFlowRealPickerQA",
+                            "ACTIVE_WINDOW_PACKAGE=$currentPackage"
+                        )
+                        lastPackage = currentPackage
+                    }
+
+                    if (currentPackage == context.packageName) {
                         Log.i(
                             "MusicFlowRealPickerQA",
                             "PICKER_RETURNED_TO_APP"
@@ -155,25 +244,28 @@ class RealPickerSafTest {
                         return true
                     }
 
-                    if (!confirmationClicked) {
+                    if (!confirmClicked) {
                         val confirmation = findNode(activeRoot) {
                             val label = it.trim().lowercase()
 
                             label == "open" ||
                                 label == "select" ||
-                                label == "mở" ||
-                                label == "chọn" ||
-                                label.startsWith("open (") ||
-                                label.startsWith("select (") ||
-                                label.startsWith("open ") ||
-                                label.startsWith("select ")
+                                label == "má»Ÿ" ||
+                                label == "chá»n"
                         }
 
                         if (confirmation != null) {
-                            confirmationClicked =
-                                clickNode(confirmation)
+                            Log.i(
+                                "MusicFlowRealPickerQA",
+                                "CONFIRM_TARGET " +
+                                    "text=${confirmation.text} " +
+                                    "id=${confirmation.viewIdResourceName} " +
+                                    "class=${confirmation.className}"
+                            )
 
-                            if (confirmationClicked) {
+                            confirmClicked = clickNode(confirmation)
+
+                            if (confirmClicked) {
                                 Log.i(
                                     "MusicFlowRealPickerQA",
                                     "PICKER_CONFIRM_CLICKED"
@@ -185,6 +277,8 @@ class RealPickerSafTest {
                     SystemClock.sleep(200)
                 }
 
+                logPickerUi("PICKER_TIMEOUT")
+
                 Log.w(
                     "MusicFlowRealPickerQA",
                     "PICKER_NOT_RETURNED_TO_APP"
@@ -192,21 +286,20 @@ class RealPickerSafTest {
 
                 return false
             }
+
             if (!visitedRecent) {
                 visitedRecent = true
+
                 clickNode(findNode(root) {
                     it.trim().equals("Recent", true) ||
-                        it.trim().equals("Gần đây", true)
+                        it.trim().equals("Gáº§n Ä‘Ã¢y", true)
                 })
             }
+
             SystemClock.sleep(200)
         }
 
-        Log.w(
-            "MusicFlowRealPickerQA",
-            "DOCUMENT_NOT_FOUND_IN_PICKER"
-        )
-
+        logPickerUi("DOCUMENT_NOT_FOUND")
         return false
     }
 

@@ -15,9 +15,9 @@
 | Marker | **24/24 PASS** |
 | Kết quả log | `FINAL_RESULT=PASS` (Android 10 Compatibility v1) |
 | Commit chứa vòng QA v2 | `74b9026c1cdb70c9d2ed0563bb747d1a047a061a` |
-| Commit HEAD tại thời điểm rà soát | `74b9026c` (commit QA Android 10 Compatibility v1) |
+| Commit HEAD tại thời điểm rà soát | `eef7b07a` (Real Picker SAF v1 — đang sửa bài kiểm thử) |
 | Log gần nhất đã xác nhận | `qa-logs/android10-saf-compat-v1.log` |
-| Bước đang phát triển tiếp | **Real OpenMultipleDocuments SAF v1 — FAIL, đang sửa bài kiểm thử** |
+| Bước đang phát triển tiếp | **Real Picker SAF v1 — FAIL, tiếp tục kiểm tra DocumentsUI** |
 | Ngày rà soát | **2026-10-27**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -222,6 +222,33 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-27 — Real Picker SAF v1 — FAIL lần 2
+
+- Commit: `eef7b07af779b43a5d9aedbb964c144d110888df`
+- Log: `qa-logs/real-picker-saf-v1.log`
+- Android: API 30.
+- JVM: PASS.
+- Android regression: 1 test FAIL.
+- Tạo file SAF: PASS.
+- DOCUMENT_ROW_CLICKED: có.
+- PICKER_CONFIRM_CLICKED: có.
+- PICKER_NOT_RETURNED_TO_APP: có.
+- Playback và persisted READ: chưa xác nhận.
+- FINAL_RESULT=FAIL.
+
+Đã chuẩn bị cải thiện bài test:
+- Thử nhấn giữ để chọn nhiều tài liệu.
+- Xác nhận đúng nút Open/Select.
+- Ghi package của cửa sổ đang hiển thị.
+- Ghi accessibility hierarchy khi picker không đóng.
+- Giữ nguyên assertions playback và persisted READ.
+
+Bước tiếp theo:
+Chạy lại Real Picker SAF v1, phân tích log mới.
+
+Mốc PASS gần nhất: Android 10 Compatibility v1.
+Trạng thái toàn dự án: CHƯA NGHIỆM THU MVP.
 
 ### 2026-10-27 — Real OpenMultipleDocuments SAF v1 — FAIL
 
