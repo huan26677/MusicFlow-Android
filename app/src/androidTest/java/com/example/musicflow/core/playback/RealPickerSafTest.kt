@@ -306,7 +306,13 @@ class RealPickerSafTest {
             SystemClock.sleep(250)
         }
 
-        Log.e("MusicFlowRealPickerQA", "MANUAL_SELECTION_TIMEOUT")
+        logPickerUi("MANUAL_SELECTION_TIMEOUT")
+
+        Log.e(
+            "MusicFlowRealPickerQA",
+            "MANUAL_SELECTION_TIMEOUT package=" +
+                instrumentation.uiAutomation.rootInActiveWindow?.packageName
+        )
         return false
     }
 
