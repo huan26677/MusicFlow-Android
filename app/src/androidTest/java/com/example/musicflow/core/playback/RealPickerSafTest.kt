@@ -268,181 +268,44 @@ class RealPickerSafTest {
     }
 
     private fun selectRealDocument(title: String): Boolean {
-        val deadline =
-        SystemClock.uptimeMillis() + 90_000L
+        val deadline = SystemClock.uptimeMillis() + 90_000L
+        var documentVisible = false
 
-    var documentVisible = false
+        Log.i("MusicFlowRealPickerQA", "MANUAL_SELECTION_REQUIRED file=$title")
 
-    Log.i(
-        "MusicFlowRealPickerQA",
-        "MANUAL_SELECTION_REQUIRED file=$title"
-    )
+        while (SystemClock.uptimeMillis() < deadline) {
+            val root = instrumentation.uiAutomation.rootInActiveWindow
+            val currentPackage = root?.packageName?.toString()
 
-    while (SystemClock.uptimeMillis() < deadline) {
-        val root =
-            instrumentation.uiAutomation.rootInActiveWindow
-
-        val currentPackage =
-            root?.packageName?.toString()
-
-        if (
-            currentPackage ==
-                "com.google.android.documentsui"
-        ) {
-            if (
-                findDocumentTitleNode(root, title) != null &&
-                !documentVisible
-            ) {
-                documentVisible = true
-
-                Log.i(
-                    "MusicFlowRealPickerQA",
-                    "DOCUMENT_VISIBLE_READY_FOR_SELECTION"
-                )
-            }
-        }
-
-        if (currentPackage == context.packageName) {
-            Log.i(
-                "MusicFlowRealPickerQA",
-                "PICKER_RETURNED_TO_APP"
-            )
-
-            return documentVisible
-        }
-
-        if (
-            currentPackage != null &&
-            currentPackage !=
-                "com.google.android.documentsui"
-        ) {
-            Log.e(
-                "MusicFlowRealPickerQA",
-                "UNEXPECTED_PICKER_PACKAGE=$currentPackage"
-            )
-
-            return false
-        }
-
-        SystemClock.sleep(250)
-    }
-
-    Log.e(
-        "MusicFlowRealPickerQA",
-        "MANUAL_SELECTION_TIMEOUT"
-    )
-
-    return false
-}
-
-            )
-
-                assertTrue(
-                    "KhÃ´ng gá»­i Ä‘Æ°á»£c thao tÃ¡c cháº¡m tÃªn file",
-                    tapDocumentTitle(file)
-                )
-
-                SystemClock.sleep(500)
-                logPickerUi("AFTER_TAP")
-
-                var confirmationClicked = false
-                var lastPackage: String? = null
-
-                val returnDeadline =
-                    SystemClock.uptimeMillis() + 15_000L
-
-                while (
-                    SystemClock.uptimeMillis() < returnDeadline
-                ) {
-                    val activeRoot =
-                        instrumentation.uiAutomation
-                            .rootInActiveWindow
-
-                    val currentPackage =
-                        activeRoot?.packageName?.toString()
-
-                    if (currentPackage != lastPackage) {
-                        Log.i(
-                            "MusicFlowRealPickerQA",
-                            "ACTIVE_WINDOW_PACKAGE=$currentPackage"
-                        )
-                        lastPackage = currentPackage
-                    }
-
-                    if (currentPackage == context.packageName) {
-                        Log.i(
-                            "MusicFlowRealPickerQA",
-                            "PICKER_RETURNED_TO_APP"
-                        )
-                        return true
-                    }
-
-                    if (
-                        currentPackage != null &&
-                        currentPackage !=
-                            "com.google.android.documentsui"
-                    ) {
-                        Log.e(
-                            "MusicFlowRealPickerQA",
-                            "UNEXPECTED_PICKER_PACKAGE=$currentPackage"
-                        )
-                        return false
-                    }
-
-                    if (!confirmationClicked) {
-                        val confirmation = findNode(activeRoot) {
-                            val label = it.trim().lowercase()
-
-                            label == "open" ||
-                                label.startsWith("open (") ||
-                                label == "select" ||
-                                label.startsWith("select (") ||
-                                label == "má»Ÿ" ||
-                                label == "chá»n"
-                        }
-
-                        if (confirmation != null) {
-                            confirmationClicked =
-                                clickNode(confirmation)
-
-                            Log.i(
-                                "MusicFlowRealPickerQA",
-                                "PICKER_CONFIRM_CLICKED=" +
-                                    confirmationClicked
-                            )
-                        }
-                    }
-
-                    SystemClock.sleep(200)
+            if (currentPackage == "com.google.android.documentsui") {
+                if (!documentVisible && findDocumentTitleNode(root, title) != null) {
+                    documentVisible = true
+                    Log.i(
+                        "MusicFlowRealPickerQA",
+                        "DOCUMENT_VISIBLE_READY_FOR_SELECTION"
+                    )
                 }
+            }
 
-                logPickerUi("PICKER_TIMEOUT")
+            if (currentPackage == context.packageName) {
+                Log.i("MusicFlowRealPickerQA", "PICKER_RETURNED_TO_APP")
+                return documentVisible
+            }
 
+            if (currentPackage != null &&
+                currentPackage != "com.google.android.documentsui"
+            ) {
                 Log.e(
                     "MusicFlowRealPickerQA",
-                    "PICKER_NOT_RETURNED_TO_APP"
+                    "UNEXPECTED_PICKER_PACKAGE=$currentPackage"
                 )
                 return false
             }
 
-            if (!visitedRecent) {
-                visitedRecent = true
-
-                clickNode(
-    findNode(root) {
-        it.trim().equals("Recent", true) ||
-            it.trim().equals("Gần đây", true)
-    }
-) 
-            }
-
-            SystemClock.sleep(200)
+            SystemClock.sleep(250)
         }
 
-        Log.e(
-            "MusicFlowRealPickerQA",
-            "DOCUMENT_TITLE_NOT_FOUND"
-        )
+        Log.e("MusicFlowRealPickerQA", "MANUAL_SELECTION_TIMEOUT")
         return false
     }
 

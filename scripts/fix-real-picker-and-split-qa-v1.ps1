@@ -3,20 +3,31 @@ $root = Split-Path -Parent $PSScriptRoot
 $testPath = Join-Path $root 'app\src\androidTest\java\com\example\musicflow\core\playback\RealPickerSafTest.kt'
 $docPath = Join-Path $root 'docs\Ke_Hoach_Du_An.md'
 
-if (!(Test-Path -LiteralPath $testPath)) { throw "TEST_FILE_NOT_FOUND: $testPath" }
+if (-not (Test-Path -LiteralPath $testPath)) {
+    throw "TEST_FILE_NOT_FOUND: $testPath"
+}
+
 $text = [System.IO.File]::ReadAllText($testPath)
 $startToken = '    private fun selectRealDocument(title: String): Boolean {'
 $start = $text.IndexOf($startToken, [System.StringComparison]::Ordinal)
 if ($start -lt 0) { throw 'SELECT_REAL_DOCUMENT_START_NOT_FOUND' }
-$secondStart = $text.IndexOf($startToken, $start + $startToken.Length, [System.StringComparison]::Ordinal)
-if ($secondStart -ge 0) { throw 'DUPLICATE_SELECT_REAL_DOCUMENT' }
+$duplicate = $text.IndexOf($startToken, $start + $startToken.Length, [System.StringComparison]::Ordinal)
+if ($duplicate -ge 0) { throw 'DUPLICATE_SELECT_REAL_DOCUMENT' }
 $end = $text.IndexOf('    @Test', $start + $startToken.Length, [System.StringComparison]::Ordinal)
 if ($end -lt 0) { throw 'NEXT_TEST_MARKER_NOT_FOUND' }
+
 $broken = $text.Substring($start, $end - $start)
-if (!$broken.Contains('MANUAL_SELECTION_REQUIRED')) { throw 'UNEXPECTED_TEST_VERSION' }
-if (!$text.Substring($end, [Math]::Min(130, $text.Length - $end)).Contains('realOpenMultipleDocumentsGrantsPersistedReadAndPlays')) {
-    throw 'NEXT_TEST_NOT_THE_REAL_PICKER_TEST'
+if (-not $broken.Contains('MANUAL_SELECTION_REQUIRED')) {
+    throw 'UNEXPECTED_TEST_VERSION: manual-assisted function not found'
 }
+$remaining = $text.Substring($end)
+if (-not $remaining.Contains('fun realOpenMultipleDocumentsGrantsPersistedReadAndPlays()')) {
+    throw 'REAL_PICKER_TEST_NOT_FOUND_AFTER_REPAIR_REGION'
+}
+if (-not $remaining.Contains('PASS realPickerPlayback') -or -not $remaining.Contains('PASS realPickerPersistedRead')) {
+    throw 'PLAYBACK_OR_PERMISSION_ASSERTIONS_MISSING'
+}
+
 $nl = if ($text.Contains("`r`n")) { "`r`n" } else { "`n" }
 $replacement = @'
     private fun selectRealDocument(title: String): Boolean {
@@ -60,36 +71,60 @@ $replacement = @'
         Log.e("MusicFlowRealPickerQA", "MANUAL_SELECTION_TIMEOUT")
         return false
     }
-
 '@
-$replacement = $replacement.Replace("`n", $nl)
-$updated = $text.Substring(0, $start) + $replacement + $text.Substring($end)
-if ($updated.Contains('assertTrue(') -eq $false) { throw 'ASSERTIONS_MISSING_IN_RESULT' }
-[System.IO.File]::WriteAllText($testPath, $updated, (New-Object System.Text.UTF8Encoding($false)))
-Write-Host 'PASS: Dọn sạch đoạn selectRealDocument cũ bị sót.'
+$replacement = $replacement.Replace("`r`n", "`n").Replace("`n", $nl).TrimEnd()
+$updated = $text.Substring(0, $start) + $replacement + $nl + $nl + $remaining
+
+if ([regex]::Matches($updated, 'private fun selectRealDocument\(').Count -ne 1) {
+    throw 'REPAIR_VALIDATION_FAILED: duplicate selectRealDocument'
+}
+if (-not $updated.Contains('    @Test' + $nl + '    fun realOpenMultipleDocumentsGrantsPersistedReadAndPlays')) {
+    throw 'REPAIR_VALIDATION_FAILED: adjacent test marker missing'
+}
+if ($updated.Contains('PICKER_NOT_RETURNED_TO_APP')) {
+    throw 'REPAIR_VALIDATION_FAILED: leftover old function code'
+}
+
+# Save a copy outside the repository so "git add ." does not stage a backup.
+$backup = Join-Path ([System.IO.Path]::GetTempPath()) ('MusicFlow_RealPickerSafTest_' + (Get-Date -Format 'yyyyMMdd_HHmmss') + '.kt')
+[System.IO.File]::Copy($testPath, $backup, $true)
+
+# Preserve a BOM if one exists; otherwise write UTF-8 without BOM.
+$raw = [System.IO.File]::ReadAllBytes($testPath)
+$hasBom = $raw.Length -ge 3 -and $raw[0] -eq 239 -and $raw[1] -eq 187 -and $raw[2] -eq 191
+$encoding = [System.Text.UTF8Encoding]::new($hasBom)
+[System.IO.File]::WriteAllText($testPath, $updated, $encoding)
+Write-Host 'PASS: Replaced broken selectRealDocument region exactly once.'
+Write-Host "BACKUP=$backup"
 
 if (Test-Path -LiteralPath $docPath) {
     $doc = [System.IO.File]::ReadAllText($docPath)
-    $doc = [regex]::Replace($doc, '(?m)^\| Commit HEAD tại thời điểm rà soát \|[^\r\n]*', '| Commit HEAD tại thời điểm rà soát | `d5ed525c` (trước khi tách QA; xem commit mới nhất trên GitHub sau khi push) |')
-    $doc = [regex]::Replace($doc, '(?m)^\| Bước đang phát triển tiếp \|[^\r\n]*', '| Bước đang phát triển tiếp | **Real Picker SAF v1 — chạy QA nhanh riêng; chưa PASS** |')
-    $section = '## 8. Nhật ký thay đổi — giữ lịch sử'
-    $entry = @'
-### 2026-10-27 — Real Picker SAF v1: tách QA để sửa nhanh
+    $marker = '### 2026-10-28 - Real Picker SAF isolated QA repair'
+    if (-not $doc.Contains($marker)) {
+        $headingMatch = [regex]::Match($doc, '(?m)^## 8\.[^\r\n]*')
+        if (-not $headingMatch.Success) { throw 'DOC_HISTORY_SECTION_8_NOT_FOUND' }
+        $entry = @'
 
-- HEAD được đối chiếu trước khi sửa: `d5ed525c3b856f46090c6374e749f9b7181512df`.
-- Log lỗi: `qa-logs/real-picker-saf-v1.log`; Kotlin instrumentation chưa biên dịch do phần mã cũ sót sau `selectRealDocument()`.
-- Đã sửa hàm `selectRealDocument()` thành một khối duy nhất, giữ kiểm tra playback và persisted READ.
-- Chạy **nhanh**: `scripts/run-real-picker-saf-fast-v1-tests.ps1`, chỉ một bài RealPickerSafTest; log `qa-logs/real-picker-saf-fast-v1.log`.
-- Chạy **đầy đủ**: `scripts/run-real-picker-saf-v1-tests.ps1`, sau khi vòng nhanh PASS; log riêng như trước.
-- Không đánh dấu PASS khi Kotlin compile fail, picker không trả về MusicFlow hoặc thiếu marker playback/persisted READ.
-- Các mốc Android API 29/30/33/36 có PASS lịch sử, nhưng cần hồi quy đầy đủ sau khi thay đổi liên quan.
-- Trạng thái toàn dự án: CHƯA NGHIỆM THU MVP.
+### 2026-10-28 - Real Picker SAF isolated QA repair
+
+- Reviewed GitHub main d5ed525c: broken Kotlin source includes leftover code below selectRealDocument().
+- Replaced one complete function region and kept playback / persisted READ assertions unchanged.
+- Compile only: scripts/run-real-picker-saf-fast-v1-tests.ps1 -CompileOnly.
+- Isolated device QA: scripts/run-real-picker-saf-fast-v1-tests.ps1; log qa-logs/real-picker-saf-fast-v1.log.
+- Full regression: scripts/run-real-picker-saf-v1-tests.ps1 after fast PASS.
+- Current Real Picker SAF status: PENDING; do not claim PASS before a successful log.
+- Prior Android API 29/30/33/36 PASS results remain historical baselines, not substitute for release regression.
 '@
-    if (!$doc.Contains('Real Picker SAF v1: tách QA để sửa nhanh')) {
-        if (!$doc.Contains($section)) { throw 'DOC_HISTORY_SECTION_NOT_FOUND' }
-        $doc = $doc.Replace($section, $section + "`r`n`r`n" + $entry)
+        $insertAt = $headingMatch.Index + $headingMatch.Length
+        $docNl = if ($doc.Contains("`r`n")) { "`r`n" } else { "`n" }
+        $doc = $doc.Insert($insertAt, $entry.Replace("`r`n", "`n").Replace("`n", $docNl))
+        $docRaw = [System.IO.File]::ReadAllBytes($docPath)
+        $docBom = $docRaw.Length -ge 3 -and $docRaw[0] -eq 239 -and $docRaw[1] -eq 187 -and $docRaw[2] -eq 191
+        [System.IO.File]::WriteAllText($docPath, $doc, ([System.Text.UTF8Encoding]::new($docBom)))
+        Write-Host 'PASS: Appended QA handoff note to docs/Ke_Hoach_Du_An.md.'
+    } else {
+        Write-Host 'SKIP: QA handoff note already exists.'
     }
-    [System.IO.File]::WriteAllText($docPath, $doc, (New-Object System.Text.UTF8Encoding($false)))
-    Write-Host 'PASS: Đã cập nhật docs/Ke_Hoach_Du_An.md.'
 }
-Write-Host 'Hoàn tất. Bước kế tiếp: chạy script FAST, chỉ một bài Real Picker.'
+
+Write-Host 'NEXT: run compile-only Fast QA before any device test.'

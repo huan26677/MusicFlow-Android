@@ -222,6 +222,15 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+### 2026-10-28 - Real Picker SAF isolated QA repair
+
+- Reviewed GitHub main d5ed525c: broken Kotlin source includes leftover code below selectRealDocument().
+- Replaced one complete function region and kept playback / persisted READ assertions unchanged.
+- Compile only: scripts/run-real-picker-saf-fast-v1-tests.ps1 -CompileOnly.
+- Isolated device QA: scripts/run-real-picker-saf-fast-v1-tests.ps1; log qa-logs/real-picker-saf-fast-v1.log.
+- Full regression: scripts/run-real-picker-saf-v1-tests.ps1 after fast PASS.
+- Current Real Picker SAF status: PENDING; do not claim PASS before a successful log.
+- Prior Android API 29/30/33/36 PASS results remain historical baselines, not substitute for release regression.
 
 ### 2026-10-27 — Real Picker SAF v1 — Lỗi cú pháp
 
