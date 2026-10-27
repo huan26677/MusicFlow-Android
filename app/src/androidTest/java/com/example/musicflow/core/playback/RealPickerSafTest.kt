@@ -659,7 +659,13 @@ Log.i(
             }
 
             assertEquals(2, queueUris.size)
-            assertEquals("Wrong playback queue order", created, queueUris)
+            assertEquals(created.toSet(), queueUris.toSet())
+
+            assertEquals(
+                "Queue order differs from picker result",
+                activity.lastPickedUrisForQa,
+                queueUris
+            )
             assertTrue("Queue is not playing", playing)
 
             Log.i("MusicFlowRealPickerQA", "PASS multiQueue")

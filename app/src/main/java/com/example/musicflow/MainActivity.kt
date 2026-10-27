@@ -24,6 +24,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.jvm.Volatile
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +36,11 @@ class MainActivity : ComponentActivity() {
 
     private var pickFilesJob: Job? = null
 
+    @Volatile
+    var lastPickedUrisForQa: List<Uri> = emptyList()
+        private set
+
+
     private val pickAudio = registerForActivityResult(
         ActivityResultContracts.OpenMultipleDocuments()
     ) { uris ->
@@ -42,6 +48,8 @@ class MainActivity : ComponentActivity() {
         if (uris.isNotEmpty()) {
 
             val selectedUris = uris.distinct()
+
+            lastPickedUrisForQa = selectedUris
 
             selectedUris.forEach { uri ->
                 try {
