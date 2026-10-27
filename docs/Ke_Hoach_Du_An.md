@@ -9,15 +9,15 @@
 | Mục | Trạng thái đã đối chiếu |
 |---|---|
 | Tình trạng toàn dự án | **ĐANG PHÁT TRIỂN — CHƯA NGHIỆM THU MVP/RELEASE** |
-| Mốc kỹ thuật gần nhất | **SAF Permission Persistence v1 — PASS** |
+| Mốc kỹ thuật gần nhất | **Android 13 SAF Compatibility v1 — PASS** |
 | JVM unit tests (mốc v2) | **PASS** |
-| Android instrumented tests (mốc v2) | **50 regression + 3 test theo pha PASS** — Pixel_5, Android 11 (API 30) |
-| Marker | **20/20 PASS** |
-| Kết quả log | `FINAL_RESULT=PASS` (SAF Permission Persistence v1) |
-| Commit chứa vòng QA v2 | `77c546e9a2b2f621f21ae114a240d9b916309735` |
-| Commit HEAD tại thời điểm rà soát | `77c546e9` (commit QA SAF Permission Persistence v1) |
-| Log gần nhất đã xác nhận | `qa-logs/saf-permission-v1.log` |
-| Bước đang phát triển tiếp | **Android Compatibility Matrix v1 — Android 13 (API 33)** |
+| Android instrumented tests (mốc v2) | **50 regression + 3 test theo pha PASS** — Pixel_5, Android 11 (API 30); Android 13 (API 33) PASS |
+| Marker | **24/24 PASS** |
+| Kết quả log | `FINAL_RESULT=PASS` (Android 13 SAF Compatibility v1) |
+| Commit chứa vòng QA v2 | `7e2e7b59cb45ed0a7bc702de5a39659aa8bb93bb` |
+| Commit HEAD tại thời điểm rà soát | `7e2e7b59` (commit QA Android 13 SAF Compatibility v1) |
+| Log gần nhất đã xác nhận | `qa-logs/android13-saf-compat-v1.log` |
+| Bước đang phát triển tiếp | **Android 16 Compatibility v1 — đang QA** |
 | Ngày rà soát | **2026-10-27**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -88,6 +88,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | Background Playback & System Controls v1 | 45 | **PASS tự động** — JVM PASS, 18/18 marker | `663e3ba0` · `qa-logs/background-controls-v1.log` |
 | Background/System Controls v2 | 47 | **PASS tự động** — JVM PASS, 20/20 marker; notification actions và transient audio focus | `1ab915f5` · `qa-logs/background-controls-v2.log` |
 | SAF Permission Persistence v1 | 50 regression + 3 test theo pha | **PASS** — quyền SAF tồn tại sau force-stop, Favorites phát lại thành công | `77c546e9` · `qa-logs/saf-permission-v1.log` |
+| Android 13 SAF Compatibility v1 | 50 regression + 3 test theo pha | **PASS** — API 33, SAF persisted read và Favorites playback sau force-stop | `7e2e7b59` · `qa-logs/android13-saf-compat-v1.log` |
 
 **Không cộng** các con số 9 + 11 + ... + 31: đây là số lượng test của **các lần chạy tăng dần** với nhiều bài trùng nhau.
 
@@ -219,6 +220,25 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-27 — Android 13 SAF Compatibility v1 — PASS
+
+- Commit: `7e2e7b59cb45ed0a7bc702de5a39659aa8bb93bb`
+- Log: `qa-logs/android13-saf-compat-v1.log`
+- API: 33 — Android 13.
+- JVM: PASS.
+- Android regression: PASS.
+- SAF PREPARE, VERIFY, CLEANUP: PASS.
+- PID trước/sau force-stop: 7491 → 8196.
+- Markers: 24/24 PASS.
+- FINAL_RESULT=PASS.
+
+Giới hạn:
+- Chưa kiểm thử OpenMultipleDocuments đầy đủ với tài liệu thật.
+- Chưa nghiệm thu thiết bị Bluetooth thật và lockscreen.
+- Kết quả không đại diện cho tất cả thiết bị Android 13.
+
+Bước tiếp theo: Android 16 Compatibility v1 (API 36).
 
 ### 2026-10-27 — SAF Permission Persistence v1 — PASS
 
