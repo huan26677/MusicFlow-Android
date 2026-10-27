@@ -16,6 +16,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 
@@ -538,4 +539,212 @@ Log.i(
             }
         }
     }
+    private fun createMultiQaWav(
+        activity: MainActivity,
+        title: String,
+        key: String
+    ): Uri {
+        val result = AtomicReference<Uri?>(null)
+        val error = AtomicReference<String?>(null)
+        val finished = CountDownLatch(1)
+
+        instrumentation.runOnMainSync {
+            val launcher = activity.activityResultRegistry.register(
+                key,
+                ActivityResultContracts.CreateDocument("audio/wav")
+            ) { uri ->
+                try {
+                    val doc = checkNotNull(uri)
+                    activity.contentResolver.takePersistableUriPermission(
+                        doc,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    )
+                    activity.contentResolver.openOutputStream(doc, "w").use {
+                        checkNotNull(it).write(wavBytes())
+                    }
+                    activity.contentResolver.releasePersistableUriPermission(
+                        doc,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                    result.set(doc)
+                } catch (e: Exception) {
+                    error.set(e.toString())
+                } finally {
+                    finished.countDown()
+                }
+            }
+            launcher.launch(title)
+        }
+
+        assertTrue("Save not found", clickNamedAction(20_000L) {
+            it.equals("Save", true) || it.equals("Lưu", true)
+        })
+        assertTrue("Document creation timeout", finished.await(25, TimeUnit.SECONDS))
+        assertNull(error.get())
+
+        return checkNotNull(result.get())
+    }
+
+
+    @Test
+    fun realOpenMultipleDocumentsSelectsTwoFilesAndNavigates() {
+        val id = System.nanoTime()
+        val titles = listOf(
+            "musicflow_real_picker_multi_${id}_1.wav",
+            "musicflow_real_picker_multi_${id}_2.wav"
+        )
+        val created = mutableListOf<Uri>()
+        var future: ListenableFuture<MediaController>? = null
+        var controller: MediaController? = null
+
+        try {
+            val activity = composeRule.activity
+
+            titles.forEachIndexed { index, title ->
+                created += createMultiQaWav(
+                    activity,
+                    title,
+                    "musicflow-multi-$id-$index"
+                )
+            }
+
+            assertTrue(created.all { !persistedRead(it) })
+            Log.i("MusicFlowRealPickerQA", "PASS multiSourcesPrepared")
+
+            val connecting = MediaController.Builder(
+                context,
+                SessionToken(
+                    context,
+                    ComponentName(context, PlaybackService::class.java)
+                )
+            ).buildAsync()
+            future = connecting
+            val media = connecting.get(20, TimeUnit.SECONDS)
+            controller = media
+
+            instrumentation.runOnMainSync {
+                activity.openAudioPickerForQa()
+            }
+
+            Log.i(
+                "MusicFlowRealPickerQA",
+                "MULTI_SELECTION_REQUIRED ${titles.joinToString()}"
+            )
+
+            assertTrue(
+                "Picker did not return",
+                selectRealDocument(titles.first())
+            )
+
+            var queueUris = emptyList<Uri>()
+            var playing = false
+            val deadline = SystemClock.uptimeMillis() + 25_000L
+
+            while (SystemClock.uptimeMillis() < deadline) {
+                instrumentation.runOnMainSync {
+                    queueUris = (0 until media.mediaItemCount).mapNotNull {
+                        media.getMediaItemAt(it).localConfiguration?.uri
+                    }
+                    playing = media.isPlaying
+                }
+
+                if (
+                    playing &&
+                    queueUris.size == 2 &&
+                    queueUris.toSet() == created.toSet()
+                ) break
+
+                SystemClock.sleep(200)
+            }
+
+            assertEquals(2, queueUris.size)
+            assertEquals(created.toSet(), queueUris.toSet())
+            assertTrue("Queue is not playing", playing)
+
+            Log.i("MusicFlowRealPickerQA", "PASS multiQueue")
+
+            queueUris.forEach { uri ->
+                assertTrue("READ not persisted: $uri", persistedRead(uri))
+
+                val header = ByteArray(4)
+                val count = context.contentResolver.openInputStream(uri).use {
+                    checkNotNull(it).read(header)
+                }
+                assertEquals(4, count)
+                assertEquals("RIFF", String(header, Charsets.US_ASCII))
+            }
+
+            Log.i("MusicFlowRealPickerQA", "PASS multiPersistedRead")
+
+            instrumentation.runOnMainSync {
+                media.shuffleModeEnabled = false
+                media.repeatMode = Player.REPEAT_MODE_OFF
+                media.seekTo(0, 0L)
+            }
+
+            val nextDeadline = SystemClock.uptimeMillis() + 10_000L
+            var firstReady = false
+
+            while (SystemClock.uptimeMillis() < nextDeadline) {
+                instrumentation.runOnMainSync {
+                    firstReady =
+                        media.currentMediaItem?.localConfiguration?.uri == queueUris[0]
+                }
+                if (firstReady) break
+                SystemClock.sleep(100)
+            }
+
+            assertTrue("First item not ready", firstReady)
+
+            instrumentation.runOnMainSync {
+                media.seekToNextMediaItem()
+            }
+
+            var nextReady = false
+            val end = SystemClock.uptimeMillis() + 10_000L
+
+            while (SystemClock.uptimeMillis() < end) {
+                instrumentation.runOnMainSync {
+                    nextReady =
+                        media.currentMediaItem?.localConfiguration?.uri == queueUris[1] &&
+                            media.isPlaying
+                }
+                if (nextReady) break
+                SystemClock.sleep(100)
+            }
+
+            assertTrue("Next item not playing", nextReady)
+            Log.i("MusicFlowRealPickerQA", "PASS multiNext")
+        } finally {
+            controller?.let { media ->
+                instrumentation.runOnMainSync {
+                    media.pause()
+                    media.stop()
+                    media.clearMediaItems()
+                }
+            }
+
+            future?.let {
+                instrumentation.runOnMainSync {
+                    MediaController.releaseFuture(it)
+                }
+            }
+
+            created.forEach { uri ->
+                runCatching {
+                    DocumentsContract.deleteDocument(context.contentResolver, uri)
+                }
+                runCatching {
+                    context.contentResolver.releasePersistableUriPermission(
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    )
+                }
+            }
+        }
+    }
+
+
 }
