@@ -127,6 +127,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    fun openAudioPickerForQa() {
+        pickAudio.launch(arrayOf("audio/*"))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

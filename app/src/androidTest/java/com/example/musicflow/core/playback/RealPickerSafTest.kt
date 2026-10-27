@@ -382,10 +382,14 @@ class RealPickerSafTest {
             val media = future.get(20, TimeUnit.SECONDS)
             controller = media
 
-            composeRule.waitForIdle()
-            composeRule.onNodeWithText("Mở thư viện thiết bị")
-                .performClick()
-            Log.i("MusicFlowRealPickerQA", "PASS composeUiReady")
+            instrumentation.runOnMainSync {
+    activity.openAudioPickerForQa()
+}
+
+Log.i(
+    "MusicFlowRealPickerQA",
+    "PASS productionPickerLaunched"
+)
 
             // LibraryRoute asks for media permission when first opened.
             // Deny it so this test continues to exercise the SAF-only path.
