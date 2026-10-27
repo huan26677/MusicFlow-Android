@@ -1,0 +1,23 @@
+﻿    private fun selectRealDocument(title: String): Boolean {
+        val deadline = SystemClock.uptimeMillis() + 25_000L
+        var visitedRecent = false
+
+        while (SystemClock.uptimeMillis() < deadline) {
+            val root =
+                instrumentation.uiAutomation.rootInActiveWindow
+
+            val file = findNode(root) {
+                it.contains(title, ignoreCase = true)
+            }
+
+            if (file != null && clickNode(file)) {
+                Log.i(
+                    "MusicFlowRealPickerQA",
+                    "DOCUMENT_ROW_CLICKED"
+                )
+
+                val confirmDeadline =
+                    SystemClock.uptimeMillis() + 12_000L
+
+                var confirmationClicked = false
+TESTLINE

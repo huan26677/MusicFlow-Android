@@ -120,24 +120,79 @@ class RealPickerSafTest {
         val deadline = SystemClock.uptimeMillis() + 25_000L
         var visitedRecent = false
         while (SystemClock.uptimeMillis() < deadline) {
-            val root = instrumentation.uiAutomation.rootInActiveWindow
+            val root =
+                instrumentation.uiAutomation.rootInActiveWindow
+
             val file = findNode(root) {
                 it.contains(title, ignoreCase = true)
             }
-            if (clickNode(file)) {
-                // Single-item ACTION_OPEN_DOCUMENT may return directly.
-                // On multi-select layouts an Open/Select confirmation is shown.
-                clickNamedAction(2_000L) { label ->
-                    label.trim().equals("Open", true) ||
-                        label.trim().equals("Select", true) ||
-                        label.trim().equals("Mở", true) ||
-                        label.trim().equals("Chọn", true)
+            if (file != null && clickNode(file)) {
+                Log.i(
+                    "MusicFlowRealPickerQA",
+                    "DOCUMENT_ROW_CLICKED"
+                )
+
+                val confirmDeadline =
+                    SystemClock.uptimeMillis() + 12_000L
+
+                var confirmationClicked = false
+
+                while (
+                    SystemClock.uptimeMillis() < confirmDeadline
+                ) {
+                    val activeRoot =
+                        instrumentation.uiAutomation
+                            .rootInActiveWindow
+
+                    val activePackage =
+                        activeRoot?.packageName?.toString()
+
+                    if (activePackage == context.packageName) {
+                        Log.i(
+                            "MusicFlowRealPickerQA",
+                            "PICKER_RETURNED_TO_APP"
+                        )
+                        return true
+                    }
+
+                    if (!confirmationClicked) {
+                        val confirmation = findNode(activeRoot) {
+                            val label = it.trim().lowercase()
+
+                            label == "open" ||
+                                label == "select" ||
+                                label == "mở" ||
+                                label == "chọn" ||
+                                label.startsWith("open (") ||
+                                label.startsWith("select (") ||
+                                label.startsWith("open ") ||
+                                label.startsWith("select ")
+                        }
+
+                        if (confirmation != null) {
+                            confirmationClicked =
+                                clickNode(confirmation)
+
+                            if (confirmationClicked) {
+                                Log.i(
+                                    "MusicFlowRealPickerQA",
+                                    "PICKER_CONFIRM_CLICKED"
+                                )
+                            }
+                        }
+                    }
+
+                    SystemClock.sleep(200)
                 }
-                return true
+
+                Log.w(
+                    "MusicFlowRealPickerQA",
+                    "PICKER_NOT_RETURNED_TO_APP"
+                )
+
+                return false
             }
-            if (!visitedRecent &&
-                SystemClock.uptimeMillis() + 22_000L < deadline
-            ) {
+            if (!visitedRecent) {
                 visitedRecent = true
                 clickNode(findNode(root) {
                     it.trim().equals("Recent", true) ||
@@ -146,6 +201,12 @@ class RealPickerSafTest {
             }
             SystemClock.sleep(200)
         }
+
+        Log.w(
+            "MusicFlowRealPickerQA",
+            "DOCUMENT_NOT_FOUND_IN_PICKER"
+        )
+
         return false
     }
 
@@ -231,26 +292,98 @@ class RealPickerSafTest {
                 selectRealDocument(title)
             )
 
-            val deadline = SystemClock.uptimeMillis() + 25_000L
+            val deadline =
+                SystemClock.uptimeMillis() + 25_000L
+
             var playsExpected = false
-            while (!playsExpected && SystemClock.uptimeMillis() < deadline) {
+            var actualUri: Uri? = null
+            var actualMediaId: String? = null
+            var actualTitle: String? = null
+            var actualState = -1
+            var actualError: String? = null
+
+            while (
+                !playsExpected &&
+                SystemClock.uptimeMillis() < deadline
+            ) {
                 instrumentation.runOnMainSync {
-                    playsExpected = media.isPlaying &&
-                        media.currentMediaItem?.mediaId == uri.toString()
+                    val item = media.currentMediaItem
+
+                    actualUri =
+                        item?.localConfiguration?.uri
+                    actualMediaId = item?.mediaId
+                    actualTitle =
+                        item?.mediaMetadata?.title?.toString()
+                    actualState = media.playbackState
+                    actualError =
+                        media.playerError?.errorCodeName
+
+                    playsExpected =
+                        media.isPlaying &&
+                        actualTitle == title &&
+                        actualUri?.scheme == "content"
                 }
-                if (!playsExpected) SystemClock.sleep(150)
+
+                if (!playsExpected) {
+                    SystemClock.sleep(150)
+                }
             }
-            assertTrue(
-                "Production picker did not play selected SAF document",
-                playsExpected
+
+            Log.i(
+                "MusicFlowRealPickerQA",
+                "PICKER_RESULT " +
+                    "playing=$playsExpected " +
+                    "mediaId=$actualMediaId " +
+                    "title=$actualTitle " +
+                    "state=$actualState " +
+                    "error=$actualError"
             )
-            Log.i("MusicFlowRealPickerQA", "PASS realPickerPlayback")
 
             assertTrue(
-                "Production callback did not persist READ grant",
-                persistedRead(uri)
+                "File SAF chưa phát đúng. " +
+                    "mediaId=$actualMediaId " +
+                    "title=$actualTitle " +
+                    "state=$actualState " +
+                    "error=$actualError",
+                playsExpected
             )
-            Log.i("MusicFlowRealPickerQA", "PASS realPickerPersistedRead")
+
+            val selectedUri = checkNotNull(actualUri)
+
+            val header = ByteArray(4)
+            val bytesRead =
+                context.contentResolver
+                    .openInputStream(selectedUri)
+                    .use { input ->
+                        checkNotNull(input).read(header)
+                    }
+
+            assertEquals(
+                "Không đọc đủ WAV header",
+                4,
+                bytesRead
+            )
+
+            assertEquals(
+                "File đã chọn không phải WAV mong đợi",
+                "RIFF",
+                String(header, Charsets.US_ASCII)
+            )
+
+            Log.i(
+                "MusicFlowRealPickerQA",
+                "PASS realPickerPlayback"
+            )
+
+            assertTrue(
+                "Production picker chưa lưu READ permission",
+                persistedRead(selectedUri)
+            )
+
+            Log.i(
+                "MusicFlowRealPickerQA",
+                "PASS realPickerPersistedRead"
+            )
         } finally {
             controller?.let { media ->
                 instrumentation.runOnMainSync {

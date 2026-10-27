@@ -17,7 +17,7 @@
 | Commit chứa vòng QA v2 | `74b9026c1cdb70c9d2ed0563bb747d1a047a061a` |
 | Commit HEAD tại thời điểm rà soát | `74b9026c` (commit QA Android 10 Compatibility v1) |
 | Log gần nhất đã xác nhận | `qa-logs/android10-saf-compat-v1.log` |
-| Bước đang phát triển tiếp | **Real OpenMultipleDocuments SAF v1 — đang chờ QA** |
+| Bước đang phát triển tiếp | **Real OpenMultipleDocuments SAF v1 — FAIL, đang sửa bài kiểm thử** |
 | Ngày rà soát | **2026-10-27**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -222,6 +222,40 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-27 — Real OpenMultipleDocuments SAF v1 — FAIL
+
+- Commit: `ea317255c9a92d143f8de78a4c498309fa06504d`
+- Test: `RealPickerSafTest.kt`
+- Script: `scripts/run-real-picker-saf-v1-tests.ps1`
+- Log: `qa-logs/real-picker-saf-v1.log`
+- Android: API 30, Emulator.
+- JVM: PASS.
+- Android regression: 1 test FAIL.
+- Tạo tài liệu SAF thật: PASS.
+- Phát nhạc từ DocumentsUI: chưa xác nhận.
+- Quyền READ sau picker: chưa xác nhận.
+- FINAL_RESULT=FAIL.
+
+Nguyên nhân đang điều tra:
+- Kiểm thử so sánh mediaId với URI CreateDocument.
+- Chưa xác nhận DocumentsUI thực sự hoàn tất lựa chọn.
+- Chưa có log URI và playback state thực tế.
+
+Đã chuẩn bị:
+- Kiểm tra DocumentsUI quay về ứng dụng.
+- Đối chiếu metadata và nội dung WAV đã chọn.
+- Kiểm tra persisted READ trên URI thực tế.
+- Bổ sung log trạng thái playback để chẩn đoán.
+
+Bước tiếp theo:
+Chạy lại Real OpenMultipleDocuments SAF v1.
+
+Mốc PASS gần nhất:
+Android 10 Compatibility v1.
+
+Trạng thái toàn dự án:
+ĐANG PHÁT TRIỂN — CHƯA NGHIỆM THU MVP/RELEASE.
 
 ### 2026-10-27 — Android 10 Compatibility v1 — PASS
 
