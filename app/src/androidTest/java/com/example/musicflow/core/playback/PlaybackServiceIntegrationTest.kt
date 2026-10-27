@@ -375,6 +375,28 @@ class PlaybackServiceIntegrationTest {
                 "PASS serviceWritesRecentlyPlayed"
             )
 
+            // Xác nhận Activity thực sự ở foreground trước Home.
+            var beforeHomeState = Lifecycle.State.DESTROYED
+
+            instrumentation.runOnMainSync {
+                beforeHomeState =
+                    checkNotNull(activity).lifecycle.currentState
+            }
+
+            Log.i(
+                "MusicFlowServiceIT",
+                "HOME_BEFORE=$beforeHomeState"
+            )
+
+            assertTrue(
+                "Activity chưa ở foreground trước Home: " +
+                    beforeHomeState,
+                beforeHomeState.isAtLeast(
+                    Lifecycle.State.STARTED
+                )
+            )
+
+            // Gửi phím Home thực tế, không giả lập lifecycle.
             ParcelFileDescriptor.AutoCloseInputStream(
                 instrumentation.uiAutomation
                     .executeShellCommand(
@@ -385,29 +407,54 @@ class PlaybackServiceIntegrationTest {
                 }
             }
 
-            instrumentation.waitForIdleSync()
-            delay(1000)
+            // Chờ hệ thống hoàn tất lifecycle thay vì giả định
+            // Android 16 luôn chuyển nền trong 1 giây.
+            var afterHomeState = beforeHomeState
 
-            var activityIsBackground = false
+            val backgroundDeadline =
+                SystemClock.uptimeMillis() + 15_000L
+
+            while (
+                SystemClock.uptimeMillis() < backgroundDeadline
+            ) {
+                instrumentation.runOnMainSync {
+                    afterHomeState =
+                        checkNotNull(activity)
+                            .lifecycle.currentState
+                }
+
+                if (
+                    !afterHomeState.isAtLeast(
+                        Lifecycle.State.STARTED
+                    )
+                ) {
+                    break
+                }
+
+                delay(150)
+            }
+
+            Log.i(
+                "MusicFlowServiceIT",
+                "HOME_AFTER=$afterHomeState"
+            )
+
+            assertFalse(
+                "Activity chưa chuyển về nền sau 15 giây: " +
+                    afterHomeState,
+                afterHomeState.isAtLeast(
+                    Lifecycle.State.STARTED
+                )
+            )
+
             var audioStillPlaying = false
 
             instrumentation.runOnMainSync {
-                activityIsBackground =
-                    !checkNotNull(activity)
-                        .lifecycle
-                        .currentState
-                        .isAtLeast(Lifecycle.State.STARTED)
-
                 audioStillPlaying =
                     mediaController.isPlaying &&
                     mediaController.currentMediaItem
                         ?.mediaId == expectedIds[0]
             }
-
-            assertTrue(
-                "Activity chưa chuyển về nền",
-                activityIsBackground
-            )
 
             assertTrue(
                 "Nhạc dừng sau khi nhấn Home",

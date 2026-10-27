@@ -119,7 +119,23 @@ try {
     if ($jvmOk) {
         $androidOk = Run-Gradle "ANDROID_TESTS" @(':app:connectedDebugAndroidTest', '--console=plain')
     }
-    if (!$jvmOk -or !$androidOk) { throw "REGRESSION_FAILED" }
+    if (!$jvmOk -or !$androidOk) {
+    Write-Log "=== ANDROID16_FAILURE_DIAGNOSTICS ==="
+
+    $diagnostics = @(
+        & $adb -s $serial logcat -d -v brief -s `
+            'MusicFlowServiceIT:I' `
+            'ActivityTaskManager:I' `
+            'AndroidRuntime:E' `
+            '*:S' 2>&1
+    )
+
+    foreach ($line in $diagnostics) {
+        Write-Log $line.ToString()
+    }
+
+    throw "REGRESSION_FAILED"
+}
 
     # The 3 phase-specific tests are skipped by JUnit Assume during the general suite.
     # Their real assertions are executed below in separate instrumented processes.
