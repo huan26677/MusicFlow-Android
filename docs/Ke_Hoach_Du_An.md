@@ -9,15 +9,15 @@
 | Mục | Trạng thái đã đối chiếu |
 |---|---|
 | Tình trạng toàn dự án | **ĐANG PHÁT TRIỂN — CHƯA NGHIỆM THU MVP/RELEASE** |
-| Mốc kỹ thuật gần nhất | **Android 16 Compatibility v1 — PASS** |
+| Mốc kỹ thuật gần nhất | **Android 10 Compatibility v1 — PASS** |
 | JVM unit tests (mốc v2) | **PASS** |
-| Android instrumented tests (mốc v2) | **50 regression + 3 test theo pha PASS** — Pixel_7, Android 16 (API 36) |
+| Android instrumented tests (mốc v2) | **50 regression + 3 test theo pha PASS** — Pixel_5, Android 10 (API 29) |
 | Marker | **24/24 PASS** |
-| Kết quả log | `FINAL_RESULT=PASS` (Android 16 Compatibility v1) |
-| Commit chứa vòng QA v2 | `69bf34f96608e11f9cc537338a2347931ab2f010` |
-| Commit HEAD tại thời điểm rà soát | `69bf34f9` (commit QA Android 16 Compatibility v1) |
-| Log gần nhất đã xác nhận | `qa-logs/android16-saf-compat-v1.log` |
-| Bước đang phát triển tiếp | **Android 10 Compatibility v1 — API 29** |
+| Kết quả log | `FINAL_RESULT=PASS` (Android 10 Compatibility v1) |
+| Commit chứa vòng QA v2 | `74b9026c1cdb70c9d2ed0563bb747d1a047a061a` |
+| Commit HEAD tại thời điểm rà soát | `74b9026c` (commit QA Android 10 Compatibility v1) |
+| Log gần nhất đã xác nhận | `qa-logs/android10-saf-compat-v1.log` |
+| Bước đang phát triển tiếp | **Real OpenMultipleDocuments SAF v1 — đang chờ QA** |
 | Ngày rà soát | **2026-10-27**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -90,6 +90,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | SAF Permission Persistence v1 | 50 regression + 3 test theo pha | **PASS** — quyền SAF tồn tại sau force-stop, Favorites phát lại thành công | `77c546e9` · `qa-logs/saf-permission-v1.log` |
 | Android 13 SAF Compatibility v1 | 50 regression + 3 test theo pha | **PASS** — API 33, SAF persisted read và Favorites playback sau force-stop | `7e2e7b59` · `qa-logs/android13-saf-compat-v1.log` |
 | Android 16 Compatibility v1 | 50 regression + 3 test theo pha | **PASS** — API 36, SAF persistence, Favorites playback và background lifecycle | `69bf34f9` · `qa-logs/android16-saf-compat-v1.log` |
+| Android 10 Compatibility v1 | 50 regression + 3 test theo pha | **PASS** — API 29, SAF persistence và Favorites playback | `74b9026c` · `qa-logs/android10-saf-compat-v1.log` |
 
 **Không cộng** các con số 9 + 11 + ... + 31: đây là số lượng test của **các lần chạy tăng dần** với nhiều bài trùng nhau.
 
@@ -112,7 +113,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **P0 — đã hoàn thành** | **Playback Runtime Recovery Race Hardening v3** | **PASS — 36/36 Android tests** | Xem `qa-logs/playback-runtime-recovery-v3.log`; yêu cầu 5 marker v3 + regression v2 |
 | **P0 — kế tiếp** | **MVP End-to-End Acceptance v1** — Library/Search/Picker → Player → Playlist/History → restart | CHƯA NGHIỆM THU | Script UI/integration tests có assertions và log cho từng flow |
 | **P0** | **Background Playback / System Controls QA** | V2 QA TỰ ĐỘNG PASS (API 30) — còn lockscreen và Bluetooth thực tế | Test lifecycle, audio focus, điều khiển từ MediaSession/notification/lock screen trong phạm vi khả thi; mọi điều kiện đã chốt đạt PASS |
-| **P0** | **Android Compatibility & Permissions Matrix** | API 30 / 33 / 36 PASS — còn API 29 | Bộ test tự động trên các API đại diện, đề xuất **29 / 30 / 33 / 36**, hoặc có ngoại lệ phạm vi được chủ dự án chấp nhận; file picker, MediaStore, URI và quyền đạt PASS |
+| **P0** | **Android Compatibility & Permissions Matrix** | API 29 / 30 / 33 / 36 — QA tự động PASS trong phạm vi hiện có | Bộ test tự động trên các API đại diện, đề xuất **29 / 30 / 33 / 36**, hoặc có ngoại lệ phạm vi được chủ dự án chấp nhận; file picker, MediaStore, URI và quyền đạt PASS |
 | **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
 | **P1** | UI/accessibility/empty-state/error-state | CHƯA NGHIỆM THU | UI tests hoặc ảnh chụp kiểm tra tự động cho các trạng thái bắt buộc; tiêu chí khả dụng được xác nhận |
 | **P1** | Hiệu năng và dữ liệu lớn | CHƯA NGHIỆM THU | Dataset cố định; ngưỡng thời gian/độ ổn định được chốt; không crash/ANR, không mất dữ liệu |
@@ -221,6 +222,36 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-27 — Android 10 Compatibility v1 — PASS
+
+- Commit: `74b9026c1cdb70c9d2ed0563bb747d1a047a061a`
+- Script: `scripts/run-android10-saf-compat-v1-tests.ps1`
+- Log: `qa-logs/android10-saf-compat-v1.log`
+- Android: API 29, Pixel 5 Emulator.
+- JVM: PASS.
+- Android regression: 50 bài PASS.
+- Ba bài SAF theo pha: PASS.
+- Process restart: PID 8237 → 8373.
+- QA markers: 24/24 PASS.
+- FINAL_RESULT=PASS.
+
+Ma trận đã có bằng chứng QA tự động:
+- Android 10 — API 29: PASS.
+- Android 11 — API 30: PASS.
+- Android 13 — API 33: PASS.
+- Android 16 — API 36: PASS.
+
+Giới hạn:
+- Chưa xác nhận chọn file thật qua toàn bộ OpenMultipleDocuments.
+- Chưa nghiệm thu Bluetooth và lockscreen trên thiết bị thực.
+- Chưa hoàn tất toàn bộ các cổng nghiệm thu MVP.
+
+Bước tiếp theo:
+Real OpenMultipleDocuments SAF v1.
+
+Trạng thái toàn dự án:
+ĐANG PHÁT TRIỂN — CHƯA NGHIỆM THU MVP/RELEASE.
 
 ### 2026-10-27 — Android 16 Compatibility v1 — PASS
 
