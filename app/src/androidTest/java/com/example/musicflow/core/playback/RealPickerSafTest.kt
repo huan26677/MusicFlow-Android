@@ -269,18 +269,73 @@ class RealPickerSafTest {
 
     private fun selectRealDocument(title: String): Boolean {
         val deadline =
-            SystemClock.uptimeMillis() + 25_000L
+        SystemClock.uptimeMillis() + 90_000L
 
-        var visitedRecent = false
+    var documentVisible = false
 
-        while (SystemClock.uptimeMillis() < deadline) {
-            val root =
-                instrumentation.uiAutomation.rootInActiveWindow
+    Log.i(
+        "MusicFlowRealPickerQA",
+        "MANUAL_SELECTION_REQUIRED file=$title"
+    )
 
-            val file = findDocumentTitleNode(root, title)
+    while (SystemClock.uptimeMillis() < deadline) {
+        val root =
+            instrumentation.uiAutomation.rootInActiveWindow
 
-            if (file != null) {
-                logPickerUi("BEFORE_TAP")
+        val currentPackage =
+            root?.packageName?.toString()
+
+        if (
+            currentPackage ==
+                "com.google.android.documentsui"
+        ) {
+            if (
+                findDocumentTitleNode(root, title) != null &&
+                !documentVisible
+            ) {
+                documentVisible = true
+
+                Log.i(
+                    "MusicFlowRealPickerQA",
+                    "DOCUMENT_VISIBLE_READY_FOR_SELECTION"
+                )
+            }
+        }
+
+        if (currentPackage == context.packageName) {
+            Log.i(
+                "MusicFlowRealPickerQA",
+                "PICKER_RETURNED_TO_APP"
+            )
+
+            return documentVisible
+        }
+
+        if (
+            currentPackage != null &&
+            currentPackage !=
+                "com.google.android.documentsui"
+        ) {
+            Log.e(
+                "MusicFlowRealPickerQA",
+                "UNEXPECTED_PICKER_PACKAGE=$currentPackage"
+            )
+
+            return false
+        }
+
+        SystemClock.sleep(250)
+    }
+
+    Log.e(
+        "MusicFlowRealPickerQA",
+        "MANUAL_SELECTION_TIMEOUT"
+    )
+
+    return false
+}
+
+            )
 
                 assertTrue(
                     "KhÃ´ng gá»­i Ä‘Æ°á»£c thao tÃ¡c cháº¡m tÃªn file",

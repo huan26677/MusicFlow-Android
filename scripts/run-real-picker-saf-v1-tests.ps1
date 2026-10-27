@@ -66,7 +66,8 @@ try {
     $jvmOk = Run-Gradle "JVM_TESTS" @(':app:testDebugUnitTest', '--console=plain')
     $androidOk = $false
     if ($jvmOk) {
-        $androidOk = Run-Gradle "ANDROID_TESTS" @(':app:connectedDebugAndroidTest', '--console=plain')
+        Write-Log "INTERACTION_MODE=MANUAL_ASSISTED"
+    $androidOk = Run-Gradle "ANDROID_TESTS" @(':app:connectedDebugAndroidTest', '--console=plain')
     }
 
     $logs = @(
