@@ -166,7 +166,7 @@ try {
     Write-Log "REGRESSION_START_COUNT=$startCount"
     Write-Log "REGRESSION_FINISHED_COUNT=$finishCount"
 
-    if ($startCount -ne 50 -or !$finishMatch.Success) {
+    if ($startCount -ne 55 -or $finishCount -ne 58) {
         throw "UNEXPECTED_REGRESSION_TEST_COUNT"
     }
 
@@ -216,7 +216,7 @@ try {
     $diagnostics = @(
         & $adb -s $serial logcat -d -v brief -s `
             'MusicFlowMvpE2E:I' 'MusicFlowFavoritesQA:I' 'MusicFlowBackgroundQA:I' `
-            'MusicFlowSystemV2QA:I' 'MusicFlowSafQA:I' 'AndroidRuntime:E' '*:S' 2>&1
+            'MusicFlowSystemV2QA:I' 'MusicFlowSafQA:I' 'MusicFlowRealPickerQA:I' 'MusicFlowPlaylistUIQA:I' 'AndroidRuntime:E' '*:S' 2>&1
     )
     foreach ($line in $diagnostics) { Write-Log $line.ToString() }
 
@@ -231,6 +231,26 @@ try {
         'PASS backgroundSurvivesActivityStop', 'PASS mediaNotificationVisible',
         'PASS survivesActivityDestroy', 'PASS controllerControlsWithoutUi',
         'PASS notificationButtonCommands', 'PASS transientAudioFocusLoss',
+'PASS sourcePreparedWithoutPersistedRead',
+'PASS realPickerPlayback',
+'PASS realPickerPersistedRead',
+'PASS multiSourcesPrepared',
+'PASS multiQueue',
+'PASS multiPersistedRead',
+'PASS multiNext',
+'PASS multiNextWrittenHistory',
+'PASS playlistUiReorderAndPlayAll',
+'PASS playlistUiSelectedTrack',
+'PASS playlistUiCreate',
+'PASS playlistUiRename',
+'PASS playlistUiDelete',
+'PASS mvpPlaylistNavigation',
+'PASS mvpPlaylistPlayback',
+'PASS mvpPlaylistNext',
+'PASS mvpPlaylistFirstHistory',
+'PASS mvpPlaylistHistoryOrder',
+'PASS mvpPlaylistHistoryUi',
+'PASS mvpHistoryReplay',
         'SAF_PREPARE_PASS', 'SAF_PERSISTED_READ_PASS',
         'SAF_FAVORITE_PLAYBACK_PASS', 'SAF_CLEANUP_PASS'
     )

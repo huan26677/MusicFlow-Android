@@ -6,21 +6,15 @@
 
 ## 0. Tóm tắt nhanh cho cuộc trò chuyện mới
 
-| Mục | Trạng thái đã đối chiếu |
+| Mục | Trạng thái |
 |---|---|
-| Tình trạng toàn dự án | **ĐANG PHÁT TRIỂN — CHƯA NGHIỆM THU MVP/RELEASE** |
-| Mốc kỹ thuật gần nhất | **Session Recovery UI Acceptance v1 — Fast QA PASS** |
-| JVM unit tests (mốc v2) | **PASS** |
-| Android instrumented tests (mốc v2) | **55 regression PASS + 3 test theo pha SKIPPED** — Pixel_5, Android 11 (API 30) |
-| Marker | **40/40 PASS** |
-| Kết quả log | `FINAL_RESULT=PASS` (Session Recovery UI Acceptance v1 Fast QA) |
-| Commit chứa vòng QA v2 | `580681c3` |
-| Commit HEAD đã kiểm tra | `d84c9a11` (Session Recovery UI Acceptance v1 — Fast QA PASS) |
-| Mốc Full Regression gần nhất | 55 bài chính, 40/40 marker PASS |
-| MVP tổng thể | CHƯA NGHIỆM THU |
-| Log gần nhất đã xác nhận | `qa-logs/playback-process-restart-v1.log` |
-| Bước đang phát triển tiếp | **Full Regression — PENDING chạy lại với code mới** |
-| Ngày rà Sox | **2026-10-28**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
+| HEAD đã đối chiếu | `d430cfc7` |
+| Session Recovery v1 | Full QA PASS |
+| Android API 30 | 55 bài chính PASS |
+| Marker API 30 | 40/40 PASS |
+| Android Compatibility Matrix v2 | Đang thực hiện |
+| API 29 với bộ 55 bài | PENDING QA |
+| MVP tổng thể | Chưa nghiệm thu |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
 
@@ -97,7 +91,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | SAF Multi-file v1 | 52 PASS, 3 test theo pha SKIPPED | **PASS — Full Regression, API 30** | `94c03895` · `qa-logs/real-picker-saf-v1.log` |
 | MVP Playlist Navigation v1 | 55 PASS, 3 test theo pha SKIPPED | **Full QA PASS — API 30** | `18d5893a` · `qa-logs/mvp-playlist-navigation-v1.log` |
 | MVP Playlist → History → Replay v1 | 1 bài isolated PASS | **Fast QA PASS — API 30** | `69d5a559` · `qa-logs/mvp-playlist-history-v1.log` |
-| Session Recovery UI Acceptance v1 | 1 bài isolated PASS | **Fast QA PASS — API 30** | `d84c9a11` · `qa-logs/playback-process-restart-v1.log` |
+| Session Recovery UI Acceptance v1 | 55 bài chính PASS | **Full QA PASS — API 30** | `d430cfc7` · `qa-logs/playback-process-restart-v1.log` |
 
 **Không cộng** các con số 9 + 11 + ... + 31: đây là số lượng test của **các lần chạy tăng dần** với nhiều bài trùng nhau.
 
@@ -118,9 +112,9 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | Ưu tiên | Bước / việc cần làm | Trạng thái | Điều kiện kết thúc bước |
 |---|---|---|---|
 | **P0 — đã hoàn thành** | **Playback Runtime Recovery Race Hardening v3** | **PASS — 36/36 Android tests** | Xem `qa-logs/playback-runtime-recovery-v3.log`; yêu cầu 5 marker v3 + regression v2 |
-| **P0 — kế tiếp** | **MVP End-to-End Acceptance v1** — Library/Search/Picker → Player → Playlist/History → restart | CHƯA NGHIỆM THU | Script UI/integration tests có assertions và log cho từng flow |
+| **P0** | **MVP End-to-End Acceptance v1** — Library/Search/Picker → Player → Playlist/History → restart | CHƯA NGHIỆM THU | Script UI/integration tests có assertions và log cho từng flow |
 | **P0** | **Background Playback / System Controls QA** | V2 QA TỰ ĐỘNG PASS (API 30) — còn lockscreen và Bluetooth thực tế | Test lifecycle, audio focus, điều khiển từ MediaSession/notification/lock screen trong phạm vi khả thi; mọi điều kiện đã chốt đạt PASS |
-| **P0** | **Android Compatibility & Permissions Matrix** | API 29 / 30 / 33 / 36 — QA tự động PASS trong phạm vi hiện có | Bộ test tự động trên các API đại diện, đề xuất **29 / 30 / 33 / 36**, hoặc có ngoại lệ phạm vi được chủ dự án chấp nhận; file picker, MediaStore, URI và quyền đạt PASS |
+| **P0 — kế tiếp** | **Android Compatibility Matrix v2** | Đang thực hiện | Bộ test tự động trên các API đại diện (29/30/33/36): 55 bài chính + 3 SKIPPED, 40 marker + 4 SAF |
 | **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
 | **P1** | UI/accessibility/empty-state/error-state | CHƯA NGHIỆM THU | UI tests hoặc ảnh chụp kiểm tra tự động cho các trạng thái bắt buộc; tiêu chí khả dụng được xác nhận |
 | **P1** | Hiệu năng và dữ liệu lớn | CHƯA NGHIỆM THU | Dataset cố định; ngưỡng thời gian/độ ổn định được chốt; không crash/ANR, không mất dữ liệu |
@@ -229,6 +223,18 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-28 — Android Compatibility Matrix v2
+
+- Baseline: d430cfc7.
+- Session Recovery v1: Full QA PASS trên API 30.
+- Android 10 / API 29: PENDING QA v2.
+- Android 13 / API 33: PENDING QA v2.
+- Android 16 / API 36: PENDING QA v2.
+- Regression mục tiêu: 55 bài chính, 3 SKIPPED.
+- Marker mục tiêu: 40 chức năng + 4 SAF.
+- Log API 29: qa-logs/android10-saf-compat-v1.log.
+- MVP tổng thể: Chưa nghiệm thu.
 
 ### 2026-10-28 — Session Recovery UI Acceptance v1 — PASS
 
