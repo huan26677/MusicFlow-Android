@@ -20,8 +20,10 @@ import android.view.accessibility.AccessibilityNodeInfo
 import androidx.core.content.ContextCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import org.junit.Rule
 
 import androidx.lifecycle.Lifecycle
@@ -754,6 +756,145 @@ class PlaybackServiceIntegrationTest {
 
         audioUri?.let { resolver.delete(it, null, null) }
         source.delete()
+    }
+
+    @Test
+    fun mvpHomePlaylistNowPlayingThroughMediaSession() {
+        val stamp = System.nanoTime()
+        val playlistName = "QA MVP Playlist $stamp"
+        val ids = listOf("qa-mvp-$stamp-1", "qa-mvp-$stamp-2")
+        val files = listOf(createWav(), createWav())
+
+        val playlists = RoomPlaylistRepository(
+            RecentHistoryDatabase.getInstance(context)
+        )
+
+        var playlistId: String? = null
+        var scenario: ActivityScenario<MainActivity>? = null
+        var future: ListenableFuture<MediaController>? = null
+        var controller: MediaController? = null
+
+        try {
+            val playlist = runBlocking {
+                val created = checkNotNull(playlists.create(playlistName))
+
+                files.forEachIndexed { index, file ->
+                    assertTrue(
+                        playlists.addTrack(
+                            created.id,
+                            PlaylistTrack(
+                                mediaId = ids[index],
+                                audioUri = Uri.fromFile(file).toString(),
+                                title = "QA MVP Track ${index + 1}",
+                                artist = "MusicFlow QA",
+                                addedAtMs = index.toLong()
+                            )
+                        )
+                    )
+                }
+                created
+            }
+
+            playlistId = playlist.id
+
+            val token = SessionToken(
+                context,
+                ComponentName(context, PlaybackService::class.java)
+            )
+
+            future = MediaController.Builder(context, token).buildAsync()
+            val media = checkNotNull(future).get(20, TimeUnit.SECONDS)
+            controller = media
+
+            scenario = ActivityScenario.launch(MainActivity::class.java)
+
+            composeRule.onNodeWithText("Danh sách phát của tôi")
+                .performScrollTo()
+                .performClick()
+
+            composeRule.onNodeWithText(playlistName)
+                .performClick()
+
+            composeRule.onNodeWithText("▶ Phát toàn bộ")
+                .performClick()
+
+            composeRule.onNodeWithText("ĐANG PHÁT")
+                .assertExists()
+
+            Log.i("MusicFlowMvpE2E", "PASS mvpPlaylistNavigation")
+
+            var firstPlaying = false
+            val firstDeadline = SystemClock.uptimeMillis() + 20_000L
+
+            while (SystemClock.uptimeMillis() < firstDeadline) {
+                instrumentation.runOnMainSync {
+                    firstPlaying =
+                        media.mediaItemCount == 2 &&
+                        (0 until media.mediaItemCount).map {
+                            media.getMediaItemAt(it).mediaId
+                        } == ids &&
+                        media.currentMediaItem?.mediaId == ids[0] &&
+                        media.isPlaying
+                }
+
+                if (firstPlaying) break
+                SystemClock.sleep(150)
+            }
+
+            assertTrue("Playlist UI did not start correct queue", firstPlaying)
+
+            Log.i("MusicFlowMvpE2E", "PASS mvpPlaylistPlayback")
+
+            composeRule.onNodeWithText("Tiếp")
+                .performScrollTo()
+                .performClick()
+
+            var nextPlaying = false
+            val nextDeadline = SystemClock.uptimeMillis() + 15_000L
+
+            while (SystemClock.uptimeMillis() < nextDeadline) {
+                instrumentation.runOnMainSync {
+                    nextPlaying =
+                        media.currentMediaItem?.mediaId == ids[1] &&
+                        media.currentMediaItemIndex == 1 &&
+                        media.isPlaying
+                }
+
+                if (nextPlaying) break
+                SystemClock.sleep(150)
+            }
+
+            assertTrue("Next from Now Playing failed", nextPlaying)
+
+            Log.i("MusicFlowMvpE2E", "PASS mvpPlaylistNext")
+        } finally {
+            controller?.let { media ->
+                instrumentation.runOnMainSync {
+                    media.pause()
+                    media.stop()
+                    media.clearMediaItems()
+                }
+            }
+
+            future?.let {
+                instrumentation.runOnMainSync {
+                    MediaController.releaseFuture(it)
+                }
+            }
+
+            scenario?.close()
+
+            runBlocking {
+                playlistId?.let { playlists.deletePlaylist(it) }
+
+                val history = RoomRecentHistoryRepository(
+                    RecentHistoryDatabase.getInstance(context)
+                )
+                ids.forEach { history.remove(it) }
+            }
+
+            files.forEach { it.delete() }
+        }
     }
 }
 }
