@@ -9,15 +9,15 @@
 | Mục | Trạng thái đã đối chiếu |
 |---|---|
 | Tình trạng toàn dự án | **ĐANG PHÁT TRIỂN — CHƯA NGHIỆM THU MVP/RELEASE** |
-| Mốc kỹ thuật gần nhất | **MVP Playlist → History → Replay v1 — Fast QA PASS** |
+| Mốc kỹ thuật gần nhất | **MVP Playlist → History → Replay v1 — Full QA PASS** |
 | JVM unit tests (mốc v2) | **PASS** |
-| Android instrumented tests (mốc v2) | **55 regression + 3 test theo pha PASS** — Pixel_5, Android 11 (API 30) |
-| Marker | **36/36 PASS** |
-| Kết quả log | `FINAL_RESULT=PASS` (MVP Playlist → History → Replay v1 Fast QA) |
-| Commit chứa vòng QA v2 | `18d5893a` |
-| Commit HEAD tại thời điểm rà sow | `69d5a559` (MVP Playlist → History → Replay v1 — Fast QA PASS) |
+| Android instrumented tests (mốc v2) | **55 regression PASS + 3 test theo pha SKIPPED** — Pixel_5, Android 11 (API 30) |
+| Marker | **40/40 PASS** |
+| Kết quả log | `FINAL_RESULT=PASS` (MVP Playlist → History → Replay v1 Full QA) |
+| Commit chứa vòng QA v2 | `580681c3` |
+| Commit HEAD tại thời điểm rà sow | `580681c3` (MVP Playlist → History → Replay v1 — Full QA PASS) |
 | Log gần nhất đã xác nhận | `qa-logs/mvp-playlist-history-v1.log` |
-| Bước đang phát triển tiếp | **MVP Playlist → History → Replay v1 — Full Regression PENDING** |
+| Bước đang phát triển tiếp | **MVP Session Recovery v1 — PENDING QA** |
 | Ngày rà Sox | **2026-10-28**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -226,6 +226,19 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-28 — MVP Session Recovery v1
+
+- Mốc trước: Playlist → History → Replay Full QA PASS.
+- Commit mốc trước: 580681c3.
+- Playlist tồn tại sau process restart: PASS ở mốc trước.
+- Queue khôi phục ở trạng thái Pause: PASS ở mốc trước.
+- History được ghi trước restart: PENDING QA.
+- History tồn tại sau restart: PENDING QA.
+- Cleanup dữ liệu History: PENDING QA.
+- Script: run-playback-process-restart-tests.ps1 -PhasesOnly.
+- Log: qa-logs/playback-process-restart-v1.log.
+- MVP tổng thể: Chưa nghiệm thu.
 
 ### 2026-10-28 — MVP Playlist → History → Replay v1
 

@@ -304,6 +304,32 @@ class PlaybackProcessRestartTest {
 
             delay(1000)
 
+val history = RoomRecentHistoryRepository(
+    RecentHistoryDatabase.getInstance(context)
+)
+
+withTimeout(15_000L) {
+    while (true) {
+        val entries = history.getRecent()
+            .filter { it.mediaId in ids }
+
+        val correct =
+            entries.size == 1 &&
+                entries[0].mediaId == ids[1] &&
+                entries[0].audioUri ==
+                    Uri.fromFile(file(2)).toString() &&
+                entries[0].title == "Restart QA 2"
+
+        if (correct) break
+        delay(100)
+    }
+}
+
+Log.i(
+    "MusicFlowRestartIT",
+    "PASS historyPreparedBeforeRestart"
+)
+
             Log.i(
                 "MusicFlowRestartIT",
                 "PREPARE_PROCESS_PID=${Process.myPid()}"
@@ -352,6 +378,30 @@ class PlaybackProcessRestartTest {
             assertEquals(ids, tracks.map { it.mediaId })
 
             Log.i("MusicFlowRestartIT", "PASS playlistPersistedAfterRestart")
+
+val recoveredHistory = RoomRecentHistoryRepository(
+    RecentHistoryDatabase.getInstance(context)
+).getRecent().filter { it.mediaId in ids }
+
+assertEquals(
+    listOf(ids[1]),
+    recoveredHistory.map { it.mediaId }
+)
+
+assertEquals(
+    Uri.fromFile(file(2)).toString(),
+    recoveredHistory.single().audioUri
+)
+
+assertEquals(
+    "Restart QA 2",
+    recoveredHistory.single().title
+)
+
+Log.i(
+    "MusicFlowRestartIT",
+    "PASS historyPersistedAfterRestart"
+)
 
             instrumentation.runOnMainSync {
                 assertEquals(
@@ -501,6 +551,15 @@ class PlaybackProcessRestartTest {
             for (id in ids) {
                 history.remove(id)
             }
+
+assertTrue(
+    history.getRecent().none { it.mediaId in ids }
+)
+
+Log.i(
+    "MusicFlowRestartIT",
+    "PASS historyCleanedAfterRestart"
+)
         }
 
         for (index in 1..2) {

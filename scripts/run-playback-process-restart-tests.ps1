@@ -457,6 +457,28 @@ try {
                     }
                 ).Count -gt 0
 
+                $historyPrepared = @(
+                    $diagnostics | Where-Object {
+                        $_ -match "PASS historyPreparedBeforeRestart"
+                    }
+                ).Count -gt 0
+
+                $historyRestored = @(
+                    $diagnostics | Where-Object {
+                        $_ -match "PASS historyPersistedAfterRestart"
+                    }
+                ).Count -gt 0
+
+                $historyCleaned = @(
+                    $diagnostics | Where-Object {
+                        $_ -match "PASS historyCleanedAfterRestart"
+                    }
+                ).Count -gt 0
+
+                Write-Log "HISTORY_PREPARED=$historyPrepared"
+                Write-Log "HISTORY_RESTORED=$historyRestored"
+                Write-Log "HISTORY_CLEANED=$historyCleaned"
+
                 Write-Log "PREPARED=$prepared"
                 Write-Log "PROCESS_RESTARTED=$newProcess"
                 Write-Log "RECOVERED_PAUSED=$pausedMarker"
@@ -471,7 +493,10 @@ try {
                     $preparedMarker -and
                     $pausedMarker -and
                     $verifiedMarker -and
-                    $cleanupMarker
+                    $cleanupMarker -and
+                    $historyPrepared -and
+                    $historyRestored -and
+                    $historyCleaned
                 ) {
                     Write-Log "FINAL_RESULT=PASS"
                     $exitCode = 0
