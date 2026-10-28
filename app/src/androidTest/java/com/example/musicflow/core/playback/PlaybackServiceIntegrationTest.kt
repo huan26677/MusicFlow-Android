@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import org.junit.Rule
@@ -845,6 +846,35 @@ class PlaybackServiceIntegrationTest {
 
             Log.i("MusicFlowMvpE2E", "PASS mvpPlaylistPlayback")
 
+val history = RoomRecentHistoryRepository(
+    RecentHistoryDatabase.getInstance(context)
+)
+
+val firstHistoryDeadline =
+    SystemClock.uptimeMillis() + 15_000L
+
+var firstHistorySaved = false
+
+while (SystemClock.uptimeMillis() < firstHistoryDeadline) {
+    firstHistorySaved = runBlocking {
+        history.getRecent().any {
+            it.mediaId == ids[0] &&
+                it.audioUri == Uri.fromFile(files[0]).toString() &&
+                it.title == "QA MVP Track 1"
+        }
+    }
+
+    if (firstHistorySaved) break
+    SystemClock.sleep(150)
+}
+
+assertTrue(
+    "First playlist track missing from history",
+    firstHistorySaved
+)
+
+Log.i("MusicFlowMvpE2E", "PASS mvpPlaylistFirstHistory")
+
             composeRule.onNodeWithText("Tiếp")
                 .performScrollTo()
                 .performClick()
@@ -867,6 +897,95 @@ class PlaybackServiceIntegrationTest {
             assertTrue("Next from Now Playing failed", nextPlaying)
 
             Log.i("MusicFlowMvpE2E", "PASS mvpPlaylistNext")
+
+val historyDeadline =
+    SystemClock.uptimeMillis() + 15_000L
+
+var historyOrderCorrect = false
+
+while (SystemClock.uptimeMillis() < historyDeadline) {
+    historyOrderCorrect = runBlocking {
+        val recent = history.getRecent()
+            .filter { it.mediaId in ids }
+
+        recent.map { it.mediaId } ==
+            listOf(ids[1], ids[0]) &&
+            recent[0].audioUri ==
+                Uri.fromFile(files[1]).toString() &&
+            recent[1].audioUri ==
+                Uri.fromFile(files[0]).toString()
+    }
+
+    if (historyOrderCorrect) break
+    SystemClock.sleep(150)
+}
+
+assertTrue(
+    "Playlist playback history order is incorrect",
+    historyOrderCorrect
+)
+
+Log.i(
+    "MusicFlowMvpE2E",
+    "PASS mvpPlaylistHistoryOrder"
+)
+
+// Quay về Home để kiểm tra lịch sử hiển thị.
+composeRule.onNodeWithText("‹ Trở về")
+    .performClick()
+
+composeRule.onNodeWithText("Home")
+    .performClick()
+
+composeRule.onNodeWithText("Nghe gần đây")
+    .performScrollTo()
+    .assertExists()
+
+composeRule.waitUntil(15_000L) {
+    composeRule.onAllNodesWithText("QA MVP Track 1")
+        .fetchSemanticsNodes().isNotEmpty()
+}
+
+composeRule.onNodeWithText("QA MVP Track 1")
+    .performScrollTo()
+    .assertExists()
+
+Log.i(
+    "MusicFlowMvpE2E",
+    "PASS mvpPlaylistHistoryUi"
+)
+
+// Phát lại bài hát từ lịch sử.
+composeRule.onNodeWithText("QA MVP Track 1")
+    .performClick()
+
+composeRule.onNodeWithText("ĐANG PHÁT")
+    .assertExists()
+
+var historyReplay = false
+val replayDeadline =
+    SystemClock.uptimeMillis() + 15_000L
+
+while (SystemClock.uptimeMillis() < replayDeadline) {
+    instrumentation.runOnMainSync {
+        historyReplay =
+            media.currentMediaItem?.mediaId == ids[0] &&
+                media.isPlaying
+    }
+
+    if (historyReplay) break
+    SystemClock.sleep(150)
+}
+
+assertTrue(
+    "Cannot replay playlist track from history",
+    historyReplay
+)
+
+Log.i(
+    "MusicFlowMvpE2E",
+    "PASS mvpHistoryReplay"
+)
         } finally {
             controller?.let { media ->
                 instrumentation.runOnMainSync {
