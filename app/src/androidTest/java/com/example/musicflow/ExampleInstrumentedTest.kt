@@ -195,7 +195,9 @@ fun mvpLibrarySearchToRealPlayer() {
                     onSetPlaybackSpeed =
                         playerViewModel::setPlaybackSpeed,
                     onSetSleepTimerMinutes =
-                        playerViewModel::setSleepTimerMinutes
+                        playerViewModel::setSleepTimerMinutes,
+                    lyrics = com.example.musicflow.core.lyrics.LyricsUiState(),
+                    onPickLyrics = {}
                 )
             }
         }

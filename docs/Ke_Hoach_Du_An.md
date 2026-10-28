@@ -8,13 +8,19 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD nền | `e16348ac` |
+| HEAD nền | `2b04b1e6` |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 | 55 bài chính PASS |
 | Marker API 30 | 40/40 PASS |
 | Playback Speed v1 | Đã có source |
-| Sleep Timer v1 | Đang phát triển |
-| MVP / sản phẩm tổng thể | Chưa nghiệm thu — không đánh dấu hoàn thành khi chưa có đủ chức năng |
+| Sleep Timer v1 | Đã có source, chưa Full QA |
+| Lyrics v1 | Triển khai đọc LRC và hiển thị đồng bộ |
+| Lyrics import | Android OpenDocument |
+| Lưu liên kết LRC theo audio URI | Đã triển khai |
+| Build Lyrics v1 | PENDING / cập nhật theo kết quả thực tế |
+| Full QA | Để cuối giai đoạn phát triển |
+| Bước tiếp theo | Equalizer v1 |
+| Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
 
@@ -223,6 +229,19 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-28 — Feature Development: Lyrics v1
+
+- HEAD nền: 2b04b1e6.
+- Playback Speed v1: đã có source.
+- Sleep Timer v1: đã có source, chưa Full QA.
+- Lyrics v1: triển khai đọc LRC và hiển thị đồng bộ.
+- Lyrics import: Android OpenDocument.
+- Lưu liên kết file LRC theo audio URI: đã triển khai.
+- Build Lyrics v1: PENDING / cập nhật theo kết quả thực tế.
+- Full QA: Để cuối giai đoạn phát triển.
+- Bước tiếp theo: Equalizer v1.
+- Sản phẩm tổng thể: CHƯA NGHIỆM THU.
 
 ### 2026-10-28 — Feature Development: Playback Speed & Sleep Timer
 

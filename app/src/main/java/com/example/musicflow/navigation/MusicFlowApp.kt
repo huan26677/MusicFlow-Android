@@ -32,6 +32,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.musicflow.core.history.RecentSong
 import com.example.musicflow.core.playback.PlayerUiState
+import com.example.musicflow.core.lyrics.LyricsUiState
 import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.playlist.PlaylistTrack
 
@@ -88,6 +89,8 @@ fun MusicFlowApp(
     onCycleRepeat: () -> Unit,
     onSetPlaybackSpeed: (Float) -> Unit,
     onSetSleepTimerMinutes: (Int) -> Unit,
+    lyrics: LyricsUiState,
+    onPickLyrics: () -> Unit,
     themeMode: String,
     onThemeModeChange: (String) -> Unit
 
@@ -366,7 +369,9 @@ fun MusicFlowApp(
                         onToggleShuffle = onToggleShuffle,
                         onCycleRepeat = onCycleRepeat,
                         onSetPlaybackSpeed = onSetPlaybackSpeed,
-                        onSetSleepTimerMinutes = onSetSleepTimerMinutes
+                        onSetSleepTimerMinutes = onSetSleepTimerMinutes,
+                        lyrics = lyrics,
+                        onPickLyrics = onPickLyrics
                     )
                 }
             }

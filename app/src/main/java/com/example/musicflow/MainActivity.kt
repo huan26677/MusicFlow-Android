@@ -17,6 +17,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.musicflow.feature.player.PickedAudioFile
 import com.example.musicflow.feature.player.PlayerViewModel
+import com.example.musicflow.core.lyrics.LocalLyricsRepository
+import com.example.musicflow.core.lyrics.LyricsUiState
 import com.example.musicflow.navigation.MusicFlowApp
 import com.example.musicflow.ui.theme.MusicFlowTheme
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +26,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlin.jvm.Volatile
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +39,58 @@ import androidx.compose.runtime.setValue
 class MainActivity : ComponentActivity() {
 
     private lateinit var playerViewModel: PlayerViewModel
+
+private val lyricsRepository by lazy {
+    LocalLyricsRepository(applicationContext)
+}
+
+private val lyricsUiState =
+    mutableStateOf(LyricsUiState())
+
+private var lyricsPickerTarget: String? = null
+
+private val pickLyrics = registerForActivityResult(
+    ActivityResultContracts.OpenDocument()
+) { selectedUri ->
+    val trackUri = lyricsPickerTarget
+    lyricsPickerTarget = null
+
+    if (selectedUri != null && trackUri != null) {
+        lifecycleScope.launch {
+            try {
+                val lines = withContext(Dispatchers.IO) {
+                    lyricsRepository.import(
+                        trackUri,
+                        selectedUri
+                    )
+                }
+
+                if (
+                    playerViewModel.uiState.value
+                        .audioUri?.toString() == trackUri
+                ) {
+                    lyricsUiState.value = LyricsUiState(
+                        trackUri = trackUri,
+                        lines = lines
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                if (
+                    playerViewModel.uiState.value
+                        .audioUri?.toString() == trackUri
+                ) {
+                    lyricsUiState.value = LyricsUiState(
+                        trackUri = trackUri,
+                        error = "Không thể nhập file LRC. " +
+                            "Hãy chọn file khác."
+                    )
+                }
+            }
+        }
+    }
+}
 
     private var pickFilesJob: Job? = null
 
@@ -148,6 +206,40 @@ class MainActivity : ComponentActivity() {
         )[PlayerViewModel::class.java]
 
         lifecycleScope.launch {
+            playerViewModel.uiState
+                .map { it.audioUri?.toString() }
+                .distinctUntilChanged()
+                .collectLatest { trackUri ->
+
+                    lyricsUiState.value = LyricsUiState(
+                        trackUri = trackUri
+                    )
+
+                    if (trackUri == null) {
+                        return@collectLatest
+                    }
+
+                    try {
+                        val lines = withContext(Dispatchers.IO) {
+                            lyricsRepository.load(trackUri)
+                        }
+
+                        lyricsUiState.value = LyricsUiState(
+                            trackUri = trackUri,
+                            lines = lines
+                        )
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (_: Exception) {
+                        lyricsUiState.value = LyricsUiState(
+                            trackUri = trackUri,
+                            error = "Không thể đọc lời bài hát đã lưu."
+                        )
+                    }
+                }
+        }
+
+        lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 while (true) {
                     playerViewModel.refreshProgress()
@@ -183,6 +275,7 @@ class MainActivity : ComponentActivity() {
             MusicFlowTheme(darkTheme = useDarkTheme) {
                 MusicFlowApp(
                     state = playerState,
+                    lyrics = lyricsUiState.value,
                     themeMode = themeMode,
                     onThemeModeChange = { selected ->
                         if (selected in setOf("system", "dark", "light")) {
@@ -248,6 +341,18 @@ class MainActivity : ComponentActivity() {
 
                     onSetSleepTimerMinutes = { minutes ->
                         playerViewModel.setSleepTimerMinutes(minutes)
+                    },
+
+                    onPickLyrics = {
+                        val currentAudioUri =
+                            playerViewModel.uiState.value
+                                .audioUri?.toString()
+
+                        if (currentAudioUri != null) {
+                            lyricsPickerTarget = currentAudioUri
+
+                            pickLyrics.launch(arrayOf("*/*"))
+                        }
                     }
                 )
             }

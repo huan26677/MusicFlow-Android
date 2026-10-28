@@ -19,7 +19,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 import androidx.media3.common.Player
+import com.example.musicflow.core.lyrics.LyricsUiState
 import com.example.musicflow.core.playback.PlayerUiState
+import androidx.compose.ui.text.font.FontWeight
 import com.example.musicflow.ui.components.SongArtwork
 
 @Composable
@@ -35,7 +37,9 @@ fun NowPlayingScreen(
     onToggleShuffle: () -> Unit,
     onCycleRepeat: () -> Unit,
     onSetPlaybackSpeed: (Float) -> Unit,
-    onSetSleepTimerMinutes: (Int) -> Unit
+    onSetSleepTimerMinutes: (Int) -> Unit,
+    lyrics: LyricsUiState,
+    onPickLyrics: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -352,6 +356,63 @@ fun NowPlayingScreen(
             ) {
                 Text("Hủy hẹn giờ")
             }
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        HorizontalDivider()
+
+        Spacer(Modifier.height(16.dp))
+
+        Text(
+            text = "Lời bài hát",
+            style = MaterialTheme.typography.titleLarge
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        if (lyrics.error != null) {
+            Text(
+                text = lyrics.error,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error
+            )
+        } else if (lyrics.lines.isEmpty()) {
+            Text(
+                text = "Chưa có lời bài hát. " +
+                    "Hãy nhập file .lrc.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        } else {
+            val currentLineIndex = lyrics.lines.indexOfLast {
+                it.timeMs <= state.positionMs
+            }
+
+            lyrics.lines.forEachIndexed { index, line ->
+                Text(
+                    text = line.text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = if (index == currentLineIndex) {
+                        FontWeight.Bold
+                    } else {
+                        FontWeight.Normal
+                    },
+                    color = if (index == currentLineIndex) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    }
+                )
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedButton(
+            onClick = onPickLyrics,
+            enabled = state.hasMedia
+        ) {
+            Text("Nhập file .lrc")
         }
 
         Spacer(Modifier.height(16.dp))
