@@ -92,7 +92,8 @@ try {
         'PASS sourcePreparedWithoutPersistedRead',
         'PASS realPickerPlayback', 'PASS realPickerPersistedRead',
         'PASS multiSourcesPrepared', 'PASS multiQueue',
-        'PASS multiPersistedRead', 'PASS multiNext'
+        'PASS multiPersistedRead', 'PASS multiNext',
+        'PASS multiNextWrittenHistory'
     )
     $markersOk = $true
     foreach ($marker in $markers) {

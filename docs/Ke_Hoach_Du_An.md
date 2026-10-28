@@ -9,15 +9,15 @@
 | Mục | Trạng thái đã đối chiếu |
 |---|---|
 | Tình trạng toàn dự án | **ĐANG PHÁT TRIỂN — CHƯA NGHIỆM THU MVP/RELEASE** |
-| Mốc kỹ thuật gần nhất | **SAF Multi-file v1 — Full QA PASS** |
+| Mốc kỹ thuật gần nhất | **SAF → History v1 — Fast QA PASS** |
 | JVM unit tests (mốc v2) | **PASS** |
-| Android instrumented tests (mốc v2) | **52 regression + 3 test theo pha PASS** — Pixel_5, Android 10 (API 30) |
-| Marker | **27/27 PASS** |
-| Kết quả log | `FINAL_RESULT=PASS` (SAF Multi-file v1 Full QA) |
+| Android instrumented tests (mốc v2) | **52 regression + 3 test theo pha PASS** — Pixel_5, Android 11 (API 30) |
+| Marker | **28/28 PASS** |
+| Kết quả log | `FINAL_RESULT=PASS` (SAF → History v1 Fast QA) |
 | Commit chứa vòng QA v2 | `74b9026c1cdb70c9d2ed0563bb747d1a047a061a` |
-| Commit HEAD tại thời điểm rà sow | `94c03895` (SAF Multi-file v1 — Full QA PASS) |
+| Commit HEAD tại thời điểm rà sow | `d7243128` (SAF → History v1 — Fast QA PASS) |
 | Log gần nhất đã xác nhận | `qa-logs/real-picker-saf-v1.log` |
-| Bước đang phát triển tiếp | **SAF → History v1 — PENDING QA** |
+| Bước đang phát triển tiếp | **SAF → History v1 — Fast QA PASS, Full Regression PENDING** |
 | Ngày rà Sox | **2026-10-28**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -237,6 +237,17 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 ### 2026-10-28 — SAF → History v1 — PENDING QA
 
 - Multi-file picker writes second track to recent history: PENDING QA
+- Full Regression: PENDING
+- MVP: Chưa nghiệm thu
+
+### 2026-10-28 — SAF → History v1
+
+- Commit: d7243128
+- Fast QA: PASS
+- Chọn 2 file SAF: PASS
+- Queue và Next: PASS
+- Persisted READ: PASS
+- Recently Played (Room): PASS
 - Full Regression: PENDING
 - MVP: Chưa nghiệm thu
 
