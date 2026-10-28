@@ -756,6 +756,7 @@ class PlaybackServiceIntegrationTest {
         audioUri?.let { resolver.delete(it, null, null) }
         source.delete()
     }
+}
 
     @Test
     fun mvpHomePlaylistNowPlayingThroughMediaSession() {
@@ -895,6 +896,6 @@ class PlaybackServiceIntegrationTest {
             files.forEach { it.delete() }
         }
     }
-}
+
 }
 
