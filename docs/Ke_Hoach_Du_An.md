@@ -9,15 +9,15 @@
 | Mục | Trạng thái đã đối chiếu |
 |---|---|
 | Tình trạng toàn dự án | **ĐANG PHÁT TRIỂN — CHƯA NGHIỆM THU MVP/RELEASE** |
-| Mốc kỹ thuật gần nhất | **Playlist → Playback → Restart v1 — Full QA PASS** |
+| Mốc kỹ thuật gần nhất | **Playlist UI CRUD v1 — Fast QA PASS** |
 | JVM unit tests (mốc v2) | **PASS** |
-| Android instrumented tests (mốc v2) | **52 regression + 3 test theo pha PASS** — Pixel_5, Android 11 (API 30) |
-| Marker | **28/28 PASS** |
-| Kết quả log | `FINAL_RESULT=PASS` (Playlist → Playback → Restart v1) |
+| Android instrumented tests (mốc v2) | **54 regression + 3 test theo pha PASS** — Pixel_5, Android 11 (API 30) |
+| Marker | **33/33 PASS** |
+| Kết quả log | `FINAL_RESULT=PASS` (Playlist UI Acceptance v1 Fast QA) |
 | Commit chứa vòng QA v2 | `74b9026c1cdb70c9d2ed0563bb747d1a047a061a` |
-| Commit HEAD tại thời điểm rà sow | `873b9629` (Playlist UI CRUD v1 — PENDING QA rerun) |
-| Log gần nhất đã xác nhận | `qa-logs/playlist-ui-crud-v1.log` |
-| Bước đang phát triển tiếp | **Playlist UI CRUD v1 — PENDING QA rerun** |
+| Commit HEAD tại thời điểm rà sow | `a7e0992d` (Playlist UI Acceptance v1 — Fast QA PASS) |
+| Log gần nhất đã xác nhận | `qa-logs/real-picker-saf-v1.log` |
+| Bước đang phát triển tiếp | **Playlist UI Acceptance v1 — Fast QA PASS, Full Regression PENDING** |
 | Ngày rà Sox | **2026-10-28**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -225,14 +225,16 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
 
-### 2026-10-28 — Playlist UI CRUD v1
+### 2026-10-28 — Playlist UI Acceptance v1
 
-- Commit kiểm tra: 873b9629
-- Lỗi: Kotlin compile FAIL do import onNode không hợp lệ.
-- Sửa: xóa import androidx.compose.ui.test.onNode.
-- Log: qa-logs/playlist-ui-crud-v1.log
-- Trạng thái: PENDING QA chạy lại.
-- Playlist UI Reorder: PASS.
+- Playlist UI Reorder: Fast QA PASS.
+- Playlist UI Play All / Selected Track: PASS.
+- Playlist UI Create: PASS.
+- Playlist UI Rename: PASS.
+- Playlist UI Delete: PASS.
+- Android: API 30.
+- Full Regression: PENDING.
+- Log: qa-logs/real-picker-saf-v1.log.
 - MVP: Chưa nghiệm thu.
 
 ### 2026-10-28 — Playlist → Playback → Restart v1

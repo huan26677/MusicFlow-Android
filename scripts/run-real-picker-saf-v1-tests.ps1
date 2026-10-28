@@ -73,7 +73,7 @@ try {
     $logs = @(
         & $adb -s $serial logcat -d -v brief -s `
             'MusicFlowMvpE2E:I' 'MusicFlowFavoritesQA:I' 'MusicFlowBackgroundQA:I' `
-            'MusicFlowSystemV2QA:I' 'MusicFlowRealPickerQA:I' `
+            'MusicFlowSystemV2QA:I' 'MusicFlowRealPickerQA:I' 'MusicFlowPlaylistUIQA:I' `
             'AndroidRuntime:E' '*:S' 2>&1
     )
     $logs | ForEach-Object { Write-Log $_.ToString() }
@@ -93,7 +93,12 @@ try {
         'PASS realPickerPlayback', 'PASS realPickerPersistedRead',
         'PASS multiSourcesPrepared', 'PASS multiQueue',
         'PASS multiPersistedRead', 'PASS multiNext',
-        'PASS multiNextWrittenHistory'
+        'PASS multiNextWrittenHistory',
+        'PASS playlistUiReorderAndPlayAll',
+        'PASS playlistUiSelectedTrack',
+        'PASS playlistUiCreate',
+        'PASS playlistUiRename',
+        'PASS playlistUiDelete'
     )
     $markersOk = $true
     foreach ($marker in $markers) {
@@ -117,8 +122,8 @@ try {
         Write-Log "PHASE_TEST_SKIP_${method}=$skipped"
         if (!$skipped) { $skipsOk = $false }
     }
-    $passed = $jvmOk -and $androidOk -and $startCount -eq 52 -and
-        $finishCount -eq 55 -and $skipsOk -and $markersOk
+    $passed = $jvmOk -and $androidOk -and $startCount -eq 54 -and
+        $finishCount -eq 57 -and $skipsOk -and $markersOk
 }
 catch {
     Write-Log "ERROR=$($_.Exception.Message)"
