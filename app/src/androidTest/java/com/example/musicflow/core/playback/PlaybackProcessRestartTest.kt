@@ -18,6 +18,9 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.example.musicflow.MainActivity
 import com.example.musicflow.core.history.RoomRecentHistoryRepository
 import com.example.musicflow.core.history.local.RecentHistoryDatabase
+import com.example.musicflow.core.playlist.PlaylistMediaItems
+import com.example.musicflow.core.playlist.PlaylistTrack
+import com.example.musicflow.core.playlist.RoomPlaylistRepository
 import com.google.common.util.concurrent.ListenableFuture
 
 import kotlinx.coroutines.delay
@@ -178,6 +181,42 @@ class PlaybackProcessRestartTest {
             writeWav(file(index))
         }
 
+        val playlists = RoomPlaylistRepository(
+            RecentHistoryDatabase.getInstance(context)
+        )
+
+        val playlist = checkNotNull(
+            playlists.create("Restart Playlist QA")
+        )
+
+        assertTrue(
+            qaPrefs.edit()
+                .putString("playlistId", playlist.id)
+                .commit()
+        )
+
+        for (index in 2 downTo 1) {
+            assertTrue(
+                playlists.addTrack(
+                    playlist.id,
+                    PlaylistTrack(
+                        mediaId = ids[index - 1],
+                        audioUri = Uri.fromFile(file(index)).toString(),
+                        title = "Restart QA $index",
+                        artist = "MusicFlow QA",
+                        addedAtMs = index.toLong()
+                    )
+                )
+            )
+        }
+
+        assertTrue(playlists.moveTrack(playlist.id, ids[0], -1))
+
+        val orderedTracks = playlists.getTracks(playlist.id)
+        assertEquals(ids, orderedTracks.map { it.mediaId })
+
+        Log.i("MusicFlowRestartIT", "PASS playlistPrepared")
+
         var future: ListenableFuture<MediaController>? = null
 
         try {
@@ -186,18 +225,7 @@ class PlaybackProcessRestartTest {
             val (connection, controller) = connect()
             future = connection
 
-            val items = (1..2).map { index ->
-                MediaItem.Builder()
-                    .setMediaId(ids[index - 1])
-                    .setUri(Uri.fromFile(file(index)))
-                    .setMediaMetadata(
-                        MediaMetadata.Builder()
-                            .setTitle("Restart QA $index")
-                            .setArtist("MusicFlow QA")
-                            .build()
-                    )
-                    .build()
-            }
+            val items = PlaylistMediaItems.fromTracks(orderedTracks)
 
             val playing = CountDownLatch(1)
 
@@ -312,6 +340,18 @@ class PlaybackProcessRestartTest {
 
             val (connection, controller) = connect()
             future = connection
+
+            val playlistId = checkNotNull(
+                qaPrefs.getString("playlistId", null)
+            )
+
+            val tracks = RoomPlaylistRepository(
+                RecentHistoryDatabase.getInstance(context)
+            ).getTracks(playlistId)
+
+            assertEquals(ids, tracks.map { it.mediaId })
+
+            Log.i("MusicFlowRestartIT", "PASS playlistPersistedAfterRestart")
 
             instrumentation.runOnMainSync {
                 assertEquals(
@@ -465,6 +505,14 @@ class PlaybackProcessRestartTest {
 
         for (index in 1..2) {
             file(index).delete()
+        }
+
+        qaPrefs.getString("playlistId", null)?.let { playlistId ->
+            val playlists = RoomPlaylistRepository(
+                RecentHistoryDatabase.getInstance(context)
+            )
+            playlists.deletePlaylist(playlistId)
+            assertNull(playlists.getPlaylist(playlistId))
         }
 
         qaPrefs.edit().clear().commit()

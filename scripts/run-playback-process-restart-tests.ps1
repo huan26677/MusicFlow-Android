@@ -1,3 +1,5 @@
+param([switch]$PhasesOnly)
+
 $ErrorActionPreference = "Continue"
 
 $root = Split-Path -Parent $PSScriptRoot
@@ -304,14 +306,22 @@ try {
 
             & $adbPath -s $serial logcat -c 2>$null
 
-            $unitPassed = Run-Gradle "JVM_TESTS" @(
-                ":app:testDebugUnitTest",
-                "--console=plain"
-            )
+            $unitPassed = if ($PhasesOnly) {
+                Run-Gradle "BUILD_TEST_APKS" @(
+                    ":app:assembleDebug",
+                    ":app:assembleDebugAndroidTest",
+                    "--console=plain"
+                )
+            } else {
+                Run-Gradle "JVM_TESTS" @(
+                    ":app:testDebugUnitTest",
+                    "--console=plain"
+                )
+            }
 
-            $androidPassed = $false
+            $androidPassed = $PhasesOnly
 
-            if ($unitPassed) {
+            if ($unitPassed -and -not $PhasesOnly) {
                 $androidPassed = Run-Gradle "ANDROID_TESTS" @(
                     ":app:connectedDebugAndroidTest",
                     "--console=plain"
