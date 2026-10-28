@@ -15,9 +15,9 @@
 | Marker | **28/28 PASS** |
 | Kết quả log | `FINAL_RESULT=PASS` (Playlist → Playback → Restart v1) |
 | Commit chứa vòng QA v2 | `74b9026c1cdb70c9d2ed0563bb747d1a047a061a` |
-| Commit HEAD tại thời điểm rà sow | `40b238af` (Playlist UI Acceptance v1 — PENDING QA) |
-| Log gần nhất đã xác nhận | `qa-logs/playlist-ui-v1.log` |
-| Bước đang phát triển tiếp | **Playlist UI Acceptance v1 — PENDING QA** |
+| Commit HEAD tại thời điểm rà sow | `873b9629` (Playlist UI CRUD v1 — PENDING QA rerun) |
+| Log gần nhất đã xác nhận | `qa-logs/playlist-ui-crud-v1.log` |
+| Bước đang phát triển tiếp | **Playlist UI CRUD v1 — PENDING QA rerun** |
 | Ngày rà Sox | **2026-10-28**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -225,13 +225,14 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
 
-### 2026-10-28 — Playlist UI Acceptance v1
+### 2026-10-28 — Playlist UI CRUD v1
 
-- Mốc trước: Playlist → Playback → Restart v1 — Full QA PASS.
-- Commit mốc trước: 40b238af.
-- Bài kiểm thử mới: Playlist UI reorder và playback callback.
-- Log: qa-logs/playlist-ui-v1.log
-- Trạng thái: PENDING QA.
+- Commit kiểm tra: 873b9629
+- Lỗi: Kotlin compile FAIL do import onNode không hợp lệ.
+- Sửa: xóa import androidx.compose.ui.test.onNode.
+- Log: qa-logs/playlist-ui-crud-v1.log
+- Trạng thái: PENDING QA chạy lại.
+- Playlist UI Reorder: PASS.
 - MVP: Chưa nghiệm thu.
 
 ### 2026-10-28 — Playlist → Playback → Restart v1
