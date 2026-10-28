@@ -132,6 +132,12 @@ class PlayerViewModel(
     fun setSleepTimerMinutes(minutes: Int) =
         playbackController.setSleepTimerMinutes(minutes)
 
+    fun setEqualizerEnabled(enabled: Boolean) =
+        playbackController.setEqualizerEnabled(enabled)
+
+    fun setEqualizerBand(index: Int, levelMb: Int) =
+        playbackController.setEqualizerBand(index, levelMb)
+
     fun refreshProgress() =
         playbackController.refreshProgress()
 

@@ -342,6 +342,12 @@ private val pickLyrics = registerForActivityResult(
                     onSetSleepTimerMinutes = { minutes ->
                         playerViewModel.setSleepTimerMinutes(minutes)
                     },
+                    onSetEqualizerEnabled = { enabled ->
+                        playerViewModel.setEqualizerEnabled(enabled)
+                    },
+                    onSetEqualizerBand = { index, level ->
+                        playerViewModel.setEqualizerBand(index, level)
+                    },
 
                     onPickLyrics = {
                         val currentAudioUri =

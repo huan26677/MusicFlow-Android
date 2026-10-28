@@ -196,6 +196,10 @@ fun mvpLibrarySearchToRealPlayer() {
                         playerViewModel::setPlaybackSpeed,
                     onSetSleepTimerMinutes =
                         playerViewModel::setSleepTimerMinutes,
+                    onSetEqualizerEnabled =
+                        playerViewModel::setEqualizerEnabled,
+                    onSetEqualizerBand =
+                        playerViewModel::setEqualizerBand,
                     lyrics = com.example.musicflow.core.lyrics.LyricsUiState(),
                     onPickLyrics = {}
                 )

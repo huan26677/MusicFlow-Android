@@ -38,6 +38,8 @@ fun NowPlayingScreen(
     onCycleRepeat: () -> Unit,
     onSetPlaybackSpeed: (Float) -> Unit,
     onSetSleepTimerMinutes: (Int) -> Unit,
+    onSetEqualizerEnabled: (Boolean) -> Unit,
+    onSetEqualizerBand: (Int, Int) -> Unit,
     lyrics: LyricsUiState,
     onPickLyrics: () -> Unit
 ) {
@@ -358,8 +360,45 @@ fun NowPlayingScreen(
             }
         }
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(20.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(12.dp))
+        Text("Equalizer", style = MaterialTheme.typography.titleLarge)
+        val eq = state.equalizer
+        if (!eq.supported) {
+            Text("Thiết bị chưa cung cấp bộ cân bằng âm thanh.",
+                style = MaterialTheme.typography.bodyMedium)
+        } else {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Bật Equalizer", modifier = Modifier.weight(1f))
+                Switch(checked = eq.enabled, onCheckedChange = onSetEqualizerEnabled)
+            }
+            eq.bands.forEach { band ->
+                var dragged by remember(band.index, eq.enabled) {
+                    mutableFloatStateOf(band.levelMb.toFloat())
+                }
+                LaunchedEffect(band.levelMb) {
+                    dragged = band.levelMb.toFloat()
+                }
+                val frequency = if (band.frequencyHz >= 1000) {
+                    "${band.frequencyHz / 1000f} kHz"
+                } else "${band.frequencyHz} Hz"
+                Text("$frequency  (${(dragged / 100f).toInt()} dB)")
+                Slider(
+                    value = dragged.coerceIn(
+                        eq.minLevelMb.toFloat(), eq.maxLevelMb.toFloat()
+                    ),
+                    onValueChange = { dragged = it },
+                    onValueChangeFinished = {
+                        onSetEqualizerBand(band.index, dragged.toInt())
+                    },
+                    valueRange = eq.minLevelMb.toFloat()..eq.maxLevelMb.toFloat(),
+                    enabled = eq.enabled && eq.minLevelMb < eq.maxLevelMb
+                )
+            }
+        }
 
+        Spacer(Modifier.height(24.dp))
         HorizontalDivider()
 
         Spacer(Modifier.height(16.dp))

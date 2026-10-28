@@ -40,6 +40,7 @@ import kotlinx.coroutines.withContext
 class PlaybackService : MediaSessionService() {
 
     private var mediaSession: MediaSession? = null
+    private lateinit var equalizerEngine: EqualizerEngine
 
     private var runtimeAutoSkip: PlaybackRuntimeAutoSkip? = null
 
@@ -75,6 +76,9 @@ class PlaybackService : MediaSessionService() {
     )
 
     private val playerListener = object : Player.Listener {
+        override fun onAudioSessionIdChanged(audioSessionId: Int) {
+            equalizerEngine.onAudioSessionChanged(audioSessionId)
+        }
 
         override fun onMediaItemTransition(
             mediaItem: MediaItem?,
@@ -192,6 +196,7 @@ class PlaybackService : MediaSessionService() {
                                 Bundle.EMPTY
                             )
                         )
+                        .add(SessionCommand(EqualizerContract.ACTION, Bundle.EMPTY))
                         .build()
 
                 val result =
@@ -209,6 +214,28 @@ class PlaybackService : MediaSessionService() {
                 customCommand: SessionCommand,
                 args: Bundle
             ): ListenableFuture<SessionResult> {
+
+                if (customCommand.customAction == EqualizerContract.ACTION) {
+                    val op = args.getInt(EqualizerContract.KEY_OPERATION, -1)
+                    val ok = when (op) {
+                        EqualizerContract.OP_GET -> true
+                        EqualizerContract.OP_ENABLE -> equalizerEngine.setEnabled(
+                            args.getBoolean(EqualizerContract.KEY_ENABLED)
+                        )
+                        EqualizerContract.OP_SET_BAND -> equalizerEngine.setBandLevel(
+                            args.getInt(EqualizerContract.KEY_BAND_INDEX, -1),
+                            args.getInt(EqualizerContract.KEY_LEVEL_MB)
+                        )
+                        else -> false
+                    }
+                    return Futures.immediateFuture(
+                        SessionResult(
+                            if (ok) SessionResult.RESULT_SUCCESS
+                            else SessionResult.RESULT_ERROR_BAD_VALUE,
+                            equalizerEngine.stateBundle()
+                        )
+                    )
+                }
 
                 if (customCommand.customAction !=
                     SleepTimerContract.ACTION
@@ -259,6 +286,7 @@ class PlaybackService : MediaSessionService() {
 
     override fun onCreate() {
         super.onCreate()
+        equalizerEngine = EqualizerEngine(applicationContext)
 
         val player = ExoPlayer.Builder(this)
             .setAudioAttributes(
@@ -267,6 +295,7 @@ class PlaybackService : MediaSessionService() {
             )
             .setHandleAudioBecomingNoisy(true)
             .build()
+
 
         val restored = queueStore.restoreInto(player)
 
@@ -476,6 +505,7 @@ class PlaybackService : MediaSessionService() {
     }
 
     override fun onDestroy() {
+        equalizerEngine.release()
         runtimeAutoSkip?.dispose()
         runtimeAutoSkip = null
 

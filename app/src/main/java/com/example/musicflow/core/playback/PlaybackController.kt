@@ -43,7 +43,8 @@ data class PlayerUiState(
     val artworkUri: Uri? = null,
     val audioUri: Uri? = null,
     val playbackSpeed: Float = 1f,
-    val sleepTimerRemainingMs: Long = 0L
+    val sleepTimerRemainingMs: Long = 0L,
+    val equalizer: EqualizerUiState = EqualizerUiState()
 )
 
 class PlaybackController(context: Context) {
@@ -60,6 +61,7 @@ class PlaybackController(context: Context) {
 
     private var sleepTimerRequestId = 0L
     private var lastSleepTimerQueryMs = 0L
+    private var lastEqualizerQueryMs = 0L
 
     private data class QueueRequest(
         val items: List<MediaItem>,
@@ -107,6 +109,7 @@ class PlaybackController(context: Context) {
                         newController.addListener(listener)
                         updateState(newController)
                         requestSleepTimer(-1)
+                        requestEqualizer(EqualizerContract.OP_GET)
 
                         pendingQueue?.let { request ->
                             pendingQueue = null
@@ -227,7 +230,8 @@ class PlaybackController(context: Context) {
             audioUri = audioUri,
             playbackSpeed = player.playbackParameters.speed,
             sleepTimerRemainingMs =
-                _uiState.value.sleepTimerRemainingMs
+                _uiState.value.sleepTimerRemainingMs,
+            equalizer = _uiState.value.equalizer
         )
     }
 
@@ -239,6 +243,10 @@ class PlaybackController(context: Context) {
         if (now - lastSleepTimerQueryMs >= 1_000L) {
             lastSleepTimerQueryMs = now
             requestSleepTimer(-1)
+        }
+        if (now - lastEqualizerQueryMs >= 2_000L) {
+            lastEqualizerQueryMs = now
+            requestEqualizer(EqualizerContract.OP_GET)
         }
     }
 
@@ -458,7 +466,53 @@ class PlaybackController(context: Context) {
         requestSleepTimer(minutes)
     }
 
+    private var equalizerRequestId = 0L
+
+    private fun requestEqualizer(
+        operation: Int,
+        enabled: Boolean = false,
+        index: Int = -1,
+        levelMb: Int = 0
+    ) {
+        val media = controller ?: return
+        val requestId = ++equalizerRequestId
+        val args = Bundle().apply {
+            putInt(EqualizerContract.KEY_OPERATION, operation)
+            putBoolean(EqualizerContract.KEY_ENABLED, enabled)
+            putInt(EqualizerContract.KEY_BAND_INDEX, index)
+            putInt(EqualizerContract.KEY_LEVEL_MB, levelMb)
+        }
+        val future = media.sendCustomCommand(
+            SessionCommand(EqualizerContract.ACTION, Bundle.EMPTY), args
+        )
+        future.addListener({
+            if (controller === media && requestId == equalizerRequestId) {
+                try {
+                    val result = future.get()
+                    _uiState.value = _uiState.value.copy(
+                        equalizer = EqualizerUiState.fromBundle(result.extras)
+                    )
+                } catch (_: Exception) {
+                    _uiState.value = _uiState.value.copy(
+                        equalizer = EqualizerUiState()
+                    )
+                }
+            }
+        }, ContextCompat.getMainExecutor(appContext))
+    }
+
+    fun setEqualizerEnabled(enabled: Boolean) =
+        requestEqualizer(EqualizerContract.OP_ENABLE, enabled = enabled)
+
+    fun setEqualizerBand(index: Int, levelMb: Int) =
+        requestEqualizer(
+            EqualizerContract.OP_SET_BAND,
+            index = index,
+            levelMb = levelMb
+        )
+
     fun release() {
+        equalizerRequestId++
         sleepTimerRequestId++
 
         controller?.removeListener(listener)

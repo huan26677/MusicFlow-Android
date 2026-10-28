@@ -89,6 +89,8 @@ fun MusicFlowApp(
     onCycleRepeat: () -> Unit,
     onSetPlaybackSpeed: (Float) -> Unit,
     onSetSleepTimerMinutes: (Int) -> Unit,
+    onSetEqualizerEnabled: (Boolean) -> Unit,
+    onSetEqualizerBand: (Int, Int) -> Unit,
     lyrics: LyricsUiState,
     onPickLyrics: () -> Unit,
     themeMode: String,
@@ -370,6 +372,8 @@ fun MusicFlowApp(
                         onCycleRepeat = onCycleRepeat,
                         onSetPlaybackSpeed = onSetPlaybackSpeed,
                         onSetSleepTimerMinutes = onSetSleepTimerMinutes,
+                        onSetEqualizerEnabled = onSetEqualizerEnabled,
+                        onSetEqualizerBand = onSetEqualizerBand,
                         lyrics = lyrics,
                         onPickLyrics = onPickLyrics
                     )

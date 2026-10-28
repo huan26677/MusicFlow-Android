@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `0d6dc08` — sửa build ở workspace, chưa commit |
+| HEAD Git hiện tại | `49603b0` — Equalizer v1 đang sửa ở workspace, chưa commit |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 | 55 bài chính PASS |
 | Marker API 30 | 40/40 PASS |
@@ -19,7 +19,8 @@
 | Lưu liên kết LRC theo audio URI | Đã triển khai |
 | Build Lyrics v1 + Sleep Timer v1 | `:app:assembleDebug` và `:app:assembleDebugAndroidTest` PASS ngày 2026-10-29; chỉ xác nhận biên dịch |
 | Full QA | Để cuối giai đoạn phát triển |
-| Bước tiếp theo | Equalizer v1 |
+| Equalizer v1 | Đã viết engine theo audio session, UI điều chỉnh dải tần, lưu cấu hình; Build PASS, chưa chạy QA thực tế |
+| Bước tiếp theo | Crossfade/Gapless: nghiên cứu và triển khai theo năng lực Media3 |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -229,6 +230,18 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Equalizer v1 — Build PASS
+
+- HEAD trước thay đổi: `49603b0`, workspace `E:\Du_An\MusicFlow`.
+- Đã thêm `EqualizerContract.kt` và `EqualizerEngine.kt`; hiệu ứng gắn theo audio session của ExoPlayer trong `PlaybackService`.
+- Điều khiển Bật/Tắt và từng băng tần trong `NowPlayingScreen`; dải tần và giới hạn gain theo thiết bị, không giả định 5 băng tần.
+- Dùng MediaSession custom command để gửi/nhận trạng thái; lưu cấu hình trong SharedPreferences; tự làm mới UI sau khi có audio session.
+- Đã cập nhật dây nối `PlaybackController` / `PlayerViewModel` / `MusicFlowApp` / `MainActivity` và lời gọi ở `ExampleInstrumentedTest`.
+- Build ứng dụng và APK instrumentation: `:app:assembleDebug` + `:app:assembleDebugAndroidTest` PASS. Log: `qa-logs/assemble-debug-equalizer-v1.log`.
+- Giới hạn: chỉ build PASS, chưa có runtime QA xác nhận audio effect thực sự hoạt động trên mọi thiết bị. Nếu thiết bị không hỗ trợ thì UI báo không hỗ trợ.
+- Chưa chạy Full Regression theo kế hoạch hoàn thiện chức năng trước; chưa commit/push.
+- Bước tiếp theo: Crossfade/Gapless; MVP tổng thể CHƯA NGHIỆM THU.
 
 ### 2026-10-29 — Fix MediaSession API, build Lyrics + Sleep Timer v1
 
