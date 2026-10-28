@@ -15,9 +15,9 @@
 | Marker | **28/28 PASS** |
 | Kết quả log | `FINAL_RESULT=PASS` (Playlist → Playback → Restart v1) |
 | Commit chứa vòng QA v2 | `74b9026c1cdb70c9d2ed0563bb747d1a047a061a` |
-| Commit HEAD tại thời điểm rà sow | `56011698` (Playlist → Playback → Restart v1) |
-| Log gần nhất đã xác nhận | `qa-logs/playback-process-restart-v1.log` |
-| Bước đang phát triển tiếp | **Playlist → Playback → Restart v1 — Full QA PASS; tiếp tục Full Regression** |
+| Commit HEAD tại thời điểm rà sow | `40b238af` (Playlist UI Acceptance v1 — PENDING QA) |
+| Log gần nhất đã xác nhận | `qa-logs/playlist-ui-v1.log` |
+| Bước đang phát triển tiếp | **Playlist UI Acceptance v1 — PENDING QA** |
 | Ngày rà Sox | **2026-10-28**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -224,6 +224,15 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-28 — Playlist UI Acceptance v1
+
+- Mốc trước: Playlist → Playback → Restart v1 — Full QA PASS.
+- Commit mốc trước: 40b238af.
+- Bài kiểm thử mới: Playlist UI reorder và playback callback.
+- Log: qa-logs/playlist-ui-v1.log
+- Trạng thái: PENDING QA.
+- MVP: Chưa nghiệm thu.
 
 ### 2026-10-28 — Playlist → Playback → Restart v1
 

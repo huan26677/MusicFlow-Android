@@ -3,6 +3,10 @@ package com.example.musicflow.core.playlist
 import android.net.Uri
 import android.util.Log
 
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -14,10 +18,12 @@ import com.example.musicflow.core.history.RecentSong
 import com.example.musicflow.core.history.RoomRecentHistoryRepository
 import com.example.musicflow.core.history.local.RecentHistoryDatabase
 import com.example.musicflow.core.playback.PlaybackSkipRecovery
+import com.example.musicflow.feature.playlist.PlaylistDetailRoute
 
 import kotlinx.coroutines.runBlocking
 
 import org.junit.Assert.*
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -30,6 +36,9 @@ import java.util.concurrent.atomic.AtomicReference
 
 @RunWith(AndroidJUnit4::class)
 class PlaylistPlaybackOrderTest {
+
+    @get:Rule
+    val composeRule = createComposeRule()
 
     private val instrumentation =
         InstrumentationRegistry.getInstrumentation()
@@ -396,5 +405,112 @@ class PlaylistPlaybackOrderTest {
                 }
             }
         }
+
+    @Test
+    fun playlistUiReorderPassesCorrectQueue() {
+        val stamp = System.nanoTime()
+        val files = (1..3).associateWith { createWav(it) }
+        val ids = (1..3).map { "qa-ui-$stamp-$it" }
+        val repository = RoomPlaylistRepository(
+            RecentHistoryDatabase.getInstance(context)
+        )
+
+        val playlist = runBlocking {
+            val created = checkNotNull(
+                repository.create("QA UI Playlist $stamp")
+            )
+
+            (1..3).forEach { index ->
+                assertTrue(
+                    repository.addTrack(
+                        created.id,
+                        PlaylistTrack(
+                            mediaId = ids[index - 1],
+                            audioUri = Uri.fromFile(
+                                files.getValue(index)
+                            ).toString(),
+                            title = "QA UI Track $index",
+                            artist = "MusicFlow QA",
+                            addedAtMs = index.toLong()
+                        )
+                    )
+                )
+            }
+            created
+        }
+
+        val selected =
+            AtomicReference<Pair<List<String>, Int>?>(null)
+
+        try {
+            composeRule.setContent {
+                PlaylistDetailRoute(
+                    playlistId = playlist.id,
+                    onBack = {},
+                    onPlayTracks = { tracks, index ->
+                        selected.set(
+                            tracks.map { it.mediaId } to index
+                        )
+                    }
+                )
+            }
+
+            composeRule.onNodeWithContentDescription(
+                "Đưa QA UI Track 3 lên"
+            ).performClick()
+
+            composeRule.waitUntil(10_000L) {
+                runBlocking {
+                    repository.getTracks(playlist.id)
+                        .map { it.mediaId } ==
+                        listOf(ids[0], ids[2], ids[1])
+                }
+            }
+
+            composeRule.waitForIdle()
+
+            composeRule.onNodeWithContentDescription(
+                "Đưa QA UI Track 3 lên"
+            ).performClick()
+
+            val expected = listOf(ids[2], ids[0], ids[1])
+
+            composeRule.waitUntil(10_000L) {
+                runBlocking {
+                    repository.getTracks(playlist.id)
+                        .map { it.mediaId } == expected
+                }
+            }
+
+            composeRule.waitForIdle()
+
+            composeRule.onNodeWithText(
+                "▶ Phát toàn bộ"
+            ).performClick()
+
+            assertEquals(expected to 0, selected.get())
+
+            Log.i(
+                "MusicFlowPlaylistUIQA",
+                "PASS playlistUiReorderAndPlayAll"
+            )
+
+            composeRule.onNodeWithText(
+                "QA UI Track 2"
+            ).performClick()
+
+            assertEquals(expected to 2, selected.get())
+
+            Log.i(
+                "MusicFlowPlaylistUIQA",
+                "PASS playlistUiSelectedTrack"
+            )
+        } finally {
+            runBlocking {
+                repository.deletePlaylist(playlist.id)
+            }
+            files.values.forEach { it.delete() }
+        }
+    }
 }
 
