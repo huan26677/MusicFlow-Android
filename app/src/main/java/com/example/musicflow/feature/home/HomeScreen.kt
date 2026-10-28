@@ -37,7 +37,8 @@ fun HomeRoute(
     onOpenPlayer: () -> Unit,
     onRecentSongSelected: (List<RecentSong>, Int) -> Unit,
     onOpenFavoriteSongs: () -> Unit,
-    onOpenFavoriteAlbums: () -> Unit
+    onOpenFavoriteAlbums: () -> Unit,
+    onOpenOnlineCatalog: () -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -84,6 +85,7 @@ fun HomeRoute(
         favoriteAlbumCount = favoriteAlbumIds.size,
         onOpenFavoriteSongs = onOpenFavoriteSongs,
         onOpenFavoriteAlbums = onOpenFavoriteAlbums,
+        onOpenOnlineCatalog = onOpenOnlineCatalog,
         actionError = actionError,
         onDismissActionError = homeViewModel::dismissActionError,
         onRemoveRecentSong = homeViewModel::removeRecentSong,
@@ -107,7 +109,8 @@ fun HomeScreen(
     actionError: String?,
     onDismissActionError: () -> Unit,
     onRemoveRecentSong: (String) -> Unit,
-    onClearHistory: () -> Unit
+    onClearHistory: () -> Unit,
+    onOpenOnlineCatalog: () -> Unit = {}
 ) {
     var showClearDialog by rememberSaveable {
         mutableStateOf(false)
@@ -162,6 +165,13 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Danh sách phát của tôi")
+                }
+
+                OutlinedButton(
+                    onClick = onOpenOnlineCatalog,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Khám phá nhạc online")
                 }
 
                 HorizontalDivider()

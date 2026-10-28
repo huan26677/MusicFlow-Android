@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `a2622f4` — Search nâng cao v1 đã build, thay đổi ở workspace chưa commit |
+| HEAD Git hiện tại | `036b504` — Online Catalog Foundation v1 đã build trong workspace, chưa commit |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 | 55 bài chính PASS |
 | Marker API 30 | 40/40 PASS |
@@ -23,7 +23,8 @@
 | Crossfade/Gapless v1 | Có mã crossfade thử nghiệm (mặc định tắt) và giữ Media3 gapless tự nhiên; build-only, chưa runtime QA |
 | Library nâng cao v1 | Bài hát / Album / Nghệ sĩ / Thể loại; có source, build ứng dụng + AndroidTest PASS, chưa runtime QA |
 | Search nâng cao v1 | Tìm bài hát, album, nghệ sĩ, thể loại có bỏ dấu; 4 bộ lọc, mở nhóm/phát/thêm Playlist; build ứng dụng + AndroidTest PASS, chưa runtime QA |
-| Bước tiếp theo | Online Catalog Foundation v1 — kiến trúc nguồn nhạc online hợp lệ, API/repository và trạng thái UI; chưa tích hợp nguồn không được cấp phép |
+| Online Catalog Foundation v1 | API HTTPS cấu hình được, repository metadata, phân trang và màn khám phá online; build ứng dụng + AndroidTest PASS; chưa có dịch vụ hay QA thực tế |
+| Bước tiếp theo | Licensed Streaming Integration v1 — triển khai phát online chỉ sau khi có backend và quyền phát hợp lệ |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -119,7 +120,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 
 ## 5. Công việc tiếp theo: backlog theo thứ tự ưu tiên
 
-**Chế độ phát triển hiện hành (2026-10-29):** Chủ dự án ưu tiên hoàn thiện tính năng Full Product trước rồi mới chạy vòng QA/bug tổng thể. Các mục P0 QA/Release bên dưới vẫn giữ nguyên để nghiệm thu cuối, không được hiểu là đã PASS khi chỉ build thành công. Mốc feature tiếp theo: **Online Catalog Foundation v1**; các bước kế tiếp sau đó gồm tài khoản/đồng bộ, podcast/radio, Premium theo tài liệu thiết kế, chỉ kết nối dịch vụ và nguồn nội dung được cấp phép.
+**Chế độ phát triển hiện hành (2026-10-29):** Chủ dự án ưu tiên hoàn thiện tính năng Full Product trước rồi mới chạy vòng QA/bug tổng thể. Các mục P0 QA/Release bên dưới vẫn giữ nguyên để nghiệm thu cuối, không được hiểu là đã PASS khi chỉ build thành công. Online Catalog Foundation v1 đã viết và build; mốc tiếp theo **Licensed Streaming Integration v1** phụ thuộc vào backend có quyền cung cấp nhạc. Sau đó gồm tải offline hợp lệ, tài khoản/đồng bộ, podcast/radio, Premium theo tài liệu thiết kế.
 
 | Ưu tiên | Bước / việc cần làm | Trạng thái | Điều kiện kết thúc bước |
 |---|---|---|---|
@@ -235,6 +236,18 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Online Catalog Foundation v1 — Build PASS
+
+- HEAD trước thay đổi: `036b504` (`feat: add advanced search for songs albums artists and genres`); thay đổi ở máy Windows, chưa commit/push.
+- Thêm `core/online/OnlineCatalog.kt`: model metadata, interface repository, cài đặt URL gốc HTTPS và implementation bằng `HttpsURLConnection`. Không tích hợp URL nhạc hoặc nguồn không được cấp phép.
+- Hợp đồng API: `GET /v1/catalog/tracks` có `items` và `nextCursor`; dùng `cursor` cho phân trang. Tài liệu `docs/Online_Catalog_API_v1.md`.
+- Thêm `feature/online/OnlineCatalogViewModel.kt` và `OnlineCatalogScreen.kt`: trạng thái chưa cấu hình/đang tải/rỗng/lỗi, cấu hình máy chủ và tải thêm.
+- Kết nối từ Home qua nút `Khám phá nhạc online` và Navigation3 `OnlineCatalogPage`; không chỉnh MediaSession/offline queue.
+- Giới hạn: HTTPS, không theo redirect, timeout 10s, mỗi trang tối đa 100 bản ghi/1 MiB, không gửi token, không autoplay hay tải xuống.
+- `:app:assembleDebug` + `:app:assembleDebugAndroidTest`: BUILD PASS; log `qa-logs/assemble-debug-online-catalog-v1.log` (build-only; không chạy instrumentation).
+- Chưa có endpoint nhà cung cấp thực tế, chưa kiểm thử server/mạng hoặc quyền streaming; chưa Full QA. Sản phẩm tổng thể CHƯA NGHIỆM THU.
+- Bước tiếp theo: Licensed Streaming Integration v1 sau khi có backend/API và quyền sử dụng nội dung; nếu chưa có backend, ưu tiên xây hợp đồng backend và dữ liệu quyền phát trước.
 
 ### 2026-10-29 — Search nâng cao v1 — Build PASS
 

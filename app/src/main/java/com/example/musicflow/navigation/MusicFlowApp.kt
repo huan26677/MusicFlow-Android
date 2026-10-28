@@ -38,6 +38,7 @@ import com.example.musicflow.core.playlist.PlaylistTrack
 
 import com.example.musicflow.feature.home.HomeRoute
 import com.example.musicflow.feature.library.LibraryRoute
+import com.example.musicflow.feature.online.OnlineCatalogRoute
 import com.example.musicflow.feature.playlist.PlaylistListRoute
 import com.example.musicflow.feature.playlist.PlaylistDetailRoute
 import com.example.musicflow.feature.player.MiniPlayer
@@ -67,6 +68,9 @@ data object NowPlaying : NavKey
 
 @Serializable
 data object PlaylistsRoute : NavKey
+
+@Serializable
+data object OnlineCatalogPage : NavKey
 
 @Serializable
 data class PlaylistDetail(
@@ -214,6 +218,12 @@ fun MusicFlowApp(
                             switchTab(SearchTab)
                         },
 
+                        onOpenOnlineCatalog = {
+                            if (backStack.lastOrNull() != OnlineCatalogPage) {
+                                backStack.add(OnlineCatalogPage)
+                            }
+                        },
+
                         onOpenPlaylists = {
                             if (backStack.lastOrNull() != PlaylistsRoute) {
                                 backStack.add(PlaylistsRoute)
@@ -307,6 +317,18 @@ fun MusicFlowApp(
                     AccountSettingsScreen(
                         themeMode = themeMode,
                         onThemeModeChange = onThemeModeChange
+                    )
+                }
+
+                entry<OnlineCatalogPage> {
+                    OnlineCatalogRoute(
+                        onBack = {
+                            if (backStack.size > 1) {
+                                backStack.removeAt(backStack.lastIndex)
+                            } else {
+                                switchTab(HomeTab)
+                            }
+                        }
                     )
                 }
 
