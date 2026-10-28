@@ -16,7 +16,8 @@ captures/
 .externalNativeBuild/
 .cxx/
 
-# Generated application packages
+# Generated application packages and local release bundles
+dist/
 *.apk
 *.aab
 
