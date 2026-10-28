@@ -126,6 +126,9 @@ class PlayerViewModel(
     fun seekTo(positionMs: Long) =
         playbackController.seekTo(positionMs)
 
+    fun setPlaybackSpeed(speed: Float) =
+        playbackController.setPlaybackSpeed(speed)
+
     fun refreshProgress() =
         playbackController.refreshProgress()
 

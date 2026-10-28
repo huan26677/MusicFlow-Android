@@ -37,7 +37,8 @@ data class PlayerUiState(
     val shuffleEnabled: Boolean = false,
     val repeatMode: Int = Player.REPEAT_MODE_OFF,
     val artworkUri: Uri? = null,
-    val audioUri: Uri? = null
+    val audioUri: Uri? = null,
+    val playbackSpeed: Float = 1f
 )
 
 class PlaybackController(context: Context) {
@@ -214,7 +215,8 @@ class PlaybackController(context: Context) {
 
             repeatMode = player.repeatMode,
             artworkUri = artworkUri,
-            audioUri = audioUri
+            audioUri = audioUri,
+            playbackSpeed = player.playbackParameters.speed
         )
     }
 
@@ -371,6 +373,15 @@ class PlaybackController(context: Context) {
 
         player.setRepeatMode(nextMode)
 
+        updateState(player)
+    }
+
+    fun setPlaybackSpeed(speed: Float) {
+        if (speed !in 0.5f..2f) return
+
+        val player = controller ?: return
+
+        player.setPlaybackSpeed(speed)
         updateState(player)
     }
 

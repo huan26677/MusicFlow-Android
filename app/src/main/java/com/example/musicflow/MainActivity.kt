@@ -240,6 +240,10 @@ class MainActivity : ComponentActivity() {
 
                     onCycleRepeat = {
                         playerViewModel.cycleRepeat()
+                    },
+
+                    onSetPlaybackSpeed = { speed ->
+                        playerViewModel.setPlaybackSpeed(speed)
                     }
                 )
             }

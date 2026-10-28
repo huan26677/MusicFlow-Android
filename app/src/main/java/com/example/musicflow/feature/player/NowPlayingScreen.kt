@@ -1,5 +1,6 @@
 package com.example.musicflow.feature.player
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,7 +33,8 @@ fun NowPlayingScreen(
     onNext: () -> Unit,
     onSeek: (Long) -> Unit,
     onToggleShuffle: () -> Unit,
-    onCycleRepeat: () -> Unit
+    onCycleRepeat: () -> Unit,
+    onSetPlaybackSpeed: (Float) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -274,6 +276,32 @@ fun NowPlayingScreen(
             ) {
                 Text(repeatLabel)
             }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        Text(
+            text = "Tốc độ phát",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf(0.75f, 1f, 1.25f, 1.5f, 2f)
+                .forEach { speed ->
+                    FilterChip(
+                        selected = kotlin.math.abs(
+                            state.playbackSpeed - speed
+                        ) < 0.01f,
+                        onClick = { onSetPlaybackSpeed(speed) },
+                        enabled = state.hasMedia,
+                        label = { Text("${speed}x") }
+                    )
+                }
         }
 
         Spacer(Modifier.height(16.dp))

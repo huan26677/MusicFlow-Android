@@ -86,6 +86,7 @@ fun MusicFlowApp(
     onSeek: (Long) -> Unit,
     onToggleShuffle: () -> Unit,
     onCycleRepeat: () -> Unit,
+    onSetPlaybackSpeed: (Float) -> Unit,
     themeMode: String,
     onThemeModeChange: (String) -> Unit
 
@@ -362,7 +363,8 @@ fun MusicFlowApp(
                         onNext = onNext,
                         onSeek = onSeek,
                         onToggleShuffle = onToggleShuffle,
-                        onCycleRepeat = onCycleRepeat
+                        onCycleRepeat = onCycleRepeat,
+                        onSetPlaybackSpeed = onSetPlaybackSpeed
                     )
                 }
             }
