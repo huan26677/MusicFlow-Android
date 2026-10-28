@@ -34,6 +34,10 @@ google-services.json
 *.log
 *.hprof
 
+# Python tooling (local admin uploader)
+__pycache__/
+*.pyc
+
 # Cho phép lưu log kiểm thử MusicFlow
 !qa-logs/
 !qa-logs/*.log

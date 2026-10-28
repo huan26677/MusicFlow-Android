@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `b310d9f` — Supabase Catalog + Licensed Streaming v1 sửa ở workspace, chưa commit |
+| HEAD Git hiện tại | `66ab690` — Licensed Content Upload v1 sửa ở workspace, chưa commit |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 | 55 bài chính PASS |
 | Marker API 30 | 40/40 PASS |
@@ -25,7 +25,8 @@
 | Search nâng cao v1 | Tìm bài hát, album, nghệ sĩ, thể loại có bỏ dấu; 4 bộ lọc, mở nhóm/phát/thêm Playlist; build ứng dụng + AndroidTest PASS, chưa runtime QA |
 | Online Catalog Foundation v1 | API HTTPS cấu hình được, repository metadata, phân trang và màn khám phá online; build ứng dụng + AndroidTest PASS; chưa có dịch vụ hay QA thực tế |
 | Supabase Backend v1 | Dự án Supabase đã kết nối; bảng public.music_tracks RLS; Data API read-only; client Android đọc danh mục và có luồng phát HTTPS hợp lệ; build-only |
-| Bước tiếp theo | Licensed Content Upload + Rights Verification v1, sau đó kiểm thử streaming bằng bài có quyền sử dụng |
+| Licensed Content Upload v1 | Hai bucket private/public, music_uploads RLS, RPC publish atomic, admin stage/review/publish; Python unit 8/8 PASS và Android build PASS; chưa upload thật |
+| Bước tiếp theo | Licensed Streaming Smoke v1 khi có file nhạc được cấp phép; hoặc Account/Auth Foundation v1 nếu chưa có nội dung |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -121,7 +122,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 
 ## 5. Công việc tiếp theo: backlog theo thứ tự ưu tiên
 
-**Chế độ phát triển hiện hành (2026-10-29):** Chủ dự án ưu tiên hoàn thiện tính năng Full Product trước rồi mới chạy vòng QA/bug tổng thể. Các mục P0 QA/Release bên dưới vẫn giữ nguyên để nghiệm thu cuối, không được hiểu là đã PASS khi chỉ build thành công. Online Catalog Foundation v1 đã viết và build; mốc tiếp theo **Licensed Streaming Integration v1** phụ thuộc vào backend có quyền cung cấp nhạc. Sau đó gồm tải offline hợp lệ, tài khoản/đồng bộ, podcast/radio, Premium theo tài liệu thiết kế.
+**Chế độ phát triển hiện hành (2026-10-29):** Chủ dự án ưu tiên hoàn thiện tính năng Full Product trước rồi mới chạy vòng QA/bug tổng thể. Các mục P0 QA/Release bên dưới vẫn giữ nguyên để nghiệm thu cuối, không được hiểu là đã PASS khi chỉ build thành công. Supabase Catalog/Streaming Foundation và Licensed Content Upload v1 đã có mã và cấu hình; **chưa có nhạc được cấp phép để thực hiện upload hoặc streaming thực tế**. Nếu chưa có file/giấy phép, bước feature độc lập tiếp theo là Account/Auth Foundation v1; khi có nội dung thì làm Licensed Streaming Smoke v1. Sau đó xây signed URL, tải offline có quyền, podcast/radio, Premium.
 
 | Ưu tiên | Bước / việc cần làm | Trạng thái | Điều kiện kết thúc bước |
 |---|---|---|---|
@@ -237,6 +238,20 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Licensed Content Upload + Rights Verification v1
+
+- HEAD nền: `66ab690` (`feat: integrate Supabase licensed music catalog and streaming`); workspace sạch trước khi sửa.
+- Supabase: tạo hai bucket `musicflow-private-drafts` (private) và `musicflow-public-audio` (public), giới hạn 50 MiB, định dạng audio có danh sách cho phép.
+- Tạo `public.music_uploads` lưu staging path/hash/kích thước và bằng chứng xác nhận quyền; bật RLS, **thu hồi toàn bộ quyền anon/authenticated**; không có chính sách cho client. Supabase advisor thông tin `rls_enabled_no_policy` là chủ ý khóa bảng nội bộ.
+- RPC `musicflow_publish_licensed_track` dùng SECURITY INVOKER, quyền EXECUTE chỉ dành cho `service_role`, atomically cập nhật receipt và trạng thái public catalog. Kiểm tra grant thực tế: anon không được SELECT receipt/EXECUTE RPC; service role có quyền.
+- Công cụ quản trị `scripts/musicflow_licensed_upload.py` hỗ trợ `stage` riêng tư rồi `publish` khi đã xác nhận bản quyền, kiểm tra MIME/magic bytes, SHA-256, kích thước; chỉ nhận secret key trong biến môi trường máy quản trị, không trong Android/Git.
+- Bộ kiểm tra offline `scripts/test_musicflow_licensed_upload.py`: **8/8 PASS**; ngăn giả file, không công khai trước xác nhận, từ chối key publishable làm admin, phát hiện thay đổi hash. CLI `--help` PASS trên Windows.
+- Đã kiểm tra RPC bằng giao dịch SQL dùng role service_role, xác minh cập nhật cả hai bảng và ROLLBACK; Supabase không lưu nhạc giả. Grant: anon không đọc receipt, không gọi RPC; role service_role có quyền.
+- Build `:app:assembleDebug` + `:app:assembleDebugAndroidTest`: PASS, build-only, không chạy instrumentation.
+- Tài liệu triển khai `docs/Supabase_Licensed_Upload_v1.md`. Log `qa-logs/licensed-content-upload-v1.log`: `PYTHON_UNIT_EXIT=0`, `ANDROID_BUILD_EXIT=0`, `FINAL_RESULT=BUILD_AND_UNIT_PASS`.
+- **Chưa upload hoặc phát nhạc online thực tế** vì không có file + giấy phép + secret key quản trị; không suy diễn runtime PASS. Full QA vẫn để cuối.
+- Bước tiếp theo: khi có nhạc hợp lệ → Licensed Streaming Smoke; khi chưa có → Account/Auth Foundation v1. Sản phẩm CHƯA NGHIỆM THU.
 
 ### 2026-10-29 — Supabase backend / streaming foundation v1
 
