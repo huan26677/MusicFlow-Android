@@ -19,21 +19,20 @@ object SongSearch {
         artist: String,
         query: String
     ): Boolean {
+        return matchesText("$title $artist", query)
+    }
+
+    /**
+     * Search group titles with the same accent-insensitive matching
+     * already used by the original song search.
+     */
+    fun matchesText(text: String, query: String): Boolean {
         val normalizedQuery = normalize(query)
-
-        if (normalizedQuery.isEmpty()) {
-            return false
+        if (normalizedQuery.isEmpty()) return false
+        val searchableText = normalize(text)
+        return normalizedQuery.split(' ').all { keyword ->
+            searchableText.contains(keyword)
         }
-
-        val searchableText = normalize(
-            "$title $artist"
-        )
-
-        return normalizedQuery
-            .split(' ')
-            .all { keyword ->
-                searchableText.contains(keyword)
-            }
     }
 
     /**

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 
 import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.media.LocalMusicRepository
+import com.example.musicflow.feature.library.MusicCollection
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +24,9 @@ data class SearchUiState(
     val query: String = "",
     val songs: List<DeviceSong> = emptyList(),
     val results: List<DeviceSong> = emptyList(),
+    val albumResults: List<MusicCollection> = emptyList(),
+    val artistResults: List<MusicCollection> = emptyList(),
+    val genreResults: List<MusicCollection> = emptyList(),
     val isLoading: Boolean = false,
     val isFiltering: Boolean = false,
     val isLoaded: Boolean = false,
@@ -53,6 +57,9 @@ class SearchViewModel(
                 it.copy(
                     songs = emptyList(),
                     results = emptyList(),
+                    albumResults = emptyList(),
+                    artistResults = emptyList(),
+                    genreResults = emptyList(),
                     isLoading = true,
                     isFiltering = false,
                     isLoaded = false,
@@ -102,6 +109,9 @@ class SearchViewModel(
             current.copy(
                 query = query,
                 results = emptyList(),
+                albumResults = emptyList(),
+                artistResults = emptyList(),
+                genreResults = emptyList(),
                 isFiltering = query.isNotBlank() &&
                     current.isLoaded
             )
@@ -132,7 +142,7 @@ class SearchViewModel(
             delay(150)
 
             val results = withContext(Dispatchers.Default) {
-                SongSearch.filter(songs, query)
+                AdvancedMusicSearch.find(songs, query)
             }
 
             // Bỏ kết quả cũ nếu đã nhập từ khóa mới
@@ -144,7 +154,10 @@ class SearchViewModel(
                     current.songs === songs
                 ) {
                     current.copy(
-                        results = results,
+                        results = results.songs,
+                        albumResults = results.albums,
+                        artistResults = results.artists,
+                        genreResults = results.genres,
                         isFiltering = false
                     )
                 } else {

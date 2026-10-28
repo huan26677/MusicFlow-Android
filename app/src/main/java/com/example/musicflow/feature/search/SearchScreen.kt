@@ -7,11 +7,14 @@ import android.os.Build
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -26,6 +29,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.media.MediaStoreLocalMusicRepository
 import com.example.musicflow.feature.library.SongRow
+import com.example.musicflow.feature.library.MusicCollectionsContent
 import com.example.musicflow.feature.playlist.PlaylistPickerDialog
 import com.example.musicflow.core.favorites.LocalFavoritesStore
 import com.example.musicflow.feature.playlist.rememberPlaylistViewModel
@@ -161,6 +165,10 @@ fun SearchScreen(
     favoriteSongUris: Set<String> = emptySet(),
     onToggleFavorite: (DeviceSong) -> Unit = {}
 ) {
+    var selectedCategory by rememberSaveable {
+        mutableStateOf("songs")
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -210,7 +218,7 @@ fun SearchScreen(
             value = state.query,
             onValueChange = onQueryChange,
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Tên bài hát hoặc nghệ sĩ") },
+            label = { Text("Bài hát, album, nghệ sĩ hoặc thể loại") },
             placeholder = { Text("Ví dụ: duong ve nha") },
             singleLine = true,
             trailingIcon = {
@@ -223,6 +231,28 @@ fun SearchScreen(
                 }
             }
         )
+
+        if (state.isLoaded && state.query.isNotBlank()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(
+                    "songs" to "Bài hát",
+                    "albums" to "Album",
+                    "artists" to "Nghệ sĩ",
+                    "genres" to "Thể loại"
+                ).forEach { (category, label) ->
+                    FilterChip(
+                        selected = selectedCategory == category,
+                        onClick = { selectedCategory = category },
+                        label = { Text(label) }
+                    )
+                }
+            }
+        }
 
         when {
             state.isLoading -> {
@@ -253,7 +283,8 @@ fun SearchScreen(
 
             state.query.isBlank() -> {
                 Text(
-                    text = "Nhập tên bài hát hoặc nghệ sĩ để tìm kiếm.",
+                    text = "Nhập tên bài hát, album, nghệ sĩ " +
+                        "hoặc thể loại để tìm kiếm.",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -266,6 +297,39 @@ fun SearchScreen(
                 Text(
                     text = "Đang tìm bài hát...",
                     style = MaterialTheme.typography.bodySmall
+                )
+            }
+
+            selectedCategory == "albums" -> {
+                MusicCollectionsContent(
+                    title = "album phù hợp",
+                    collections = state.albumResults,
+                    favoriteSongUris = favoriteSongUris,
+                    onToggleFavorite = onToggleFavorite,
+                    onAddToPlaylist = onAddToPlaylist,
+                    onSongSelected = onSongSelected
+                )
+            }
+
+            selectedCategory == "artists" -> {
+                MusicCollectionsContent(
+                    title = "nghệ sĩ phù hợp",
+                    collections = state.artistResults,
+                    favoriteSongUris = favoriteSongUris,
+                    onToggleFavorite = onToggleFavorite,
+                    onAddToPlaylist = onAddToPlaylist,
+                    onSongSelected = onSongSelected
+                )
+            }
+
+            selectedCategory == "genres" -> {
+                MusicCollectionsContent(
+                    title = "thể loại phù hợp",
+                    collections = state.genreResults,
+                    favoriteSongUris = favoriteSongUris,
+                    onToggleFavorite = onToggleFavorite,
+                    onAddToPlaylist = onAddToPlaylist,
+                    onSongSelected = onSongSelected
                 )
             }
 

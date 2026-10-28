@@ -23,13 +23,26 @@ import androidx.compose.ui.unit.dp
 import com.example.musicflow.core.media.DeviceSong
 import java.util.Locale
 
-internal data class MusicCollection(
+data class MusicCollection(
     val key: String,
     val name: String,
     val tracks: List<DeviceSong>
 )
 
 internal object MusicCollections {
+    fun albums(songs: List<DeviceSong>): List<MusicCollection> =
+        songs.groupBy { song ->
+            song.albumId?.let { "album-id:$it" }
+                ?: "album-name:${song.album.trim().lowercase(Locale.ROOT)}:" +
+                    song.artist.trim().lowercase(Locale.ROOT)
+        }.map { (key, tracks) ->
+            MusicCollection(
+                key = key,
+                name = tracks.first().album,
+                tracks = tracks
+            )
+        }.sortedWith(compareBy({ it.name.lowercase(Locale.ROOT) }, { it.key }))
+
     fun artists(songs: List<DeviceSong>): List<MusicCollection> =
         songs.groupBy { song ->
             song.artistId?.let { "artist-id:$it" }

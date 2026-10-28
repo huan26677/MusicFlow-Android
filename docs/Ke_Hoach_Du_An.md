@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `0ea2510` — Library Collections v1 đã build, sửa ở workspace chưa commit |
+| HEAD Git hiện tại | `a2622f4` — Search nâng cao v1 đã build, thay đổi ở workspace chưa commit |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 | 55 bài chính PASS |
 | Marker API 30 | 40/40 PASS |
@@ -22,7 +22,8 @@
 | Equalizer v1 | Đã viết engine theo audio session, UI điều chỉnh dải tần, lưu cấu hình; Build PASS, chưa chạy QA thực tế |
 | Crossfade/Gapless v1 | Có mã crossfade thử nghiệm (mặc định tắt) và giữ Media3 gapless tự nhiên; build-only, chưa runtime QA |
 | Library nâng cao v1 | Bài hát / Album / Nghệ sĩ / Thể loại; có source, build ứng dụng + AndroidTest PASS, chưa runtime QA |
-| Bước tiếp theo | Search nâng cao v1: tìm bài hát, album, nghệ sĩ và thể loại trên thiết bị |
+| Search nâng cao v1 | Tìm bài hát, album, nghệ sĩ, thể loại có bỏ dấu; 4 bộ lọc, mở nhóm/phát/thêm Playlist; build ứng dụng + AndroidTest PASS, chưa runtime QA |
+| Bước tiếp theo | Online Catalog Foundation v1 — kiến trúc nguồn nhạc online hợp lệ, API/repository và trạng thái UI; chưa tích hợp nguồn không được cấp phép |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -117,6 +118,8 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 **Giới hạn:** API 30 là môi trường có log QA đã đọc; quyền URI của document provider thực tế và Android tự thu hồi process chưa được khẳng định PASS; marker của test tiêm lỗi không phải marker production Auto-Skip. Không suy rộng kết quả sang mọi thiết bị / mọi nguồn nhạc.
 
 ## 5. Công việc tiếp theo: backlog theo thứ tự ưu tiên
+
+**Chế độ phát triển hiện hành (2026-10-29):** Chủ dự án ưu tiên hoàn thiện tính năng Full Product trước rồi mới chạy vòng QA/bug tổng thể. Các mục P0 QA/Release bên dưới vẫn giữ nguyên để nghiệm thu cuối, không được hiểu là đã PASS khi chỉ build thành công. Mốc feature tiếp theo: **Online Catalog Foundation v1**; các bước kế tiếp sau đó gồm tài khoản/đồng bộ, podcast/radio, Premium theo tài liệu thiết kế, chỉ kết nối dịch vụ và nguồn nội dung được cấp phép.
 
 | Ưu tiên | Bước / việc cần làm | Trạng thái | Điều kiện kết thúc bước |
 |---|---|---|---|
@@ -232,6 +235,17 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Search nâng cao v1 — Build PASS
+
+- HEAD nền: `a2622f4` (`feat: add artist and genre browsing to local music library`).
+- Giữ tìm kiếm bài hát hiện tại (không dấu tiếng Việt, debounce 150ms, kết quả bất đồng bộ, Playlist/Favorites) và nâng cấp màn Search thành bốn bộ lọc: Bài hát / Album / Nghệ sĩ / Thể loại.
+- `AdvancedMusicSearch.kt` tạo kết quả theo nhóm từ một lần quét MediaStore, tìm theo tên nhóm có bỏ dấu; `SearchViewModel` cập nhật các nhóm kết quả cùng lúc và bỏ kết quả cũ khi đổi từ khóa.
+- `MusicCollectionsContent.kt` thêm nhóm Album để tái sử dụng giao diện mở nhóm, Phát toàn bộ, chọn bài, yêu thích và Thêm Playlist trong Search.
+- File thay đổi: `SearchScreen.kt`, `SearchViewModel.kt`, `SongSearch.kt`, `MusicCollectionsContent.kt`; file thêm: `AdvancedMusicSearch.kt`.
+- Build ứng dụng và APK instrumentation: `:app:assembleDebug` + `:app:assembleDebugAndroidTest` PASS (`BUILD_EXIT_CODE=0`). Log: `qa-logs/assemble-debug-advanced-search-v1.log`.
+- Phạm vi kiểm tra chỉ là biên dịch; chưa kiểm thử thao tác UI với thư viện thật, nhiều metadata, quyền và hiệu năng.
+- Chưa commit/push. Bước tiếp theo: Online Catalog Foundation v1. Sản phẩm tổng thể CHƯA NGHIỆM THU.
 
 ### 2026-10-29 — Library Collections v1 — Build PASS
 
