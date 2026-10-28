@@ -23,8 +23,40 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Release signing is opt-in and never falls back to the debug key.
+    // Supply all four values as environment variables on the release machine.
+    val releaseKeystorePath =
+        providers.environmentVariable("MUSICFLOW_KEYSTORE_PATH").orNull
+    val releaseStorePassword =
+        providers.environmentVariable("MUSICFLOW_STORE_PASSWORD").orNull
+    val releaseKeyAlias =
+        providers.environmentVariable("MUSICFLOW_KEY_ALIAS").orNull
+    val releaseKeyPassword =
+        providers.environmentVariable("MUSICFLOW_KEY_PASSWORD").orNull
+
+    val releaseSigningReady = listOf(
+        releaseKeystorePath,
+        releaseStorePassword,
+        releaseKeyAlias,
+        releaseKeyPassword
+    ).all { !it.isNullOrBlank() }
+
+    if (releaseSigningReady) {
+        signingConfigs {
+            create("musicflowRelease") {
+                storeFile = file(checkNotNull(releaseKeystorePath))
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
+            if (releaseSigningReady) {
+                signingConfig = signingConfigs.getByName("musicflowRelease")
+            }
             optimization {
                 enable = false
             }
