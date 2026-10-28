@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `66ab690` — Licensed Content Upload v1 sửa ở workspace, chưa commit |
+| HEAD Git hiện tại | `e7446bc` — Account & Subscription Foundation v1 đã triển khai trong workspace, chưa commit |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 | 55 bài chính PASS |
 | Marker API 30 | 40/40 PASS |
@@ -26,7 +26,8 @@
 | Online Catalog Foundation v1 | API HTTPS cấu hình được, repository metadata, phân trang và màn khám phá online; build ứng dụng + AndroidTest PASS; chưa có dịch vụ hay QA thực tế |
 | Supabase Backend v1 | Dự án Supabase đã kết nối; bảng public.music_tracks RLS; Data API read-only; client Android đọc danh mục và có luồng phát HTTPS hợp lệ; build-only |
 | Licensed Content Upload v1 | Hai bucket private/public, music_uploads RLS, RPC publish atomic, admin stage/review/publish; Python unit 8/8 PASS và Android build PASS; chưa upload thật |
-| Bước tiếp theo | Licensed Streaming Smoke v1 khi có file nhạc được cấp phép; hoặc Account/Auth Foundation v1 nếu chưa có nội dung |
+| Account & Subscription Foundation v1 | Guest/Free/Premium model; Supabase Auth email/password, profile RLS, entitlement read-only, Android Keystore; build và unit PASS, chưa QA email thật |
+| Bước tiếp theo | Cloud Playlist & Favorites Sync v1; Licensed Streaming Smoke khi có nhạc được cấp phép |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -122,7 +123,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 
 ## 5. Công việc tiếp theo: backlog theo thứ tự ưu tiên
 
-**Chế độ phát triển hiện hành (2026-10-29):** Chủ dự án ưu tiên hoàn thiện tính năng Full Product trước rồi mới chạy vòng QA/bug tổng thể. Các mục P0 QA/Release bên dưới vẫn giữ nguyên để nghiệm thu cuối, không được hiểu là đã PASS khi chỉ build thành công. Supabase Catalog/Streaming Foundation và Licensed Content Upload v1 đã có mã và cấu hình; **chưa có nhạc được cấp phép để thực hiện upload hoặc streaming thực tế**. Nếu chưa có file/giấy phép, bước feature độc lập tiếp theo là Account/Auth Foundation v1; khi có nội dung thì làm Licensed Streaming Smoke v1. Sau đó xây signed URL, tải offline có quyền, podcast/radio, Premium.
+**Chế độ phát triển hiện hành (2026-10-29):** Chủ dự án ưu tiên hoàn thiện tính năng Full Product trước rồi mới chạy vòng QA/bug tổng thể. Các mục P0 QA/Release bên dưới vẫn giữ nguyên để nghiệm thu cuối, không được hiểu là đã PASS khi chỉ build thành công. Supabase Catalog/Streaming Foundation, Licensed Content Upload v1 và Account/Auth Foundation v1 đã có source. **Chưa có nhạc được cấp phép và chưa có test email/đăng nhập thực tế**. Feature tiếp theo: Cloud Playlist & Favorites Sync v1; khi có nhạc hợp lệ thì Licensed Streaming Smoke. Thanh toán Premium, signed URL, podcast/radio còn là backlog.
 
 | Ưu tiên | Bước / việc cần làm | Trạng thái | Điều kiện kết thúc bước |
 |---|---|---|---|
@@ -238,6 +239,17 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Account & Subscription Foundation v1 — Build + JVM PASS
+
+- HEAD nền: `e7446bc` (`feat: add secure licensed music upload and rights verification`), working tree sạch lúc bắt đầu.
+- Supabase migration `musicflow_account_profiles_entitlements_v1` tạo `account_profiles` và `account_entitlements`; tất cả bật RLS, profile theo `auth.uid() = id`. Chỉ cho sửa `display_name` ở profile; người dùng chỉ SELECT entitlement của mình, không INSERT/UPDATE gói.
+- Free mặc định nếu không có entitlement; Premium chỉ còn hiệu lực khi backend có row `premium` và `expires_at` chưa qua. Không kích hoạt thanh toán, không tự nâng quyền từ Android.
+- Tạo `core/account/AccountApi.kt` + `AccountTier.kt`, `feature/account/AccountViewModel.kt` + `AccountScreen.kt`, thay tab Account placeholder bằng luồng Auth email/password/hồ sơ, vẫn có tùy chọn theme và Guest offline. Refresh token mã hóa Android Keystore, không đưa secret/service_role vào app.
+- JVM `AccountTierTest` kiểm tra Free/Premium theo thời hạn; Supabase grants xác minh anon không đọc profile, authenticated không sửa gói hoặc id, chỉ sửa display_name.
+- Build `:app:assembleDebug` + `:app:assembleDebugAndroidTest` và `:app:testDebugUnitTest`: PASS; log `qa-logs/account-subscription-foundation-v1.log`.
+- Chưa có tài khoản đăng ký thử thực tế, chưa test email xác nhận, chưa Cloud Sync/Billing; không tuyên bố Auth E2E PASS. Full QA vẫn để cuối.
+- Tài liệu: `docs/Account_Subscription_v1.md`; bước tiếp theo Cloud Playlist & Favorites Sync v1; Licensed Streaming Smoke chờ nhạc.
 
 ### 2026-10-29 — Licensed Content Upload + Rights Verification v1
 

@@ -37,6 +37,7 @@ import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.playlist.PlaylistTrack
 
 import com.example.musicflow.feature.home.HomeRoute
+import com.example.musicflow.feature.account.AccountRoute
 import com.example.musicflow.feature.library.LibraryRoute
 import com.example.musicflow.feature.online.OnlineCatalogRoute
 import com.example.musicflow.core.online.OnlineTrack
@@ -316,7 +317,7 @@ fun MusicFlowApp(
                 }
 
                 entry<AccountTab> {
-                    AccountSettingsScreen(
+                    AccountRoute(
                         themeMode = themeMode,
                         onThemeModeChange = onThemeModeChange
                     )
@@ -445,74 +446,5 @@ private fun PlaceholderScreen(
                 Text(actionLabel)
             }
         }
-    }
-}
-
-@Composable
-private fun AccountSettingsScreen(
-    themeMode: String,
-    onThemeModeChange: (String) -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text(
-            "Tài khoản",
-            style = MaterialTheme.typography.headlineMedium
-        )
-
-        Text(
-            "Chế độ khách",
-            style = MaterialTheme.typography.titleMedium
-        )
-
-        Text(
-            "Bạn có thể nghe nhạc trên thiết bị " +
-                "mà không cần đăng nhập."
-        )
-
-        HorizontalDivider()
-
-        Text(
-            "Giao diện",
-            style = MaterialTheme.typography.titleLarge
-        )
-
-        Text("Chọn chế độ hiển thị của MusicFlow.")
-
-        listOf(
-            "system" to "Theo hệ thống",
-            "dark" to "Chế độ tối",
-            "light" to "Chế độ sáng"
-        ).forEach { (mode, label) ->
-            FilterChip(
-                selected = themeMode == mode,
-                onClick = { onThemeModeChange(mode) },
-                label = { Text(label) }
-            )
-        }
-
-        Text(
-            "Lựa chọn được lưu trên thiết bị " +
-                "và áp dụng ngay cho ứng dụng.",
-            style = MaterialTheme.typography.bodySmall
-        )
-
-        HorizontalDivider()
-
-        Text(
-            "Tài khoản và đồng bộ",
-            style = MaterialTheme.typography.titleLarge
-        )
-
-        Text(
-            "Đăng nhập Google, email, hồ sơ cá nhân " +
-                "và đồng bộ nhiều thiết bị sẽ được " +
-                "bổ sung trong giai đoạn tài khoản."
-        )
     }
 }
