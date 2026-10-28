@@ -9,15 +9,15 @@
 | Mục | Trạng thái đã đối chiếu |
 |---|---|
 | Tình trạng toàn dự án | **ĐANG PHÁT TRIỂN — CHƯA NGHIỆM THU MVP/RELEASE** |
-| Mốc kỹ thuật gần nhất | **SAF → History v1 — Full QA PASS** |
+| Mốc kỹ thuật gần nhất | **Playlist → Playback → Restart v1 — Full QA PASS** |
 | JVM unit tests (mốc v2) | **PASS** |
 | Android instrumented tests (mốc v2) | **52 regression + 3 test theo pha PASS** — Pixel_5, Android 11 (API 30) |
 | Marker | **28/28 PASS** |
-| Kết quả log | `FINAL_RESULT=PASS` (SAF → History v1 Full QA) |
+| Kết quả log | `FINAL_RESULT=PASS` (Playlist → Playback → Restart v1) |
 | Commit chứa vòng QA v2 | `74b9026c1cdb70c9d2ed0563bb747d1a047a061a` |
-| Commit HEAD tại thời điểm rà sow | `fa430630` (SAF → History v1 — Full QA PASS) |
-| Log gần nhất đã xác nhận | `qa-logs/real-picker-saf-v1.log` |
-| Bước đang phát triển tiếp | **Playlist → Playback → Restart v1 — PENDING QA** |
+| Commit HEAD tại thời điểm rà sow | `56011698` (Playlist → Playback → Restart v1) |
+| Log gần nhất đã xác nhận | `qa-logs/playback-process-restart-v1.log` |
+| Bước đang phát triển tiếp | **Playlist → Playback → Restart v1 — Full QA PASS; tiếp tục Full Regression** |
 | Ngày rà Sox | **2026-10-28**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -227,12 +227,18 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 
 ### 2026-10-28 — Playlist → Playback → Restart v1
 
-- Mốc trước: SAF → History v1 Full QA PASS.
-- Android API 30: 52 bài chính PASS, 3 bài theo pha SKIPPED.
-- Kiểm tra mới: Playlist Room → PlaybackService → force-stop → restore.
-- Yêu cầu: đúng thứ tự, không tự phát, Resume đúng bài.
-- QA: PENDING.
-- MVP: Chưa nghiệm thu.
+- Commit: 56011698
+- QA ba pha: PASS
+- Playlist Room: PASS
+- Thứ tự playlist: PASS
+- Process Restart: PASS
+- Queue Recovery: PASS
+- Không tự phát sau restart: PASS
+- Resume: PASS
+- Cleanup: PASS
+- Full Regression: PENDING
+- MVP: Chưa nghiệm thu
+
 ### 2026-10-28 — SAF Multi-file v1
 
 - Fast QA: PASS — Android API 30
