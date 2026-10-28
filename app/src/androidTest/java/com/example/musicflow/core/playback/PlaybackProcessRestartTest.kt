@@ -505,7 +505,6 @@ composeRule.onNodeWithText("Danh sách phát của tôi")
     .performScrollTo()
     .performClick()
 
-val playlistId = qaPrefs.getString("playlistId", null)
 val playlistTag = "playlist-$playlistId"
 
 composeRule.waitUntil(15_000L) {
