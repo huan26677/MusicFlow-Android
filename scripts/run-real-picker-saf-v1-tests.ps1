@@ -101,7 +101,11 @@ try {
         'PASS playlistUiDelete',
         'PASS mvpPlaylistNavigation',
         'PASS mvpPlaylistPlayback',
-        'PASS mvpPlaylistNext'
+        'PASS mvpPlaylistNext',
+        'PASS mvpPlaylistFirstHistory',
+        'PASS mvpPlaylistHistoryOrder',
+        'PASS mvpPlaylistHistoryUi',
+        'PASS mvpHistoryReplay'
     )
     $markersOk = $true
     foreach ($marker in $markers) {

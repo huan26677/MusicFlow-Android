@@ -9,15 +9,15 @@
 | Mục | Trạng thái đã đối chiếu |
 |---|---|
 | Tình trạng toàn dự án | **ĐANG PHÁT TRIỂN — CHƯA NGHIỆM THU MVP/RELEASE** |
-| Mốc kỹ thuật gần nhất | **MVP Playlist Navigation v1 — Full QA PASS** |
+| Mốc kỹ thuật gần nhất | **MVP Playlist → History → Replay v1 — Fast QA PASS** |
 | JVM unit tests (mốc v2) | **PASS** |
 | Android instrumented tests (mốc v2) | **55 regression + 3 test theo pha PASS** — Pixel_5, Android 11 (API 30) |
 | Marker | **36/36 PASS** |
-| Kết quả log | `FINAL_RESULT=PASS` (MVP Playlist Navigation v1 Full QA) |
+| Kết quả log | `FINAL_RESULT=PASS` (MVP Playlist → History → Replay v1 Fast QA) |
 | Commit chứa vòng QA v2 | `18d5893a` |
-| Commit HEAD tại thời điểm rà sow | `18d5893a` (MVP Playlist Navigation v1 — Full QA PASS) |
-| Log gần nhất đã xác nhận | `qa-logs/mvp-playlist-navigation-v1.log` |
-| Bước đang phát triển tiếp | **MVP Playlist → History → Replay v1 — PENDING QA** |
+| Commit HEAD tại thời điểm rà sow | `69d5a559` (MVP Playlist → History → Replay v1 — Fast QA PASS) |
+| Log gần nhất đã xác nhận | `qa-logs/mvp-playlist-history-v1.log` |
+| Bước đang phát triển tiếp | **MVP Playlist → History → Replay v1 — Full Regression PENDING** |
 | Ngày rà Sox | **2026-10-28**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -94,6 +94,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | Real Picker SAF v1 | 51 PASS, 3 test theo pha SKIPPED | **PASS — manual-assisted, API 30** | `19f418ae` · `qa-logs/real-picker-saf-v1.log` |
 | SAF Multi-file v1 | 52 PASS, 3 test theo pha SKIPPED | **PASS — Full Regression, API 30** | `94c03895` · `qa-logs/real-picker-saf-v1.log` |
 | MVP Playlist Navigation v1 | 55 PASS, 3 test theo pha SKIPPED | **Full QA PASS — API 30** | `18d5893a` · `qa-logs/mvp-playlist-navigation-v1.log` |
+| MVP Playlist → History → Replay v1 | 1 bài isolated PASS | **Fast QA PASS — API 30** | `69d5a559` · `qa-logs/mvp-playlist-history-v1.log` |
 
 **Không cộng** các con số 9 + 11 + ... + 31: đây là số lượng test của **các lần chạy tăng dần** với nhiều bài trùng nhau.
 
@@ -228,13 +229,14 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 
 ### 2026-10-28 — MVP Playlist → History → Replay v1
 
-- Mốc trước: MVP Playlist Navigation v1 — Full QA PASS.
-- Commit mốc trước: 18d5893a.
-- Playlist → Playback: PASS ở mốc trước.
-- Ghi bài đầu tiên vào History: PENDING QA.
-- Thứ tự lịch sử sau Next: PENDING QA.
-- Hiển thị Recently Played tại Home: PENDING QA.
-- Phát lại từ Recently Played: PENDING QA.
+- Commit: 69d5a559.
+- Playlist → Playback: PASS.
+- Ghi bài đầu vào Recently Played: PASS.
+- Next cập nhật thứ tự History: PASS.
+- History hiển thị tại Home: PASS.
+- Phát lại từ History: PASS.
+- Fast QA: PASS.
+- Full Regression: PENDING.
 - Log: qa-logs/mvp-playlist-history-v1.log.
 - MVP tổng thể: Chưa nghiệm thu.
 
