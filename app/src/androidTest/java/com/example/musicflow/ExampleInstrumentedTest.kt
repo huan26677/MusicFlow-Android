@@ -200,6 +200,8 @@ fun mvpLibrarySearchToRealPlayer() {
                         playerViewModel::setEqualizerEnabled,
                     onSetEqualizerBand =
                         playerViewModel::setEqualizerBand,
+                    onSetCrossfadeDuration =
+                        playerViewModel::setCrossfadeDuration,
                     lyrics = com.example.musicflow.core.lyrics.LyricsUiState(),
                     onPickLyrics = {}
                 )

@@ -91,6 +91,7 @@ fun MusicFlowApp(
     onSetSleepTimerMinutes: (Int) -> Unit,
     onSetEqualizerEnabled: (Boolean) -> Unit,
     onSetEqualizerBand: (Int, Int) -> Unit,
+    onSetCrossfadeDuration: (Int) -> Unit,
     lyrics: LyricsUiState,
     onPickLyrics: () -> Unit,
     themeMode: String,
@@ -374,6 +375,7 @@ fun MusicFlowApp(
                         onSetSleepTimerMinutes = onSetSleepTimerMinutes,
                         onSetEqualizerEnabled = onSetEqualizerEnabled,
                         onSetEqualizerBand = onSetEqualizerBand,
+                        onSetCrossfadeDuration = onSetCrossfadeDuration,
                         lyrics = lyrics,
                         onPickLyrics = onPickLyrics
                     )

@@ -138,6 +138,9 @@ class PlayerViewModel(
     fun setEqualizerBand(index: Int, levelMb: Int) =
         playbackController.setEqualizerBand(index, levelMb)
 
+    fun setCrossfadeDuration(durationMs: Int) =
+        playbackController.setCrossfadeDuration(durationMs)
+
     fun refreshProgress() =
         playbackController.refreshProgress()
 

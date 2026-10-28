@@ -348,6 +348,9 @@ private val pickLyrics = registerForActivityResult(
                     onSetEqualizerBand = { index, level ->
                         playerViewModel.setEqualizerBand(index, level)
                     },
+                    onSetCrossfadeDuration = { duration ->
+                        playerViewModel.setCrossfadeDuration(duration)
+                    },
 
                     onPickLyrics = {
                         val currentAudioUri =

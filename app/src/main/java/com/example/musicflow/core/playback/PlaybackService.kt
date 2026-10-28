@@ -41,6 +41,7 @@ class PlaybackService : MediaSessionService() {
 
     private var mediaSession: MediaSession? = null
     private lateinit var equalizerEngine: EqualizerEngine
+    private var crossfade: PlaybackCrossfade? = null
 
     private var runtimeAutoSkip: PlaybackRuntimeAutoSkip? = null
 
@@ -78,6 +79,16 @@ class PlaybackService : MediaSessionService() {
     private val playerListener = object : Player.Listener {
         override fun onAudioSessionIdChanged(audioSessionId: Int) {
             equalizerEngine.onAudioSessionChanged(audioSessionId)
+        }
+
+        override fun onPositionDiscontinuity(
+            oldPosition: Player.PositionInfo,
+            newPosition: Player.PositionInfo,
+            reason: Int
+        ) {
+            if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+                crossfade?.onSeek()
+            }
         }
 
         override fun onMediaItemTransition(
@@ -197,6 +208,7 @@ class PlaybackService : MediaSessionService() {
                             )
                         )
                         .add(SessionCommand(EqualizerContract.ACTION, Bundle.EMPTY))
+                        .add(SessionCommand(TransitionContract.ACTION, Bundle.EMPTY))
                         .build()
 
                 val result =
@@ -214,6 +226,26 @@ class PlaybackService : MediaSessionService() {
                 customCommand: SessionCommand,
                 args: Bundle
             ): ListenableFuture<SessionResult> {
+                if (customCommand.customAction == TransitionContract.ACTION) {
+                    val operation = args.getInt(TransitionContract.KEY_OPERATION, -1)
+                    val result = when (operation) {
+                        TransitionContract.OP_GET -> true
+                        TransitionContract.OP_SET -> crossfade?.setDurationMs(
+                            args.getInt(TransitionContract.KEY_DURATION_MS, -1)
+                        ) ?: false
+                        else -> false
+                    }
+                    val extras = Bundle().apply {
+                        putInt(
+                            TransitionContract.KEY_DURATION_MS,
+                            crossfade?.durationMs ?: 0
+                        )
+                    }
+                    return Futures.immediateFuture(SessionResult(
+                        if (result) SessionResult.RESULT_SUCCESS
+                        else SessionResult.RESULT_ERROR_BAD_VALUE, extras
+                    ))
+                }
 
                 if (customCommand.customAction == EqualizerContract.ACTION) {
                     val op = args.getInt(EqualizerContract.KEY_OPERATION, -1)
@@ -295,6 +327,7 @@ class PlaybackService : MediaSessionService() {
             )
             .setHandleAudioBecomingNoisy(true)
             .build()
+        crossfade = PlaybackCrossfade(applicationContext, player)
 
 
         val restored = queueStore.restoreInto(player)
@@ -317,6 +350,7 @@ class PlaybackService : MediaSessionService() {
             .build()
 
         player.addListener(playerListener)
+        crossfade?.start()
 
         if (restored) {
             queueScope.launch {
@@ -505,6 +539,8 @@ class PlaybackService : MediaSessionService() {
     }
 
     override fun onDestroy() {
+        crossfade?.release()
+        crossfade = null
         equalizerEngine.release()
         runtimeAutoSkip?.dispose()
         runtimeAutoSkip = null

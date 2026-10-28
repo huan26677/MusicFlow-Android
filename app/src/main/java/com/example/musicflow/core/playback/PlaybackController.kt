@@ -44,7 +44,8 @@ data class PlayerUiState(
     val audioUri: Uri? = null,
     val playbackSpeed: Float = 1f,
     val sleepTimerRemainingMs: Long = 0L,
-    val equalizer: EqualizerUiState = EqualizerUiState()
+    val equalizer: EqualizerUiState = EqualizerUiState(),
+    val crossfadeDurationMs: Int = 0
 )
 
 class PlaybackController(context: Context) {
@@ -62,6 +63,7 @@ class PlaybackController(context: Context) {
     private var sleepTimerRequestId = 0L
     private var lastSleepTimerQueryMs = 0L
     private var lastEqualizerQueryMs = 0L
+    private var transitionRequestId = 0L
 
     private data class QueueRequest(
         val items: List<MediaItem>,
@@ -110,6 +112,7 @@ class PlaybackController(context: Context) {
                         updateState(newController)
                         requestSleepTimer(-1)
                         requestEqualizer(EqualizerContract.OP_GET)
+                        requestTransition(TransitionContract.OP_GET)
 
                         pendingQueue?.let { request ->
                             pendingQueue = null
@@ -231,7 +234,8 @@ class PlaybackController(context: Context) {
             playbackSpeed = player.playbackParameters.speed,
             sleepTimerRemainingMs =
                 _uiState.value.sleepTimerRemainingMs,
-            equalizer = _uiState.value.equalizer
+            equalizer = _uiState.value.equalizer,
+            crossfadeDurationMs = _uiState.value.crossfadeDurationMs
         )
     }
 
@@ -511,7 +515,41 @@ class PlaybackController(context: Context) {
             levelMb = levelMb
         )
 
+    private fun requestTransition(operation: Int, durationMs: Int = 0) {
+        val media = controller ?: return
+        val requestId = ++transitionRequestId
+        val command = SessionCommand(TransitionContract.ACTION, Bundle.EMPTY)
+        val args = Bundle().apply {
+            putInt(TransitionContract.KEY_OPERATION, operation)
+            putInt(TransitionContract.KEY_DURATION_MS, durationMs)
+        }
+        val future = media.sendCustomCommand(command, args)
+        future.addListener({
+            if (controller === media && requestId == transitionRequestId) {
+                try {
+                    val result = future.get()
+                    if (result.resultCode == SessionResult.RESULT_SUCCESS) {
+                        _uiState.value = _uiState.value.copy(
+                            crossfadeDurationMs = result.extras.getInt(
+                                TransitionContract.KEY_DURATION_MS, 0
+                            )
+                        )
+                    }
+                } catch (_: Exception) {
+                    // Keep playback working if custom command fails.
+                }
+            }
+        }, ContextCompat.getMainExecutor(appContext))
+    }
+
+    fun setCrossfadeDuration(durationMs: Int) {
+        if (durationMs in TransitionContract.allowedDurationsMs) {
+            requestTransition(TransitionContract.OP_SET, durationMs)
+        }
+    }
+
     fun release() {
+        transitionRequestId++
         equalizerRequestId++
         sleepTimerRequestId++
 

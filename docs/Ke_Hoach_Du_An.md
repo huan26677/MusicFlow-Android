@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `49603b0` — Equalizer v1 đang sửa ở workspace, chưa commit |
+| HEAD Git hiện tại | `1c57e56` — Crossfade/Gapless v1 đang sửa ở workspace, chưa commit |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 | 55 bài chính PASS |
 | Marker API 30 | 40/40 PASS |
@@ -20,7 +20,8 @@
 | Build Lyrics v1 + Sleep Timer v1 | `:app:assembleDebug` và `:app:assembleDebugAndroidTest` PASS ngày 2026-10-29; chỉ xác nhận biên dịch |
 | Full QA | Để cuối giai đoạn phát triển |
 | Equalizer v1 | Đã viết engine theo audio session, UI điều chỉnh dải tần, lưu cấu hình; Build PASS, chưa chạy QA thực tế |
-| Bước tiếp theo | Crossfade/Gapless: nghiên cứu và triển khai theo năng lực Media3 |
+| Crossfade/Gapless v1 | Có mã crossfade thử nghiệm (mặc định tắt) và giữ Media3 gapless tự nhiên; build-only, chưa runtime QA |
+| Bước tiếp theo | Library nâng cao: Album / Artist / Genre |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -230,6 +231,17 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Crossfade / Gapless Playback v1 — Build-only
+
+- HEAD trước sửa: `1c57e56`.
+- Giữ ExoPlayer/MediaSession và queue persistence làm đường phát chuẩn; Media3 quản lý khoảng nối gapless khi dữ liệu và định dạng hỗ trợ.
+- Thêm `PlaybackCrossfade.kt` và `TransitionContract.kt`. Crossfade tùy chọn 1s/2s/3s, mặc định tắt; phát lớp âm thanh tạm cho bài kế tiếp, handoff trở lại ExoPlayer chính và giữ queue/index.
+- Chỉ chạy khi phát tuần tự bình thường, repeat/shuffle tắt, tốc độ 1.0x; hủy khi người dùng seek hoặc trạng thái không còn đủ điều kiện. Trở về volume bình thường khi hủy.
+- Đã thêm lệnh MediaSession, trạng thái `PlayerUiState`, giao diện Now Playing và callback qua ViewModel/Activity, cập nhật lời gọi trong instrumented test.
+- Build debug + build AndroidTest: PASS (chưa kiểm thử phát âm thanh, race conditions hay tác động recovery). Log: `qa-logs/assemble-debug-transition-v1.log`.
+- Hạn chế: hai player có thể tạo khác biệt về audio focus/equalizer; cần kiểm thử âm thanh thực trên thiết bị trước khi chấp nhận crossfade. Tắt mặc định để không ảnh hưởng bản local ổn định.
+- Bước tiếp theo: Library nâng cao (Album / Artist / Genre). Sản phẩm tổng thể CHƯA NGHIỆM THU.
 
 ### 2026-10-29 — Equalizer v1 — Build PASS
 

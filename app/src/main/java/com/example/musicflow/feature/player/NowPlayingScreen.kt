@@ -40,6 +40,7 @@ fun NowPlayingScreen(
     onSetSleepTimerMinutes: (Int) -> Unit,
     onSetEqualizerEnabled: (Boolean) -> Unit,
     onSetEqualizerBand: (Int, Int) -> Unit,
+    onSetCrossfadeDuration: (Int) -> Unit,
     lyrics: LyricsUiState,
     onPickLyrics: () -> Unit
 ) {
@@ -363,6 +364,22 @@ fun NowPlayingScreen(
         Spacer(Modifier.height(20.dp))
         HorizontalDivider()
         Spacer(Modifier.height(12.dp))
+        Text("Chuyển bài", style = MaterialTheme.typography.titleLarge)
+        Text("Gapless tự động khi tệp hỗ trợ. Crossfade thử nghiệm, mặc định tắt.",
+            style = MaterialTheme.typography.bodySmall)
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf(0, 1000, 2000, 3000).forEach { duration ->
+                FilterChip(
+                    selected = state.crossfadeDurationMs == duration,
+                    onClick = { onSetCrossfadeDuration(duration) },
+                    label = { Text(if (duration == 0) "Tắt" else "${duration / 1000}s") }
+                )
+            }
+        }
+        Spacer(Modifier.height(16.dp))
         Text("Equalizer", style = MaterialTheme.typography.titleLarge)
         val eq = state.equalizer
         if (!eq.supported) {
