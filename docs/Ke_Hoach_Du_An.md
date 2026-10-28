@@ -8,16 +8,16 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD nền | `2b04b1e6` |
+| HEAD Git hiện tại | `0d6dc08` — sửa build ở workspace, chưa commit |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 | 55 bài chính PASS |
 | Marker API 30 | 40/40 PASS |
 | Playback Speed v1 | Đã có source |
-| Sleep Timer v1 | Đã có source, chưa Full QA |
+| Sleep Timer v1 | Đã có source; đã sửa lỗi MediaSession API; chưa Full QA |
 | Lyrics v1 | Triển khai đọc LRC và hiển thị đồng bộ |
 | Lyrics import | Android OpenDocument |
 | Lưu liên kết LRC theo audio URI | Đã triển khai |
-| Build Lyrics v1 | PENDING / cập nhật theo kết quả thực tế |
+| Build Lyrics v1 + Sleep Timer v1 | `:app:assembleDebug` và `:app:assembleDebugAndroidTest` PASS ngày 2026-10-29; chỉ xác nhận biên dịch |
 | Full QA | Để cuối giai đoạn phát triển |
 | Bước tiếp theo | Equalizer v1 |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
@@ -230,6 +230,19 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
 
+### 2026-10-29 — Fix MediaSession API, build Lyrics + Sleep Timer v1
+
+- HEAD trước sửa: `0d6dc08` (`feat: add synchronized local LRC lyrics support`).
+- Log FAIL ban đầu: `qa-logs/buidfail` và `qa-logs/assemble-debug-sleep-timer.log`.
+- Nguyên nhân: Media3 1.10.1 không có callback `onConnectAsync`; `AcceptedResultBuilder` chỉ nhận `session`.
+- Sửa `PlaybackService.kt`: dùng `onConnect`, `super.onConnect`, `AcceptedResultBuilder(session)`; bỏ `@OptIn` không có hiệu lực để loại cảnh báo build.
+- Kiểm chứng: `:app:assembleDebug` BUILD SUCCESSFUL (9s), `RESULT ASSEMBLE_DEBUG exitCode=0`; `:app:assembleDebugAndroidTest` BUILD SUCCESSFUL (16s), `RESULT ASSEMBLE_DEBUG_ANDROID_TEST exitCode=0`.
+- Log build mới: `qa-logs/assemble-debug-lyrics-v1.log`.
+- Phạm vi: build-only, chưa kiểm thử chức năng Sleep Timer / Lyrics trên thiết bị, chưa chạy Full QA.
+- Code sửa trên máy Windows, **chưa commit/push**; cần đối chiếu lại HEAD khi đẩy GitHub.
+- Bước tiếp theo: Equalizer v1 sau khi chốt build.
+- MVP / sản phẩm tổng thể: CHƯA NGHIỆM THU.
+
 ### 2026-10-28 — Feature Development: Lyrics v1
 
 - HEAD nền: 2b04b1e6.
@@ -238,7 +251,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - Lyrics v1: triển khai đọc LRC và hiển thị đồng bộ.
 - Lyrics import: Android OpenDocument.
 - Lưu liên kết file LRC theo audio URI: đã triển khai.
-- Build Lyrics v1: PENDING / cập nhật theo kết quả thực tế.
+- Build Lyrics v1: PASS ngày 2026-10-29 sau khi sửa API MediaSession trong Sleep Timer; chỉ kiểm tra biên dịch.
 - Full QA: Để cuối giai đoạn phát triển.
 - Bước tiếp theo: Equalizer v1.
 - Sản phẩm tổng thể: CHƯA NGHIỆM THU.

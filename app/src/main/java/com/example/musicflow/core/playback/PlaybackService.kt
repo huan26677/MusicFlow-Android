@@ -37,7 +37,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-@OptIn(androidx.media3.common.util.UnstableApi::class)
 class PlaybackService : MediaSessionService() {
 
     private var mediaSession: MediaSession? = null
@@ -172,13 +171,13 @@ class PlaybackService : MediaSessionService() {
     private val sleepTimerCallback =
         object : MediaSession.Callback {
 
-            override fun onConnectAsync(
+            override fun onConnect(
                 session: MediaSession,
                 controller: MediaSession.ControllerInfo
-            ): ListenableFuture<MediaSession.ConnectionResult> {
+            ): MediaSession.ConnectionResult {
 
                 if (controller.packageName != packageName) {
-                    return super.onConnectAsync(
+                    return super.onConnect(
                         session, controller
                     )
                 }
@@ -197,13 +196,11 @@ class PlaybackService : MediaSessionService() {
 
                 val result =
                     MediaSession.ConnectionResult
-                        .AcceptedResultBuilder(
-                            session, controller
-                        )
+                        .AcceptedResultBuilder(session)
                         .setAvailableSessionCommands(commands)
                         .build()
 
-                return Futures.immediateFuture(result)
+                return result
             }
 
             override fun onCustomCommand(
