@@ -479,6 +479,28 @@ try {
                 Write-Log "HISTORY_RESTORED=$historyRestored"
                 Write-Log "HISTORY_CLEANED=$historyCleaned"
 
+                $historyUiOk = @(
+                    $diagnostics | Where-Object {
+                        $_ -match "PASS historyUiAfterRestart"
+                    }
+                ).Count -gt 0
+
+                $playlistUiOk = @(
+                    $diagnostics | Where-Object {
+                        $_ -match "PASS playlistUiAfterRestart"
+                    }
+                ).Count -gt 0
+
+                $pausedAfterUiOk = @(
+                    $diagnostics | Where-Object {
+                        $_ -match "PASS remainsPausedAfterUiNavigation"
+                    }
+                ).Count -gt 0
+
+                Write-Log "HISTORY_UI_RESTORED=$historyUiOk"
+                Write-Log "PLAYLIST_UI_RESTORED=$playlistUiOk"
+                Write-Log "PAUSED_AFTER_UI=$pausedAfterUiOk"
+
                 Write-Log "PREPARED=$prepared"
                 Write-Log "PROCESS_RESTARTED=$newProcess"
                 Write-Log "RECOVERED_PAUSED=$pausedMarker"
@@ -496,7 +518,10 @@ try {
                     $cleanupMarker -and
                     $historyPrepared -and
                     $historyRestored -and
-                    $historyCleaned
+                    $historyCleaned -and
+                    $historyUiOk -and
+                    $playlistUiOk -and
+                    $pausedAfterUiOk
                 ) {
                     Write-Log "FINAL_RESULT=PASS"
                     $exitCode = 0

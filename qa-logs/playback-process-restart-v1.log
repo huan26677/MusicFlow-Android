@@ -1,25 +1,25 @@
 ﻿MusicFlow Process Restart Recovery v1
-DATE=2026-10-28T13:14:50.3821302+07:00
-COMMIT=580681c
+DATE=2026-10-28T13:22:03.5559629+07:00
+COMMIT=a1b3936
 EMULATOR=emulator-5554
 === BUILD_TEST_APKS ===
 Reusing configuration cache.
+> Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:preBuild UP-TO-DATE
 > Task :app:generateDebugAndroidTestAssets UP-TO-DATE
-> Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
 > Task :app:generateDebugResources UP-TO-DATE
-> Task :app:generateDebugGlobalSynthetics UP-TO-DATE
 > Task :app:javaPreCompileDebug UP-TO-DATE
-> Task :app:mapDebugSourceSetPaths UP-TO-DATE
-> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:generateDebugGlobalSynthetics UP-TO-DATE
 > Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
 > Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
-> Task :app:validateSigningDebug UP-TO-DATE
 > Task :app:extractDeepLinksDebug UP-TO-DATE
-> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
 > Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
 > Task :app:writeDebugSigningConfigVersions UP-TO-DATE
 > Task :app:preDebugAndroidTestBuild SKIPPED
 > Task :app:generateDebugAndroidTestResources UP-TO-DATE
@@ -30,153 +30,76 @@ Reusing configuration cache.
 > Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
 > Task :app:mergeDebugAssets UP-TO-DATE
 > Task :app:compressDebugAssets UP-TO-DATE
-> Task :app:mergeDebugAndroidTestAssets UP-TO-DATE
 > Task :app:generateDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :app:mergeDebugAndroidTestAssets UP-TO-DATE
 > Task :app:compressDebugAndroidTestAssets UP-TO-DATE
 > Task :app:desugarDebugAndroidTestFileDependencies UP-TO-DATE
-> Task :app:processDebugNavigationResources UP-TO-DATE
-> Task :app:checkDebugAarMetadata UP-TO-DATE
-> Task :app:parseDebugLocalResources UP-TO-DATE
-> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
 > Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
 > Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
-> Task :app:generateDebugRFile UP-TO-DATE
-> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
 > Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
 > Task :app:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
 > Task :app:validateSigningDebugAndroidTest UP-TO-DATE
 > Task :app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
-> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
 > Task :app:mergeDebugNativeLibs UP-TO-DATE
 > Task :app:stripDebugDebugSymbols UP-TO-DATE
-> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
 > Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
 > Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
 > Task :app:mergeLibDexDebug UP-TO-DATE
 > Task :app:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
-> Task :app:mergeLibDexDebugAndroidTest UP-TO-DATE
-> Task :app:mergeDebugAndroidTestManifest UP-TO-DATE
 > Task :app:processDebugMainManifest UP-TO-DATE
-> Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :app:mergeDebugAndroidTestManifest UP-TO-DATE
 > Task :app:processDebugManifest UP-TO-DATE
 > Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :app:processDebugAndroidTestManifest UP-TO-DATE
 > Task :app:mergeExtDexDebug UP-TO-DATE
-> Task :app:kspDebugKotlin UP-TO-DATE
 > Task :app:mergeExtDexDebugAndroidTest UP-TO-DATE
-> Task :app:processDebugAndroidTestResources UP-TO-DATE
 > Task :app:processDebugResources UP-TO-DATE
-> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+> Task :app:kspDebugKotlin
+> Task :app:compileDebugKotlin
 > Task :app:compileDebugJavaWithJavac NO-SOURCE
 > Task :app:processDebugJavaRes UP-TO-DATE
-> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
-> Task :app:kspDebugAndroidTestKotlin SKIPPED
-> Task :app:dexBuilderDebug UP-TO-DATE
-> Task :app:mergeProjectDexDebug UP-TO-DATE
 > Task :app:mergeDebugJavaResource UP-TO-DATE
-> Task :app:packageDebug UP-TO-DATE
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:kspDebugAndroidTestKotlin SKIPPED
+> Task :app:dexBuilderDebug
+> Task :app:mergeProjectDexDebug
+> Task :app:packageDebug
+> Task :app:assembleDebug
 > Task :app:createDebugApkListingFileRedirect UP-TO-DATE
-> Task :app:assembleDebug UP-TO-DATE
-> Task :app:compileDebugAndroidTestKotlin
-> Task :app:compileDebugAndroidTestJavaWithJavac NO-SOURCE
-> Task :app:processDebugAndroidTestJavaRes UP-TO-DATE
-> Task :app:mergeDebugAndroidTestJavaResource UP-TO-DATE
-> Task :app:dexBuilderDebugAndroidTest
-> Task :app:mergeProjectDexDebugAndroidTest
-> Task :app:packageDebugAndroidTest
-> Task :app:assembleDebugAndroidTest
-> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
 
-BUILD SUCCESSFUL in 6s
-68 actionable tasks: 4 executed, 64 up-to-date
+> Task :app:compileDebugAndroidTestKotlin FAILED
+e: file:///E:/Du_An/MusicFlow/app/src/androidTest/java/com/example/musicflow/core/playback/PlaybackProcessRestartTest.kt:381:17 Conflicting declarations:
+local val playlistId: String
+local val playlistId: String?
+e: file:///E:/Du_An/MusicFlow/app/src/androidTest/java/com/example/musicflow/core/playback/PlaybackProcessRestartTest.kt:508:5 Conflicting declarations:
+local val playlistId: String
+local val playlistId: String?
+System.Management.Automation.RemoteException
+FAILURE: Build failed with an exception.
+System.Management.Automation.RemoteException
+* What went wrong:
+Execution failed for task ':app:compileDebugAndroidTestKotlin' (registered by plugin 'com.android.internal.application').
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+System.Management.Automation.RemoteException
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+System.Management.Automation.RemoteException
+BUILD FAILED in 10s
+62 actionable tasks: 7 executed, 55 up-to-date
 Configuration cache entry reused.
-RESULT BUILD_TEST_APKS exitCode=0
-=== INSTALL_TEST_RUNNER ===
-MAIN_APP_APK=E:\Du_An\MusicFlow\app\build\outputs\apk\debug\app-debug.apk
-Performing Streamed Install
-Success
-TARGET_APP_INSTALLED=True
-TEST_APK=E:\Du_An\MusicFlow\app\build\outputs\apk\androidTest\debug\app-debug-androidTest.apk
-Performing Streamed Install
-Success
-instrumentation:com.example.musicflow.test/androidx.test.runner.AndroidJUnitRunner (target=com.example.musicflow)
-TEST_RUNNER_AVAILABLE=True
-=== FORCE_STOP ===
-PROCESS_STOPPED=True
-=== PHASE_INITIAL_CLEANUP ===
-
-com.example.musicflow.core.playback.PlaybackProcessRestartTest:.
-
-Time: 0.074
-
-OK (1 test)
-
-
-PHASE_INITIAL_CLEANUP_EXIT_CODE=0
-PHASE_INITIAL_CLEANUP_RESULT=True
-=== FORCE_STOP ===
-PROCESS_STOPPED=True
-=== PHASE_PREPARE ===
-
-com.example.musicflow.core.playback.PlaybackProcessRestartTest:.
-
-Time: 5.633
-
-OK (1 test)
-
-
-PHASE_PREPARE_EXIT_CODE=0
-PHASE_PREPARE_RESULT=True
-OLD_PID=16072
-=== FORCE_STOP ===
-PROCESS_STOPPED=True
-=== PHASE_VERIFY ===
-
-com.example.musicflow.core.playback.PlaybackProcessRestartTest:.
-
-Time: 5.259
-
-OK (1 test)
-
-
-PHASE_VERIFY_EXIT_CODE=0
-PHASE_VERIFY_RESULT=True
-NEW_PID=16156
-NEW_PROCESS=True
-=== FORCE_STOP ===
-PROCESS_STOPPED=True
-=== PHASE_CLEANUP ===
-
-com.example.musicflow.core.playback.PlaybackProcessRestartTest:.
-
-Time: 0.236
-
-OK (1 test)
-
-
-PHASE_CLEANUP_EXIT_CODE=0
-PHASE_CLEANUP_RESULT=True
-=== RESTART_DIAGNOSTICS ===
---------- beginning of main
---------- beginning of system
---------- beginning of kernel
-I/MusicFlowRestartIT(16021): PHASE_CLEANUP_PASS
-I/MusicFlowRestartIT(16072): PASS playlistPrepared
-I/MusicFlowRestartIT(16072): PASS historyPreparedBeforeRestart
-I/MusicFlowRestartIT(16072): PREPARE_PROCESS_PID=16072
-I/MusicFlowRestartIT(16072): PHASE_PREPARE_PASS
-I/MusicFlowRestartIT(16156): VERIFY_PROCESS_PID=16156
-I/MusicFlowRestartIT(16156): PASS playlistPersistedAfterRestart
-I/MusicFlowRestartIT(16156): PASS historyPersistedAfterRestart
-I/MusicFlowRestartIT(16156): PHASE_VERIFY_PAUSED_PASS
-I/MusicFlowRestartIT(16156): PHASE_VERIFY_PASS
-I/MusicFlowRestartIT(16233): PASS historyCleanedAfterRestart
-I/MusicFlowRestartIT(16233): PHASE_CLEANUP_PASS
-HISTORY_PREPARED=True
-HISTORY_RESTORED=True
-HISTORY_CLEANED=True
-PREPARED=True
-PROCESS_RESTARTED=True
-RECOVERED_PAUSED=True
-PLAYBACK_RESUMED=True
-CLEANUP=True
-FINAL_RESULT=PASS
+RESULT BUILD_TEST_APKS exitCode=1
+FINAL_RESULT=FAIL

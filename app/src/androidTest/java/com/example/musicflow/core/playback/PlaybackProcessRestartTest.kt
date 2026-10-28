@@ -23,6 +23,14 @@ import com.example.musicflow.core.playlist.PlaylistTrack
 import com.example.musicflow.core.playlist.RoomPlaylistRepository
 import com.google.common.util.concurrent.ListenableFuture
 
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import org.junit.Rule
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -45,6 +53,9 @@ class PlaybackProcessRestartTest {
         InstrumentationRegistry.getInstrumentation()
 
     private val context = instrumentation.targetContext
+
+    @get:Rule
+    val composeRule = createEmptyComposeRule()
 
     private val queuePrefs = context.getSharedPreferences(
         "musicflow_playback_queue_v1",
@@ -461,6 +472,88 @@ Log.i(
                 "MusicFlowRestartIT",
                 "PHASE_VERIFY_PAUSED_PASS"
             )
+
+// 1. Xác nhận History hiển thị sau restart.
+composeRule.waitUntil(15_000L) {
+    composeRule.onAllNodesWithText("Nghe gần đây")
+        .fetchSemanticsNodes()
+        .isNotEmpty()
+}
+
+composeRule.onNodeWithText("Nghe gần đây")
+    .performScrollTo()
+
+val historyTag = "history-song-${ids[1]}"
+
+composeRule.waitUntil(15_000L) {
+    composeRule.onAllNodesWithTag(historyTag)
+        .fetchSemanticsNodes()
+        .isNotEmpty()
+}
+
+composeRule.onNodeWithTag(historyTag)
+    .performScrollTo()
+    .assertExists()
+
+Log.i(
+    "MusicFlowRestartIT",
+    "PASS historyUiAfterRestart"
+)
+
+// 2. Mở Playlist từ Home sau restart.
+composeRule.onNodeWithText("Danh sách phát của tôi")
+    .performScrollTo()
+    .performClick()
+
+val playlistId = qaPrefs.getString("playlistId", null)
+val playlistTag = "playlist-$playlistId"
+
+composeRule.waitUntil(15_000L) {
+    composeRule.onAllNodesWithTag(playlistTag)
+        .fetchSemanticsNodes()
+        .isNotEmpty()
+}
+
+composeRule.onNodeWithTag(playlistTag)
+    .performClick()
+
+// 3. Xác nhận cả hai bài hát có trên giao diện.
+val firstTrackTag = "playlist-track-${ids[0]}"
+val secondTrackTag = "playlist-track-${ids[1]}"
+
+composeRule.waitUntil(15_000L) {
+    composeRule.onAllNodesWithTag(firstTrackTag)
+        .fetchSemanticsNodes()
+        .isNotEmpty() &&
+    composeRule.onAllNodesWithTag(secondTrackTag)
+        .fetchSemanticsNodes()
+        .isNotEmpty()
+}
+
+composeRule.onNodeWithText("2 bài hát")
+    .assertExists()
+
+composeRule.onNodeWithTag(firstTrackTag)
+    .assertExists()
+
+composeRule.onNodeWithTag(secondTrackTag)
+    .assertExists()
+
+Log.i(
+    "MusicFlowRestartIT",
+    "PASS playlistUiAfterRestart"
+)
+
+// 4. Chỉ xem giao diện không được tự phát nhạc.
+instrumentation.runOnMainSync {
+    assertFalse(controller.isPlaying)
+    assertFalse(controller.playWhenReady)
+}
+
+Log.i(
+    "MusicFlowRestartIT",
+    "PASS remainsPausedAfterUiNavigation"
+)
 
             val resumed = CountDownLatch(1)
 

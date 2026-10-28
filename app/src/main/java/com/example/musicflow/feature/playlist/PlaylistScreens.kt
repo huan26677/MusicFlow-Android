@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -156,6 +157,7 @@ fun PlaylistListRoute(
                             ListItem(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .testTag("playlist-${playlist.id}")
                                     .clickable {
                                         onOpenPlaylist(playlist.id)
                                     },
@@ -460,6 +462,7 @@ fun PlaylistDetailRoute(
                                         ListItem(
                                             modifier = Modifier
                                                 .fillMaxWidth()
+                                                .testTag("playlist-track-${track.mediaId}")
                                                 .clickable {
                                                     onPlayTracks(
                                                         tracks.tracks,
