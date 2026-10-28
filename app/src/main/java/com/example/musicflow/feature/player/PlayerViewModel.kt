@@ -12,6 +12,7 @@ import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.playback.PlaybackController
 import com.example.musicflow.core.playlist.PlaylistTrack
 import com.example.musicflow.core.playlist.PlaylistMediaItems
+import com.example.musicflow.core.online.OnlineTrack
 
 data class PickedAudioFile(
     val uri: Uri,
@@ -24,6 +25,28 @@ class PlayerViewModel(
 ) : ViewModel() {
 
     val uiState = playbackController.uiState
+
+    fun playOnlineTracks(tracks: List<OnlineTrack>, selectedIndex: Int) {
+        if (selectedIndex !in tracks.indices) return
+        val playable = tracks.filter { it.streamUrl?.startsWith("https://") == true }
+        val selected = tracks[selectedIndex]
+        val index = playable.indexOfFirst { it.id == selected.id }
+        if (index < 0) return
+        val items = playable.map { track ->
+            MediaItem.Builder()
+                .setMediaId("online:${track.id}")
+                .setUri(Uri.parse(requireNotNull(track.streamUrl)))
+                .setMediaMetadata(
+                    MediaMetadata.Builder()
+                        .setTitle(track.title)
+                        .setArtist(track.artist)
+                        .setAlbumTitle(track.album)
+                        .build()
+                )
+                .build()
+        }
+        playbackController.playQueue(items, index)
+    }
 
     fun playPickedFiles(
         files: List<PickedAudioFile>

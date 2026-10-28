@@ -21,7 +21,8 @@ data class OnlineTrack(
     val title: String,
     val artist: String,
     val album: String?,
-    val durationMs: Long
+    val durationMs: Long,
+    val streamUrl: String? = null
 )
 
 data class OnlineCatalogPage(

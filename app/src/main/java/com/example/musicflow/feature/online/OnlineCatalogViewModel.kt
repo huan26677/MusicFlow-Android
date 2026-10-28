@@ -8,6 +8,8 @@ import com.example.musicflow.core.online.HttpsOnlineCatalogRepository
 import com.example.musicflow.core.online.OnlineCatalogRepository
 import com.example.musicflow.core.online.OnlineCatalogSettings
 import com.example.musicflow.core.online.OnlineTrack
+import com.example.musicflow.core.online.SupabaseCatalogRepository
+import com.example.musicflow.BuildConfig
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +34,12 @@ class OnlineCatalogViewModel(
     private val settings: OnlineCatalogSettings,
     private val repository: OnlineCatalogRepository
 ) : ViewModel() {
-    private val initialEndpoint = settings.savedEndpoint()
+    private val supabaseConfigured =
+        BuildConfig.SUPABASE_URL.isNotBlank() &&
+            BuildConfig.SUPABASE_PUBLISHABLE_KEY.isNotBlank()
+    private val initialEndpoint = if (supabaseConfigured) {
+        BuildConfig.SUPABASE_URL
+    } else settings.savedEndpoint()
     private val _uiState = MutableStateFlow(
         OnlineCatalogUiState(
             endpointInput = initialEndpoint,
@@ -164,7 +171,12 @@ class OnlineCatalogViewModel(
                     @Suppress("UNCHECKED_CAST")
                     return OnlineCatalogViewModel(
                         OnlineCatalogSettings(context.applicationContext),
-                        HttpsOnlineCatalogRepository()
+                        if (BuildConfig.SUPABASE_URL.isNotBlank() &&
+                            BuildConfig.SUPABASE_PUBLISHABLE_KEY.isNotBlank()
+                        ) SupabaseCatalogRepository(
+                            BuildConfig.SUPABASE_URL,
+                            BuildConfig.SUPABASE_PUBLISHABLE_KEY
+                        ) else HttpsOnlineCatalogRepository()
                     ) as T
                 }
             }

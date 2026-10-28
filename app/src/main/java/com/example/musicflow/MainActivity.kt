@@ -310,6 +310,9 @@ private val pickLyrics = registerForActivityResult(
                             selectedIndex = index
                         )
                     },
+                    onPlayOnlineTracks = { tracks, index ->
+                        playerViewModel.playOnlineTracks(tracks, index)
+                    },
 
                     onPlayPause = {
                         playerViewModel.togglePlayPause()

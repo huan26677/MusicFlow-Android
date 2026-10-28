@@ -39,6 +39,7 @@ import com.example.musicflow.core.playlist.PlaylistTrack
 import com.example.musicflow.feature.home.HomeRoute
 import com.example.musicflow.feature.library.LibraryRoute
 import com.example.musicflow.feature.online.OnlineCatalogRoute
+import com.example.musicflow.core.online.OnlineTrack
 import com.example.musicflow.feature.playlist.PlaylistListRoute
 import com.example.musicflow.feature.playlist.PlaylistDetailRoute
 import com.example.musicflow.feature.player.MiniPlayer
@@ -84,6 +85,7 @@ fun MusicFlowApp(
     onPlayDeviceSongs: (List<DeviceSong>, Int) -> Unit,
     onPlayRecentSongs: (List<RecentSong>, Int) -> Unit,
     onPlayPlaylistTracks: (List<PlaylistTrack>, Int) -> Unit,
+    onPlayOnlineTracks: (List<OnlineTrack>, Int) -> Unit,
 
     onPlayPause: () -> Unit,
     onPrevious: () -> Unit,
@@ -327,6 +329,12 @@ fun MusicFlowApp(
                                 backStack.removeAt(backStack.lastIndex)
                             } else {
                                 switchTab(HomeTab)
+                            }
+                        },
+                        onPlayTrack = { tracks, index ->
+                            onPlayOnlineTracks(tracks, index)
+                            if (backStack.lastOrNull() != NowPlaying) {
+                                backStack.add(NowPlaying)
                             }
                         }
                     )

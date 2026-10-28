@@ -19,6 +19,9 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.Badge
+import com.example.musicflow.core.online.OnlineTrack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -28,9 +31,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.musicflow.BuildConfig
 
 @Composable
-fun OnlineCatalogRoute(onBack: () -> Unit) {
+fun OnlineCatalogRoute(
+    onBack: () -> Unit,
+    onPlayTrack: (List<OnlineTrack>, Int) -> Unit
+) {
     val context = LocalContext.current
     val factory = remember(context) {
         OnlineCatalogViewModel.factory(context.applicationContext)
@@ -46,6 +53,8 @@ fun OnlineCatalogRoute(onBack: () -> Unit) {
         onClearEndpoint = model::clearEndpoint,
         onRefresh = model::refresh,
         onLoadMore = model::loadMore
+        ,onPlayTrack = onPlayTrack,
+        isSupabaseManaged = BuildConfig.SUPABASE_URL.isNotBlank()
     )
 }
 
@@ -57,7 +66,9 @@ fun OnlineCatalogScreen(
     onSaveEndpoint: () -> Unit,
     onClearEndpoint: () -> Unit,
     onRefresh: () -> Unit,
-    onLoadMore: () -> Unit
+    onLoadMore: () -> Unit,
+    onPlayTrack: (List<OnlineTrack>, Int) -> Unit,
+    isSupabaseManaged: Boolean = false
 ) {
     Column(
         modifier = Modifier
@@ -88,15 +99,18 @@ fun OnlineCatalogScreen(
             label = { Text("Địa chỉ gốc API (HTTPS)") },
             placeholder = { Text("https://music.example.com") },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            readOnly = isSupabaseManaged
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(
-                onClick = onSaveEndpoint,
-                enabled = !state.isLoading && !state.isLoadingMore &&
-                    state.endpointInput.isNotBlank()
-            ) {
-                Text("Lưu và kết nối")
+            if (!isSupabaseManaged) {
+                Button(
+                    onClick = onSaveEndpoint,
+                    enabled = !state.isLoading && !state.isLoadingMore &&
+                        state.endpointInput.isNotBlank()
+                ) {
+                    Text("Lưu và kết nối")
+                }
             }
             OutlinedButton(
                 onClick = onRefresh,
@@ -105,7 +119,7 @@ fun OnlineCatalogScreen(
             ) {
                 Text("Tải lại")
             }
-            if (state.savedEndpoint.isNotEmpty()) {
+            if (!isSupabaseManaged && state.savedEndpoint.isNotEmpty()) {
                 TextButton(onClick = onClearEndpoint) {
                     Text("Ngắt")
                 }
@@ -149,8 +163,12 @@ fun OnlineCatalogScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     LazyColumn(modifier = Modifier.weight(1f)) {
-                        items(state.tracks, key = { it.id }) { track ->
+                        items(state.tracks.size) { index ->
+                            val track = state.tracks[index]
                             ListItem(
+                                modifier = Modifier.clickable(
+                                    enabled = track.streamUrl != null
+                                ) { onPlayTrack(state.tracks, index) },
                                 headlineContent = {
                                     Text(
                                         track.title,
@@ -172,7 +190,9 @@ fun OnlineCatalogScreen(
                                     )
                                 },
                                 trailingContent = {
-                                    if (track.durationMs > 0L) {
+                                    if (track.streamUrl != null) {
+                                        Text("▶")
+                                    } else if (track.durationMs > 0L) {
                                         val minutes = track.durationMs / 60_000
                                         val seconds = (track.durationMs / 1000) % 60
                                         Text("%d:%02d".format(minutes, seconds))

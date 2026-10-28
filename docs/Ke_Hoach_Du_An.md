@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `036b504` — Online Catalog Foundation v1 đã build trong workspace, chưa commit |
+| HEAD Git hiện tại | `b310d9f` — Supabase Catalog + Licensed Streaming v1 sửa ở workspace, chưa commit |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 | 55 bài chính PASS |
 | Marker API 30 | 40/40 PASS |
@@ -24,7 +24,8 @@
 | Library nâng cao v1 | Bài hát / Album / Nghệ sĩ / Thể loại; có source, build ứng dụng + AndroidTest PASS, chưa runtime QA |
 | Search nâng cao v1 | Tìm bài hát, album, nghệ sĩ, thể loại có bỏ dấu; 4 bộ lọc, mở nhóm/phát/thêm Playlist; build ứng dụng + AndroidTest PASS, chưa runtime QA |
 | Online Catalog Foundation v1 | API HTTPS cấu hình được, repository metadata, phân trang và màn khám phá online; build ứng dụng + AndroidTest PASS; chưa có dịch vụ hay QA thực tế |
-| Bước tiếp theo | Licensed Streaming Integration v1 — triển khai phát online chỉ sau khi có backend và quyền phát hợp lệ |
+| Supabase Backend v1 | Dự án Supabase đã kết nối; bảng public.music_tracks RLS; Data API read-only; client Android đọc danh mục và có luồng phát HTTPS hợp lệ; build-only |
+| Bước tiếp theo | Licensed Content Upload + Rights Verification v1, sau đó kiểm thử streaming bằng bài có quyền sử dụng |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -236,6 +237,19 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Supabase backend / streaming foundation v1
+
+- HEAD nền: `b310d9f`; không chỉnh dữ liệu nhạc offline đã có.
+- Xác minh Supabase project `vzvxpbwrftlnyvuhfoqn` ACTIVE_HEALTHY; schema public ban đầu không có bảng. Tạo bảng `music_tracks` bằng migration `musicflow_licensed_catalog_v1`.
+- Bật RLS, anon/authenticated chỉ có SELECT bài `is_published and rights_confirmed` và stream_url hợp lệ; không cho ghi từ client. Supabase security advisors: không có cảnh báo tại thời điểm kiểm tra.
+- Lưu cấu hình Supabase ở `secrets.properties` (gitignored); Gradle BuildConfig đưa publishable key vào Android; tuyệt đối không dùng service-role key.
+- Thêm `SupabaseCatalogRepository.kt`; hỗ trợ đọc REST catalog có phân trang. `OnlineCatalogViewModel` dùng Supabase khi build đã cấu hình.
+- Thêm nút phát cho bản ghi có stream_url HTTPS; queue và MediaSession tiếp tục dùng ExoPlayer chung.
+- Chưa thêm dữ liệu hoặc URL nhạc, do chưa có nội dung/quyền phát hợp lệ. Không có bằng chứng phát online thực tế; QA cuối giai đoạn.
+- Tài liệu: `docs/Supabase_MusicFlow_v1.md`.
+- Build debug + AndroidTest: chạy build-only; log `qa-logs/assemble-debug-supabase-v1.log`.
+- Bước tiếp theo: nhập bản ghi nhạc được cấp phép rồi QA streaming; sau đó signed URL/Storage/Auth cho nội dung riêng tư.
 
 ### 2026-10-29 — Online Catalog Foundation v1 — Build PASS
 
