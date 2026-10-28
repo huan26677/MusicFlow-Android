@@ -15,9 +15,9 @@
 | Marker | **33/33 PASS** |
 | Kết quả log | `FINAL_RESULT=PASS` (Playlist UI Acceptance v1 Full QA) |
 | Commit chứa vòng QA v2 | `74b9026c1cdb70c9d2ed0563bb747d1a047a061a` |
-| Commit HEAD tại thời điểm rà sow | `f71c2c42` (MVP Playlist Navigation v1 — PENDING QA rerun) |
+| Commit HEAD tại thời điểm rà sow | `1ae5c36c` (MVP Playlist Navigation v1 — Fast QA PASS) |
 | Log gần nhất đã xác nhận | `qa-logs/mvp-playlist-navigation-v1.log` |
-| Bước đang phát triển tiếp | **MVP Playlist Navigation v1 — PENDING QA rerun** |
+| Bước đang phát triển tiếp | **MVP Playlist Navigation v1 — Fast QA PASS, Full Regression PENDING** |
 | Ngày rà Sox | **2026-10-28**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -93,6 +93,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | Android 10 Compatibility v1 | 50 regression + 3 test theo pha | **PASS** — API 29, SAF persistence và Favorites playback | `74b9026c` · `qa-logs/android10-saf-compat-v1.log` |
 | Real Picker SAF v1 | 51 PASS, 3 test theo pha SKIPPED | **PASS — manual-assisted, API 30** | `19f418ae` · `qa-logs/real-picker-saf-v1.log` |
 | SAF Multi-file v1 | 52 PASS, 3 test theo pha SKIPPED | **PASS — Full Regression, API 30** | `94c03895` · `qa-logs/real-picker-saf-v1.log` |
+| MVP Playlist Navigation v1 | 1 bài isolated PASS | **Fast QA PASS — API 30** | `1ae5c36c` · `qa-logs/mvp-playlist-navigation-v1.log` |
 
 **Không cộng** các con số 9 + 11 + ... + 31: đây là số lượng test của **các lần chạy tăng dần** với nhiều bài trùng nhau.
 
@@ -227,13 +228,14 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 
 ### 2026-10-28 — MVP Playlist Navigation v1
 
-- Commit kiểm tra: f71c2c42.
-- Kotlin compile: PASS.
-- Instrumentation: FAIL — InvalidTestClassError.
-- Nguyên nhân: Thiếu dấu đóng hàm trước @Test mới.
-- Sửa: Đóng đúng hai hàm test và bỏ dấu } thừa cuối file.
+- Commit: 1ae5c36c.
+- Home → Playlist → Now Playing: PASS.
+- Playlist → MediaSession: PASS.
+- Next từ Now Playing: PASS.
+- Fast QA: PASS.
+- Full Regression: PENDING.
 - Log: qa-logs/mvp-playlist-navigation-v1.log.
-- Trạng thái: PENDING QA rerun.
+- Bước tiếp theo: Full Regression 55 bài chính.
 - MVP tổng thể: Chưa nghiệm thu.
 
 ### 2026-10-28 — Playlist → Playback → Restart v1
