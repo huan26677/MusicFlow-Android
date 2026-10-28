@@ -722,6 +722,33 @@ Log.i(
 
             assertTrue("Next item not playing", nextReady)
             Log.i("MusicFlowRealPickerQA", "PASS multiNext")
+
+            val history = RoomRecentHistoryRepository(
+                RecentHistoryDatabase.getInstance(context)
+            )
+
+            val expectedUri = queueUris[1].toString()
+            val historyDeadline = SystemClock.uptimeMillis() + 15_000L
+            var historyFound = false
+
+            while (SystemClock.uptimeMillis() < historyDeadline) {
+                historyFound = runBlocking {
+                    history.getRecent().any {
+                        it.mediaId == expectedUri &&
+                            it.audioUri == expectedUri
+                    }
+                }
+
+                if (historyFound) break
+                SystemClock.sleep(200)
+            }
+
+            assertTrue(
+                "Second SAF track missing from recent history",
+                historyFound
+            )
+
+            Log.i("MusicFlowRealPickerQA", "PASS multiNextWrittenHistory")
         } finally {
             controller?.let { media ->
                 instrumentation.runOnMainSync {
@@ -747,6 +774,15 @@ Log.i(
                         Intent.FLAG_GRANT_READ_URI_PERMISSION or
                             Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                     )
+                }
+            }
+
+            runCatching {
+                runBlocking {
+                    val history = RoomRecentHistoryRepository(
+                        RecentHistoryDatabase.getInstance(context)
+                    )
+                    created.forEach { history.remove(it.toString()) }
                 }
             }
         }
