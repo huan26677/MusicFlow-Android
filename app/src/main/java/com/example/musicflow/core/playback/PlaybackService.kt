@@ -1,8 +1,10 @@
 package com.example.musicflow.core.playback
 
 import android.net.Uri
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.MediaItem
@@ -12,6 +14,11 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import androidx.media3.session.SessionCommand
+import androidx.media3.session.SessionResult
+import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.ListenableFuture
+
 import com.example.musicflow.core.history.RecentPlaybackTracker
 import com.example.musicflow.core.history.RecentSong
 import com.example.musicflow.core.history.RoomRecentHistoryRepository
@@ -30,6 +37,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
+@OptIn(androidx.media3.common.util.UnstableApi::class)
 class PlaybackService : MediaSessionService() {
 
     private var mediaSession: MediaSession? = null
@@ -120,6 +128,138 @@ class PlaybackService : MediaSessionService() {
         }
     }
 
+    private val sleepTimerScope = CoroutineScope(
+        SupervisorJob() + Dispatchers.Main.immediate
+    )
+
+    private var sleepTimerJob: Job? = null
+    private var sleepDeadlineElapsedMs = 0L
+
+    private fun sleepRemainingMs(): Long =
+        if (sleepDeadlineElapsedMs == 0L) {
+            0L
+        } else {
+            (sleepDeadlineElapsedMs -
+                SystemClock.elapsedRealtime())
+                .coerceAtLeast(0L)
+        }
+
+    private fun setSleepTimer(minutes: Int) {
+        sleepTimerJob?.cancel()
+        sleepTimerJob = null
+        sleepDeadlineElapsedMs = 0L
+
+        if (minutes == 0) return
+
+        val durationMs = minutes.toLong() * 60_000L
+
+        sleepDeadlineElapsedMs =
+            SystemClock.elapsedRealtime() + durationMs
+
+        sleepTimerJob = sleepTimerScope.launch {
+            delay(durationMs)
+
+            sleepDeadlineElapsedMs = 0L
+            sleepTimerJob = null
+
+            // Tạm dừng nhưng giữ nguyên queue.
+            mediaSession?.player?.pause()
+
+            Log.i("MusicFlowSleepTimer", "TIMER_FINISHED")
+        }
+    }
+
+    private val sleepTimerCallback =
+        object : MediaSession.Callback {
+
+            override fun onConnectAsync(
+                session: MediaSession,
+                controller: MediaSession.ControllerInfo
+            ): ListenableFuture<MediaSession.ConnectionResult> {
+
+                if (controller.packageName != packageName) {
+                    return super.onConnectAsync(
+                        session, controller
+                    )
+                }
+
+                val commands =
+                    MediaSession.ConnectionResult
+                        .DEFAULT_SESSION_COMMANDS
+                        .buildUpon()
+                        .add(
+                            SessionCommand(
+                                SleepTimerContract.ACTION,
+                                Bundle.EMPTY
+                            )
+                        )
+                        .build()
+
+                val result =
+                    MediaSession.ConnectionResult
+                        .AcceptedResultBuilder(
+                            session, controller
+                        )
+                        .setAvailableSessionCommands(commands)
+                        .build()
+
+                return Futures.immediateFuture(result)
+            }
+
+            override fun onCustomCommand(
+                session: MediaSession,
+                controller: MediaSession.ControllerInfo,
+                customCommand: SessionCommand,
+                args: Bundle
+            ): ListenableFuture<SessionResult> {
+
+                if (customCommand.customAction !=
+                    SleepTimerContract.ACTION
+                ) {
+                    return super.onCustomCommand(
+                        session, controller,
+                        customCommand, args
+                    )
+                }
+
+                val minutes = args.getInt(
+                    SleepTimerContract.KEY_MINUTES,
+                    -2
+                )
+
+                if (minutes !in
+                    setOf(-1, 0, 15, 30, 45, 60)
+                ) {
+                    return Futures.immediateFuture(
+                        SessionResult(
+                            SessionResult.RESULT_ERROR_BAD_VALUE
+                        )
+                    )
+                }
+
+                // -1: hỏi trạng thái
+                //  0: hủy timer
+                // >0: đặt timer mới
+                if (minutes >= 0) {
+                    setSleepTimer(minutes)
+                }
+
+                val extras = Bundle().apply {
+                    putLong(
+                        SleepTimerContract.KEY_REMAINING_MS,
+                        sleepRemainingMs()
+                    )
+                }
+
+                return Futures.immediateFuture(
+                    SessionResult(
+                        SessionResult.RESULT_SUCCESS,
+                        extras
+                    )
+                )
+            }
+        }
+
     override fun onCreate() {
         super.onCreate()
 
@@ -146,7 +286,9 @@ class PlaybackService : MediaSessionService() {
         mediaSession = MediaSession.Builder(
             this,
             player
-        ).build()
+        )
+            .setCallback(sleepTimerCallback)
+            .build()
 
         player.addListener(playerListener)
 
@@ -339,6 +481,10 @@ class PlaybackService : MediaSessionService() {
     override fun onDestroy() {
         runtimeAutoSkip?.dispose()
         runtimeAutoSkip = null
+
+        sleepTimerJob?.cancel()
+        sleepTimerScope.cancel()
+        sleepDeadlineElapsedMs = 0L
 
         artworkRequestId++
         artworkJob?.cancel()

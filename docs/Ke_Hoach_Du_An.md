@@ -8,11 +8,12 @@
 
 | Mục | Trạng thái |
 |---|---|
-| Chuyển sang | Feature Development — Full Product |
-| HEAD nền | `ffe42e7c` |
-| Hoàn thiện chức năng trước, Full QA cuối giai đoạn | Đang thực hiện |
-| Đang triển khai | PLAY-08 Playback Speed v1 |
-| Các giai đoạn còn lại | Theo bảng lộ trình ở trên |
+| HEAD nền | `e16348ac` |
+| Session Recovery v1 | Full QA PASS |
+| Android API 30 | 55 bài chính PASS |
+| Marker API 30 | 40/40 PASS |
+| Playback Speed v1 | Đã có source |
+| Sleep Timer v1 | Đang phát triển |
 | MVP / sản phẩm tổng thể | Chưa nghiệm thu — không đánh dấu hoàn thành khi chưa có đủ chức năng |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -222,6 +223,15 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-28 — Feature Development: Playback Speed & Sleep Timer
+
+- HEAD nền: e16348ac.
+- Playback Speed v1: đã có source (chưa QA).
+- Sleep Timer v1: đang phát triển.
+- Giữ các mốc QA cũ (Session Recovery v1 Full QA PASS, Android API 30 55 bài chính PASS, Marker 40/40 PASS).
+- Build debug: FAIL (compile Kotlin — PlaybackService onConnectAsync/AcceptedResultBuilder API). Log: qa-logs/assemble-debug-sleep-timer.log.
+- MVP / sản phẩm tổng thể: Chưa nghiệm thu.
 
 ### 2026-10-28 — Feature Development — Full Product
 

@@ -244,6 +244,10 @@ class MainActivity : ComponentActivity() {
 
                     onSetPlaybackSpeed = { speed ->
                         playerViewModel.setPlaybackSpeed(speed)
+                    },
+
+                    onSetSleepTimerMinutes = { minutes ->
+                        playerViewModel.setSleepTimerMinutes(minutes)
                     }
                 )
             }

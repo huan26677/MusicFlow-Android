@@ -191,7 +191,11 @@ fun mvpLibrarySearchToRealPlayer() {
                     onToggleShuffle =
                         playerViewModel::toggleShuffle,
                     onCycleRepeat =
-                        playerViewModel::cycleRepeat
+                        playerViewModel::cycleRepeat,
+                    onSetPlaybackSpeed =
+                        playerViewModel::setPlaybackSpeed,
+                    onSetSleepTimerMinutes =
+                        playerViewModel::setSleepTimerMinutes
                 )
             }
         }

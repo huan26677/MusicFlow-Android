@@ -4,6 +4,8 @@ import android.content.ComponentName
 import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
+import android.os.Bundle
+import android.os.SystemClock
 import android.provider.MediaStore
 import android.util.Log
 
@@ -13,6 +15,8 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
+import androidx.media3.session.SessionCommand
+import androidx.media3.session.SessionResult
 import androidx.media3.session.SessionToken
 
 import com.google.common.util.concurrent.ListenableFuture
@@ -38,7 +42,8 @@ data class PlayerUiState(
     val repeatMode: Int = Player.REPEAT_MODE_OFF,
     val artworkUri: Uri? = null,
     val audioUri: Uri? = null,
-    val playbackSpeed: Float = 1f
+    val playbackSpeed: Float = 1f,
+    val sleepTimerRemainingMs: Long = 0L
 )
 
 class PlaybackController(context: Context) {
@@ -52,6 +57,9 @@ class PlaybackController(context: Context) {
             ListenableFuture<MediaController>? = null
 
     private var controller: MediaController? = null
+
+    private var sleepTimerRequestId = 0L
+    private var lastSleepTimerQueryMs = 0L
 
     private data class QueueRequest(
         val items: List<MediaItem>,
@@ -98,6 +106,7 @@ class PlaybackController(context: Context) {
                         controller = newController
                         newController.addListener(listener)
                         updateState(newController)
+                        requestSleepTimer(-1)
 
                         pendingQueue?.let { request ->
                             pendingQueue = null
@@ -216,12 +225,21 @@ class PlaybackController(context: Context) {
             repeatMode = player.repeatMode,
             artworkUri = artworkUri,
             audioUri = audioUri,
-            playbackSpeed = player.playbackParameters.speed
+            playbackSpeed = player.playbackParameters.speed,
+            sleepTimerRemainingMs =
+                _uiState.value.sleepTimerRemainingMs
         )
     }
 
     fun refreshProgress() {
         controller?.let { updateState(it) }
+
+        val now = SystemClock.elapsedRealtime()
+
+        if (now - lastSleepTimerQueryMs >= 1_000L) {
+            lastSleepTimerQueryMs = now
+            requestSleepTimer(-1)
+        }
     }
 
     fun playQueue(
@@ -385,7 +403,64 @@ class PlaybackController(context: Context) {
         updateState(player)
     }
 
+    private fun requestSleepTimer(minutes: Int) {
+        val media = controller ?: return
+        val requestId = ++sleepTimerRequestId
+
+        val command = SessionCommand(
+            SleepTimerContract.ACTION,
+            Bundle.EMPTY
+        )
+
+        val args = Bundle().apply {
+            putInt(SleepTimerContract.KEY_MINUTES, minutes)
+        }
+
+        val future = media.sendCustomCommand(
+            command, args
+        )
+
+        future.addListener(
+            {
+                if (
+                    controller === media &&
+                    requestId == sleepTimerRequestId
+                ) {
+                    try {
+                        val result = future.get()
+
+                        if (result.resultCode ==
+                            SessionResult.RESULT_SUCCESS
+                        ) {
+                            val remaining = result.extras.getLong(
+                                SleepTimerContract.KEY_REMAINING_MS,
+                                0L
+                            )
+
+                            _uiState.value = _uiState.value.copy(
+                                sleepTimerRemainingMs = remaining
+                            )
+                        }
+                    } catch (_: Exception) {
+                        // Không làm gián đoạn phát nhạc.
+                    }
+                }
+            },
+            ContextCompat.getMainExecutor(appContext)
+        )
+    }
+
+    fun setSleepTimerMinutes(minutes: Int) {
+        if (minutes !in setOf(0, 15, 30, 45, 60)) {
+            return
+        }
+
+        requestSleepTimer(minutes)
+    }
+
     fun release() {
+        sleepTimerRequestId++
+
         controller?.removeListener(listener)
         controller = null
         pendingQueue = null

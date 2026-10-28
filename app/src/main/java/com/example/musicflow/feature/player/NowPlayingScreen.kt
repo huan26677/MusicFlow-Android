@@ -34,7 +34,8 @@ fun NowPlayingScreen(
     onSeek: (Long) -> Unit,
     onToggleShuffle: () -> Unit,
     onCycleRepeat: () -> Unit,
-    onSetPlaybackSpeed: (Float) -> Unit
+    onSetPlaybackSpeed: (Float) -> Unit,
+    onSetSleepTimerMinutes: (Int) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -302,6 +303,55 @@ fun NowPlayingScreen(
                         label = { Text("${speed}x") }
                     )
                 }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        Text(
+            text = "Hẹn giờ tắt nhạc",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        val remainingMs = state.sleepTimerRemainingMs
+
+        Text(
+            text = if (remainingMs > 0L) {
+                val minutesLeft =
+                    (remainingMs + 59_999L) / 60_000L
+
+                "Còn khoảng $minutesLeft phút"
+            } else {
+                "Chưa hẹn giờ"
+            },
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf(15, 30, 45, 60).forEach { minutes ->
+                OutlinedButton(
+                    onClick = {
+                        onSetSleepTimerMinutes(minutes)
+                    },
+                    enabled = state.connected && state.hasMedia
+                ) {
+                    Text("$minutes phút")
+                }
+            }
+        }
+
+        if (remainingMs > 0L) {
+            TextButton(
+                onClick = {
+                    onSetSleepTimerMinutes(0)
+                }
+            ) {
+                Text("Hủy hẹn giờ")
+            }
         }
 
         Spacer(Modifier.height(16.dp))

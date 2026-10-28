@@ -129,6 +129,9 @@ class PlayerViewModel(
     fun setPlaybackSpeed(speed: Float) =
         playbackController.setPlaybackSpeed(speed)
 
+    fun setSleepTimerMinutes(minutes: Int) =
+        playbackController.setSleepTimerMinutes(minutes)
+
     fun refreshProgress() =
         playbackController.refreshProgress()
 
