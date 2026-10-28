@@ -15,7 +15,9 @@
 | Marker | **40/40 PASS** |
 | Kết quả log | `FINAL_RESULT=PASS` (Session Recovery UI Acceptance v1 Fast QA) |
 | Commit chứa vòng QA v2 | `580681c3` |
-| Commit HEAD tại thời điểm rà sow | `d84c9a11` (Session Recovery UI Acceptance v1 — Fast QA PASS) |
+| Commit HEAD đã kiểm tra | `d84c9a11` (Session Recovery UI Acceptance v1 — Fast QA PASS) |
+| Mốc Full Regression gần nhất | 55 bài chính, 40/40 marker PASS |
+| MVP tổng thể | CHƯA NGHIỆM THU |
 | Log gần nhất đã xác nhận | `qa-logs/playback-process-restart-v1.log` |
 | Bước đang phát triển tiếp | **Full Regression — PENDING chạy lại với code mới** |
 | Ngày rà Sox | **2026-10-28**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
@@ -241,6 +243,8 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - Fast QA ba pha: PASS.
 - Full Regression: PENDING.
 - Log: qa-logs/playback-process-restart-v1.log.
+- Bước tiếp theo: Full Regression 55 bài chính, 40 marker.
+- MVP tổng thể: Chưa nghiệm thu.
 
 ### 2026-10-28 — MVP Session Recovery v1
 
