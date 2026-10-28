@@ -9,15 +9,15 @@
 | Mục | Trạng thái đã đối chiếu |
 |---|---|
 | Tình trạng toàn dự án | **ĐANG PHÁT TRIỂN — CHƯA NGHIỆM THU MVP/RELEASE** |
-| Mốc kỹ thuật gần nhất | **MVP Session Recovery v1 — Fast QA PASS** |
+| Mốc kỹ thuật gần nhất | **Session Recovery UI Acceptance v1 — Fast QA PASS** |
 | JVM unit tests (mốc v2) | **PASS** |
 | Android instrumented tests (mốc v2) | **55 regression PASS + 3 test theo pha SKIPPED** — Pixel_5, Android 11 (API 30) |
 | Marker | **40/40 PASS** |
-| Kết quả log | `FINAL_RESULT=PASS` (MVP Session Recovery v1 Fast QA) |
+| Kết quả log | `FINAL_RESULT=PASS` (Session Recovery UI Acceptance v1 Fast QA) |
 | Commit chứa vòng QA v2 | `580681c3` |
-| Commit HEAD tại thời điểm rà sow | `a1b39367` (MVP Session Recovery v1 — Fast QA PASS) |
+| Commit HEAD tại thời điểm rà sow | `d84c9a11` (Session Recovery UI Acceptance v1 — Fast QA PASS) |
 | Log gần nhất đã xác nhận | `qa-logs/playback-process-restart-v1.log` |
-| Bước đang phát triển tiếp | **Session Recovery UI Acceptance v1 — PENDING QA** |
+| Bước đang phát triển tiếp | **Full Regression — PENDING chạy lại với code mới** |
 | Ngày rà Sox | **2026-10-28**, múi giờ Việt Nam (`Asia/Ho_Chi_Minh`) |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -95,6 +95,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | SAF Multi-file v1 | 52 PASS, 3 test theo pha SKIPPED | **PASS — Full Regression, API 30** | `94c03895` · `qa-logs/real-picker-saf-v1.log` |
 | MVP Playlist Navigation v1 | 55 PASS, 3 test theo pha SKIPPED | **Full QA PASS — API 30** | `18d5893a` · `qa-logs/mvp-playlist-navigation-v1.log` |
 | MVP Playlist → History → Replay v1 | 1 bài isolated PASS | **Fast QA PASS — API 30** | `69d5a559` · `qa-logs/mvp-playlist-history-v1.log` |
+| Session Recovery UI Acceptance v1 | 1 bài isolated PASS | **Fast QA PASS — API 30** | `d84c9a11` · `qa-logs/playback-process-restart-v1.log` |
 
 **Không cộng** các con số 9 + 11 + ... + 31: đây là số lượng test của **các lần chạy tăng dần** với nhiều bài trùng nhau.
 
@@ -227,17 +228,19 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
 
-### 2026-10-28 — Session Recovery UI Acceptance v1
+### 2026-10-28 — Session Recovery UI Acceptance v1 — PASS
 
-- Mốc trước: Session Recovery Fast QA PASS.
-- Commit trước: a1b39367.
-- History hiển thị trên Home sau restart: PENDING QA.
-- Playlist hiển thị sau restart: PENDING QA.
-- Hai bài hát còn trong Playlist UI: PENDING QA.
-- Điều hướng UI không tự phát nhạc: PENDING QA.
-- Resume sau khi xem UI: PENDING QA.
+- Commit: d84c9a11.
+- Build APK: PASS.
+- History tồn tại và hiển thị sau restart: PASS.
+- Playlist và hai bài hát tồn tại sau restart: PASS.
+- Không tự phát khi điều hướng UI: PASS.
+- PID thay đổi sau force-stop: PASS.
+- Resume: PASS.
+- Cleanup: PASS.
+- Fast QA ba pha: PASS.
+- Full Regression: PENDING.
 - Log: qa-logs/playback-process-restart-v1.log.
-- MVP tổng thể: Chưa nghiệm thu.
 
 ### 2026-10-28 — MVP Session Recovery v1
 

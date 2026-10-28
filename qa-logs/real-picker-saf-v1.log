@@ -1,5 +1,5 @@
 ﻿MusicFlow Real OpenMultipleDocuments SAF v1
-DATE=2026-10-28T13:07:25.2463253+07:00
+DATE=2026-10-28T13:30:41.3198801+07:00
 EMULATOR=emulator-5554
 ANDROID_API_LEVEL=30
 Reusing configuration cache.
@@ -8,16 +8,16 @@ Reusing configuration cache.
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
 > Task :app:extractDeepLinksDebug UP-TO-DATE
 > Task :app:mapDebugSourceSetPaths UP-TO-DATE
-> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
 > Task :app:generateDebugResources UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
 > Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
 > Task :app:javaPreCompileDebug UP-TO-DATE
 > Task :app:packageDebugResources UP-TO-DATE
 > Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
 > Task :app:checkDebugAarMetadata UP-TO-DATE
 > Task :app:compileDebugNavigationResources UP-TO-DATE
 > Task :app:parseDebugLocalResources UP-TO-DATE
-> Task :app:mergeDebugResources UP-TO-DATE
 > Task :app:generateDebugRFile UP-TO-DATE
 > Task :app:processDebugMainManifest UP-TO-DATE
 > Task :app:processDebugManifest UP-TO-DATE
@@ -29,81 +29,81 @@ Reusing configuration cache.
 > Task :app:processDebugJavaRes UP-TO-DATE
 > Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
 > Task :app:kspDebugUnitTestKotlin SKIPPED
-> Task :app:bundleDebugClassesToRuntimeJar UP-TO-DATE
 > Task :app:compileDebugUnitTestKotlin UP-TO-DATE
-> Task :app:processDebugUnitTestJavaRes UP-TO-DATE
 > Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
-> Task :app:testDebugUnitTest UP-TO-DATE
+> Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:testDebugUnitTest
 
-BUILD SUCCESSFUL in 2s
-25 actionable tasks: 25 up-to-date
+BUILD SUCCESSFUL in 3s
+25 actionable tasks: 2 executed, 23 up-to-date
 Configuration cache entry reused.
 RESULT JVM_TESTS exitCode=0
 INTERACTION_MODE=MANUAL_ASSISTED
 Reusing configuration cache.
+> Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:generateDebugAndroidTestAssets UP-TO-DATE
 > Task :app:preBuild UP-TO-DATE
-> Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:preDebugAndroidTestBuild SKIPPED
-> Task :app:generateDebugResources UP-TO-DATE
 > Task :app:mapDebugSourceSetPaths UP-TO-DATE
-> Task :app:javaPreCompileDebug UP-TO-DATE
-> Task :app:extractDeepLinksDebug UP-TO-DATE
 > Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
 > Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
 > Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
 > Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
 > Task :app:packageDebugResources UP-TO-DATE
-> Task :app:generateDebugGlobalSynthetics UP-TO-DATE
-> Task :app:processDebugNavigationResources UP-TO-DATE
-> Task :app:checkDebugAarMetadata UP-TO-DATE
-> Task :app:mergeDebugAssets UP-TO-DATE
-> Task :app:compileDebugNavigationResources UP-TO-DATE
-> Task :app:parseDebugLocalResources UP-TO-DATE
 > Task :app:packageDebugAndroidTestResources UP-TO-DATE
-> Task :app:desugarDebugFileDependencies UP-TO-DATE
-> Task :app:mergeDebugResources UP-TO-DATE
-> Task :app:checkDebugDuplicateClasses UP-TO-DATE
-> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:generateDebugGlobalSynthetics UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
 > Task :app:parseDebugAndroidTestLocalResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
 > Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
 > Task :app:validateSigningDebug UP-TO-DATE
-> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:generateDebugAndroidTestRFile UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
 > Task :app:writeDebugAppMetadata UP-TO-DATE
 > Task :app:writeDebugSigningConfigVersions UP-TO-DATE
 > Task :app:generateDebugRFile UP-TO-DATE
-> Task :app:generateDebugAndroidTestRFile UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
 > Task :app:generateDebugAndroidTestGlobalSynthetics UP-TO-DATE
-> Task :app:mergeDebugAndroidTestAssets UP-TO-DATE
 > Task :app:desugarDebugAndroidTestFileDependencies UP-TO-DATE
-> Task :app:compressDebugAndroidTestAssets UP-TO-DATE
-> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
-> Task :app:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :app:mergeDebugAndroidTestAssets UP-TO-DATE
 > Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
-> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:compressDebugAndroidTestAssets UP-TO-DATE
 > Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
-> Task :app:mergeLibDexDebugAndroidTest UP-TO-DATE
-> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
 > Task :app:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
-> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
-> Task :app:processDebugManifestForPackage UP-TO-DATE
-> Task :app:validateSigningDebugAndroidTest UP-TO-DATE
 > Task :app:mergeDebugNativeLibs UP-TO-DATE
-> Task :app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
-> Task :app:mergeExtDexDebug UP-TO-DATE
-> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
 > Task :app:kspDebugKotlin UP-TO-DATE
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
 > Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:mergeExtDexDebug UP-TO-DATE
 > Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :app:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
 > Task :app:mergeExtDexDebugAndroidTest UP-TO-DATE
 > Task :app:mergeDebugAndroidTestManifest UP-TO-DATE
 > Task :app:processDebugAndroidTestManifest UP-TO-DATE
 > Task :app:processDebugResources UP-TO-DATE
 > Task :app:processDebugAndroidTestResources UP-TO-DATE
 > Task :app:compileDebugKotlin UP-TO-DATE
-> Task :app:compileDebugJavaWithJavac NO-SOURCE
 > Task :app:processDebugJavaRes UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac NO-SOURCE
 > Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
 > Task :app:kspDebugAndroidTestKotlin SKIPPED
 > Task :app:dexBuilderDebug UP-TO-DATE
@@ -120,15 +120,16 @@ Reusing configuration cache.
 > Task :app:packageDebugAndroidTest UP-TO-DATE
 > Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
 Starting 55 tests on Pixel_5_API_30(AVD) - 11
-Pixel_5_API_30(AVD) - 11 Tests 1/55 completed. (0 skipped) (0 failed)
-Pixel_5_API_30(AVD) - 11 Tests 7/55 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 3/55 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 8/55 completed. (0 skipped) (0 failed)
 > Task :app:connectedDebugAndroidTest
 
 Pixel_5_API_30(AVD) - 11 Tests 11/55 completed. (0 skipped) (0 failed)
 Pixel_5_API_30(AVD) - 11 Tests 12/55 completed. (0 skipped) (0 failed)
-Pixel_5_API_30(AVD) - 11 Tests 17/55 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 24/55 completed. (0 skipped) (0 failed)
 Pixel_5_API_30(AVD) - 11 Tests 32/55 completed. (0 skipped) (0 failed)
 Pixel_5_API_30(AVD) - 11 Tests 39/55 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 42/55 completed. (0 skipped) (0 failed)
 Pixel_5_API_30(AVD) - 11 Tests 43/55 completed. (0 skipped) (0 failed)
 
 com.example.musicflow.core.playback.SafPermissionRestartTest > cleanupSafDocument[Pixel_5_API_30(AVD) - 11] [33mSKIPPED [0m
@@ -136,91 +137,91 @@ com.example.musicflow.core.playback.SafPermissionRestartTest > cleanupSafDocumen
 com.example.musicflow.core.playback.SafPermissionRestartTest > prepareSafDocument[Pixel_5_API_30(AVD) - 11] [33mSKIPPED [0m
 
 com.example.musicflow.core.playback.SafPermissionRestartTest > verifySafAfterForceStop[Pixel_5_API_30(AVD) - 11] [33mSKIPPED [0m
-Pixel_5_API_30(AVD) - 11 Tests 51/55 completed. (3 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 53/55 completed. (3 skipped) (0 failed)
 Finished 58 tests on Pixel_5_API_30(AVD) - 11
 
-BUILD SUCCESSFUL in 2m 58s
+BUILD SUCCESSFUL in 3m 1s
 69 actionable tasks: 1 executed, 68 up-to-date
 Configuration cache entry reused.
 RESULT ANDROID_TESTS exitCode=0
+--------- beginning of kernel
 --------- beginning of main
 --------- beginning of system
---------- beginning of kernel
-I/MusicFlowMvpE2E(14932): PASS libraryUiToMediaSession
-I/MusicFlowMvpE2E(14932): PASS nextPreviousFromUi
-I/MusicFlowMvpE2E(14932): PASS pauseResumeFromUi
-I/MusicFlowMvpE2E(14932): PASS searchUiToMediaSession
-I/MusicFlowMvpE2E(14932): PASS uiPlaybackWritesHistory
+I/MusicFlowMvpE2E(16963): PASS libraryUiToMediaSession
+I/MusicFlowMvpE2E(16963): PASS nextPreviousFromUi
+I/MusicFlowMvpE2E(16963): PASS pauseResumeFromUi
+I/MusicFlowMvpE2E(16963): PASS searchUiToMediaSession
+I/MusicFlowMvpE2E(16963): PASS uiPlaybackWritesHistory
 --------- beginning of crash
-E/AndroidRuntime(14046): FATAL EXCEPTION: main
-E/AndroidRuntime(14046): Process: com.android.bluetooth, PID: 14046
-E/AndroidRuntime(14046): java.lang.NullPointerException: Attempt to invoke interface method 'java.util.Iterator java.util.List.iterator()' on a null object reference
-E/AndroidRuntime(14046): 	at com.android.bluetooth.avrcp.MediaPlayerWrapper.isMetadataSynced(MediaPlayerWrapper.java:181)
-E/AndroidRuntime(14046): 	at com.android.bluetooth.avrcp.MediaPlayerWrapper$MediaControllerListener.trySendMediaUpdate(MediaPlayerWrapper.java:355)
-E/AndroidRuntime(14046): 	at com.android.bluetooth.avrcp.MediaPlayerWrapper$MediaControllerListener.onPlaybackStateChanged(MediaPlayerWrapper.java:427)
-E/AndroidRuntime(14046): 	at android.media.session.MediaController$MessageHandler.handleMessage(MediaController.java:1203)
-E/AndroidRuntime(14046): 	at android.os.Handler.dispatchMessage(Handler.java:106)
-E/AndroidRuntime(14046): 	at android.os.Looper.loop(Looper.java:223)
-E/AndroidRuntime(14046): 	at android.app.ActivityThread.main(ActivityThread.java:7656)
-E/AndroidRuntime(14046): 	at java.lang.reflect.Method.invoke(Native Method)
-E/AndroidRuntime(14046): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
-E/AndroidRuntime(14046): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
-I/MusicFlowMvpE2E(14932): PASS realMediaStoreScan
-I/MusicFlowMvpE2E(14932): PASS realMediaStoreUiPlayback
-I/MusicFlowFavoritesQA(14932): PASS safFavoriteWithoutMediaStorePermission
-I/MusicFlowFavoritesQA(14932): PASS favoriteLibraryAndAlbum
-I/MusicFlowFavoritesQA(14932): PASS favoritesPersistence
-I/MusicFlowFavoritesQA(14932): PASS homeFavoritesShortcuts
-I/MusicFlowFavoritesQA(14932): PASS themePersistsAfterRestart
-I/MusicFlowSystemV2QA(14932): PASS notificationButtonCommands
-I/MusicFlowBackgroundQA(14932): PASS backgroundSurvivesActivityStop
-I/MusicFlowBackgroundQA(14932): PASS mediaNotificationVisible
-I/MusicFlowBackgroundQA(14932): PASS survivesActivityDestroy
-I/MusicFlowBackgroundQA(14932): PASS controllerControlsWithoutUi
-I/MusicFlowSystemV2QA(14932): PASS transientAudioFocusLoss
-I/MusicFlowMvpE2E(14932): PASS mvpPlaylistNavigation
-I/MusicFlowMvpE2E(14932): PASS mvpPlaylistPlayback
-I/MusicFlowMvpE2E(14932): PASS mvpPlaylistFirstHistory
-I/MusicFlowMvpE2E(14932): PASS mvpPlaylistNext
-I/MusicFlowMvpE2E(14932): PASS mvpPlaylistHistoryOrder
-I/MusicFlowMvpE2E(14932): PASS mvpPlaylistHistoryUi
-I/MusicFlowMvpE2E(14932): PASS mvpHistoryReplay
-I/MusicFlowMvpE2E(14932): ACTIVITY_LAUNCHED
-I/MusicFlowMvpE2E(14932): PASS pickerIntentIntercepted
-I/MusicFlowMvpE2E(14932): PASS pickerResultPlaysThroughService
-I/MusicFlowRealPickerQA(14932): PASS sourcePreparedWithoutPersistedRead
-I/MusicFlowRealPickerQA(14932): PASS productionPickerLaunched
-I/MusicFlowRealPickerQA(14932): MANUAL_SELECTION_REQUIRED file=musicflow_real_picker_6502785140000.wav
-I/MusicFlowRealPickerQA(14932): PICKER_RETURNED_TO_APP observed=false
-I/MusicFlowRealPickerQA(14932): PICKER_RESULT playing=true mediaId=content://com.android.providers.downloads.documents/document/79 title=musicflow_real_picker_6502785140000.wav state=3 error=null
-I/MusicFlowRealPickerQA(14932): PASS realPickerPlayback
-I/MusicFlowRealPickerQA(14932): PASS realPickerPersistedRead
-I/MusicFlowRealPickerQA(14932): PASS multiSourcesPrepared
-I/MusicFlowRealPickerQA(14932): MULTI_SELECTION_REQUIRED musicflow_real_picker_multi_6508721481700_1.wav, musicflow_real_picker_multi_6508721481700_2.wav
-I/MusicFlowRealPickerQA(14932): MANUAL_SELECTION_REQUIRED file=musicflow_real_picker_multi_6508721481700_1.wav
-I/MusicFlowRealPickerQA(14932): PICKER_RETURNED_TO_APP observed=false
-I/MusicFlowRealPickerQA(14932): PASS multiQueue
-I/MusicFlowRealPickerQA(14932): PASS multiPersistedRead
-I/MusicFlowRealPickerQA(14932): PASS multiNext
-I/MusicFlowRealPickerQA(14932): PASS multiNextWrittenHistory
-E/AndroidRuntime(15040): FATAL EXCEPTION: main
-E/AndroidRuntime(15040): Process: com.android.bluetooth, PID: 15040
-E/AndroidRuntime(15040): java.lang.NullPointerException: Attempt to invoke interface method 'java.util.Iterator java.util.List.iterator()' on a null object reference
-E/AndroidRuntime(15040): 	at com.android.bluetooth.avrcp.MediaPlayerWrapper.isMetadataSynced(MediaPlayerWrapper.java:181)
-E/AndroidRuntime(15040): 	at com.android.bluetooth.avrcp.MediaPlayerWrapper$MediaControllerListener.trySendMediaUpdate(MediaPlayerWrapper.java:355)
-E/AndroidRuntime(15040): 	at com.android.bluetooth.avrcp.MediaPlayerWrapper$MediaControllerListener.onPlaybackStateChanged(MediaPlayerWrapper.java:427)
-E/AndroidRuntime(15040): 	at android.media.session.MediaController$MessageHandler.handleMessage(MediaController.java:1203)
-E/AndroidRuntime(15040): 	at android.os.Handler.dispatchMessage(Handler.java:106)
-E/AndroidRuntime(15040): 	at android.os.Looper.loop(Looper.java:223)
-E/AndroidRuntime(15040): 	at android.app.ActivityThread.main(ActivityThread.java:7656)
-E/AndroidRuntime(15040): 	at java.lang.reflect.Method.invoke(Native Method)
-E/AndroidRuntime(15040): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
-E/AndroidRuntime(15040): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
-I/MusicFlowPlaylistUIQA(14932): PASS playlistUiCreate
-I/MusicFlowPlaylistUIQA(14932): PASS playlistUiRename
-I/MusicFlowPlaylistUIQA(14932): PASS playlistUiDelete
-I/MusicFlowPlaylistUIQA(14932): PASS playlistUiReorderAndPlayAll
-I/MusicFlowPlaylistUIQA(14932): PASS playlistUiSelectedTrack
+E/AndroidRuntime(15611): FATAL EXCEPTION: main
+E/AndroidRuntime(15611): Process: com.android.bluetooth, PID: 15611
+E/AndroidRuntime(15611): java.lang.NullPointerException: Attempt to invoke interface method 'java.util.Iterator java.util.List.iterator()' on a null object reference
+E/AndroidRuntime(15611): 	at com.android.bluetooth.avrcp.MediaPlayerWrapper.isMetadataSynced(MediaPlayerWrapper.java:181)
+E/AndroidRuntime(15611): 	at com.android.bluetooth.avrcp.MediaPlayerWrapper$MediaControllerListener.trySendMediaUpdate(MediaPlayerWrapper.java:355)
+E/AndroidRuntime(15611): 	at com.android.bluetooth.avrcp.MediaPlayerWrapper$MediaControllerListener.onPlaybackStateChanged(MediaPlayerWrapper.java:427)
+E/AndroidRuntime(15611): 	at android.media.session.MediaController$MessageHandler.handleMessage(MediaController.java:1203)
+E/AndroidRuntime(15611): 	at android.os.Handler.dispatchMessage(Handler.java:106)
+E/AndroidRuntime(15611): 	at android.os.Looper.loop(Looper.java:223)
+E/AndroidRuntime(15611): 	at android.app.ActivityThread.main(ActivityThread.java:7656)
+E/AndroidRuntime(15611): 	at java.lang.reflect.Method.invoke(Native Method)
+E/AndroidRuntime(15611): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
+E/AndroidRuntime(15611): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
+I/MusicFlowMvpE2E(16963): PASS realMediaStoreScan
+I/MusicFlowMvpE2E(16963): PASS realMediaStoreUiPlayback
+I/MusicFlowFavoritesQA(16963): PASS safFavoriteWithoutMediaStorePermission
+I/MusicFlowFavoritesQA(16963): PASS favoriteLibraryAndAlbum
+I/MusicFlowFavoritesQA(16963): PASS favoritesPersistence
+I/MusicFlowFavoritesQA(16963): PASS homeFavoritesShortcuts
+I/MusicFlowFavoritesQA(16963): PASS themePersistsAfterRestart
+I/MusicFlowSystemV2QA(16963): PASS notificationButtonCommands
+I/MusicFlowBackgroundQA(16963): PASS backgroundSurvivesActivityStop
+I/MusicFlowBackgroundQA(16963): PASS mediaNotificationVisible
+I/MusicFlowBackgroundQA(16963): PASS survivesActivityDestroy
+I/MusicFlowBackgroundQA(16963): PASS controllerControlsWithoutUi
+I/MusicFlowSystemV2QA(16963): PASS transientAudioFocusLoss
+I/MusicFlowMvpE2E(16963): PASS mvpPlaylistNavigation
+I/MusicFlowMvpE2E(16963): PASS mvpPlaylistPlayback
+I/MusicFlowMvpE2E(16963): PASS mvpPlaylistFirstHistory
+I/MusicFlowMvpE2E(16963): PASS mvpPlaylistNext
+I/MusicFlowMvpE2E(16963): PASS mvpPlaylistHistoryOrder
+I/MusicFlowMvpE2E(16963): PASS mvpPlaylistHistoryUi
+I/MusicFlowMvpE2E(16963): PASS mvpHistoryReplay
+I/MusicFlowMvpE2E(16963): ACTIVITY_LAUNCHED
+I/MusicFlowMvpE2E(16963): PASS pickerIntentIntercepted
+I/MusicFlowMvpE2E(16963): PASS pickerResultPlaysThroughService
+E/AndroidRuntime(17070): FATAL EXCEPTION: main
+E/AndroidRuntime(17070): Process: com.android.bluetooth, PID: 17070
+E/AndroidRuntime(17070): java.lang.NullPointerException: Attempt to invoke interface method 'java.util.Iterator java.util.List.iterator()' on a null object reference
+E/AndroidRuntime(17070): 	at com.android.bluetooth.avrcp.MediaPlayerWrapper.isMetadataSynced(MediaPlayerWrapper.java:181)
+E/AndroidRuntime(17070): 	at com.android.bluetooth.avrcp.MediaPlayerWrapper$MediaControllerListener.trySendMediaUpdate(MediaPlayerWrapper.java:355)
+E/AndroidRuntime(17070): 	at com.android.bluetooth.avrcp.MediaPlayerWrapper$MediaControllerListener.onPlaybackStateChanged(MediaPlayerWrapper.java:427)
+E/AndroidRuntime(17070): 	at android.media.session.MediaController$MessageHandler.handleMessage(MediaController.java:1203)
+E/AndroidRuntime(17070): 	at android.os.Handler.dispatchMessage(Handler.java:106)
+E/AndroidRuntime(17070): 	at android.os.Looper.loop(Looper.java:223)
+E/AndroidRuntime(17070): 	at android.app.ActivityThread.main(ActivityThread.java:7656)
+E/AndroidRuntime(17070): 	at java.lang.reflect.Method.invoke(Native Method)
+E/AndroidRuntime(17070): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
+E/AndroidRuntime(17070): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
+I/MusicFlowRealPickerQA(16963): PASS sourcePreparedWithoutPersistedRead
+I/MusicFlowRealPickerQA(16963): PASS productionPickerLaunched
+I/MusicFlowRealPickerQA(16963): MANUAL_SELECTION_REQUIRED file=musicflow_real_picker_7902326463700.wav
+I/MusicFlowRealPickerQA(16963): PICKER_RETURNED_TO_APP observed=false
+I/MusicFlowRealPickerQA(16963): PICKER_RESULT playing=true mediaId=content://com.android.providers.downloads.documents/document/82 title=musicflow_real_picker_7902326463700.wav state=3 error=null
+I/MusicFlowRealPickerQA(16963): PASS realPickerPlayback
+I/MusicFlowRealPickerQA(16963): PASS realPickerPersistedRead
+I/MusicFlowRealPickerQA(16963): PASS multiSourcesPrepared
+I/MusicFlowRealPickerQA(16963): MULTI_SELECTION_REQUIRED musicflow_real_picker_multi_7910469420900_1.wav, musicflow_real_picker_multi_7910469420900_2.wav
+I/MusicFlowRealPickerQA(16963): MANUAL_SELECTION_REQUIRED file=musicflow_real_picker_multi_7910469420900_1.wav
+I/MusicFlowRealPickerQA(16963): PICKER_RETURNED_TO_APP observed=false
+I/MusicFlowRealPickerQA(16963): PASS multiQueue
+I/MusicFlowRealPickerQA(16963): PASS multiPersistedRead
+I/MusicFlowRealPickerQA(16963): PASS multiNext
+I/MusicFlowRealPickerQA(16963): PASS multiNextWrittenHistory
+I/MusicFlowPlaylistUIQA(16963): PASS playlistUiCreate
+I/MusicFlowPlaylistUIQA(16963): PASS playlistUiRename
+I/MusicFlowPlaylistUIQA(16963): PASS playlistUiDelete
+I/MusicFlowPlaylistUIQA(16963): PASS playlistUiReorderAndPlayAll
+I/MusicFlowPlaylistUIQA(16963): PASS playlistUiSelectedTrack
 MARKER PASS libraryUiToMediaSession=True
 MARKER PASS nextPreviousFromUi=True
 MARKER PASS pauseResumeFromUi=True
