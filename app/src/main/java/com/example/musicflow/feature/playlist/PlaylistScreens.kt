@@ -172,8 +172,9 @@ fun PlaylistListRoute(
                                 trailingContent = {
                                     Box {
                                         TextButton(
-                                            onClick = {
-                                                expanded = true
+                                            onClick = { expanded = true },
+                                            modifier = Modifier.semantics {
+                                                contentDescription = "Tùy chọn ${playlist.name}"
                                             }
                                         ) {
                                             Text("Tùy chọn")

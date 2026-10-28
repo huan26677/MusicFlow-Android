@@ -3,10 +3,14 @@ package com.example.musicflow.core.playlist
 import android.net.Uri
 import android.util.Log
 
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onNode
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextReplacement
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -19,7 +23,9 @@ import com.example.musicflow.core.history.RoomRecentHistoryRepository
 import com.example.musicflow.core.history.local.RecentHistoryDatabase
 import com.example.musicflow.core.playback.PlaybackSkipRecovery
 import com.example.musicflow.feature.playlist.PlaylistDetailRoute
+import com.example.musicflow.feature.playlist.PlaylistListRoute
 
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
 import org.junit.Assert.*
@@ -510,6 +516,106 @@ class PlaylistPlaybackOrderTest {
                 repository.deletePlaylist(playlist.id)
             }
             files.values.forEach { it.delete() }
+        }
+    }
+
+    @Test
+    fun playlistUiCreateRenameDelete() {
+        val stamp = System.nanoTime()
+        val originalName = "QA Playlist $stamp"
+        val renamedName = "QA Playlist Renamed $stamp"
+        val repository = RoomPlaylistRepository(
+            RecentHistoryDatabase.getInstance(context)
+        )
+        var playlistId: String? = null
+
+        try {
+            composeRule.setContent {
+                PlaylistListRoute(
+                    onBack = {},
+                    onOpenPlaylist = {}
+                )
+            }
+
+            composeRule.onNodeWithText("Tạo playlist mới")
+                .performClick()
+
+            composeRule.onNode(hasSetTextAction())
+                .performTextReplacement(originalName)
+
+            composeRule.onNodeWithText("Tạo")
+                .performClick()
+
+            composeRule.waitUntil(10_000L) {
+                runBlocking {
+                    val item = repository.observePlaylists()
+                        .first()
+                        .firstOrNull { it.name == originalName }
+                    playlistId = item?.id
+                    item != null
+                }
+            }
+
+            val id = checkNotNull(playlistId)
+
+            composeRule.waitUntil(10_000L) {
+                composeRule.onAllNodesWithContentDescription(
+                    "Tùy chọn $originalName"
+                ).fetchSemanticsNodes().isNotEmpty()
+            }
+
+            Log.i("MusicFlowPlaylistUIQA", "PASS playlistUiCreate")
+
+            composeRule.onNodeWithContentDescription(
+                "Tùy chọn $originalName"
+            ).performClick()
+
+            composeRule.onNodeWithText("Đổi tên")
+                .performClick()
+
+            composeRule.onNode(hasSetTextAction())
+                .performTextReplacement(renamedName)
+
+            composeRule.onNodeWithText("Lưu")
+                .performClick()
+
+            composeRule.waitUntil(10_000L) {
+                runBlocking {
+                    repository.getPlaylist(id)?.name == renamedName
+                }
+            }
+
+            composeRule.waitUntil(10_000L) {
+                composeRule.onAllNodesWithContentDescription(
+                    "Tùy chọn $renamedName"
+                ).fetchSemanticsNodes().isNotEmpty()
+            }
+
+            Log.i("MusicFlowPlaylistUIQA", "PASS playlistUiRename")
+
+            composeRule.onNodeWithContentDescription(
+                "Tùy chọn $renamedName"
+            ).performClick()
+
+            composeRule.onNodeWithText("Xóa playlist")
+                .performClick()
+
+            composeRule.onNodeWithText("Xóa")
+                .performClick()
+
+            composeRule.waitUntil(10_000L) {
+                runBlocking {
+                    repository.getPlaylist(id) == null
+                }
+            }
+
+            Log.i("MusicFlowPlaylistUIQA", "PASS playlistUiDelete")
+        } finally {
+            playlistId?.let { id ->
+                runBlocking {
+                    repository.deletePlaylist(id)
+                }
+            }
         }
     }
 }
