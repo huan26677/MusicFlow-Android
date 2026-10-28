@@ -8,7 +8,9 @@ import android.provider.MediaStore
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
@@ -186,8 +188,8 @@ fun LibraryScreen(
         mutableStateOf(initialFavoritesOnly)
     }
 
-    var showAlbums by rememberSaveable(initialShowAlbums) {
-        mutableStateOf(initialShowAlbums)
+    var selectedCategory by rememberSaveable(initialShowAlbums) {
+        mutableStateOf(if (initialShowAlbums) "albums" else "songs")
     }
 
     val scannedSongs = (uiState as? LibraryUiState.Success)
@@ -233,7 +235,7 @@ fun LibraryScreen(
 
     val displayUiState = if (
         favoritesOnly &&
-        !showAlbums &&
+        selectedCategory == "songs" &&
         uiState !is LibraryUiState.Loading &&
         uiState !is LibraryUiState.Error
     ) {
@@ -279,7 +281,7 @@ fun LibraryScreen(
                 }
             }
 
-            if (!hasPermission && (!favoritesOnly || showAlbums)) {
+            if (!hasPermission && (!favoritesOnly || selectedCategory != "songs")) {
                 Text(
                     "MusicFlow cần quyền đọc âm thanh " +
                             "để quét thư viện thiết bị."
@@ -297,19 +299,23 @@ fun LibraryScreen(
 
             } else {
                 Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    FilterChip(
-                        selected = !showAlbums,
-                        onClick = { showAlbums = false },
-                        label = { Text("Bài hát") }
-                    )
-
-                    FilterChip(
-                        selected = showAlbums,
-                        onClick = { showAlbums = true },
-                        label = { Text("Album") }
-                    )
+                    listOf(
+                        "songs" to "Bài hát",
+                        "albums" to "Album",
+                        "artists" to "Nghệ sĩ",
+                        "genres" to "Thể loại"
+                    ).forEach { (category, label) ->
+                        FilterChip(
+                            selected = selectedCategory == category,
+                            onClick = { selectedCategory = category },
+                            label = { Text(label) }
+                        )
+                    }
                 }
 
                 when (val current = displayUiState) {
@@ -340,7 +346,7 @@ fun LibraryScreen(
                     }
 
                     is LibraryUiState.Success -> {
-                        if (showAlbums) {
+                        if (selectedCategory == "albums") {
                             AlbumFavoritesContent(
                                 songs = current.songs,
                                 favoriteAlbumIds = favoriteAlbumIds,
@@ -350,6 +356,30 @@ fun LibraryScreen(
                                 onSongSelected = onSongSelected,
                                 onAddToPlaylist = onAddToPlaylist,
                                 initialFavoritesOnly = initialFavoritesOnly
+                            )
+                        } else if (selectedCategory == "artists") {
+                            val artistGroups = remember(current.songs) {
+                                MusicCollections.artists(current.songs)
+                            }
+                            MusicCollectionsContent(
+                                title = "nghệ sĩ",
+                                collections = artistGroups,
+                                favoriteSongUris = favoriteSongUris,
+                                onToggleFavorite = onToggleFavorite,
+                                onAddToPlaylist = onAddToPlaylist,
+                                onSongSelected = onSongSelected
+                            )
+                        } else if (selectedCategory == "genres") {
+                            val genreGroups = remember(current.songs) {
+                                MusicCollections.genres(current.songs)
+                            }
+                            MusicCollectionsContent(
+                                title = "thể loại",
+                                collections = genreGroups,
+                                favoriteSongUris = favoriteSongUris,
+                                onToggleFavorite = onToggleFavorite,
+                                onAddToPlaylist = onAddToPlaylist,
+                                onSongSelected = onSongSelected
                             )
                         } else {
                             val visibleSongs = if (favoritesOnly) {

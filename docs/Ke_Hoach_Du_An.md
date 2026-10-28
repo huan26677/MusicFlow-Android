@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `1c57e56` — Crossfade/Gapless v1 đang sửa ở workspace, chưa commit |
+| HEAD Git hiện tại | `0ea2510` — Library Collections v1 đã build, sửa ở workspace chưa commit |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 | 55 bài chính PASS |
 | Marker API 30 | 40/40 PASS |
@@ -21,7 +21,8 @@
 | Full QA | Để cuối giai đoạn phát triển |
 | Equalizer v1 | Đã viết engine theo audio session, UI điều chỉnh dải tần, lưu cấu hình; Build PASS, chưa chạy QA thực tế |
 | Crossfade/Gapless v1 | Có mã crossfade thử nghiệm (mặc định tắt) và giữ Media3 gapless tự nhiên; build-only, chưa runtime QA |
-| Bước tiếp theo | Library nâng cao: Album / Artist / Genre |
+| Library nâng cao v1 | Bài hát / Album / Nghệ sĩ / Thể loại; có source, build ứng dụng + AndroidTest PASS, chưa runtime QA |
+| Bước tiếp theo | Search nâng cao v1: tìm bài hát, album, nghệ sĩ và thể loại trên thiết bị |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -231,6 +232,18 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Library Collections v1 — Build PASS
+
+- HEAD nền: `0ea2510` (`feat: add experimental crossfade and gapless transition controls`).
+- Duy trì tab Album, Favorites, Playlist và các luồng phát nhạc hiện tại.
+- Bổ sung tab Nghệ sĩ và Thể loại vào Library; mở nhóm, xem bài và Phát toàn bộ hoặc chọn một bài; nút yêu thích và Thêm Playlist tái sử dụng `SongRow`.
+- Mở rộng `DeviceSong`: artistId / genres, giá trị mặc định tương thích nơi tạo mẫu; `DeviceMusicScanner` đọc Artist ID và ánh xạ Genre → các bài qua MediaStore.
+- Nếu bảng Genres của nhà cung cấp MediaStore không đọc được, thư viện bài hát vẫn hoạt động; bài không có thể loại được nhóm là `Không rõ thể loại`.
+- Nhóm nghệ sĩ ưu tiên Artist ID, dự phòng theo tên; hỗ trợ nhiều thể loại trên cùng bài hát.
+- File mới: `feature/library/MusicCollectionsContent.kt`; file thay đổi: `core/media/DeviceMusicScanner.kt`, `feature/library/LibraryScreen.kt`.
+- Build-only: `:app:assembleDebug` và `:app:assembleDebugAndroidTest` PASS (`BUILD_EXIT_CODE=0`), log `qa-logs/assemble-debug-library-collections-v1.log`. Chưa chạy instrumentation hay QA hành vi.
+- Bước tiếp theo: Search nâng cao v1 — tìm theo bài/album/nghệ sĩ/thể loại. Sản phẩm tổng thể CHƯA NGHIỆM THU.
 
 ### 2026-10-29 — Crossfade / Gapless Playback v1 — Build-only
 
