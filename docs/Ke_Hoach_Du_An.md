@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `2dc1d61` — Queue Manager đã commit; Core Media Source Contract v1 đang ở workspace, chưa commit |
+| HEAD Git hiện tại | `3774b88` — Core Media Source Contract v1 đã commit; MusicFlow UI/UX Foundation v1 đang ở workspace, chưa commit |
 | Phạm vi MusicFlow 1.0 | **Đã chốt** offline + online hợp pháp + library cá nhân + cloud; ưu tiên dùng cá nhân, mở rộng sau 1.0; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
@@ -37,8 +37,9 @@
 | Playback Queue Actions v1 | Phát tiếp / Thêm vào hàng đợi từ Library/Search; luật queue độc lập, có test; build + JVM PASS (8/8 queue rule tests), chưa Android runtime QA |
 | Queue Manager UI v1 | Xem/xóa/di chuyển/dọn hàng đợi, giữ bài đang phát; 16/16 JVM và 3/3 Android instrumented trên API 30 PASS |
 | Core Media Source Contract v1 | Một điểm dựng MediaItem từ MediaStore/SAF/online, bảo toàn legacy; JVM 11/11, Android API 30 9/9 PASS; log `qa-logs/media-source-contract-v1.log` |
+| MusicFlow UI/UX Foundation v1 | Trạng thái UI thống nhất trên Home/Library/Search/Online/Queue, theme xanh ngọc–xanh đêm và TalkBack labels; BUILD + JVM, Android API 30 **13/13 PASS** |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **MusicFlow UI/UX Foundation v1** — chuẩn hóa empty/loading/error, accessibility và trải nghiệm Guest; Google Login và email thật ĐỂ CUỐI |
+| Bước tiếp theo | **MusicFlow UI/UX Polish v2** — responsive/font scale, Now Playing/Playlist/Account; sau đó licensed online rights/attribution; Google Login và email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -142,13 +143,14 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **Phát triển — vừa xong source** | **Playback Queue Actions v1** | **BUILD + JVM PASS, chưa QA runtime** | `qa-logs/playback-queue-actions-v1.log`, 8/8 JVM queue test; cần E2E queue/restore |
 | **Phát triển — đã test Android** | **Queue Manager UI v1** | **16 JVM + 3 Android instrumented PASS (API 30)** | `qa-logs/queue-manager-v1.log`; chưa kiểm thử đa API hoặc khôi phục sau force-stop |
 | **Phát triển — đã test Android** | **Core Media Source Contract v1** | **11/11 JVM + 9/9 Android API 30 PASS** | `qa-logs/media-source-contract-v1.log`; chưa có streaming thật/cấp phép thật và signed URL resolver |
-| **Phát triển — kế tiếp** | **MusicFlow UI/UX Foundation v1** | CHƯA TRIỂN KHAI | Thống nhất empty/loading/error/accessibility, thao tác trên máy không tài khoản |
+| **Phát triển — đã test Android** | **MusicFlow UI/UX Foundation v1** | **Build/JVM + 13/13 Android API 30 PASS** | `qa-logs/musicflow-ui-foundation-v1.log`, `docs/MusicFlow_UI_UX_Foundation_v1.md`; chưa nghiệm thu bố cục đa cỡ chữ/thiết bị |
+| **Phát triển — kế tiếp** | **MusicFlow UI/UX Polish v2** | CHƯA TRIỂN KHAI | Now Playing/Playlist/Account, font scale, kích thước màn hình, vùng chạm và trợ năng |
 | **Hoãn tới cuối** | **Google Login + email thật + Auth/Cloud E2E** | HOÃN THEO QUYẾT ĐỊNH CHỦ DỰ ÁN | Chỉ kiểm thử thật khi gần hoàn thành Full Product và có credentials do chủ dự án tự cấu hình |
 | **P0** | **MVP End-to-End Acceptance v1** — Library/Search/Picker → Player → Playlist/History → restart | CHƯA NGHIỆM THU | Script UI/integration tests có assertions và log cho từng flow |
 | **P0** | **Background Playback / System Controls QA** | V2 QA TỰ ĐỘNG PASS (API 30) — còn lockscreen và Bluetooth thực tế | Test lifecycle, audio focus, điều khiển từ MediaSession/notification/lock screen trong phạm vi khả thi; mọi điều kiện đã chốt đạt PASS |
 | **P0 — kế tiếp** | **Android Compatibility Matrix v2** | Đang thực hiện | Bộ test tự động trên các API đại diện (29/30/33/36): 55 bài chính + 3 SKIPPED, 40 marker + 4 SAF |
 | **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
-| **P1** | UI/accessibility/empty-state/error-state | CHƯA NGHIỆM THU | UI tests hoặc ảnh chụp kiểm tra tự động cho các trạng thái bắt buộc; tiêu chí khả dụng được xác nhận |
+| **P1** | UI/accessibility/empty-state/error-state | Foundation v1 **13/13 Android PASS**; toàn diện **CHƯA NGHIỆM THU** | Tiếp tục font scale, TalkBack thật, adaptive layout và các trạng thái chưa chuẩn hóa |
 | **P1** | Hiệu năng và dữ liệu lớn | CHƯA NGHIỆM THU | Dataset cố định; ngưỡng thời gian/độ ổn định được chốt; không crash/ANR, không mất dữ liệu |
 | **Theo quyết định** | Phát hành Google Play | CHƯA CHỐT PHẠM VI | Chỉ mở milestone nếu chọn hình thức phân phối này |
 
@@ -255,6 +257,17 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — MusicFlow UI/UX Foundation v1 — BUILD + JVM + ANDROID PASS
+
+- HEAD nền `3774b88` (`feat: unify media source identity and Media3 item factories v1`); workspace sạch trước khi chỉnh sửa; mốc UI/UX v1 **chưa commit/push**.
+- Thêm `MusicFlowStatusPanel.kt` dùng chung với trạng thái Loading/Empty/Error/Permission/Info, thông điệp hướng dẫn và hành động tùy chọn, `liveRegion=Polite` và test tag; áp dụng trên Home History, Library/Favorites/Albums/Artists/Genres, Search, Online Catalog, Queue Manager.
+- Bộ nhận diện màu **xanh ngọc / xanh đêm / hổ phách** trong `Color.kt`, `Theme.kt`. Search có nhãn TalkBack cho xóa query; Mini Player có nhãn mô tả bài và nghệ sĩ; các callback và luồng guest/offline không thay đổi.
+- Phát hiện 2 nút `Tải lại` trùng trong Online Catalog qua test UI lần đầu; bỏ CTA trùng, tương tự nút `Chọn MP3` trong thư viện. Sửa `ThemeBatchTest` cũ dùng nhãn `Chế độ tối` không còn đúng (UI là `Tối`) và thêm cuộn để test thao tác thực.
+- Script `scripts/run-musicflow-ui-foundation-v1-tests.ps1`, log `qa-logs/musicflow-ui-foundation-v1.log`, `FINAL_RESULT=PASS`. Gradle `:app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest` **BUILD SUCCESSFUL**, toàn bộ JVM unit trong task PASS.
+- Emulator `emulator-5554` Android API 30: `MusicFlowUiFoundationTest` **10/10 PASS** (trạng thái và callback, nhãn trợ năng, tỷ lệ tương phản primary), `QueueManagerScreenTest` **2/2 PASS**, `ThemeBatchTest` **1/1 PASS**; tổng **13/13 PASS**.
+- Tài liệu `docs/MusicFlow_UI_UX_Foundation_v1.md`. **Giới hạn:** chưa review UI trực quan nhiều kích thước/font scale; TalkBack thật, đa API, toàn bộ màu tương phản và toàn hệ thống vẫn cần nghiệm thu; không tuyên bố MusicFlow 1.0 hoàn thành.
+- Bước tiếp theo: **MusicFlow UI/UX Polish v2**, sau đó **Licensed Online Rights Metadata & Attribution v1** khi chuẩn bị nội dung online hợp pháp; email thật/Google Login E2E về cuối.
 
 ### 2026-10-29 — Core Media Source Contract v1 — BUILD + JVM + ANDROID PASS
 

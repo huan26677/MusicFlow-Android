@@ -27,6 +27,8 @@ import com.example.musicflow.core.history.RoomRecentHistoryRepository
 import com.example.musicflow.core.history.local.RecentHistoryDatabase
 import com.example.musicflow.core.playback.PlayerUiState
 import com.example.musicflow.core.favorites.LocalFavoritesStore
+import com.example.musicflow.ui.components.MusicFlowStatusKind
+import com.example.musicflow.ui.components.MusicFlowStatusPanel
 
 @Composable
 fun HomeRoute(
@@ -276,25 +278,29 @@ fun HomeScreen(
         when (val history = historyState) {
 
             HomeHistoryUiState.Loading -> {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth()
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.LOADING,
+                    title = "Đang tải lịch sử nghe nhạc...",
+                    description = "Danh sách các bài đã nghe sẽ xuất hiện tại đây."
                 )
-                Text("Đang tải lịch sử nghe nhạc...")
             }
 
             HomeHistoryUiState.Empty -> {
-                Text(
-                    text = "Chưa có bài hát nào trong lịch sử. " +
-                            "Hãy mở Library hoặc Search để nghe nhạc.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.EMPTY,
+                    title = "Chưa có bài hát nào trong lịch sử",
+                    description = "Nghe nhạc từ Thư viện hoặc Tìm kiếm để bắt đầu " +
+                        "tạo danh sách gần đây. Không cần đăng nhập tài khoản.",
+                    actionLabel = "Mở thư viện",
+                    onAction = onOpenLibrary
                 )
             }
 
             is HomeHistoryUiState.Error -> {
-                Text(
-                    text = history.message,
-                    color = MaterialTheme.colorScheme.error
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.ERROR,
+                    title = "Không thể tải lịch sử nghe",
+                    description = history.message
                 )
             }
 

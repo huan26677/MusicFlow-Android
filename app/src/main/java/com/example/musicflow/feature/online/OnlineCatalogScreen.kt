@@ -23,6 +23,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.material3.Badge
 import com.example.musicflow.core.online.OnlineTrack
 import com.example.musicflow.core.media.TrackMediaItems
+import com.example.musicflow.ui.components.MusicFlowStatusKind
+import com.example.musicflow.ui.components.MusicFlowStatusPanel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -128,35 +130,50 @@ fun OnlineCatalogScreen(
             }
         }
 
-        if (state.error != null) {
-            Text(
-                state.error,
-                color = MaterialTheme.colorScheme.error
-            )
-        }
-
         HorizontalDivider()
 
         when {
             state.savedEndpoint.isBlank() -> {
-                Text(
-                    "Chưa cấu hình nguồn nhạc online. " +
-                        "Hãy nhập URL HTTPS của máy chủ có quyền cung cấp nội dung.",
-                    style = MaterialTheme.typography.bodyMedium
+                MusicFlowStatusPanel(
+                    kind = if (state.error != null) MusicFlowStatusKind.ERROR
+                        else MusicFlowStatusKind.INFO,
+                    title = if (state.error != null) "Cấu hình nguồn nhạc chưa hợp lệ"
+                        else "Chưa kết nối nguồn nhạc online",
+                    description = state.error ?: "Nhập URL HTTPS của máy chủ có quyền " +
+                        "cung cấp nội dung và lưu kết nối để tải danh mục.",
+                    actionLabel = if (state.error == null && !isSupabaseManaged)
+                        "Kết nối" else null,
+                    onAction = if (state.error == null && !isSupabaseManaged &&
+                        state.endpointInput.isNotBlank()) onSaveEndpoint else null
                 )
             }
             state.isLoading -> {
-                LinearProgressIndicator(Modifier.fillMaxWidth())
-                Text("Đang tải danh mục từ máy chủ...")
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.LOADING,
+                    title = "Đang tải danh mục từ máy chủ...",
+                    description = "MusicFlow đang kết nối nguồn nhạc được cấu hình."
+                )
             }
             else -> {
                 if (state.error != null) {
-                    TextButton(onClick = onRefresh) { Text("Thử lại") }
+                    MusicFlowStatusPanel(
+                        kind = MusicFlowStatusKind.ERROR,
+                        title = "Không thể tải danh mục online",
+                        description = state.error,
+                        actionLabel = "Thử lại",
+                        onAction = onRefresh
+                    )
                 }
                 if (state.isLoaded && state.tracks.isEmpty() &&
                     state.error == null
                 ) {
-                    Text("Máy chủ chưa trả về bài hát nào.")
+                    MusicFlowStatusPanel(
+                        kind = MusicFlowStatusKind.EMPTY,
+                        title = "Chưa có bài hát online",
+                        description = "Máy chủ chưa trả về bài hát nào có thể hiển thị. " +
+                            "Danh mục sẽ xuất hiện khi có nội dung hợp lệ. " +
+                            "Sử dụng nút Tải lại ở phía trên để kiểm tra lần nữa."
+                    )
                 }
 
                 if (state.tracks.isNotEmpty()) {

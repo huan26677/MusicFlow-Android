@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -40,7 +41,10 @@ class ThemeBatchTest {
             composeRule.onNodeWithText("Account")
                 .performClick()
 
-            composeRule.onNodeWithText("Chế độ tối")
+            // Actual Account filter chip is labeled "Tối". Scroll because
+            // account content can exceed the emulator viewport.
+            composeRule.onNodeWithText("Tối")
+                .performScrollTo()
                 .performClick()
 
             assertEquals(
@@ -58,7 +62,8 @@ class ThemeBatchTest {
             composeRule.onNodeWithText("Account")
                 .performClick()
 
-            composeRule.onNodeWithText("Chế độ tối")
+            composeRule.onNodeWithText("Tối")
+                .performScrollTo()
                 .assertIsSelected()
 
             Log.i(

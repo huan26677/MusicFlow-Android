@@ -21,6 +21,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.musicflow.core.media.DeviceSong
+import com.example.musicflow.ui.components.MusicFlowStatusKind
+import com.example.musicflow.ui.components.MusicFlowStatusPanel
 import java.util.Locale
 
 data class MusicCollection(
@@ -95,9 +97,10 @@ internal fun ColumnScope.MusicCollectionsContent(
 
     if (collections.isEmpty()) {
         Spacer(Modifier.height(8.dp))
-        Text(
-            "Chưa có $title. Hãy quét lại thư viện nếu vừa thêm nhạc.",
-            style = MaterialTheme.typography.bodyMedium
+        MusicFlowStatusPanel(
+            kind = MusicFlowStatusKind.EMPTY,
+            title = "Chưa có $title",
+            description = "Hãy thử từ khóa khác hoặc quét lại thư viện nếu vừa thêm nhạc."
         )
     }
 

@@ -33,6 +33,10 @@ import com.example.musicflow.feature.library.MusicCollectionsContent
 import com.example.musicflow.feature.playlist.PlaylistPickerDialog
 import com.example.musicflow.core.favorites.LocalFavoritesStore
 import com.example.musicflow.feature.playlist.rememberPlaylistViewModel
+import com.example.musicflow.ui.components.MusicFlowStatusKind
+import com.example.musicflow.ui.components.MusicFlowStatusPanel
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 
 @Composable
 fun SearchRoute(
@@ -202,19 +206,13 @@ fun SearchScreen(
         }
 
         if (!hasPermission) {
-            Text(
-                text = "MusicFlow cần quyền đọc âm thanh " +
-                        "để tìm bài hát trên thiết bị."
-            )
-
-            Button(onClick = onRequestPermission) {
-                Text("Cấp quyền")
-            }
-
-            Text(
-                text = "Nếu đã từ chối nhiều lần, " +
-                        "hãy kiểm tra quyền ứng dụng trong Cài đặt.",
-                style = MaterialTheme.typography.bodySmall
+            MusicFlowStatusPanel(
+                kind = MusicFlowStatusKind.PERMISSION,
+                title = "Cần quyền đọc nhạc",
+                description = "Để tìm kiếm nhạc trên thiết bị, hãy cấp quyền đọc âm thanh. " +
+                    "Nếu đã từ chối nhiều lần, hãy mở quyền ứng dụng trong Cài đặt.",
+                actionLabel = "Cấp quyền",
+                onAction = onRequestPermission
             )
 
             return@Column
@@ -230,7 +228,10 @@ fun SearchScreen(
             trailingIcon = {
                 if (state.query.isNotEmpty()) {
                     IconButton(
-                        onClick = { onQueryChange("") }
+                        onClick = { onQueryChange("") },
+                        modifier = Modifier.semantics {
+                            contentDescription = "Xóa nội dung tìm kiếm"
+                        }
                     ) {
                         Text("×")
                     }
@@ -262,47 +263,56 @@ fun SearchScreen(
 
         when {
             state.isLoading -> {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth()
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.LOADING,
+                    title = "Đang quét nhạc trên thiết bị...",
+                    description = "Đang chuẩn bị thư viện để tìm kiếm."
                 )
-                Text("Đang quét nhạc trên thiết bị...")
             }
 
             state.error != null -> {
-                Text(
-                    text = state.error,
-                    color = MaterialTheme.colorScheme.error
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.ERROR,
+                    title = "Không thể tìm kiếm",
+                    description = state.error,
+                    actionLabel = "Thử lại",
+                    onAction = onRefresh
                 )
-
-                Button(onClick = onRefresh) {
-                    Text("Thử lại")
-                }
             }
 
             !state.isLoaded -> {
-                Text("Chưa tải thư viện nhạc.")
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.INFO,
+                    title = "Chưa tải thư viện nhạc",
+                    description = "Quét nhạc để bắt đầu tìm kiếm.",
+                    actionLabel = "Quét lại",
+                    onAction = onRefresh
+                )
             }
 
             state.songs.isEmpty() -> {
-                Text("Không tìm thấy bài hát nào trên thiết bị.")
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.EMPTY,
+                    title = "Không tìm thấy bài hát nào trên thiết bị",
+                    description = "Hãy thêm tệp nhạc hoặc kiểm tra quyền đọc âm thanh.",
+                    actionLabel = "Quét lại",
+                    onAction = onRefresh
+                )
             }
 
             state.query.isBlank() -> {
-                Text(
-                    text = "Nhập tên bài hát, album, nghệ sĩ " +
-                        "hoặc thể loại để tìm kiếm.",
-                    style = MaterialTheme.typography.bodyMedium
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.INFO,
+                    title = "Bạn muốn nghe gì?",
+                    description = "Nhập tên bài hát, album, nghệ sĩ hoặc thể loại để tìm kiếm."
                 )
             }
 
             state.isFiltering -> {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Text(
-                    text = "Đang tìm bài hát...",
-                    style = MaterialTheme.typography.bodySmall
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.LOADING,
+                    title = "Đang tìm bài hát...",
+                    description = "Đang lọc kết quả theo nội dung bạn nhập."
                 )
             }
 
@@ -346,7 +356,11 @@ fun SearchScreen(
             }
 
             state.results.isEmpty() -> {
-                Text("Không tìm thấy bài hát phù hợp.")
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.EMPTY,
+                    title = "Không tìm thấy bài hát phù hợp",
+                    description = "Thử từ khóa ngắn hơn hoặc tìm bằng tên nghệ sĩ."
+                )
             }
 
             else -> {

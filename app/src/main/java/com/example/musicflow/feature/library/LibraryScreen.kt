@@ -36,6 +36,8 @@ import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.media.MediaStoreLocalMusicRepository
 import com.example.musicflow.feature.playlist.PlaylistPickerDialog
 import com.example.musicflow.feature.playlist.rememberPlaylistViewModel
+import com.example.musicflow.ui.components.MusicFlowStatusKind
+import com.example.musicflow.ui.components.MusicFlowStatusPanel
 
 @Composable
 fun LibraryRoute(
@@ -288,19 +290,14 @@ fun LibraryScreen(
             }
 
             if (!hasPermission && (!favoritesOnly || selectedCategory != "songs")) {
-                Text(
-                    "MusicFlow cần quyền đọc âm thanh " +
-                            "để quét thư viện thiết bị."
-                )
-
-                Button(onClick = onRefresh) {
-                    Text("Cấp quyền")
-                }
-
-                Text(
-                    "Nếu đã từ chối quyền nhiều lần, " +
-                            "hãy kiểm tra quyền ứng dụng trong Cài đặt.",
-                    style = MaterialTheme.typography.bodySmall
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.PERMISSION,
+                    title = "Cần quyền truy cập nhạc",
+                    description = "Cho phép đọc âm thanh để quét thư viện Android. " +
+                        "Bạn vẫn có thể chọn tệp riêng bằng nút Chọn MP3 ở trên. " +
+                        "Nếu đã từ chối nhiều lần, hãy kiểm tra quyền trong Cài đặt.",
+                    actionLabel = "Cấp quyền",
+                    onAction = onRefresh
                 )
 
             } else {
@@ -327,27 +324,39 @@ fun LibraryScreen(
                 when (val current = displayUiState) {
 
                     LibraryUiState.Idle -> {
-                        Text("Chưa quét thư viện.")
+                        MusicFlowStatusPanel(
+                            kind = MusicFlowStatusKind.INFO,
+                            title = "Chưa quét thư viện",
+                            description = "Quét nhạc trên thiết bị để xem bài hát, album và nghệ sĩ.",
+                            actionLabel = "Quét nhạc",
+                            onAction = onRefresh
+                        )
                     }
 
                     LibraryUiState.Loading -> {
-                        LinearProgressIndicator(
-                            modifier = Modifier.fillMaxWidth()
+                        MusicFlowStatusPanel(
+                            kind = MusicFlowStatusKind.LOADING,
+                            title = "Đang quét nhạc...",
+                            description = "MusicFlow đang đọc danh sách bài hát trên thiết bị."
                         )
-                        Text("Đang quét nhạc...")
                     }
 
                     LibraryUiState.Empty -> {
-                        Text(
-                            "Không tìm thấy bài hát nào " +
-                                    "được Android phân loại là nhạc."
+                        MusicFlowStatusPanel(
+                            kind = MusicFlowStatusKind.EMPTY,
+                            title = "Thư viện chưa có nhạc",
+                            description = "Không tìm thấy bài hát nào được Android phân loại " +
+                                "là nhạc. Hãy dùng nút Chọn MP3 ở phía trên để mở tệp thủ công."
                         )
                     }
 
                     is LibraryUiState.Error -> {
-                        Text(
-                            text = current.message,
-                            color = MaterialTheme.colorScheme.error
+                        MusicFlowStatusPanel(
+                            kind = MusicFlowStatusKind.ERROR,
+                            title = "Không thể quét thư viện",
+                            description = current.message,
+                            actionLabel = "Thử lại",
+                            onAction = onRefresh
                         )
                     }
 
@@ -414,7 +423,18 @@ fun LibraryScreen(
                         )
 
                         if (visibleSongs.isEmpty()) {
-                            Text("Chưa có bài hát yêu thích phù hợp.")
+                            MusicFlowStatusPanel(
+                                kind = MusicFlowStatusKind.EMPTY,
+                                title = if (favoritesOnly) "Chưa có bài hát yêu thích"
+                                    else "Chưa có bài hát trong thư viện",
+                                description = if (favoritesOnly) {
+                                    "Chạm vào hình trái tim trên bài hát để lưu vào mục yêu thích."
+                                } else {
+                                    "Hãy quét lại thư viện hoặc chọn tệp MP3 từ thiết bị."
+                                },
+                                actionLabel = if (favoritesOnly) null else "Quét lại",
+                                onAction = if (favoritesOnly) null else onRefresh
+                            )
                         }
 
                         Text("${visibleSongs.size} bài hát")
@@ -506,7 +526,16 @@ private fun ColumnScope.AlbumFavoritesContent(
     Text("${albums.size} album")
 
     if (albums.isEmpty()) {
-        Text("Không có album phù hợp.")
+        MusicFlowStatusPanel(
+            kind = MusicFlowStatusKind.EMPTY,
+            title = if (favoritesOnly) "Chưa có album yêu thích"
+                else "Không có album phù hợp",
+            description = if (favoritesOnly) {
+                "Chọn trái tim trên album để lưu vào danh sách yêu thích."
+            } else {
+                "Hãy quét lại thư viện nếu bạn vừa thêm nhạc."
+            }
+        )
     }
 
     LazyColumn(

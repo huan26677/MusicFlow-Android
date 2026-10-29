@@ -29,6 +29,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.musicflow.core.playback.PlayerUiState
 import com.example.musicflow.core.playback.QueueEditRules
+import com.example.musicflow.ui.components.MusicFlowStatusKind
+import com.example.musicflow.ui.components.MusicFlowStatusPanel
 
 /**
  * A presentation of the MediaController timeline, never an independent queue.
@@ -84,9 +86,17 @@ fun QueueManagerScreen(
 
         HorizontalDivider()
         if (!state.connected) {
-            Text("Đang kết nối với bộ phát nhạc...")
+            MusicFlowStatusPanel(
+                kind = MusicFlowStatusKind.LOADING,
+                title = "Đang kết nối với bộ phát nhạc...",
+                description = "Hàng đợi sẽ hiển thị khi kết nối MediaSession sẵn sàng."
+            )
         } else if (state.queueItems.isEmpty()) {
-            Text("Hàng đợi đang trống. Hãy chọn nhạc từ Thư viện hoặc Tìm kiếm.")
+            MusicFlowStatusPanel(
+                kind = MusicFlowStatusKind.EMPTY,
+                title = "Hàng đợi đang trống",
+                description = "Hãy chọn nhạc từ Thư viện hoặc Tìm kiếm để bắt đầu nghe."
+            )
         } else {
             LazyColumn(
                 modifier = Modifier.weight(1f),

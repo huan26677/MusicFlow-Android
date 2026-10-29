@@ -42,6 +42,9 @@ fun MiniPlayer(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = onOpenPlayer)
+                    .semantics {
+                        contentDescription = "Mở trình phát: ${state.title}, ${state.artist}"
+                    }
                     .padding(
                         horizontal = 12.dp,
                         vertical = 8.dp
