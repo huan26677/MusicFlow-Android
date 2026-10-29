@@ -8,14 +8,14 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `84fa5d2` — Full Product Regression Gate v1 - Part 2B đã commit; Part 3 full Android/JVM API 30 **PASS trong workspace**, chưa commit |
+| HEAD Git hiện tại | `5350ce5` — Full Product Regression Gate v1 - Part 3 đã commit; Runtime Sleep Timer v1 **11/11 Android API 30 PASS trong workspace**, chưa commit |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 | 55 bài chính PASS |
 | Marker API 30 | 40/40 PASS |
 | Playback Speed v1 | Đã có source |
-| Sleep Timer v1 | Đã có source; đã sửa lỗi MediaSession API; chưa Full QA |
+| Sleep Timer v1 | **Runtime Android API 30 PASS:** đặt/query/thay/hủy, debug-only expiry 1–2 giây kiểm tra MediaSession tạm dừng/giữ queue; 3/3 Sleep + 8/8 Playback regression = **11/11 PASS**; chưa test multi-API/real device |
 | Lyrics v1 | Triển khai đọc LRC và hiển thị đồng bộ |
 | Lyrics import | Android OpenDocument |
 | Lưu liên kết LRC theo audio URI | Đã triển khai |
@@ -47,8 +47,9 @@
 | Full Product Regression Gate v1 - Part 2A | Đã xác minh thao tác test trên Now Playing phải cuộn tới nút trước khi chạm; **BUILD/JVM PASS, 8/8 Android API 30 PASS**, `qa-logs/full-product-regression-v1-part2a-playback.log`; full gate vẫn chưa nghiệm thu |
 | Full Product Regression Gate v1 - Part 2B | UIAutomator chọn file thật + `SELECT` trong DocumentsUI; **2/2 Android API 30 PASS**, persisted READ, MediaSession Playback, 2-file queue + Next/History, Gradle/JVM PASS; `docs/Full_Product_Regression_Gate_v1_Part_2B.md` |
 | Full Product Regression Gate v1 - Part 3 | Toàn bộ Android/JVM API 30 **PASS**: JVM **99/99**, Android **86 PASS / 0 FAIL / 3 SKIP** từ 89 testcase; đã sửa lỗi timing/scroll Playlist Reorder và chạy lại suite; `qa-logs/full-product-regression-v1-part3.log` |
+| Sleep Timer Runtime Acceptance v1 | Gradle Build/JVM PASS; **3/3 Sleep Timer + 8/8 Playback/Queue regression = 11/11 Android API 30 PASS**, 8/8 marker; release không nhận debug-duration override, không đổi nhạc offline/online rights |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Runtime Feature Acceptance — Sleep Timer v1** — kiểm thử thời gian hẹn dừng, cancel/restart, trạng thái MediaSession bằng Android instrumentation; từng tính năng một. Sau đó mới EQ/Lyrics/release QA. Licensed Streaming Smoke chờ audio có quyền thật; Google Login/email thật ĐỂ CUỐI |
+| Bước tiếp theo | **Runtime Feature Acceptance — Equalizer v1** — kiểm thử audio session, bật/tắt EQ, điều chỉnh dải tần, lưu/đọc trạng thái qua MediaSession trên emulator; sau đó Lyrics v1 riêng. Licensed Streaming Smoke chờ audio có quyền thật; Google Login/email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -273,6 +274,15 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Runtime Feature Acceptance: Sleep Timer v1 — BUILD/JVM + 11 ANDROID PASS
+
+- HEAD nền `5350ce5`, Git sạch khi bắt đầu. Tập trung riêng Sleep Timer (không động EQ/Lyrics/online rights), giữ mốc hẹn người dùng **15/30/45/60 phút** và hủy.
+- `PlaybackService.kt`: tái sử dụng logic timer với thời lượng millisecond, nhận `KEY_DEBUG_DURATION_MS` **chỉ nếu BuildConfig.DEBUG + controller nội bộ cùng package + minutes hợp lệ + thời gian 200..15000ms**. APK release không nhận override theo guard, đường production vẫn hẹn theo thời lượng phút thật; expiration pause nhưng không xóa queue.
+- Thêm `SleepTimerRuntimeTest.kt` chạy MediaController/MediaSession thật với WAV offline: (1) invalid/set/query/replace/cancel, (2) expiry pause giữ queue/ID/index, (3) cancel trước deadline bảo đảm nhạc tiếp tục phát. Sau sửa lỗi test MediaController sai thread, **3/3 Android PASS** và 8/8 marker.
+- `scripts/run-sleep-timer-runtime-v1-tests.ps1`, `qa-logs/sleep-timer-runtime-v1.log`: Gradle `:app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest` PASS, Android API 30 **Sleep 3/3 + PlaybackServiceIntegration 3/3 + PlaybackQueuePersistence 5/5 = 11/11 PASS**, Git diff check PASS, `FINAL_RESULT=PASS`.
+- Tài liệu `docs/Sleep_Timer_Runtime_Acceptance_v1.md` ghi rõ giới hạn: không chờ thật 15–60 phút, chưa test điện thoại thật/đa API/service restart với timer đang hoạt động; chưa làm UI Compose E2E. Nhạc offline tự tải luôn nghe bình thường, không kiểm tra quyền phát online.
+- **Bước kế tiếp:** Runtime Feature Acceptance — Equalizer v1; sau đó Lyrics v1 riêng. Google Login/email thật, Cloud E2E hai thiết bị và Licensed Streaming Smoke đợi giai đoạn/cuộc thử phù hợp.
 
 ### 2026-10-29 — Full Product Regression Gate v1 - Part 3 — FULL ANDROID API 30 + JVM PASS
 

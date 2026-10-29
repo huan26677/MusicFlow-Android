@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
+import com.example.musicflow.BuildConfig
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -158,14 +159,12 @@ class PlaybackService : MediaSessionService() {
                 .coerceAtLeast(0L)
         }
 
-    private fun setSleepTimer(minutes: Int) {
+    private fun setSleepTimer(durationMs: Long) {
         sleepTimerJob?.cancel()
         sleepTimerJob = null
         sleepDeadlineElapsedMs = 0L
 
-        if (minutes == 0) return
-
-        val durationMs = minutes.toLong() * 60_000L
+        if (durationMs == 0L) return
 
         sleepDeadlineElapsedMs =
             SystemClock.elapsedRealtime() + durationMs
@@ -293,11 +292,32 @@ class PlaybackService : MediaSessionService() {
                     )
                 }
 
+                val debugOverride = args.containsKey(
+                    SleepTimerContract.KEY_DEBUG_DURATION_MS
+                )
+                val debugDurationMs = args.getLong(
+                    SleepTimerContract.KEY_DEBUG_DURATION_MS, -1L
+                )
+                if (debugOverride && (
+                    !BuildConfig.DEBUG ||
+                        controller.packageName != packageName ||
+                        minutes <= 0 ||
+                        debugDurationMs !in 200L..15_000L
+                    )
+                ) {
+                    return Futures.immediateFuture(
+                        SessionResult(SessionResult.RESULT_ERROR_BAD_VALUE)
+                    )
+                }
+
                 // -1: hỏi trạng thái
                 //  0: hủy timer
                 // >0: đặt timer mới
                 if (minutes >= 0) {
-                    setSleepTimer(minutes)
+                    setSleepTimer(
+                        if (debugOverride) debugDurationMs
+                        else minutes.toLong() * 60_000L
+                    )
                 }
 
                 val extras = Bundle().apply {
