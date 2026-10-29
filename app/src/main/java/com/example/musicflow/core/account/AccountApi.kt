@@ -28,8 +28,7 @@ data class AccountIdentity(
 )
 
 /**
- * Encrypts only the rotating refresh token. Passwords and service keys
- * are NEVER persisted. Guest mode doesn't create an Auth user.
+ * Encrypts refresh token and short-lived PKCE state. No passwords or admin keys.
  */
 internal class AccountTokenStore(context: Context) {
     private val prefs = context.applicationContext.getSharedPreferences(
@@ -55,18 +54,16 @@ internal class AccountTokenStore(context: Context) {
         return generator.generateKey()
     }
 
-    fun save(refreshToken: String) {
+    private fun encrypt(value: String): String {
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         cipher.init(Cipher.ENCRYPT_MODE, key())
-        val encoded = Base64.encodeToString(
-            cipher.iv + cipher.doFinal(refreshToken.toByteArray(Charsets.UTF_8)),
+        return Base64.encodeToString(
+            cipher.iv + cipher.doFinal(value.toByteArray(Charsets.UTF_8)),
             Base64.NO_WRAP
         )
-        check(prefs.edit().putString("refresh", encoded).commit())
     }
 
-    fun read(): String? {
-        val value = prefs.getString("refresh", null) ?: return null
+    private fun decrypt(value: String): String? {
         return try {
             val bytes = Base64.decode(value, Base64.NO_WRAP)
             require(bytes.size > 12)
@@ -77,13 +74,43 @@ internal class AccountTokenStore(context: Context) {
             )
             String(cipher.doFinal(bytes.copyOfRange(12, bytes.size)), Charsets.UTF_8)
         } catch (_: Exception) {
-            clear()
             null
         }
     }
 
+    fun save(refreshToken: String) {
+        check(prefs.edit().putString("refresh", encrypt(refreshToken)).commit())
+    }
+
+    fun read(): String? {
+        val raw = prefs.getString("refresh", null) ?: return null
+        return decrypt(raw).also {
+            if (it == null) prefs.edit().remove("refresh").apply()
+        }
+    }
+
+    fun saveGooglePending(pending: GoogleOAuthFlow.Pending) {
+        val content = listOf(
+            pending.verifier, pending.nonce, pending.createdAtMs.toString()
+        ).joinToString("|")
+        check(prefs.edit().putString("google_pending", encrypt(content)).commit())
+    }
+
+    fun takeGooglePending(): GoogleOAuthFlow.Pending? {
+        val raw = prefs.getString("google_pending", null)
+        prefs.edit().remove("google_pending").commit()
+        val values = raw?.let { decrypt(it) }?.split('|') ?: return null
+        if (values.size != 3) return null
+        val created = values[2].toLongOrNull() ?: return null
+        return GoogleOAuthFlow.Pending(values[0], values[1], created)
+    }
+
+    fun clearGooglePending() {
+        prefs.edit().remove("google_pending").apply()
+    }
+
     fun clear() {
-        prefs.edit().remove("refresh").commit()
+        prefs.edit().remove("refresh").remove("google_pending").commit()
     }
 }
 
@@ -95,6 +122,33 @@ class AccountApi(context: Context) {
 
     val isConfigured: Boolean
         get() = base.startsWith("https://") && publishableKey.startsWith("sb_publishable_")
+
+    suspend fun googleProviderEnabled(): Boolean = withContext(Dispatchers.IO) {
+        JSONObject(request("GET", "/auth/v1/settings"))
+            .optJSONObject("external")?.optBoolean("google", false) == true
+    }
+
+    fun prepareGoogleSignIn(): String {
+        check(isConfigured) { "Supabase chưa được cấu hình." }
+        val pending = GoogleOAuthFlow.create()
+        store.saveGooglePending(pending)
+        return GoogleOAuthFlow.authorizeUrl(base, pending)
+    }
+
+    suspend fun finishGoogleSignIn(callbackUrl: String): AccountIdentity =
+        withContext(Dispatchers.IO) {
+            // One-time PKCE state: even a replayed callback cannot reuse it.
+            val pending = store.takeGooglePending()
+            val code = GoogleOAuthFlow.validate(callbackUrl, pending)
+            val response = JSONObject(request(
+                "POST", "/auth/v1/token?grant_type=pkce",
+                JSONObject()
+                    .put("auth_code", code)
+                    .put("code_verifier", pending!!.verifier)
+            ))
+            check(applySession(response)) { "Không nhận được phiên Google hợp lệ." }
+            currentAccount()
+        }
 
     private fun request(
         method: String,
@@ -197,6 +251,7 @@ class AccountApi(context: Context) {
         if (access.isBlank() || refresh.isBlank()) return false
         store.save(refresh)
         accessToken = access
+        store.clearGooglePending()
         return true
     }
 

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.musicflow.core.account.AccountApi
 import com.example.musicflow.core.account.AccountIdentity
+import com.example.musicflow.core.account.AccountOAuthRedirects
 import com.example.musicflow.core.account.CloudLibrarySync
 import com.example.musicflow.core.account.CloudHistorySync
 import com.example.musicflow.core.account.CloudSyncSummary
@@ -14,6 +15,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 data class AccountUiState(
@@ -25,6 +28,7 @@ data class AccountUiState(
     val message: String? = null,
     val error: String? = null,
     val configured: Boolean = true,
+    val googleAvailable: Boolean? = null,
     val syncing: Boolean = false,
     val syncSummary: CloudSyncSummary? = null
 )
@@ -57,6 +61,55 @@ class AccountViewModel(
                         message = "Chưa thể khôi phục phiên. Kiểm tra Internet để đăng nhập.")
                 }
             }
+            AccountOAuthRedirects.latest.filterNotNull().collect { callback ->
+                AccountOAuthRedirects.consume(callback)
+                _state.update { it.copy(loading = true, error = null, message = null) }
+                try {
+                    val identity = api.finishGoogleSignIn(callback)
+                    _state.update {
+                        it.copy(
+                            loading = false,
+                            account = identity,
+                            password = "",
+                            displayName = identity.displayName,
+                            message = "Đã đăng nhập bằng Google."
+                        )
+                    }
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (error: Exception) {
+                    _state.update {
+                        it.copy(
+                            loading = false,
+                            error = error.message ?: "Không đăng nhập Google được."
+                        )
+                    }
+                }
+            }
+        }
+        viewModelScope.launch {
+            val available = try {
+                api.googleProviderEnabled()
+            } catch (_: Exception) {
+                null
+            }
+            _state.update { it.copy(googleAvailable = available) }
+        }
+    }
+
+    fun beginGoogleSignIn(): String? {
+        if (_state.value.loading || _state.value.googleAvailable != true) return null
+        return try {
+            api.prepareGoogleSignIn()
+        } catch (error: Exception) {
+            _state.update { it.copy(error = error.message ?: "Không mở được Google.") }
+            null
+        }
+    }
+
+    fun googleLaunchFailed() {
+        _state.update {
+            it.copy(error = "Không tìm thấy trình duyệt để đăng nhập Google.")
         }
     }
 

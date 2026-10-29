@@ -13,6 +13,8 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -38,6 +40,7 @@ import com.example.musicflow.core.playlist.PlaylistTrack
 
 import com.example.musicflow.feature.home.HomeRoute
 import com.example.musicflow.feature.account.AccountRoute
+import com.example.musicflow.core.account.AccountOAuthRedirects
 import com.example.musicflow.feature.library.LibraryRoute
 import com.example.musicflow.feature.online.OnlineCatalogRoute
 import com.example.musicflow.core.online.OnlineTrack
@@ -119,6 +122,11 @@ fun MusicFlowApp(
             backStack.clear()
             backStack.add(tab)
         }
+    }
+
+    val oauthCallback by AccountOAuthRedirects.latest.collectAsState()
+    LaunchedEffect(oauthCallback) {
+        if (oauthCallback != null) switchTab(AccountTab)
     }
 
     fun openPlayer() {

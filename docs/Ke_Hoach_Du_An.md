@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `8f66af4` — History Sync v1 build PASS ở workspace, chưa commit |
+| HEAD Git hiện tại | `71944fb` — Google Login Foundation v1 ở workspace, chưa commit |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 | 55 bài chính PASS |
 | Marker API 30 | 40/40 PASS |
@@ -30,7 +30,8 @@
 | Cloud Playlist & Favorites Sync v1 | Manual opt-in, metadata-only, RPC merge/RLS theo owner, safe local relink; build/JVM PASS, chưa E2E đa thiết bị |
 | Cloud Sync Hardening v2 | Trigger quota, tombstone xóa cloud, UI relink thủ công, RPC merge, có source; chưa E2E đa thiết bị |
 | History Sync v1 | Supabase RLS, RPC metadata-only, UI đồng bộ thủ công; APK + AndroidTest build và JVM unit PASS (4/4 riêng History), chưa E2E |
-| Bước tiếp theo | Google Login Foundation v1; kiểm tra Auth + đồng bộ E2E 2 thiết bị khi có môi trường thử |
+| Google Login Foundation v1 | Android OAuth PKCE + nonce + callback + session; build Android + JVM PASS (7/7 Google unit tests); provider Supabase Google TẮT, chưa E2E |
+| Bước tiếp theo | Bật Google provider ở Dashboard + kiểm thử Google Login E2E; tiếp tục Cloud Sync E2E hai thiết bị khi có môi trường |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -126,7 +127,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 
 ## 5. Công việc tiếp theo: backlog theo thứ tự ưu tiên
 
-**Chế độ phát triển hiện hành (2026-10-29):** Chủ dự án ưu tiên hoàn thiện tính năng Full Product trước rồi mới chạy vòng QA/bug tổng thể. Các mục P0 QA/Release bên dưới vẫn giữ nguyên để nghiệm thu cuối, không được hiểu là đã PASS khi chỉ build thành công. Supabase Catalog/Streaming, Licensed Content Upload, Account/Auth, Cloud Sync và History Sync v1 đã có source. **Chưa có nhạc được cấp phép; chưa test tài khoản thật hay đồng bộ đa thiết bị E2E**. Feature tiếp theo: Google Login Foundation v1; khi có nhạc hợp lệ thì Licensed Streaming Smoke. Billing, signed URL, podcast/radio vẫn là backlog.
+**Chế độ phát triển hiện hành (2026-10-29):** Chủ dự án ưu tiên hoàn thiện tính năng Full Product trước rồi mới chạy vòng QA/bug tổng thể. Các mục P0 QA/Release bên dưới vẫn giữ nguyên để nghiệm thu cuối, không được hiểu là đã PASS khi chỉ build thành công. Supabase Catalog/Streaming, Licensed Content Upload, Account/Auth, Cloud Sync, History Sync và Google Login Foundation đã có source. **Google provider đang TẮT trong Supabase; chưa có nhạc được cấp phép; chưa test tài khoản thật hay đồng bộ đa thiết bị E2E**. Khi người dùng bật Google provider, triển khai E2E; khi có nhạc hợp lệ thì Licensed Streaming Smoke. Billing, signed URL, podcast/radio vẫn là backlog.
 
 | Ưu tiên | Bước / việc cần làm | Trạng thái | Điều kiện kết thúc bước |
 |---|---|---|---|
@@ -242,6 +243,16 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Google Login Foundation v1 — Build-only
+
+- HEAD nền `71944fb` (`feat: add Supabase listening history sync v1`), working tree sạch trước khi sửa.
+- Đã xác minh Supabase Auth `/auth/v1/settings`: `external.google=false`, `external.email=true`. Không thay đổi cấu hình Google Cloud hoặc Google provider khi chưa có Client ID/Client Secret và quyền sở hữu.
+- Android: `GoogleOAuthFlow.kt` và `AccountOAuthRedirects.kt`, thêm OAuth pending encrypted vào `AccountTokenStore`, exchange code thành phiên Supabase trong `AccountApi`, nhận deep link `MainActivity`, điều hướng sang Account, nút Google theo trạng thái provider. PKCE SHA-256 + nonce + expiration + one-time verifier; không lưu mật khẩu Google.
+- Thêm JVM `GoogleOAuthFlowTest.kt`: known challenge vector, callback hợp lệ/sai nonce/hết hạn, URL nguồn lạ, mã code trùng.
+- Tài liệu cấu hình `docs/Google_Login_Foundation_v1.md`; log dự kiến `qa-logs/google-login-foundation-v1.log`.
+- Android app/AndroidTest build + JVM unit: **PASS**, `BUILD_AND_JVM_EXIT=0` và `GoogleOAuthFlowTest` **7/7 PASS, 0 lỗi**; log `qa-logs/google-login-foundation-v1.log`. **Chưa có Google Login E2E do provider đang tắt**; không tuyên bố tính năng đăng nhập thật đã hoạt động.
+- Chưa commit/push; bước tiếp theo bật Google provider qua Dashboard và chạy Auth E2E; Full QA tổng thể vẫn để cuối.
 
 ### 2026-10-29 — History Sync v1 — BUILD + JVM PASS
 

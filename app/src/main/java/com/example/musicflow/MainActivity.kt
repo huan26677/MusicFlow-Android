@@ -19,6 +19,7 @@ import com.example.musicflow.feature.player.PickedAudioFile
 import com.example.musicflow.feature.player.PlayerViewModel
 import com.example.musicflow.core.lyrics.LocalLyricsRepository
 import com.example.musicflow.core.lyrics.LyricsUiState
+import com.example.musicflow.core.account.AccountOAuthRedirects
 import com.example.musicflow.navigation.MusicFlowApp
 import com.example.musicflow.ui.theme.MusicFlowTheme
 import kotlinx.coroutines.Dispatchers
@@ -199,6 +200,7 @@ private val pickLyrics = registerForActivityResult(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        intent?.dataString?.let(AccountOAuthRedirects::offer)
 
         playerViewModel = ViewModelProvider(
             this,
@@ -369,6 +371,12 @@ private val pickLyrics = registerForActivityResult(
                 )
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        intent.dataString?.let(AccountOAuthRedirects::offer)
     }
 }
 

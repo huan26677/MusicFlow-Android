@@ -1,5 +1,7 @@
 package com.example.musicflow.feature.account
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -52,6 +54,18 @@ fun AccountRoute(
         onDisplayNameChange = model::displayNameChanged,
         onSignIn = model::signIn,
         onSignUp = model::signUp,
+        onGoogleSignIn = {
+            val authorizeUrl = model.beginGoogleSignIn()
+            if (authorizeUrl != null) {
+                try {
+                    context.startActivity(Intent(
+                        Intent.ACTION_VIEW, Uri.parse(authorizeUrl)
+                    ).addCategory(Intent.CATEGORY_BROWSABLE))
+                } catch (_: Exception) {
+                    model.googleLaunchFailed()
+                }
+            }
+        },
         onSaveProfile = model::saveProfile,
         onSignOut = model::signOut,
         onSyncLibrary = model::syncLibrary,
@@ -72,6 +86,7 @@ fun AccountScreen(
     onDisplayNameChange: (String) -> Unit,
     onSignIn: () -> Unit,
     onSignUp: () -> Unit,
+    onGoogleSignIn: () -> Unit,
     onSaveProfile: () -> Unit,
     onSignOut: () -> Unit,
     onSyncLibrary: () -> Unit,
@@ -114,6 +129,22 @@ fun AccountScreen(
                     OutlinedButton(onClick = onSignUp, enabled = !state.loading) {
                         Text("Đăng ký Free")
                     }
+                }
+                OutlinedButton(
+                    onClick = onGoogleSignIn,
+                    enabled = !state.loading && state.googleAvailable == true
+                ) {
+                    Text("Tiếp tục với Google")
+                }
+                if (state.googleAvailable == false) {
+                    Text(
+                        "Đăng nhập Google chưa được bật trong Supabase. " +
+                            "Cần cấu hình Google Cloud OAuth trước khi sử dụng.",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                } else if (state.googleAvailable == null) {
+                    Text("Chưa xác minh được cấu hình Google Login.",
+                        style = MaterialTheme.typography.bodySmall)
                 }
             }
         } else {
