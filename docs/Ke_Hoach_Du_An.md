@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `5350ce5` — Full Product Regression Gate v1 - Part 3 đã commit; Runtime Sleep Timer v1 **11/11 Android API 30 PASS trong workspace**, chưa commit |
+| HEAD Git hiện tại | `38af246` — Runtime Sleep Timer v1 đã commit; Runtime Equalizer v1 **10/10 Android API 30 PASS trong workspace**, chưa commit |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
@@ -21,7 +21,7 @@
 | Lưu liên kết LRC theo audio URI | Đã triển khai |
 | Build Lyrics v1 + Sleep Timer v1 | `:app:assembleDebug` và `:app:assembleDebugAndroidTest` PASS ngày 2026-10-29; chỉ xác nhận biên dịch |
 | Full QA | Để cuối giai đoạn phát triển |
-| Equalizer v1 | Đã viết engine theo audio session, UI điều chỉnh dải tần, lưu cấu hình; Build PASS, chưa chạy QA thực tế |
+| Equalizer v1 | **Runtime QA API 30 PASS:** AudioEffect gắn session Media3 thật, bật/tắt, chỉnh band, lưu cấu hình, controller reconnect; 2/2 EQ + 8/8 Playback/Queue = **10/10 Android PASS**. Chưa QA UI/tiến trình restart/thiết bị thật |
 | Crossfade/Gapless v1 | Có mã crossfade thử nghiệm (mặc định tắt) và giữ Media3 gapless tự nhiên; build-only, chưa runtime QA |
 | Library nâng cao v1 | Bài hát / Album / Nghệ sĩ / Thể loại; có source, build ứng dụng + AndroidTest PASS, chưa runtime QA |
 | Search nâng cao v1 | Tìm bài hát, album, nghệ sĩ, thể loại có bỏ dấu; 4 bộ lọc, mở nhóm/phát/thêm Playlist; build ứng dụng + AndroidTest PASS, chưa runtime QA |
@@ -48,8 +48,9 @@
 | Full Product Regression Gate v1 - Part 2B | UIAutomator chọn file thật + `SELECT` trong DocumentsUI; **2/2 Android API 30 PASS**, persisted READ, MediaSession Playback, 2-file queue + Next/History, Gradle/JVM PASS; `docs/Full_Product_Regression_Gate_v1_Part_2B.md` |
 | Full Product Regression Gate v1 - Part 3 | Toàn bộ Android/JVM API 30 **PASS**: JVM **99/99**, Android **86 PASS / 0 FAIL / 3 SKIP** từ 89 testcase; đã sửa lỗi timing/scroll Playlist Reorder và chạy lại suite; `qa-logs/full-product-regression-v1-part3.log` |
 | Sleep Timer Runtime Acceptance v1 | Gradle Build/JVM PASS; **3/3 Sleep Timer + 8/8 Playback/Queue regression = 11/11 Android API 30 PASS**, 8/8 marker; release không nhận debug-duration override, không đổi nhạc offline/online rights |
+| Equalizer Runtime Acceptance v1 | Gradle Build/JVM PASS; **2/2 Equalizer + 8/8 Playback/Queue regression = 10/10 Android API 30 PASS**, 6/6 marker; `docs/Equalizer_Runtime_Acceptance_v1.md` |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Runtime Feature Acceptance — Equalizer v1** — kiểm thử audio session, bật/tắt EQ, điều chỉnh dải tần, lưu/đọc trạng thái qua MediaSession trên emulator; sau đó Lyrics v1 riêng. Licensed Streaming Smoke chờ audio có quyền thật; Google Login/email thật ĐỂ CUỐI |
+| Bước tiếp theo | **Runtime Feature Acceptance — Lyrics v1** — test nhập LRC qua SAF, parser và đồng bộ lời theo thời gian, lưu liên kết URI; từng phần nhỏ. Licensed Streaming Smoke chờ bài nhạc có quyền thật; Google Login/email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -166,6 +167,9 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **P0 — đã sửa test và QA phần nhỏ** | **Full Product Regression Gate v1 - Part 2A** | **Build/JVM + 8/8 Android API 30 PASS** | `docs/Full_Product_Regression_Gate_v1_Part_2A.md`; không đổi production code, chờ Part 2B và full gate |
 | **P0 — QA đạt phần nhỏ** | **Full Product Regression Gate v1 - Part 2B** | **Build/JVM PASS + 2/2 Android API 30 PASS** | `docs/Full_Product_Regression_Gate_v1_Part_2B.md`, `qa-logs/full-product-regression-v1-part2b-saf.log`; có URI trả về thật và persisted READ; chờ full gate Part 3 |
 | **P0 — Full regression API 30 PASS** | **Full Product Regression Gate v1 - Part 3** | **99/99 JVM PASS, 86 Android PASS / 0 FAIL / 3 SKIP (89 total)** | `docs/Full_Product_Regression_Gate_v1_Part_3.md`, `qa-logs/full-product-regression-v1-part3.log`; vẫn cần runtime acceptance các tính năng build-only và thiết bị thật |
+| **P0 — runtime QA đã đạt API 30** | **Sleep Timer Runtime Acceptance v1** | **11/11 Android PASS**, Build/JVM PASS | `docs/Sleep_Timer_Runtime_Acceptance_v1.md`, `qa-logs/sleep-timer-runtime-v1.log`; expiry test dùng debug timer, chưa thử service restart |
+| **P0 — runtime QA đã đạt API 30** | **Equalizer Runtime Acceptance v1** | **10/10 Android PASS**, Build/JVM PASS | `docs/Equalizer_Runtime_Acceptance_v1.md`, `qa-logs/equalizer-runtime-v1.log`; chưa QA thực tế process-restart, audio frequency loopback |
+| **P0 — kế tiếp** | **Lyrics Runtime Acceptance v1** | CHƯA THỰC HIỆN | Test LRC Parser + SAF/URI import/persist, timestamp-synced lyric render, playback real MediaSession với WAV offline |
 | **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
 | **P1** | UI/accessibility/empty-state/error-state | Foundation v1 13/13 + Polish v2 19/19 Android PASS; toàn diện **CHƯA NGHIỆM THU** | Tiếp tục ma trận API, TalkBack thật, adaptive layout rộng và các trạng thái chưa chuẩn hóa |
 | **P1** | Hiệu năng và dữ liệu lớn | CHƯA NGHIỆM THU | Dataset cố định; ngưỡng thời gian/độ ổn định được chốt; không crash/ANR, không mất dữ liệu |
@@ -274,6 +278,15 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Runtime Feature Acceptance: Equalizer v1 — BUILD/JVM + 10/10 ANDROID API 30 PASS
+
+- HEAD nền `38af246` (Sleep Timer v1 đã push), working tree sạch trước khi làm; chỉ tập trung Equalizer không đụng Lyrics, Auth/Supabase hoặc chính sách streaming.
+- Đọc `EqualizerEngine`, `EqualizerContract`, `PlaybackService`: effect gắn audio session thật, lưu `enabled` và `band_N` vào SharedPreferences. Bổ sung `KEY_AUDIO_SESSION_ID` chỉ để MediaSession trả ID audio session hiện tại trong state bundle cho QA, không đổi cách nghe nhạc offline hay quyền online.
+- Thêm `EqualizerRuntimeTest.kt`: phát WAV offline trên ExoPlayer/MediaSession thật, xác nhận EQ supported + sessionID dương + bands/range/frequencies hợp lệ; command invalid bị từ chối, bật/tắt và đổi gain được lưu và đọc lại, MediaController thứ hai cùng service nhận trạng thái; nhạc vẫn tiếp tục phát. Test khôi phục queue, gain/enable, SharedPreferences và xóa WAV QA.
+- `scripts/run-equalizer-runtime-v1-tests.ps1` + `qa-logs/equalizer-runtime-v1.log`: Gradle `:app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest` **BUILD SUCCESSFUL/JVM PASS**, Android API 30 **EqualizerRuntime 2/2**, **PlaybackServiceIntegration 3/3 + PlaybackQueuePersistence 5/5**, tổng **10/10 PASS**, 6/6 marker, `git diff --check` exit 0; `FINAL_RESULT=PASS`.
+- Chưa xác minh audio frequency response bằng đo tín hiệu, chưa thực hiện UI EQ end-to-end, process/service restart thật và các API/thiết bị khác. Không tuyên bố full MusicFlow 1.0 PASS. Xem `docs/Equalizer_Runtime_Acceptance_v1.md`.
+- **Kế tiếp:** Runtime Feature Acceptance — Lyrics v1 (SAF/LRC parser + timestamp sync/display + URI liên kết offline), Google Login/email thật/Cloud E2E hai máy giữ đến cuối.
 
 ### 2026-10-29 — Runtime Feature Acceptance: Sleep Timer v1 — BUILD/JVM + 11 ANDROID PASS
 

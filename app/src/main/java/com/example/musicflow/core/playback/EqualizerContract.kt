@@ -16,6 +16,7 @@ object EqualizerContract {
     const val KEY_MAX_MB = "maxMb"
     const val KEY_FREQUENCIES_HZ = "frequenciesHz"
     const val KEY_LEVELS_MB = "levelsMb"
+    const val KEY_AUDIO_SESSION_ID = "audioSessionId"
 }
 
 data class EqualizerBandUi(

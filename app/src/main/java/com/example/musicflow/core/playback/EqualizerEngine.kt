@@ -81,6 +81,7 @@ internal class EqualizerEngine(context: Context) {
     fun stateBundle(): Bundle {
         val eq = effect ?: return Bundle().apply {
             putBoolean(EqualizerContract.KEY_SUPPORTED, false)
+            putInt(EqualizerContract.KEY_AUDIO_SESSION_ID, sessionId)
         }
 
         return try {
@@ -88,6 +89,7 @@ internal class EqualizerEngine(context: Context) {
             val count = eq.numberOfBands.toInt()
             Bundle().apply {
                 putBoolean(EqualizerContract.KEY_SUPPORTED, true)
+                putInt(EqualizerContract.KEY_AUDIO_SESSION_ID, sessionId)
                 putBoolean(EqualizerContract.KEY_ENABLED, eq.enabled)
                 putInt(EqualizerContract.KEY_MIN_MB, range[0].toInt())
                 putInt(EqualizerContract.KEY_MAX_MB, range[1].toInt())
@@ -108,6 +110,7 @@ internal class EqualizerEngine(context: Context) {
             Log.w("MusicFlowEqualizer", "Cannot read bands", error)
             Bundle().apply {
                 putBoolean(EqualizerContract.KEY_SUPPORTED, false)
+                putInt(EqualizerContract.KEY_AUDIO_SESSION_ID, sessionId)
             }
         }
     }
