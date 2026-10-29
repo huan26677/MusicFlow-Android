@@ -1,12 +1,11 @@
 package com.example.musicflow.core.playback
 
 import android.content.Context
-import android.net.Uri
 import android.util.Log
 
 import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import com.example.musicflow.core.media.TrackMediaItems
 
 import org.json.JSONArray
 import org.json.JSONObject
@@ -118,22 +117,12 @@ class PlaybackQueueStore(
                 val uri = saved.getString("uri")
                 require(uri.isNotBlank())
 
-                MediaItem.Builder()
-                    .setMediaId(
-                        saved.getString("mediaId")
-                    )
-                    .setUri(Uri.parse(uri))
-                    .setMediaMetadata(
-                        MediaMetadata.Builder()
-                            .setTitle(
-                                saved.optString("title")
-                            )
-                            .setArtist(
-                                saved.optString("artist")
-                            )
-                            .build()
-                    )
-                    .build()
+                TrackMediaItems.fromStored(
+                    mediaId = saved.getString("mediaId"),
+                    audioUri = uri,
+                    title = saved.optString("title"),
+                    artist = saved.optString("artist")
+                )
             }
 
             val positionMs = snapshot

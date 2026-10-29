@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `69d3a51` — Account/Google Hardening v2, Queue Actions v1 và Queue Manager v1 đang ở workspace, chưa commit |
+| HEAD Git hiện tại | `2dc1d61` — Queue Manager đã commit; Core Media Source Contract v1 đang ở workspace, chưa commit |
 | Phạm vi MusicFlow 1.0 | **Đã chốt** offline + online hợp pháp + library cá nhân + cloud; ưu tiên dùng cá nhân, mở rộng sau 1.0; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
@@ -36,8 +36,9 @@
 | Account & Google Security Hardening v2 | Loại trừ phiên Auth/PKCE khỏi Android backup và device transfer; kiểm tra callback bổ sung; 4/4 Python, 12/12 Google JVM, Android app + AndroidTest build PASS; chưa E2E |
 | Playback Queue Actions v1 | Phát tiếp / Thêm vào hàng đợi từ Library/Search; luật queue độc lập, có test; build + JVM PASS (8/8 queue rule tests), chưa Android runtime QA |
 | Queue Manager UI v1 | Xem/xóa/di chuyển/dọn hàng đợi, giữ bài đang phát; 16/16 JVM và 3/3 Android instrumented trên API 30 PASS |
+| Core Media Source Contract v1 | Một điểm dựng MediaItem từ MediaStore/SAF/online, bảo toàn legacy; JVM 11/11, Android API 30 9/9 PASS; log `qa-logs/media-source-contract-v1.log` |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Core Media Source Contract v1** — chuẩn hóa track identity và factory cho MediaStore/SAF/online; Google Login và email thật ĐỂ CUỐI |
+| Bước tiếp theo | **MusicFlow UI/UX Foundation v1** — chuẩn hóa empty/loading/error, accessibility và trải nghiệm Guest; Google Login và email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -140,7 +141,8 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **P0 — đã hoàn thành** | **Playback Runtime Recovery Race Hardening v3** | **PASS — 36/36 Android tests** | Xem `qa-logs/playback-runtime-recovery-v3.log`; yêu cầu 5 marker v3 + regression v2 |
 | **Phát triển — vừa xong source** | **Playback Queue Actions v1** | **BUILD + JVM PASS, chưa QA runtime** | `qa-logs/playback-queue-actions-v1.log`, 8/8 JVM queue test; cần E2E queue/restore |
 | **Phát triển — đã test Android** | **Queue Manager UI v1** | **16 JVM + 3 Android instrumented PASS (API 30)** | `qa-logs/queue-manager-v1.log`; chưa kiểm thử đa API hoặc khôi phục sau force-stop |
-| **Phát triển — kế tiếp** | **Media Source Contract + modularization dần** | CHƯA TRIỂN KHAI | Tách identity/factory/contracts, không làm mất tương thích local/online |
+| **Phát triển — đã test Android** | **Core Media Source Contract v1** | **11/11 JVM + 9/9 Android API 30 PASS** | `qa-logs/media-source-contract-v1.log`; chưa có streaming thật/cấp phép thật và signed URL resolver |
+| **Phát triển — kế tiếp** | **MusicFlow UI/UX Foundation v1** | CHƯA TRIỂN KHAI | Thống nhất empty/loading/error/accessibility, thao tác trên máy không tài khoản |
 | **Hoãn tới cuối** | **Google Login + email thật + Auth/Cloud E2E** | HOÃN THEO QUYẾT ĐỊNH CHỦ DỰ ÁN | Chỉ kiểm thử thật khi gần hoàn thành Full Product và có credentials do chủ dự án tự cấu hình |
 | **P0** | **MVP End-to-End Acceptance v1** — Library/Search/Picker → Player → Playlist/History → restart | CHƯA NGHIỆM THU | Script UI/integration tests có assertions và log cho từng flow |
 | **P0** | **Background Playback / System Controls QA** | V2 QA TỰ ĐỘNG PASS (API 30) — còn lockscreen và Bluetooth thực tế | Test lifecycle, audio focus, điều khiển từ MediaSession/notification/lock screen trong phạm vi khả thi; mọi điều kiện đã chốt đạt PASS |
@@ -253,6 +255,16 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Core Media Source Contract v1 — BUILD + JVM + ANDROID PASS
+
+- HEAD nền `2dc1d61` (Queue Manager v1 đã được chủ dự án push), working tree sạch trước khi sửa; thay đổi của mốc này chưa commit/push.
+- Tạo `MediaSourceContract.kt` (Kotlin thuần): MediaStore, SAF, licensed online và legacy IDs; giữ `device-<id>`, URI picker, `online:<id>`, và IDs đã lưu byte-for-byte thay vì âm thầm thay khóa lịch sử/playlist/queue.
+- Tạo `TrackMediaItems.kt`: một factory Media3 cho device, picker, online và persisted tracks; `PlayerViewModel`, `PlaylistMediaItems`, `PlaybackQueueStore` dùng chung adapter. Không thay đổi Room schema hoặc queue snapshot version.
+- Online từ chối URL không có HTTPS host, có credentials hoặc fragment; vẫn cho signed query. Chọn bài theo index gốc, tránh chọn nhầm bài khi catalog có ID trùng/bản ghi không phát được. UI catalog chỉ cho chạm bài có URL phù hợp.
+- JVM `MediaSourceContractTest` **11/11 PASS**: ID cũ, raw URI, explicit ID, SAF/online; Android `TrackMediaItemsTest` **5/5**, `QueueManagerIntegrationTest` **1/1**, `PlaybackQueuePersistenceTest` **3/3** trên emulator API 30, tổng **9/9 PASS**. `:app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest` BUILD SUCCESSFUL. `scripts/run-media-source-contract-v1-tests.ps1`, log `qa-logs/media-source-contract-v1.log`, `FINAL_RESULT=PASS`.
+- Tài liệu chi tiết `docs/Media_Source_Contract_v1.md`. **Giới hạn:** vẫn chưa có audio thật được cấp phép; online mediaId chưa namespace nhiều catalog, không tự refresh signed URLs hết hạn, chưa chứng minh nguồn remote E2E hay đầy đủ Android API matrix. Không sửa Google Login/E2E email thật.
+- Bước tiếp theo: **MusicFlow UI/UX Foundation v1** — empty/loading/error/accessibility, sau đó licensed streaming smoke khi có nội dung hợp lệ.
 
 ### 2026-10-29 — Queue Manager UI v1 — BUILD + JVM + ANDROID PASS
 

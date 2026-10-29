@@ -5,10 +5,9 @@ import android.net.Uri
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
 import com.example.musicflow.core.history.RecentSong
 import com.example.musicflow.core.media.DeviceSong
+import com.example.musicflow.core.media.TrackMediaItems
 import com.example.musicflow.core.playback.PlaybackController
 import com.example.musicflow.core.playback.QueuePlacement
 import com.example.musicflow.core.playlist.PlaylistTrack
@@ -28,42 +27,14 @@ class PlayerViewModel(
     val uiState = playbackController.uiState
 
     fun playOnlineTracks(tracks: List<OnlineTrack>, selectedIndex: Int) {
-        if (selectedIndex !in tracks.indices) return
-        val playable = tracks.filter { it.streamUrl?.startsWith("https://") == true }
-        val selected = tracks[selectedIndex]
-        val index = playable.indexOfFirst { it.id == selected.id }
-        if (index < 0) return
-        val items = playable.map { track ->
-            MediaItem.Builder()
-                .setMediaId("online:${track.id}")
-                .setUri(Uri.parse(requireNotNull(track.streamUrl)))
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setTitle(track.title)
-                        .setArtist(track.artist)
-                        .setAlbumTitle(track.album)
-                        .build()
-                )
-                .build()
-        }
-        playbackController.playQueue(items, index)
+        val queue = TrackMediaItems.onlineQueue(tracks, selectedIndex) ?: return
+        playbackController.playQueue(queue.items, queue.startIndex)
     }
 
     fun playPickedFiles(
         files: List<PickedAudioFile>
     ) {
-        val items = files.map { file ->
-            MediaItem.Builder()
-                .setMediaId(file.uri.toString())
-                .setUri(file.uri)
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setTitle(file.title)
-                        .setArtist(file.artist)
-                        .build()
-                )
-                .build()
-        }
+        val items = files.map { TrackMediaItems.fromPicked(it.uri, it.title, it.artist) }
 
         playbackController.playQueue(items)
     }
@@ -72,7 +43,7 @@ class PlayerViewModel(
         songs: List<DeviceSong>,
         selectedIndex: Int
     ) {
-        val items = songs.map(::deviceMediaItem)
+        val items = songs.map(TrackMediaItems::fromDevice)
 
         playbackController.playQueue(
             items,
@@ -85,7 +56,7 @@ class PlayerViewModel(
      * More sources can call PlaybackController.enqueue with their own item.
      */
     fun queueDeviceSong(song: DeviceSong, placement: QueuePlacement): Boolean =
-        playbackController.enqueue(deviceMediaItem(song), placement)
+        playbackController.enqueue(TrackMediaItems.fromDevice(song), placement)
 
     fun removeQueueItem(index: Int, expectedVersion: Long): Boolean =
         playbackController.removeQueueItem(index, expectedVersion)
@@ -96,18 +67,6 @@ class PlayerViewModel(
     fun clearQueueOthers(expectedVersion: Long): Boolean =
         playbackController.clearQueueOthers(expectedVersion)
 
-    private fun deviceMediaItem(song: DeviceSong): MediaItem =
-        MediaItem.Builder()
-            .setMediaId(song.mediaId ?: "device-${song.id}")
-            .setUri(song.uri)
-            .setMediaMetadata(
-                MediaMetadata.Builder()
-                    .setTitle(song.title)
-                    .setArtist(song.artist)
-                    .build()
-            )
-            .build()
-
     fun playRecentSongs(
         songs: List<RecentSong>,
         selectedIndex: Int
@@ -117,18 +76,9 @@ class PlayerViewModel(
         }
 
         val items = songs.map { song ->
-            MediaItem.Builder()
-                // Giữ mediaId gốc để lịch sử không tạo
-                // bản ghi khác khi phát lại cùng bài.
-                .setMediaId(song.mediaId)
-                .setUri(Uri.parse(song.audioUri))
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setTitle(song.title)
-                        .setArtist(song.artist)
-                        .build()
-                )
-                .build()
+            TrackMediaItems.fromStored(
+                song.mediaId, song.audioUri, song.title, song.artist
+            )
         }
 
         playbackController.playQueue(

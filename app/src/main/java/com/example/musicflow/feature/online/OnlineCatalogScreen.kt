@@ -22,6 +22,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.Badge
 import com.example.musicflow.core.online.OnlineTrack
+import com.example.musicflow.core.media.TrackMediaItems
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -89,7 +90,8 @@ fun OnlineCatalogScreen(
 
         Text(
             "Kết nối API danh mục nhạc do bạn quản lý hoặc được cấp phép. " +
-                "Giai đoạn này chỉ hiển thị thông tin bài hát; chưa hỗ trợ streaming.",
+                "Chỉ có thể chọn phát bài có URL HTTPS hợp lệ; " +
+                "quyền phát nhạc phải được xác nhận từ nguồn cung cấp.",
             style = MaterialTheme.typography.bodyMedium
         )
 
@@ -165,9 +167,11 @@ fun OnlineCatalogScreen(
                     LazyColumn(modifier = Modifier.weight(1f)) {
                         items(state.tracks.size) { index ->
                             val track = state.tracks[index]
+                            val canPlay = track.id.isNotBlank() &&
+                                track.streamUrl?.let(TrackMediaItems::isSafeHttpsMediaUrl) == true
                             ListItem(
                                 modifier = Modifier.clickable(
-                                    enabled = track.streamUrl != null
+                                    enabled = canPlay
                                 ) { onPlayTrack(state.tracks, index) },
                                 headlineContent = {
                                     Text(
@@ -190,7 +194,7 @@ fun OnlineCatalogScreen(
                                     )
                                 },
                                 trailingContent = {
-                                    if (track.streamUrl != null) {
+                                    if (canPlay) {
                                         Text("▶")
                                     } else if (track.durationMs > 0L) {
                                         val minutes = track.durationMs / 60_000
