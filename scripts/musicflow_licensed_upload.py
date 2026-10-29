@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Admin-only, two-step upload for MusicFlow licensed audio.
+"""Admin-only, two-step upload for MusicFlow licensed ONLINE audio.
 
 Requires the Supabase secret/service-role key in the process environment,
 NEVER in an Android app, repository, command argument, or log.
 
 stage   => upload to a private Storage bucket and create an unpublished draft.
-publish => manually attest streaming rights, verify the staged file hash,
-           copy it to a public bucket and publish the catalog row.
+publish => require reviewed license/attribution/source, verify the staged
+           file hash, copy to public storage, publish atomically with rights.
+
+This tool is NOT used to play device-local files downloaded by users.
 """
 
 from __future__ import annotations
@@ -16,6 +18,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import sys
 import urllib.error
 import urllib.parse
@@ -32,6 +35,11 @@ MIME_TYPES = {
     ".flac": "audio/flac",
     ".ogg": "audio/ogg",
     ".wav": "audio/wav",
+}
+SUPPORTED_LICENSES = {
+    "CC0-1.0": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "CC-BY-4.0": "https://creativecommons.org/licenses/by/4.0/",
+    "DIRECT": None,
 }
 
 
@@ -66,6 +74,63 @@ def clean_text(text: str, field: str, limit: int) -> str:
     if not 1 <= len(value) <= limit:
         raise ValueError(f"{field} phải có từ 1 đến {limit} ký tự.")
     return value
+
+
+def checked_https_url(value: str, field: str) -> str:
+    """Only public HTTPS links, no fragments or embedded credentials."""
+    value = clean_text(value, field, 500)
+    if any(char.isspace() for char in value):
+        raise ValueError(f"{field} không được chứa khoảng trắng.")
+    try:
+        parsed = urllib.parse.urlsplit(value)
+        host, port = parsed.hostname, parsed.port
+    except ValueError:
+        raise ValueError(f"{field} không hợp lệ.") from None
+    if (
+        parsed.scheme.lower() != "https" or not host
+        or parsed.username is not None or parsed.password is not None
+        or "#" in value or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9.-]*", host)
+        or "@" in value
+    ):
+        raise ValueError(f"{field} phải là HTTPS công khai, không có thông tin đăng nhập.")
+    if port is not None and not 1 <= port <= 65535:
+        raise ValueError(f"{field} có cổng không hợp lệ.")
+    return value
+
+
+def reviewed_rights(args: argparse.Namespace) -> dict:
+    """Fail closed BEFORE copying any draft to the public storage bucket."""
+    if not args.confirm_rights:
+        raise ValueError("Cần --confirm-rights sau khi kiểm tra giấy phép.")
+    if args.license_code not in SUPPORTED_LICENSES:
+        raise ValueError("Giấy phép không được hỗ trợ.")
+    source = checked_https_url(args.source_url, "Nguồn bài nhạc")
+    attribution = clean_text(args.attribution, "Thông tin ghi công", 500)
+    reviewer = clean_text(args.reviewer, "Người xét duyệt", 160)
+    reference = clean_text(args.license_reference, "Bằng chứng cấp quyền", 1000)
+    if len(reference) < 8 or len(reviewer) < 2 or len(attribution) < 3:
+        raise ValueError("Bằng chứng, người xét duyệt hoặc ghi công quá ngắn.")
+    canonical = SUPPORTED_LICENSES[args.license_code]
+    if canonical is not None:
+        if args.license_url != canonical:
+            raise ValueError(f"URL {args.license_code} phải đúng: {canonical}")
+        license_url = canonical
+    else:
+        license_url = (
+            checked_https_url(args.license_url, "URL giấy phép trực tiếp")
+            if args.license_url else None
+        )
+    return {
+        "p_rights_reference": reference,
+        "p_reviewer": reviewer,
+        "p_license_code": args.license_code,
+        "p_license_url": license_url,
+        "p_attribution_text": attribution,
+        "p_source_url": source,
+        "p_streaming_allowed": True,
+        "p_download_allowed": bool(args.allow_download),
+        "p_commercial_use_allowed": bool(args.allow_commercial_use),
+    }
 
 
 class SupabaseAdmin:
@@ -129,7 +194,7 @@ class SupabaseAdmin:
             f"{bucket}/{object_key}", safe="/"
         )
         self.request(
-            "POST", path, data, mime, {"x-upsert": "true"}
+            "POST", path, data, mime, {"x-upsert": "false"}
         )
 
     def storage_download(self, bucket: str, object_key: str) -> bytes:
@@ -191,21 +256,14 @@ def load_one(api: SupabaseAdmin, table: str, track_id: str) -> dict:
 
 
 def publish(api: SupabaseAdmin, args: argparse.Namespace) -> None:
-    if not args.confirm_rights:
-        raise ValueError(
-            "Phải xác nhận --confirm-rights rằng bạn có quyền phát công khai."
-        )
+    rights = reviewed_rights(args)
     track_id = str(UUID(args.track_id))
-    license_reference = clean_text(
-        args.license_reference, "Tài liệu tham chiếu bản quyền", 1000
-    )
-    reviewer = clean_text(args.reviewer, "Người xác nhận", 160)
 
     track = load_one(api, "music_tracks", track_id)
     evidence = load_one(api, "music_uploads", track_id)
     if track.get("is_published"):
         raise ValueError("Bài đã công khai; không thực hiện xuất bản lần hai.")
-    if evidence.get("published_at") is not None:
+    if evidence.get("published_at") is not None or evidence.get("published_path") is not None:
         raise ValueError("Bản ghi upload đã được đánh dấu xuất bản.")
 
     content = api.storage_download(PRIVATE_BUCKET, evidence["staging_path"])
@@ -220,7 +278,7 @@ def publish(api: SupabaseAdmin, args: argparse.Namespace) -> None:
     public_path = (
         f"tracks/{track_id}/{evidence['content_sha256'][:24]}{extension}"
     )
-    # Only publish with explicit rights attestation. Public URLs are permanent.
+    # No overwrite: never silently replace existing public audio at this path.
     api.storage_upload(PUBLIC_BUCKET, public_path, content, evidence["mime_type"])
     url = (
         f"{PROJECT_URL}/storage/v1/object/public/{PUBLIC_BUCKET}/"
@@ -228,14 +286,13 @@ def publish(api: SupabaseAdmin, args: argparse.Namespace) -> None:
     )
     api.json(
         "POST",
-        "/rest/v1/rpc/musicflow_publish_licensed_track",
+        "/rest/v1/rpc/musicflow_publish_licensed_track_v2",
         {
             "p_track_id": track_id,
             "p_public_path": public_path,
             "p_public_url": url,
             "p_sha256": evidence["content_sha256"],
-            "p_rights_reference": license_reference,
-            "p_reviewer": reviewer,
+            **rights,
         },
     )
     print("XUẤT BẢN BÀI HÁT ĐÃ ĐƯỢC XÁC NHẬN QUYỀN")
@@ -253,10 +310,19 @@ def main() -> int:
     draft.add_argument("--album", default="")
     draft.add_argument("--duration-ms", type=int, default=0)
 
-    approval = commands.add_parser("publish", help="Xác nhận quyền và xuất bản")
+    approval = commands.add_parser("publish", help="Duyệt quyền phát online và xuất bản")
     approval.add_argument("--track-id", required=True)
     approval.add_argument("--license-reference", required=True)
     approval.add_argument("--reviewer", required=True)
+    approval.add_argument("--license-code", required=True,
+                          choices=tuple(SUPPORTED_LICENSES))
+    approval.add_argument("--license-url", default="")
+    approval.add_argument("--source-url", required=True)
+    approval.add_argument("--attribution", required=True)
+    approval.add_argument("--allow-download", action="store_true",
+                          help="Chỉ bật nếu có quyền tải bản ghi")
+    approval.add_argument("--allow-commercial-use", action="store_true",
+                          help="Chỉ bật nếu có quyền thương mại")
     approval.add_argument("--confirm-rights", action="store_true")
     args = parser.parse_args()
 

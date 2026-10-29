@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `4f65879` — UI/UX Polish v2 đã commit; Licensed Online Rights & Attribution v1 đang ở workspace, chưa commit |
+| HEAD Git hiện tại | `2fe2194` — Licensed Online Rights v1 + ngoại lệ offline đã commit; Licensed Content Review & Publish v2 đang ở workspace, chưa commit |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
@@ -40,8 +40,9 @@
 | MusicFlow UI/UX Foundation v1 | Trạng thái UI thống nhất trên Home/Library/Search/Online/Queue, theme xanh ngọc–xanh đêm và TalkBack labels; BUILD + JVM, Android API 30 **13/13 PASS** |
 | MusicFlow UI/UX Polish v2 | Responsive Now Playing/Playlist/Account, cỡ chữ lớn, theme dễ truy cập; BUILD + JVM, Android API 30 **19/19 PASS**; log `qa-logs/musicflow-ui-polish-v2.log` |
 | Licensed Online Rights Metadata & Attribution v1 | Supabase đã áp dụng migration, RLS fail-closed; chỉ chặn URL online thiếu quyền, **không chặn offline tự tải**, kể cả ID `online:` cũ; 10/10 JVM + 21/21 Android API 30 PASS |
+| Licensed Content Review & Publish v2 | Supabase RPC v2 chỉ service_role, v1 bị thu hồi EXECUTE; admin Python ghi rights + audit, 17/17 Python PASS, rollback SQL trên DB PASS, Gradle/JVM PASS; chưa upload nhạc thật |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Licensed Content Review & Publish v2** — cập nhật công cụ quản trị xuất bản theo metadata quyền mới, audit và QA bằng dữ liệu giả; Google Login và email thật ĐỂ CUỐI |
+| Bước tiếp theo | **Licensed Streaming Smoke v1 (cần bài có quyền thật)** hoặc tiếp tục Android/E2E offline nếu chưa có nội dung; không dùng nhạc không có quyền; Google Login/email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -148,7 +149,8 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **Phát triển — đã test Android** | **MusicFlow UI/UX Foundation v1** | **Build/JVM + 13/13 Android API 30 PASS** | `qa-logs/musicflow-ui-foundation-v1.log`, `docs/MusicFlow_UI_UX_Foundation_v1.md`; chưa nghiệm thu bố cục đa cỡ chữ/thiết bị |
 | **Phát triển — đã test Android** | **MusicFlow UI/UX Polish v2** | **Build/JVM + 19/19 Android API 30 PASS** | `qa-logs/musicflow-ui-polish-v2.log`, `docs/MusicFlow_UI_UX_Polish_v2.md`; còn QA đa API và TalkBack thiết bị thật |
 | **Phát triển — đã test Android + Supabase** | **Licensed Online Rights Metadata & Attribution v1** | **Supabase migration PASS, 10 JVM + 21 Android PASS API 30** | Chỉ online streaming cần quyền; offline tự tải không cần kiểm tra; `docs/Licensed_Online_Rights_Attribution_v1.md`, `qa-logs/licensed-online-rights-v1.log`; chưa có bài online thật |
-| **Phát triển — kế tiếp** | **Licensed Content Review & Publish v2** | CHƯA TRIỂN KHAI | Công cụ quản trị/RPC phải ghi đủ license/source/attribution/rights-verified-at, không xuất bản nếu chưa xác minh; QA âm thanh thật sau |
+| **Phát triển — đã kiểm thử backend** | **Licensed Content Review & Publish v2** | **Supabase migration + 17 Python unit + SQL rollback dry-run + Android build/JVM PASS** | `docs/Licensed_Content_Review_Publish_v2.md`, `qa-logs/licensed-publish-v2.log`; không có nhạc thật được upload |
+| **Phát triển — kế tiếp khi đủ quyền nội dung** | **Licensed Streaming Smoke v1** | CHƯA THỰC HIỆN | Một bài do chủ sở hữu cấp quyền thật, stage/review/publish → Android Media3 + background/seek/error; chưa cung cấp secret/audio |
 | **Hoãn tới cuối** | **Google Login + email thật + Auth/Cloud E2E** | HOÃN THEO QUYẾT ĐỊNH CHỦ DỰ ÁN | Chỉ kiểm thử thật khi gần hoàn thành Full Product và có credentials do chủ dự án tự cấu hình |
 | **P0** | **MVP End-to-End Acceptance v1** — Library/Search/Picker → Player → Playlist/History → restart | CHƯA NGHIỆM THU | Script UI/integration tests có assertions và log cho từng flow |
 | **P0** | **Background Playback / System Controls QA** | V2 QA TỰ ĐỘNG PASS (API 30) — còn lockscreen và Bluetooth thực tế | Test lifecycle, audio focus, điều khiển từ MediaSession/notification/lock screen trong phạm vi khả thi; mọi điều kiện đã chốt đạt PASS |
@@ -261,6 +263,17 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Licensed Content Review & Publish v2 — SUPABASE + PYTHON + JVM BUILD PASS
+
+- HEAD nền `2fe2194`, working tree sạch khi bắt đầu; chưa tự commit/push mã nguồn hiện tại. Nhạc offline người dùng tự tải **không** qua công cụ quản trị hoặc bộ lọc bản quyền này.
+- Supabase `vzvxpbwrftlnyvuhfoqn`: **đã áp dụng** migration `musicflow_licensed_publish_review_v2`. RPC `public.musicflow_publish_licensed_track_v2` dùng **SECURITY INVOKER**, chỉ `service_role` được EXECUTE; thu hồi EXECUTE của `musicflow_publish_licensed_track` v1 với `service_role` và client roles. Không sửa RLS bảo vệ danh mục.
+- RPC v2 yêu cầu full rights metadata/credit/source/streaming flag + reviewer và bằng chứng, kiểm tra SHA/path/URL trước khi cập nhật **cùng giao dịch** `music_tracks` và biên bản `music_uploads`. `rights_verified_at` được đóng dấu server-side `now()`; download và commercial-use là cờ riêng, mặc định FALSE.
+- `scripts/musicflow_licensed_upload.py` nhận `--license-code`, `--license-url`, `--source-url`, `--attribution`, `--allow-download`, `--allow-commercial-use`, giữ `--license-reference`, `--reviewer`, `--confirm-rights`. Python kiểm tra metadata trước upload public; Storage không tự upsert/ghi đè tệp cũ; không nhúng admin secret vào repo.
+- Xác nhận trực tiếp DB: RPC v1 (service_role/anon/authenticated) **không** còn EXECUTE; RPC v2 chỉ `service_role` được gọi. Chạy thử SQL `BEGIN ... ROLLBACK` trên bản ghi QA tạm: URL nguồn HTTP bị từ chối, dữ liệu quyền CC0/HTTPS hợp lệ cập nhật rights + receipt như mong đợi; sau rollback `music_tracks=0`, `music_uploads=0`. Security Advisor chỉ có INFO trước đây cho `music_uploads` không có client policy (cố ý).
+- `python -m unittest discover -s scripts -p test_musicflow_licensed_upload.py -v`: **17/17 PASS** (trước là 8/8), biên dịch Python PASS. Gradle `:app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest` **BUILD SUCCESSFUL**, JVM task PASS. Script `scripts/run-licensed-publish-v2-tests.ps1`, log `qa-logs/licensed-publish-v2.log`, `FINAL_RESULT=PASS`. Không rerun Android instrumentation vì mốc này không sửa source APK; kết quả Android 21/21 của mốc trước vẫn là bằng chứng riêng.
+- Tài liệu `docs/Licensed_Content_Review_Publish_v2.md`, SQL đối chiếu `scripts/sql/musicflow_licensed_publish_review_v2.sql`; hướng dẫn v1 được đánh dấu là lịch sử. **Giới hạn:** chưa có audio thực được cấp phép, chưa thực hiện upload/public streaming E2E, rollback dữ liệu không kiểm chứng đối tượng Storage, có thể phát sinh orphan khi RPC lỗi mạng; không tuyên bố full-product PASS.
+- Bước kế tiếp: **Licensed Streaming Smoke v1** khi có quyền và file thật; nếu chưa có, tiếp tục QA offline/E2E độc lập và ma trận Android theo phạm vi 1.0. Google Login/email thật vẫn để cuối.
 
 ### 2026-10-29 — Xác nhận phạm vi bản quyền: CHỈ ONLINE, OFFLINE TỰ TẢI PHÁT BÌNH THƯỜNG — BUILD + TEST PASS
 
