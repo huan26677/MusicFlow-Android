@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `a82fea3` — Full Product Regression Gate v1 - Part 1 đã commit; Part 2A Now Playing controls đang ở workspace, chưa commit |
+| HEAD Git hiện tại | `0d47da9` — Full Product Regression Gate v1 - Part 2A đã commit; Part 2B RealPickerSafTest **2/2 PASS trong workspace**, chưa commit |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
@@ -45,8 +45,9 @@
 | Android Compatibility Matrix v2 | API **29/30/33/36**, mỗi API 18 offline + 4 restart + 4 SAF; **104/104 instrumented PASS**, 9 E2E markers/API, đổi PID thật khi force-stop; `docs/Android_Compatibility_Matrix_v2.md` |
 | Full Product Regression Gate v1 - Part 1 | BUILD/JVM **99/99 PASS**; toàn bộ Android suite API 30 **89 total / 83 PASS / 3 FAIL / 3 SKIP** - **GATE FAIL**; chờ sửa MVP Previous và real SAF picker; `docs/Full_Product_Regression_Gate_v1_Part_1.md` |
 | Full Product Regression Gate v1 - Part 2A | Đã xác minh thao tác test trên Now Playing phải cuộn tới nút trước khi chạm; **BUILD/JVM PASS, 8/8 Android API 30 PASS**, `qa-logs/full-product-regression-v1-part2a-playback.log`; full gate vẫn chưa nghiệm thu |
+| Full Product Regression Gate v1 - Part 2B | UIAutomator chọn file thật + `SELECT` trong DocumentsUI; **2/2 Android API 30 PASS**, persisted READ, MediaSession Playback, 2-file queue + Next/History, Gradle/JVM PASS; `docs/Full_Product_Regression_Gate_v1_Part_2B.md` |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Full Product Regression Gate v1 - Part 2B** — sửa tự động chọn 1/2 tài liệu trong DocumentsUI (RealPickerSafTest), test riêng; sau đó rerun full Android Regression Gate. Licensed Streaming Smoke chờ audio có quyền thật; Google Login/email thật ĐỂ CUỐI |
+| Bước tiếp theo | **Full Product Regression Gate v1 – Part 3** — chạy lại toàn bộ Android/JVM API 30, phân tích pass/fail/skip theo XML, sửa riêng lỗi còn lại nếu có; Licensed Streaming Smoke chờ audio có quyền thật; Google Login/email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -161,6 +162,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **P0 — đã kiểm thử 4 API** | **Android Compatibility Matrix v2** | **104/104 PASS (26/API, API 29/30/33/36)** | `docs/Android_Compatibility_Matrix_v2.md`, 4 file `qa-logs/android-compat-matrix-v2-api-*.log`; bộ test đại diện, chưa phải full connectedDebugAndroidTest đa API |
 | **P0 — đang xử lý từng phần** | **Full Product Regression Gate v1 - Part 1** | **BUILD/JVM PASS 99/99; Android API 30 FAIL: 83/89 PASS, 3 FAIL, 3 SKIP** | `docs/Full_Product_Regression_Gate_v1_Part_1.md`, `qa-logs/full-product-regression-v1-part1.log`; tiếp tục 2A MVP Previous và 2B SAF picker |
 | **P0 — đã sửa test và QA phần nhỏ** | **Full Product Regression Gate v1 - Part 2A** | **Build/JVM + 8/8 Android API 30 PASS** | `docs/Full_Product_Regression_Gate_v1_Part_2A.md`; không đổi production code, chờ Part 2B và full gate |
+| **P0 — QA đạt phần nhỏ** | **Full Product Regression Gate v1 - Part 2B** | **Build/JVM PASS + 2/2 Android API 30 PASS** | `docs/Full_Product_Regression_Gate_v1_Part_2B.md`, `qa-logs/full-product-regression-v1-part2b-saf.log`; có URI trả về thật và persisted READ; chờ full gate Part 3 |
 | **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
 | **P1** | UI/accessibility/empty-state/error-state | Foundation v1 13/13 + Polish v2 19/19 Android PASS; toàn diện **CHƯA NGHIỆM THU** | Tiếp tục ma trận API, TalkBack thật, adaptive layout rộng và các trạng thái chưa chuẩn hóa |
 | **P1** | Hiệu năng và dữ liệu lớn | CHƯA NGHIỆM THU | Dataset cố định; ngưỡng thời gian/độ ổn định được chốt; không crash/ANR, không mất dữ liệu |
@@ -269,6 +271,22 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Full Product Regression Gate v1 - Part 2B — REAL SAF PICKER ĐÃ SỬA, 2/2 PASS
+
+- HEAD nền `0d47da9`; giữ lại thay đổi local có sẵn trong `RealPickerSafTest.kt`; không ghi đè/revert và không auto commit/push.
+- Chẩn đoán đúng gốc lỗi với Android UIAutomator: DocumentsUI có tệp thật và sau long-click `selected=true`, nhưng nút hoàn tất là **SELECT** (`action_menu_select`), không phải Open. Thêm `androidTestImplementation(androidx.test.uiautomator:uiautomator:2.3.0)` để chạm card thực/confirm, kiểm tra selected title trước khi confirm; vẫn yêu cầu ActivityResult/URI thật và assertions Media3.
+- QA Android 11 API 30: test chọn 1 file **PASS** (content URI, RIFF, persisted READ, MediaSession isPlaying); test chọn 2 file **PASS** (2 queue entries, persisted READ, next/Recent History). `run-full-regression-v1-part2b-saf-tests.ps1` chạy Build/JVM PASS, Android **2/2 PASS**, 9/9 marker, xác nhận picker returned 1 và 2, Git diff check PASS. Log `qa-logs/full-product-regression-v1-part2b-saf.log`, `FINAL_RESULT=PASS`.
+- Một lượt đầu trong quá trình làm gặp timeout gián đoạn khi CreateDocument thứ hai; bài đó chạy riêng PASS, rerun chung **2/2 PASS**. Full Android 89 test baseline **chưa chạy lại**, không kết luận full product nghiệm thu.
+- Chỉ thay QA source, không thay logic phát offline hoặc kiểm soát quyền nhạc online. **Kế tiếp Part 3**: chạy lại full connectedDebugAndroidTest/JVM API 30 để xác nhận cổng hồi quy.
+
+### 2026-10-29 — Full Product Regression Gate v1 - Part 2B — SAF REAL PICKER BLOCKER, CHƯA PASS
+
+- HEAD nền `0d47da9`; `RealPickerSafTest.kt` đã có chỉnh sửa local chưa commit khi bắt đầu, được giữ nguyên và phát triển tiếp, không reset/ghi đè thay đổi sẵn có.
+- Kiểm tra Google DocumentsUI trên API 30 với file WAV test thực. Thử Accessibility click, tap vào tên, chạm card, shell input tap và long-press, hỗ trợ tìm nút Open và chuyển List view. UI có file, nhưng **không trả kết quả chọn tệp** cho app. Hai test real picker chạy riêng vẫn FAIL tại điều kiện chờ ActivityResult.
+- Test không giả lập URI hay callback; log được làm rõ: hành động `TAP_SENT` không phải xác nhận `SELECTED`. Source production, nhạc offline, quyền bản quyền online không thay đổi. Gradle AndroidTest build PASS.
+- Báo cáo `docs/Full_Product_Regression_Gate_v1_Part_2B.md`, log tóm tắt `qa-logs/full-product-regression-v1-part2b-saf.log`, trạng thái **FINAL_RESULT=FAIL**. Full suite baseline 89 Android tests **chưa được chạy lại** sau Part 2B.
+- Bước tiếp theo vẫn **Part 2B**: nghiên cứu UIAutomator/selection thật của DocumentsUI, 2/2 PASS trước khi chạy lại full Android gate. Không tuyên bố nghiệm thu Full Product 1.0.
 
 ### 2026-10-29 — Full Product Regression Gate v1 - Part 2A — NOW PLAYING E2E FIX, 8/8 ANDROID PASS
 

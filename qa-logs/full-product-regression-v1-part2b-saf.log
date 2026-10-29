@@ -1,0 +1,149 @@
+﻿MusicFlow Full Product Regression v1 Part 2B - Real SAF Picker
+DATE=2026-10-29T20:23:17.8442717+07:00
+HEAD_BASE=0d47da9
+DEVICE=emulator-5554
+NO_ONLINE_RIGHTS_REQUIRED_FOR_PERSONAL_OFFLINE_FILES=TRUE
+30
+Calculating task graph as configuration cache cannot be reused because file 'gradle\libs.versions.toml' has changed.
+> Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:preDebugAndroidTestBuild SKIPPED
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestManifest UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:desugarDebugFileDependencies
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:kspDebugKotlin UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:processDebugAndroidTestManifest UP-TO-DATE
+> Task :app:generateDebugAndroidTestBuildConfig UP-TO-DATE
+> Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions
+> Task :app:processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :app:packageDebugAndroidTestResources UP-TO-DATE
+> Task :app:parseDebugAndroidTestLocalResources UP-TO-DATE
+> Task :app:compressDebugAssets
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :app:generateDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :app:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :app:generateDebugAndroidTestRFile UP-TO-DATE
+> Task :app:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :app:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :app:compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :app:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :app:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :app:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :app:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses
+> Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:kspDebugAndroidTestKotlin SKIPPED
+> Task :app:compileDebugAndroidTestKotlin UP-TO-DATE
+> Task :app:compileDebugAndroidTestJavaWithJavac UP-TO-DATE
+> Task :app:processDebugAndroidTestJavaRes UP-TO-DATE
+> Task :app:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :app:dexBuilderDebugAndroidTest UP-TO-DATE
+> Task :app:mergeProjectDexDebugAndroidTest UP-TO-DATE
+> Task :app:packageDebugAndroidTest UP-TO-DATE
+> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleDebugAndroidTest UP-TO-DATE
+> Task :app:mergeLibDexDebug
+> Task :app:kspDebugUnitTestKotlin SKIPPED
+> Task :app:generateDebugGlobalSynthetics
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:stripDebugDebugSymbols
+> Task :app:mergeDebugJavaResource
+> Task :app:dexBuilderDebug
+> Task :app:mergeProjectDexDebug
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:mergeExtDexDebug
+> Task :app:packageDebug
+> Task :app:assembleDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:testDebugUnitTest
+
+BUILD SUCCESSFUL in 20s
+77 actionable tasks: 22 executed, 55 up-to-date
+Configuration cache entry stored.
+BUILD_JVM_EXIT=0
+Performing Streamed Install
+Success
+Performing Streamed Install
+Success
+
+
+com.example.musicflow.core.playback.RealPickerSafTest:..
+
+Time: 24.208
+
+OK (2 tests)
+
+
+INSTRUMENTATION_EXIT=0
+REAL_PICKER_TESTS=2
+--------- beginning of main
+--------- beginning of system
+--------- beginning of kernel
+I/MusicFlowRealPickerQA( 6030): PASS sourcePreparedWithoutPersistedRead
+I/MusicFlowRealPickerQA( 6030): PASS productionPickerLaunched
+I/MusicFlowRealPickerQA( 6030): AUTO_PICKER_BEGIN count=1
+I/MusicFlowRealPickerQA( 6030): UIAUTOMATOR_ITEM resource=com.google.android.documentsui:id/item_root bounds=Rect(0, 750 - 1080, 948)
+I/MusicFlowRealPickerQA( 6030): AUTO_PICKER_TAP_SENT title=musicflow_real_picker_729977055900.wav long=true
+I/MusicFlowRealPickerQA( 6030): AUTO_PICKER_SELECT_CLICKED
+I/MusicFlowRealPickerQA( 6030): AUTO_PICKER_RETURNED tapped=1
+I/MusicFlowRealPickerQA( 6030): PICKER_RESULT playing=true mediaId=content://com.android.providers.downloads.documents/document/116 title=musicflow_real_picker_729977055900.wav state=3 error=null
+I/MusicFlowRealPickerQA( 6030): PASS realPickerPlayback
+I/MusicFlowRealPickerQA( 6030): PASS realPickerPersistedRead
+I/MusicFlowRealPickerQA( 6030): PASS multiSourcesPrepared
+I/MusicFlowRealPickerQA( 6030): AUTO_PICKER_BEGIN count=2
+I/MusicFlowRealPickerQA( 6030): UIAUTOMATOR_ITEM resource=com.google.android.documentsui:id/item_root bounds=Rect(0, 948 - 1080, 1146)
+I/MusicFlowRealPickerQA( 6030): AUTO_PICKER_TAP_SENT title=musicflow_real_picker_multi_738292574100_1.wav long=true
+I/MusicFlowRealPickerQA( 6030): UIAUTOMATOR_ITEM resource=com.google.android.documentsui:id/item_root bounds=Rect(0, 750 - 1080, 948)
+I/MusicFlowRealPickerQA( 6030): AUTO_PICKER_TAP_SENT title=musicflow_real_picker_multi_738292574100_2.wav long=false
+I/MusicFlowRealPickerQA( 6030): AUTO_PICKER_SELECT_CLICKED
+I/MusicFlowRealPickerQA( 6030): AUTO_PICKER_RETURNED tapped=2
+I/MusicFlowRealPickerQA( 6030): PASS multiQueue
+I/MusicFlowRealPickerQA( 6030): PASS multiPersistedRead
+I/MusicFlowRealPickerQA( 6030): PASS multiNext
+I/MusicFlowRealPickerQA( 6030): PASS multiNextWrittenHistory
+REAL_PICKER_MARKERS=9
+DOCUMENTS_UI_RETURNED_ONE_AND_TWO=TRUE
+warning: in the working copy of 'app/build.gradle.kts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'gradle/libs.versions.toml', LF will be replaced by CRLF the next time Git touches it
+GIT_DIFF_CHECK_EXIT=0
+FINAL_RESULT=PASS

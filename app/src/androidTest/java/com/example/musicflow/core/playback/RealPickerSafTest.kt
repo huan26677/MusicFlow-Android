@@ -22,6 +22,9 @@ import androidx.media3.session.SessionToken
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiObject2
 import com.example.musicflow.MainActivity
 import com.example.musicflow.core.history.RoomRecentHistoryRepository
 import com.example.musicflow.core.history.local.RecentHistoryDatabase
@@ -49,6 +52,7 @@ class RealPickerSafTest {
 
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val context = instrumentation.targetContext
+    private val device by lazy { UiDevice.getInstance(instrumentation) }
 
     private fun wavBytes(): ByteArray {
         val rate = 8000
@@ -103,6 +107,56 @@ class RealPickerSafTest {
             current = current.parent
         }
         return false
+    }
+
+    private fun actOnDocument(
+        node: AccessibilityNodeInfo,
+        longPress: Boolean
+    ): Boolean {
+        val title = node.text?.toString()?.trim()
+            ?: node.contentDescription?.toString()?.trim()
+        if (!title.isNullOrEmpty()) {
+            val objectTitle = device.findObject(By.text(title))
+            if (objectTitle != null) {
+                var card: UiObject2 = objectTitle
+                var parent = objectTitle.parent
+                while (parent != null) {
+                    if (parent.resourceName?.endsWith(":id/item_root") == true) {
+                        card = parent
+                        break
+                    }
+                    parent = parent.parent
+                }
+                Log.i("MusicFlowRealPickerQA",
+                    "UIAUTOMATOR_ITEM resource=${card.resourceName} bounds=${card.visibleBounds}")
+                val result = runCatching {
+                    if (longPress) card.longClick() else card.click()
+                    device.waitForIdle(1000)
+                    true
+                }.getOrElse {
+                    Log.w("MusicFlowRealPickerQA","UIAUTOMATOR_CLICK_FAILED", it)
+                    false
+                }
+                if (result) return true
+            }
+        }
+        var parent: AccessibilityNodeInfo? = node
+        while (parent != null) {
+            if (parent.isClickable || parent.isLongClickable) {
+                val action = if (longPress)
+                    AccessibilityNodeInfo.ACTION_LONG_CLICK
+                else AccessibilityNodeInfo.ACTION_CLICK
+                Log.i("MusicFlowRealPickerQA",
+                    "ROW_ACTION long=$longPress id=${parent.viewIdResourceName} " +
+                        "class=${parent.className} selected=${parent.isSelected} " +
+                        "visible=${parent.isVisibleToUser}")
+                if (parent.performAction(action)) return true
+            }
+            parent = parent.parent
+        }
+        // Fallback to a real touch when the DocumentsUI accessibility
+        // row does not implement the requested action.
+        return tapDocumentTitle(node, longPress)
     }
 
     private fun clickNamedAction(
@@ -194,9 +248,8 @@ class RealPickerSafTest {
     ): AccessibilityNodeInfo? {
         if (node == null) return null
 
-        if (
-            node.viewIdResourceName == "android:id/title" &&
-            node.text?.toString() == title
+        if (node.text?.toString()?.trim() == title ||
+            node.contentDescription?.toString()?.trim() == title
         ) {
             return node
         }
@@ -212,21 +265,64 @@ class RealPickerSafTest {
     }
 
     private fun tapDocumentTitle(
-        node: AccessibilityNodeInfo
+        node: AccessibilityNodeInfo,
+        longPress: Boolean = false
     ): Boolean {
+        // DocumentsUI can render files as large grid cards with their title
+        // in a separate, non-clickable TextView along the bottom edge.
+        // Touch the CARD center rather than the label's center.
+        var touchTarget = node
+        var ancestor: AccessibilityNodeInfo? = node
+        var depth = 0
+        while (ancestor != null && depth++ < 12) {
+            val parent = ancestor.parent
+            Log.i("MusicFlowRealPickerQA",
+                "ANCESTOR depth=$depth class=${ancestor.className} " +
+                    "id=${ancestor.viewIdResourceName} bounds=" +
+                    Rect().also { ancestor.getBoundsInScreen(it) })
+            // The direct child of the RecyclerView is the complete file card,
+            // unlike the filename TextView which is not a clickable area.
+            if (parent?.className?.toString()?.contains("RecyclerView") == true) {
+                touchTarget = ancestor
+                break
+            }
+            ancestor = parent
+        }
         val bounds = Rect()
-        node.getBoundsInScreen(bounds)
+        touchTarget.getBoundsInScreen(bounds)
 
-        if (bounds.isEmpty || !node.isVisibleToUser) {
+        if (bounds.isEmpty || !touchTarget.isVisibleToUser) {
             Log.e(
                 "MusicFlowRealPickerQA",
                 "DOCUMENT_TITLE_NOT_VISIBLE"
             )
             return false
         }
+        Log.i("MusicFlowRealPickerQA",
+            "TOUCH_TARGET id=${touchTarget.viewIdResourceName} bounds=$bounds")
 
         val x = bounds.exactCenterX()
         val y = bounds.exactCenterY()
+        // Android's shell input tool uses the same physical input dispatcher
+        // as user taps. It is more reliable for non-accessible DocumentsUI
+        // grid cards than injecting synthesized MotionEvents with UiAutomation.
+        val command = if (longPress) {
+            "input touchscreen swipe ${x.toInt()} ${y.toInt()} ${x.toInt()} ${y.toInt()} 1000"
+        } else {
+            "input touchscreen tap ${x.toInt()} ${y.toInt()}"
+        }
+        val shellWorked = runCatching {
+            ParcelFileDescriptor.AutoCloseInputStream(
+                instrumentation.uiAutomation.executeShellCommand(command)
+            ).use { it.readBytes() }
+            SystemClock.sleep(if (longPress) 1100 else 350)
+            true
+        }.getOrDefault(false)
+        if (shellWorked) {
+            Log.i("MusicFlowRealPickerQA",
+                "CARD_TOUCH_SHELL longPress=$longPress x=$x y=$y")
+            return true
+        }
         val downTime = SystemClock.uptimeMillis()
 
         val down = MotionEvent.obtain(
@@ -238,7 +334,7 @@ class RealPickerSafTest {
 
         val up = MotionEvent.obtain(
             downTime,
-            downTime + 100L,
+            downTime + if (longPress) 1000L else 100L,
             MotionEvent.ACTION_UP,
             x, y, 0
         )
@@ -251,7 +347,7 @@ class RealPickerSafTest {
                 instrumentation.uiAutomation
                     .injectInputEvent(down, true)
 
-            SystemClock.sleep(100)
+            SystemClock.sleep(if (longPress) 1000L else 100L)
 
             val upOk =
                 instrumentation.uiAutomation
@@ -259,7 +355,7 @@ class RealPickerSafTest {
 
             Log.i(
                 "MusicFlowRealPickerQA",
-                "TITLE_TAP down=$downOk up=$upOk"
+                "TITLE_TAP longPress=$longPress down=$downOk up=$upOk"
             )
 
             downOk && upOk
@@ -269,54 +365,111 @@ class RealPickerSafTest {
         }
     }
 
-    private fun selectRealDocument(title: String): Boolean {
-        val deadline = SystemClock.uptimeMillis() + 90_000L
-        var documentVisible = false
-
-        Log.i("MusicFlowRealPickerQA", "MANUAL_SELECTION_REQUIRED file=$title")
+    /** Select actual DocumentsUI rows. Never synthesize or invoke the result callback. */
+    private fun selectRealDocuments(titles: List<String>): Boolean {
+        require(titles.isNotEmpty())
+        val deadline = SystemClock.uptimeMillis() + 40_000L
+        var attempted = 0
+        var attemptedRecent = false
+        var attemptedListView = false
+        Log.i("MusicFlowRealPickerQA", "AUTO_PICKER_BEGIN count=${titles.size}")
 
         while (SystemClock.uptimeMillis() < deadline) {
             val root = instrumentation.uiAutomation.rootInActiveWindow
-            val currentPackage = root?.packageName?.toString()
-
-            if (currentPackage == "com.google.android.documentsui") {
-                if (!documentVisible && findDocumentTitleNode(root, title) != null) {
-                    documentVisible = true
-                    Log.i(
-                        "MusicFlowRealPickerQA",
-                        "DOCUMENT_VISIBLE_READY_FOR_SELECTION"
-                    )
-                }
-            }
-
-            if (currentPackage == context.packageName) {
-                Log.i(
-                    "MusicFlowRealPickerQA",
-                    "PICKER_RETURNED_TO_APP observed=$documentVisible"
-                )
+            val pkg = root?.packageName?.toString()
+            if (pkg == context.packageName && attempted == titles.size) {
+                Log.i("MusicFlowRealPickerQA", "AUTO_PICKER_RETURNED tapped=$attempted")
                 return true
             }
-
-            if (currentPackage != null &&
-                currentPackage != "com.google.android.documentsui"
-            ) {
-                Log.e(
-                    "MusicFlowRealPickerQA",
-                    "UNEXPECTED_PICKER_PACKAGE=$currentPackage"
-                )
-                return false
+            if (pkg == "com.google.android.documentsui") {
+                if (!attemptedListView) {
+                    attemptedListView = true
+                    // Grid cards expose non-clickable title children on
+                    // Google DocumentsUI. List mode makes file rows easier
+                    // to operate with an accessibility-guided test.
+                    val listMode = findNode(root) {
+                        it.equals("List view", ignoreCase = true)
+                    }
+                    if (listMode != null && clickNode(listMode)) {
+                        Log.i("MusicFlowRealPickerQA", "SWITCHED_TO_LIST_VIEW")
+                        SystemClock.sleep(700)
+                        continue
+                    }
+                }
+                if (attempted < titles.size) {
+                    val node = findDocumentTitleNode(root, titles[attempted])
+                    if (node != null) {
+                        // ACTION_OPEN_DOCUMENT with EXTRA_ALLOW_MULTIPLE may
+                        // require selection mode even for one file. Long-press
+                        // the first card, then tap other cards and confirm Open.
+                        val longPress = attempted == 0
+                        val tapped = actOnDocument(node, longPress)
+                        if (!tapped) {
+                            Log.e("MusicFlowRealPickerQA",
+                                "AUTO_PICKER_TAP_FAILED title=${titles[attempted]}")
+                            return false
+                        }
+                        Log.i("MusicFlowRealPickerQA",
+                            "AUTO_PICKER_TAP_SENT title=${titles[attempted]} long=$longPress")
+                        // A successful input dispatch is NOT a confirmed
+                        // picker selection. Only an actual result returned to
+                        // MusicFlow, later validated against the URI, is PASS.
+                        attempted++
+                        SystemClock.sleep(550)
+                        continue
+                    }
+                    if (!attemptedRecent && attempted == 0) {
+                        // DocumentsUI may remember a folder from a previous run.
+                        // Attempt to return to the Recent documents list first.
+                        val recent = findNode(root) {
+                            it.equals("Recent", true) || it.equals("Gần đây", true)
+                        }
+                        if (recent != null && clickNode(recent)) {
+                            attemptedRecent = true
+                            SystemClock.sleep(400)
+                            continue
+                        }
+                    }
+                } else {
+                    // Google DocumentsUI on API 30 uses the action-mode
+                    // button "SELECT", not "Open", after long-pressing a row.
+                    // Only confirm if every requested document is selected.
+                    val selectedTitles = titles.filter { title ->
+                        findDocumentTitleNode(root, title)?.isSelected == true
+                    }
+                    if (selectedTitles.size != titles.size) {
+                        Log.w("MusicFlowRealPickerQA",
+                            "WAIT_FOR_SELECTED_ROWS count=${selectedTitles.size}/${titles.size}")
+                        SystemClock.sleep(250)
+                        continue
+                    }
+                    val selectAction = device.findObject(
+                        By.res("com.google.android.documentsui", "action_menu_select")
+                    )
+                    if (selectAction != null) {
+                        selectAction.click()
+                        Log.i("MusicFlowRealPickerQA", "AUTO_PICKER_SELECT_CLICKED")
+                        SystemClock.sleep(500)
+                        continue
+                    }
+                    if (clickNamedAction(3000L) {
+                            it.equals("SELECT", true) ||
+                                it.equals("Chọn", true) ||
+                                it.equals("Open", true) ||
+                                it.equals("Mở", true)
+                        }) {
+                        Log.i("MusicFlowRealPickerQA", "AUTO_PICKER_CONFIRM_CLICKED")
+                        SystemClock.sleep(500)
+                        continue
+                    }
+                }
             }
-
             SystemClock.sleep(250)
         }
-
-        logPickerUi("MANUAL_SELECTION_TIMEOUT")
-
-        Log.e(
-            "MusicFlowRealPickerQA",
-            "MANUAL_SELECTION_TIMEOUT package=" +
-                instrumentation.uiAutomation.rootInActiveWindow?.packageName
-        )
+        logPickerUi("AUTO_PICKER_TIMEOUT")
+        Log.e("MusicFlowRealPickerQA",
+            "AUTO_PICKER_TIMEOUT tapped=$attempted package=" +
+                instrumentation.uiAutomation.rootInActiveWindow?.packageName)
         return false
     }
 
@@ -407,7 +560,7 @@ Log.i(
 
             assertTrue(
                 "Document was not selectable in real OpenMultipleDocuments UI",
-                selectRealDocument(title)
+                selectRealDocuments(listOf(title))
             )
 
             val deadline =
@@ -627,14 +780,9 @@ Log.i(
                 activity.openAudioPickerForQa()
             }
 
-            Log.i(
-                "MusicFlowRealPickerQA",
-                "MULTI_SELECTION_REQUIRED ${titles.joinToString()}"
-            )
-
             assertTrue(
                 "Picker did not return",
-                selectRealDocument(titles.first())
+                selectRealDocuments(titles)
             )
 
             var queueUris = emptyList<Uri>()
