@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `510de79` — Runtime Equalizer v1 đã commit; Lyrics Runtime Acceptance v1 **Android API 30 10/10 PASS, JVM 105/105 PASS trong workspace**, chưa commit |
+| HEAD Git hiện tại | `6cf6d21` — Lyrics Runtime Acceptance v1 đã commit; Lyrics Import UI E2E v2 **Android API 30 11/11 PASS, JVM 105/105 PASS trong workspace**, chưa commit |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
@@ -50,8 +50,9 @@
 | Sleep Timer Runtime Acceptance v1 | Gradle Build/JVM PASS; **3/3 Sleep Timer + 8/8 Playback/Queue regression = 11/11 Android API 30 PASS**, 8/8 marker; release không nhận debug-duration override, không đổi nhạc offline/online rights |
 | Equalizer Runtime Acceptance v1 | Gradle Build/JVM PASS; **2/2 Equalizer + 8/8 Playback/Queue regression = 10/10 Android API 30 PASS**, 6/6 marker; `docs/Equalizer_Runtime_Acceptance_v1.md` |
 | Lyrics Runtime Acceptance v1 | **105/105 JVM PASS**, Android API 30 **2/2 Lyrics + 8/8 Playback/Queue regression = 10/10 PASS**; thực tế SAF CreateDocument + persisted READ + parser + highlight khi MediaSession seek; `docs/Lyrics_Runtime_Acceptance_v1.md` |
+| Lyrics Import UI End-to-End v2 | **105/105 JVM PASS; 11/11 Android API 30 PASS** (1 MainActivity→DocumentsUI OpenDocument→Player E2E + 2 Lyrics v1 + 8 Playback/Queue), 7 E2E markers; `docs/Lyrics_Import_UI_E2E_v2.md` |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Lyrics Import UI End-to-End v2** — kiểm thử riêng nút `Nhập file .lrc` từ Now Playing / MainActivity, DocumentsUI OpenDocument, callback và tự hiển thị lời; sau đó runtime QA các tính năng còn lại. Licensed Streaming Smoke chờ nhạc có quyền thật; Google Login/email thật ĐỂ CUỐI |
+| Bước tiếp theo | **Playback Speed Runtime Acceptance v1** — kiểm thử tốc độ phát 0.75–2x qua MediaSession thật và UI Now Playing, hồi quy pause/queue; mốc nhỏ. Licensed Streaming Smoke chờ nhạc có quyền thật; Google Login/email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -171,7 +172,8 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **P0 — runtime QA đã đạt API 30** | **Sleep Timer Runtime Acceptance v1** | **11/11 Android PASS**, Build/JVM PASS | `docs/Sleep_Timer_Runtime_Acceptance_v1.md`, `qa-logs/sleep-timer-runtime-v1.log`; expiry test dùng debug timer, chưa thử service restart |
 | **P0 — runtime QA đã đạt API 30** | **Equalizer Runtime Acceptance v1** | **10/10 Android PASS**, Build/JVM PASS | `docs/Equalizer_Runtime_Acceptance_v1.md`, `qa-logs/equalizer-runtime-v1.log`; chưa QA thực tế process-restart, audio frequency loopback |
 | **P0 — runtime QA đã đạt API 30** | **Lyrics Runtime Acceptance v1** | **105 JVM PASS, 10/10 Android targeted PASS** | `docs/Lyrics_Runtime_Acceptance_v1.md`, `qa-logs/lyrics-runtime-v1.log`; có SAF thật/URI grant và Compose highlight theo MediaSession seek, chưa UI nhập hoàn chỉnh |
-| **P0 — kế tiếp (mốc nhỏ)** | **Lyrics Import UI E2E v2** | CHƯA THỰC HIỆN | Nhấn nút `Nhập file .lrc` → DocumentsUI → URI thực → cập nhật UI Player/linked LRC, cleanup |
+| **P0 — runtime QA đã đạt API 30** | **Lyrics Import UI E2E v2** | **105 JVM PASS, 11/11 Android targeted PASS** | `docs/Lyrics_Import_UI_E2E_v2.md`, `qa-logs/lyrics-import-ui-e2e-v2.log`; đã nhấn nút thật, chọn LRC trên DocumentsUI và đồng bộ highlight qua callback production |
+| **P0 — kế tiếp (mốc nhỏ)** | **Playback Speed Runtime Acceptance v1** | CHƯA THỰC HIỆN | MediaSession tốc độ 0.75/1/1.25/1.5/2x, pause/queue giữ nguyên, UI Now Playing |
 | **P0 — kế tiếp** | **Lyrics Runtime Acceptance v1** | CHƯA THỰC HIỆN | Test LRC Parser + SAF/URI import/persist, timestamp-synced lyric render, playback real MediaSession với WAV offline |
 | **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
 | **P1** | UI/accessibility/empty-state/error-state | Foundation v1 13/13 + Polish v2 19/19 Android PASS; toàn diện **CHƯA NGHIỆM THU** | Tiếp tục ma trận API, TalkBack thật, adaptive layout rộng và các trạng thái chưa chuẩn hóa |
@@ -281,6 +283,15 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Lyrics Import UI End-to-End v2 — FULL PICKER→MAINACTIVITY→PLAYER PASS
+
+- HEAD nền `6cf6d21` (Lyrics Runtime v1 đã được commit/push), Git sạch khi bắt đầu. Không thay production code, Supabase, Google Login hoặc cloud.
+- Thêm `LyricsImportUiE2eTest.kt`: tạo LRC bằng DocumentsUI CreateDocument thật, nạp WAV offline Media3, nhấn MiniPlayer → Now Playing → **Nhập file .lrc**, dùng UIAutomator chọn thẻ tài liệu ở Android OpenDocument và bấm SELECT; xác nhận **callback MainActivity production** lưu URI đúng audio, persisted READ, lyrics tự hiển thị; MediaSession seek 1.4/3.4/6.4/1.6 giây làm highlight thay đổi đúng (cả tua ngược).
+- Sửa lỗi duy nhất ở selector bài test: nhiều dòng Home/History/MiniPlayer trùng tên bài, nên chuyển sang `onNodeWithContentDescription` riêng của MiniPlayer. Không đổi hành vi ứng dụng. Script QA lần đầu nhận nhầm `OK (1 test)` là FAIL vì dùng chuỗi `OK (1 tests)`; sửa số ít/số nhiều và chạy lại đầy đủ.
+- `scripts/run-lyrics-import-ui-e2e-v2-tests.ps1` + `qa-logs/lyrics-import-ui-e2e-v2.log`: Gradle Build/JVM **105/105 PASS**, Lyrics UI E2E **1/1 PASS**, Lyrics v1 **2/2 PASS**, Playback/Queue **8/8 PASS**, tổng **11/11 Android API 30**, 7/7 marker, `git diff --check` PASS, `FINAL_RESULT=PASS`. Có cleanup URI grant/document WAV/preferences/queue test.
+- `docs/Lyrics_Import_UI_E2E_v2.md` ghi giới hạn: API30 emulator, chưa điện thoại thật/đa API/process kill, chưa chạy full connectedDebugAndroidTest sau mốc. Nhạc offline tự tải vẫn không cần xác minh quyền online.
+- **Tiếp theo:** Playback Speed Runtime Acceptance v1 (mốc nhỏ) rồi các tính năng build-only còn lại; Google/email thật, cloud E2E hai thiết bị và licensed streaming thật vẫn chờ.
 
 ### 2026-10-29 — Runtime Feature Acceptance: Lyrics v1 — JVM 105/105 + ANDROID API 30 10/10 PASS
 
