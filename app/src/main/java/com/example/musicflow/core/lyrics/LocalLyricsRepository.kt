@@ -17,6 +17,12 @@ data class LyricsUiState(
     val error: String? = null
 )
 
+/** -1 means that playback has not reached the first timestamp. */
+object LyricsTimeline {
+    fun activeIndex(lines: List<LyricLine>, positionMs: Long): Int =
+        lines.indexOfLast { it.timeMs <= positionMs }
+}
+
 object LrcParser {
     private val timestamp = Regex(
         """\[(\d{1,3}):([0-5]\d)(?:[.:](\d{1,3}))?\]"""
@@ -137,14 +143,14 @@ class LocalLyricsRepository(context: Context) {
         audioUri: String,
         lyricsUri: Uri
     ): List<LyricLine> {
-        // OpenDocument cấp quyền có thể lưu lâu dài.
+        // Read/validate while the picker grant is active, BEFORE asking
+        // Android to persist it. Invalid LRC must not retain a needless grant.
+        val lines = read(lyricsUri)
+
         resolver.takePersistableUriPermission(
             lyricsUri,
             Intent.FLAG_GRANT_READ_URI_PERMISSION
         )
-
-        // Chỉ ghi nhớ file sau khi đọc và parse thành công.
-        val lines = read(lyricsUri)
 
         check(
             preferences.edit()

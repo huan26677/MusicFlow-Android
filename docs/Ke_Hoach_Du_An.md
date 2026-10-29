@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `38af246` — Runtime Sleep Timer v1 đã commit; Runtime Equalizer v1 **10/10 Android API 30 PASS trong workspace**, chưa commit |
+| HEAD Git hiện tại | `510de79` — Runtime Equalizer v1 đã commit; Lyrics Runtime Acceptance v1 **Android API 30 10/10 PASS, JVM 105/105 PASS trong workspace**, chưa commit |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
@@ -16,7 +16,7 @@
 | Marker API 30 | 40/40 PASS |
 | Playback Speed v1 | Đã có source |
 | Sleep Timer v1 | **Runtime Android API 30 PASS:** đặt/query/thay/hủy, debug-only expiry 1–2 giây kiểm tra MediaSession tạm dừng/giữ queue; 3/3 Sleep + 8/8 Playback regression = **11/11 PASS**; chưa test multi-API/real device |
-| Lyrics v1 | Triển khai đọc LRC và hiển thị đồng bộ |
+| Lyrics v1 | Parser LRC, nhập/lưu URI SAF, đồng bộ dòng lời theo MediaSession seek; **6 JVM parser + 2 Android Lyrics + 8 Playback regression PASS** trên API 30; còn MainActivity picker-to-screen E2E |
 | Lyrics import | Android OpenDocument |
 | Lưu liên kết LRC theo audio URI | Đã triển khai |
 | Build Lyrics v1 + Sleep Timer v1 | `:app:assembleDebug` và `:app:assembleDebugAndroidTest` PASS ngày 2026-10-29; chỉ xác nhận biên dịch |
@@ -49,8 +49,9 @@
 | Full Product Regression Gate v1 - Part 3 | Toàn bộ Android/JVM API 30 **PASS**: JVM **99/99**, Android **86 PASS / 0 FAIL / 3 SKIP** từ 89 testcase; đã sửa lỗi timing/scroll Playlist Reorder và chạy lại suite; `qa-logs/full-product-regression-v1-part3.log` |
 | Sleep Timer Runtime Acceptance v1 | Gradle Build/JVM PASS; **3/3 Sleep Timer + 8/8 Playback/Queue regression = 11/11 Android API 30 PASS**, 8/8 marker; release không nhận debug-duration override, không đổi nhạc offline/online rights |
 | Equalizer Runtime Acceptance v1 | Gradle Build/JVM PASS; **2/2 Equalizer + 8/8 Playback/Queue regression = 10/10 Android API 30 PASS**, 6/6 marker; `docs/Equalizer_Runtime_Acceptance_v1.md` |
+| Lyrics Runtime Acceptance v1 | **105/105 JVM PASS**, Android API 30 **2/2 Lyrics + 8/8 Playback/Queue regression = 10/10 PASS**; thực tế SAF CreateDocument + persisted READ + parser + highlight khi MediaSession seek; `docs/Lyrics_Runtime_Acceptance_v1.md` |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Runtime Feature Acceptance — Lyrics v1** — test nhập LRC qua SAF, parser và đồng bộ lời theo thời gian, lưu liên kết URI; từng phần nhỏ. Licensed Streaming Smoke chờ bài nhạc có quyền thật; Google Login/email thật ĐỂ CUỐI |
+| Bước tiếp theo | **Lyrics Import UI End-to-End v2** — kiểm thử riêng nút `Nhập file .lrc` từ Now Playing / MainActivity, DocumentsUI OpenDocument, callback và tự hiển thị lời; sau đó runtime QA các tính năng còn lại. Licensed Streaming Smoke chờ nhạc có quyền thật; Google Login/email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -169,6 +170,8 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **P0 — Full regression API 30 PASS** | **Full Product Regression Gate v1 - Part 3** | **99/99 JVM PASS, 86 Android PASS / 0 FAIL / 3 SKIP (89 total)** | `docs/Full_Product_Regression_Gate_v1_Part_3.md`, `qa-logs/full-product-regression-v1-part3.log`; vẫn cần runtime acceptance các tính năng build-only và thiết bị thật |
 | **P0 — runtime QA đã đạt API 30** | **Sleep Timer Runtime Acceptance v1** | **11/11 Android PASS**, Build/JVM PASS | `docs/Sleep_Timer_Runtime_Acceptance_v1.md`, `qa-logs/sleep-timer-runtime-v1.log`; expiry test dùng debug timer, chưa thử service restart |
 | **P0 — runtime QA đã đạt API 30** | **Equalizer Runtime Acceptance v1** | **10/10 Android PASS**, Build/JVM PASS | `docs/Equalizer_Runtime_Acceptance_v1.md`, `qa-logs/equalizer-runtime-v1.log`; chưa QA thực tế process-restart, audio frequency loopback |
+| **P0 — runtime QA đã đạt API 30** | **Lyrics Runtime Acceptance v1** | **105 JVM PASS, 10/10 Android targeted PASS** | `docs/Lyrics_Runtime_Acceptance_v1.md`, `qa-logs/lyrics-runtime-v1.log`; có SAF thật/URI grant và Compose highlight theo MediaSession seek, chưa UI nhập hoàn chỉnh |
+| **P0 — kế tiếp (mốc nhỏ)** | **Lyrics Import UI E2E v2** | CHƯA THỰC HIỆN | Nhấn nút `Nhập file .lrc` → DocumentsUI → URI thực → cập nhật UI Player/linked LRC, cleanup |
 | **P0 — kế tiếp** | **Lyrics Runtime Acceptance v1** | CHƯA THỰC HIỆN | Test LRC Parser + SAF/URI import/persist, timestamp-synced lyric render, playback real MediaSession với WAV offline |
 | **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
 | **P1** | UI/accessibility/empty-state/error-state | Foundation v1 13/13 + Polish v2 19/19 Android PASS; toàn diện **CHƯA NGHIỆM THU** | Tiếp tục ma trận API, TalkBack thật, adaptive layout rộng và các trạng thái chưa chuẩn hóa |
@@ -278,6 +281,17 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Runtime Feature Acceptance: Lyrics v1 — JVM 105/105 + ANDROID API 30 10/10 PASS
+
+- HEAD nền `510de79` (Equalizer Runtime Acceptance đã push), Git sạch trước khi bắt đầu; tập trung Lyrics, không đổi phát nhạc offline hay chính sách quyền nội dung online.
+- Đọc đường `LrcParser` → `LocalLyricsRepository` → `MainActivity` → `NowPlayingScreen`. Thêm `LyricsTimeline.activeIndex` dùng chung cho UI và test, và tag semantics `lyrics-active-line` cho dòng hiện hành. Nhập LRC nay **đọc/parse trước khi lưu URI grant**; tệp LRC invalid không giữ quyền SAF hay liên kết không cần thiết.
+- `LrcParserTest.kt` thêm **6 JVM tests PASS** (timestamp, offset, BOM, nhiều timestamps, invalid, giới hạn text, seek timeline), tổng JVM **105/105 PASS**.
+- `LyricsSafImportTest.kt`: DocumentsUI CreateDocument thật, URI `content://`, import vào repository, persisted READ grant, nạp lại liên kết audio và từ chối LRC không hợp lệ. Đã sửa test sử dụng `openOutputStream(..., "rwt")` thay vì `"w"` để **truncate** dữ liệu cũ của DocumentsProvider, tránh kết quả sai.
+- `LyricsScreenSyncTest.kt`: NowPlaying Compose xác nhận dòng lyrics nổi bật khi seek **MediaSession thật** đến 1.2/3.3/6.2/1.8 giây; file WAV offline thử; cleanup và khôi phục trạng thái hàng đợi.
+- `scripts/run-lyrics-runtime-v1-tests.ps1` + `qa-logs/lyrics-runtime-v1.log`: Gradle build/JVM **PASS**, Lyrics Android **2/2 PASS**, PlaybackService 3/3 và QueuePersistence 5/5, tổng **10/10 Android PASS**, 3/3 marker, Git diff check PASS, `FINAL_RESULT=PASS`. Tài liệu `docs/Lyrics_Runtime_Acceptance_v1.md`.
+- **Giới hạn:** bài test SAF tạo file thật + repository import, chưa test một vòng trọn vẹn từ **nút `Nhập file .lrc` của MainActivity qua OpenDocument**; UI lyric nhận dữ liệu LRC test và vị trí MediaSession thật. Chưa toàn bộ Android suite sau mốc này, thiết bị thật, đa API.
+- **Bước kế tiếp:** Lyrics Import UI End-to-End v2 (mốc nhỏ), sau đó các tính năng còn thiếu runtime QA; Google/email thật, Cloud E2E hai thiết bị và Licensed Streaming Smoke vẫn ở cuối hoặc phụ thuộc nhạc có quyền thật.
 
 ### 2026-10-29 — Runtime Feature Acceptance: Equalizer v1 — BUILD/JVM + 10/10 ANDROID API 30 PASS
 

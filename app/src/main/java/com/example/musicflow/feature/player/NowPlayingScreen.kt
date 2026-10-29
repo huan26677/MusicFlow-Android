@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.musicflow.core.favorites.LocalFavoritesStore
 import androidx.compose.ui.Modifier
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
 
 import androidx.media3.common.Player
 import com.example.musicflow.core.lyrics.LyricsUiState
+import com.example.musicflow.core.lyrics.LyricsTimeline
 import com.example.musicflow.core.playback.PlayerUiState
 import androidx.compose.ui.text.font.FontWeight
 import com.example.musicflow.ui.components.SongArtwork
@@ -463,13 +465,17 @@ fun NowPlayingScreen(
                 style = MaterialTheme.typography.bodyMedium
             )
         } else {
-            val currentLineIndex = lyrics.lines.indexOfLast {
-                it.timeMs <= state.positionMs
-            }
+            val currentLineIndex = LyricsTimeline.activeIndex(
+                lyrics.lines, state.positionMs
+            )
 
             lyrics.lines.forEachIndexed { index, line ->
                 Text(
                     text = line.text,
+                    modifier = Modifier.testTag(
+                        if (index == currentLineIndex) "lyrics-active-line"
+                        else "lyrics-inactive-line"
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = if (index == currentLineIndex) {
                         FontWeight.Bold
