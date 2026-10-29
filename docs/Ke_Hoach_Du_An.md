@@ -8,7 +8,9 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `71944fb` — Google Login Foundation v1 ở workspace, chưa commit |
+| HEAD Git hiện tại | `69d3a51` — Account/Google Hardening v2, Queue Actions v1 và Queue Manager v1 đang ở workspace, chưa commit |
+| Phạm vi MusicFlow 1.0 | **Đã chốt** offline + online hợp pháp + library cá nhân + cloud; ưu tiên dùng cá nhân, mở rộng sau 1.0; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
+| Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 | 55 bài chính PASS |
 | Marker API 30 | 40/40 PASS |
@@ -31,7 +33,11 @@
 | Cloud Sync Hardening v2 | Trigger quota, tombstone xóa cloud, UI relink thủ công, RPC merge, có source; chưa E2E đa thiết bị |
 | History Sync v1 | Supabase RLS, RPC metadata-only, UI đồng bộ thủ công; APK + AndroidTest build và JVM unit PASS (4/4 riêng History), chưa E2E |
 | Google Login Foundation v1 | Android OAuth PKCE + nonce + callback + session; build Android + JVM PASS (7/7 Google unit tests); provider Supabase Google TẮT, chưa E2E |
-| Bước tiếp theo | Bật Google provider ở Dashboard + kiểm thử Google Login E2E; tiếp tục Cloud Sync E2E hai thiết bị khi có môi trường |
+| Account & Google Security Hardening v2 | Loại trừ phiên Auth/PKCE khỏi Android backup và device transfer; kiểm tra callback bổ sung; 4/4 Python, 12/12 Google JVM, Android app + AndroidTest build PASS; chưa E2E |
+| Playback Queue Actions v1 | Phát tiếp / Thêm vào hàng đợi từ Library/Search; luật queue độc lập, có test; build + JVM PASS (8/8 queue rule tests), chưa Android runtime QA |
+| Queue Manager UI v1 | Xem/xóa/di chuyển/dọn hàng đợi, giữ bài đang phát; 16/16 JVM và 3/3 Android instrumented trên API 30 PASS |
+| Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
+| Bước tiếp theo | **Core Media Source Contract v1** — chuẩn hóa track identity và factory cho MediaStore/SAF/online; Google Login và email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -127,11 +133,15 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 
 ## 5. Công việc tiếp theo: backlog theo thứ tự ưu tiên
 
-**Chế độ phát triển hiện hành (2026-10-29):** Chủ dự án ưu tiên hoàn thiện tính năng Full Product trước rồi mới chạy vòng QA/bug tổng thể. Các mục P0 QA/Release bên dưới vẫn giữ nguyên để nghiệm thu cuối, không được hiểu là đã PASS khi chỉ build thành công. Supabase Catalog/Streaming, Licensed Content Upload, Account/Auth, Cloud Sync, History Sync và Google Login Foundation đã có source. **Google provider đang TẮT trong Supabase; chưa có nhạc được cấp phép; chưa test tài khoản thật hay đồng bộ đa thiết bị E2E**. Khi người dùng bật Google provider, triển khai E2E; khi có nhạc hợp lệ thì Licensed Streaming Smoke. Billing, signed URL, podcast/radio vẫn là backlog.
+**Chế độ phát triển hiện hành (2026-10-29 — quyết định mới):** Chủ dự án ưu tiên hoàn thiện Full Product, thiết kế có khả năng mở rộng, **không sử dụng email thật và không triển khai Google Login E2E cho tới giai đoạn cuối**. Auth nền tảng vẫn giữ nguyên nhưng không nằm trên critical path. Các P0 QA/Release bên dưới giữ nguyên để nghiệm thu cuối, không được hiểu PASS nếu chỉ build. Xem `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md` để biết thứ tự và kiến trúc. **Google provider được xác nhận TẮT ở lần kiểm tra gần nhất; chưa có nhạc được cấp phép; chưa test tài khoản thật hoặc đồng bộ đa thiết bị E2E**. Không yêu cầu credentials cho các bước độc lập. Billing, signed URL, podcast/radio vẫn là backlog.
 
 | Ưu tiên | Bước / việc cần làm | Trạng thái | Điều kiện kết thúc bước |
 |---|---|---|---|
 | **P0 — đã hoàn thành** | **Playback Runtime Recovery Race Hardening v3** | **PASS — 36/36 Android tests** | Xem `qa-logs/playback-runtime-recovery-v3.log`; yêu cầu 5 marker v3 + regression v2 |
+| **Phát triển — vừa xong source** | **Playback Queue Actions v1** | **BUILD + JVM PASS, chưa QA runtime** | `qa-logs/playback-queue-actions-v1.log`, 8/8 JVM queue test; cần E2E queue/restore |
+| **Phát triển — đã test Android** | **Queue Manager UI v1** | **16 JVM + 3 Android instrumented PASS (API 30)** | `qa-logs/queue-manager-v1.log`; chưa kiểm thử đa API hoặc khôi phục sau force-stop |
+| **Phát triển — kế tiếp** | **Media Source Contract + modularization dần** | CHƯA TRIỂN KHAI | Tách identity/factory/contracts, không làm mất tương thích local/online |
+| **Hoãn tới cuối** | **Google Login + email thật + Auth/Cloud E2E** | HOÃN THEO QUYẾT ĐỊNH CHỦ DỰ ÁN | Chỉ kiểm thử thật khi gần hoàn thành Full Product và có credentials do chủ dự án tự cấu hình |
 | **P0** | **MVP End-to-End Acceptance v1** — Library/Search/Picker → Player → Playlist/History → restart | CHƯA NGHIỆM THU | Script UI/integration tests có assertions và log cho từng flow |
 | **P0** | **Background Playback / System Controls QA** | V2 QA TỰ ĐỘNG PASS (API 30) — còn lockscreen và Bluetooth thực tế | Test lifecycle, audio focus, điều khiển từ MediaSession/notification/lock screen trong phạm vi khả thi; mọi điều kiện đã chốt đạt PASS |
 | **P0 — kế tiếp** | **Android Compatibility Matrix v2** | Đang thực hiện | Bộ test tự động trên các API đại diện (29/30/33/36): 55 bài chính + 3 SKIPPED, 40 marker + 4 SAF |
@@ -243,6 +253,43 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Queue Manager UI v1 — BUILD + JVM + ANDROID PASS
+
+- Giữ HEAD nền `69d3a51` và toàn bộ thay đổi chưa commit trước đó; không tự commit/push.
+- Tạo `QueueEditRules.kt` độc lập Android: giữ bài đang phát, không cho di chuyển qua vị trí hiện tại, hạn chế reorder khi Shuffle.
+- `PlaybackController`: thêm `queueItems`, `queueVersion` trong `PlayerUiState`; cập nhật theo timeline Media3; lệnh remove/move/clear kiểm tra MediaController permission và snapshot version để từ chối thao tác cũ.
+- `QueueManagerScreen.kt`: xem hàng đợi, lên/xuống/xóa, xác nhận dọn; mở từ Now Playing; callbacks qua Navigation → MainActivity → PlayerViewModel → PlaybackController.
+- Phạm vi được chủ dự án duyệt: offline + licensed online + cloud opt-in, Guest/Free/Premium, bản sắc riêng; Auth E2E về cuối và mở rộng sản phẩm sau 1.0.
+- Build `:app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest` **PASS**. `QueueEditRulesTest` **8/8**, `QueueInsertRulesTest` **8/8**.
+- Android emulator API 30: `QueueManagerIntegrationTest` **1/1** (move/remove/clear, stale version, media đang phát, snapshot persistence); `QueueManagerScreenTest` **2/2** (bảo vệ current item, callback version, xác nhận dọn). Script `scripts/run-queue-manager-v1-tests.ps1`, log `qa-logs/queue-manager-v1.log`, `FINAL_RESULT=PASS`.
+- Giới hạn: dùng nút lên/xuống thay vì kéo thả; chưa instrumentation đa API hoặc force-stop restore thực tế cho Queue Manager. Full Product chưa nghiệm thu.
+- Bước tiếp theo: **Core Media Source Contract v1** — thống nhất identity/factory cho MediaStore, SAF và licensed online; giữ tương thích playback/playlist/queue persistence.
+
+### 2026-10-29 — Playback Queue Actions v1 + kiến trúc mở rộng — BUILD + UNIT PASS
+
+- Quyết định chính thức mới: hoãn dùng email/tài khoản thật và Google Login E2E đến cuối giai đoạn Full Product; không xóa nền tảng Auth đã có.
+- HEAD nền `69d3a51`; các chỉnh sửa Account/Google Security Hardening v2 từ bước trước vẫn nằm trong workspace, giữ nguyên; Queue Actions v1 chưa commit/push.
+- Tách luật `QueueInsertRules.kt` / `QueuePlacement` (JVM pure), thêm `PlaybackController.enqueue` dựa trên Media3 `addMediaItem(index, item)`; kiểm tra `COMMAND_CHANGE_MEDIA_ITEMS`, không thay bài/vị trí hiện tại, không tự phát khi queue trống.
+- Bổ sung `PlayerUiState.canEditQueue` để ẩn action khi MediaSession không có quyền sửa queue. **Phát tiếp** bị ẩn khi Shuffle hoặc Repeat One (vì không bảo đảm ngay sau bài hiện tại); **Thêm vào hàng đợi** vẫn cho phép thêm cuối playlist.
+- `PlayerViewModel` dùng chung phương thức dựng `MediaItem` từ DeviceSong cho cả Play/Queue; nối callback từ MainActivity → Navigation → Library/Search, bao gồm nhóm Album/Nghệ sĩ/Thể loại và Favorites.
+- JVM: `QueueInsertRulesTest` **8/8 PASS**, 0 failure/error. `:app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest` **BUILD SUCCESSFUL**; chưa chạy Android instrumentation trên emulator. Script `scripts/run-playback-queue-actions-v1-tests.ps1`, log `qa-logs/playback-queue-actions-v1.log` ghi `FINAL_RESULT=BUILD_AND_UNIT_PASS`.
+- Tạo `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`: kiến trúc đích theo ranh giới, lộ trình chia giai đoạn, chiến lược mô-đun hóa dần; **không** tuyên bố đã tách modules.
+- Giới hạn: chưa có UI quản lý toàn bộ queue, chưa có Android runtime test cho insertion/persistence sau restart, chưa xác nhận thao tác queue từ các thiết bị/controller ngoài.
+- Bước tiếp theo: **Queue Manager UI v1** (xem/sắp xếp/xóa hàng đợi), giữ Google Login E2E ở cuối.
+
+### 2026-10-29 — Account & Google Login Security Hardening v2 — BUILD + UNIT PASS
+
+- HEAD nền `69d3a51` (`feat: add Google OAuth login foundation with PKCE`), workspace sạch trước khi sửa; mã v2 **chưa commit/push**.
+- Sửa `app/src/main/res/xml/backup_rules.xml` (Android <= 11) và `data_extraction_rules.xml` (Android >= 12): loại riêng `musicflow_account_session_v1.xml` khỏi cloud backup và device transfer. Giữ nguyên backup dữ liệu khác.
+- `GoogleOAuthFlow.kt`: từ chối callback có cổng ngoài dự kiến hoặc query quá dài; mở rộng test callback có duplicate flow, explicit port, oversized query, OAuth error và fragment.
+- `AccountApi.kt` + `AccountViewModel.kt`: xóa Google PKCE pending nếu không khởi chạy được trình duyệt.
+- Python tests `scripts/test_account_backup_rules.py`: **4/4 PASS** (legacy backup, cloud/device transfer, Manifest, tên SharedPreferences).
+- Google JVM `GoogleOAuthFlowTest`: **12/12 PASS**, 0 lỗi. Gradle `:app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest --console=plain`: **BUILD SUCCESSFUL**; chỉ biên dịch AndroidTest APK, chưa chạy trên emulator.
+- Script `scripts/run-account-google-hardening-v2-tests.ps1`, log `qa-logs/account-google-hardening-v2.log`: `FINAL_RESULT=BUILD_AND_UNIT_PASS`. Lần chạy đầu lỗi **script QA** do PowerShell 5.1 coi stderr từ Python unittest là terminating error; sửa cách nhận stderr theo exit code, lần chạy lại PASS; không có bằng chứng lỗi Android app ở lần đầu.
+- Tham khảo Android Auto Backup chính thức, OWASP Mobile Security và tài liệu Supabase Auth PKCE; chưa thay đổi Supabase schema/config.
+- **Giới hạn:** chưa kiểm thử Android Backup restore thực tế; Google provider chưa có xác nhận bật, không có Google Login E2E; Full Regression cuối giai đoạn chưa chạy. Không tuyên bố ứng dụng hoàn thành.
+- Bước tiếp theo: chủ dự án bật Google provider bằng credential riêng tại Supabase Dashboard, sau đó chạy Google Login E2E; nếu chưa cấu hình, tiếp tục một milestone Full Product không cần tài khoản thật.
 
 ### 2026-10-29 — Google Login Foundation v1 — Build-only
 

@@ -24,6 +24,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+/** A lightweight presentation snapshot, not a second playback queue. */
+data class QueueTrackUi(
+    val mediaId: String,
+    val title: String,
+    val artist: String
+)
+
 data class PlayerUiState(
     val connected: Boolean = false,
     val hasMedia: Boolean = false,
@@ -35,6 +42,9 @@ data class PlayerUiState(
     val durationMs: Long = 0L,
     val currentIndex: Int = 0,
     val queueCount: Int = 0,
+    val queueItems: List<QueueTrackUi> = emptyList(),
+    val queueVersion: Long = 0L,
+    val canEditQueue: Boolean = false,
     val canNext: Boolean = false,
     val canPrevious: Boolean = false,
     val artist: String = "Không rõ nghệ sĩ",
@@ -77,7 +87,10 @@ class PlaybackController(context: Context) {
             player: Player,
             events: Player.Events
         ) {
-            updateState(player)
+            updateState(
+                player,
+                refreshQueue = events.contains(Player.EVENT_TIMELINE_CHANGED)
+            )
         }
     }
 
@@ -109,7 +122,7 @@ class PlaybackController(context: Context) {
 
                         controller = newController
                         newController.addListener(listener)
-                        updateState(newController)
+                        updateState(newController, refreshQueue = true)
                         requestSleepTimer(-1)
                         requestEqualizer(EqualizerContract.OP_GET)
                         requestTransition(TransitionContract.OP_GET)
@@ -136,7 +149,7 @@ class PlaybackController(context: Context) {
         )
     }
 
-    private fun updateState(player: Player) {
+    private fun updateState(player: Player, refreshQueue: Boolean = false) {
         val duration = player.duration.let { value ->
             if (value > 0L && value != C.TIME_UNSET) {
                 value
@@ -196,6 +209,22 @@ class PlaybackController(context: Context) {
             it.scheme == "content"
         }
 
+        val previous = _uiState.value
+        val queueItems = if (refreshQueue) {
+            (0 until player.mediaItemCount).map { index ->
+                val item = player.getMediaItemAt(index)
+                QueueTrackUi(
+                    mediaId = item.mediaId,
+                    title = item.mediaMetadata.title?.toString()
+                        ?.takeIf { it.isNotBlank() } ?: "Bài hát không tên",
+                    artist = item.mediaMetadata.artist?.toString()
+                        ?.takeIf { it.isNotBlank() } ?: "Không rõ nghệ sĩ"
+                )
+            }
+        } else {
+            previous.queueItems
+        }
+
         _uiState.value = PlayerUiState(
             connected = true,
             hasMedia = hasMedia,
@@ -216,6 +245,15 @@ class PlaybackController(context: Context) {
                 0
             },
             queueCount = player.mediaItemCount,
+            queueItems = queueItems,
+            queueVersion = if (refreshQueue) {
+                previous.queueVersion + 1L
+            } else {
+                previous.queueVersion
+            },
+            canEditQueue = player.isCommandAvailable(
+                Player.COMMAND_CHANGE_MEDIA_ITEMS
+            ),
             canNext = player.hasNextMediaItem(),
             canPrevious = player.hasPreviousMediaItem(),
 
@@ -287,7 +325,81 @@ class PlaybackController(context: Context) {
         player.setMediaItems(items, startIndex, 0L)
         player.prepare()
         player.play()
-        updateState(player)
+        updateState(player, refreshQueue = true)
+    }
+
+    /**
+     * Insert into the existing MediaSession playlist without interrupting the
+     * current track or its position. The service persists timeline changes.
+     * Do not silently start playback when no existing queue is present.
+     */
+    fun enqueue(item: MediaItem, placement: QueuePlacement): Boolean {
+        if (item.localConfiguration?.uri == null) return false
+        val player = controller ?: return false
+        if (!player.isCommandAvailable(Player.COMMAND_CHANGE_MEDIA_ITEMS)) return false
+        val target = QueueInsertRules.insertionIndex(
+            count = player.mediaItemCount,
+            currentIndex = player.currentMediaItemIndex,
+            placement = placement,
+            shuffleEnabled = player.shuffleModeEnabled,
+            repeatOneEnabled = player.repeatMode == Player.REPEAT_MODE_ONE
+        ) ?: return false
+        player.addMediaItem(target, item)
+        updateState(player, refreshQueue = true)
+        return true
+    }
+
+    /** Reject actions made against an outdated timeline/snapshot. */
+    private fun editableQueue(expectedVersion: Long): MediaController? {
+        val player = controller ?: return null
+        if (expectedVersion != _uiState.value.queueVersion) return null
+        if (!player.isCommandAvailable(Player.COMMAND_CHANGE_MEDIA_ITEMS)) return null
+        return player
+    }
+
+    fun removeQueueItem(index: Int, expectedVersion: Long): Boolean {
+        val player = editableQueue(expectedVersion) ?: return false
+        if (!QueueEditRules.canRemove(
+                player.mediaItemCount, player.currentMediaItemIndex, index
+            )
+        ) return false
+        player.removeMediaItem(index)
+        updateState(player, refreshQueue = true)
+        return true
+    }
+
+    fun moveQueueItem(fromIndex: Int, toIndex: Int, expectedVersion: Long): Boolean {
+        val player = editableQueue(expectedVersion) ?: return false
+        if (!QueueEditRules.canMove(
+                player.mediaItemCount,
+                player.currentMediaItemIndex,
+                fromIndex,
+                toIndex,
+                player.shuffleModeEnabled
+            )
+        ) return false
+        player.moveMediaItem(fromIndex, toIndex)
+        updateState(player, refreshQueue = true)
+        return true
+    }
+
+    /**
+     * Clear all OTHER items. Clearing the current MediaItem would stop audio,
+     * so keep it (with its position) and let PlaybackService persist the change.
+     */
+    fun clearQueueOthers(expectedVersion: Long): Boolean {
+        val player = editableQueue(expectedVersion) ?: return false
+        val current = player.currentMediaItemIndex
+        val count = player.mediaItemCount
+        if (!QueueEditRules.canClearOthers(count, current)) return false
+        if (current + 1 < count) {
+            player.removeMediaItems(current + 1, count)
+        }
+        if (current > 0) {
+            player.removeMediaItems(0, current)
+        }
+        updateState(player, refreshQueue = true)
+        return true
     }
 
     fun togglePlayPause() {

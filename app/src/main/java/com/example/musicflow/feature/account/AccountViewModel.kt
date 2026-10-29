@@ -108,6 +108,7 @@ class AccountViewModel(
     }
 
     fun googleLaunchFailed() {
+        api.cancelGoogleSignIn()
         _state.update {
             it.copy(error = "Không tìm thấy trình duyệt để đăng nhập Google.")
         }

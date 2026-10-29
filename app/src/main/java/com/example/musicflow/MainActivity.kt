@@ -20,6 +20,7 @@ import com.example.musicflow.feature.player.PlayerViewModel
 import com.example.musicflow.core.lyrics.LocalLyricsRepository
 import com.example.musicflow.core.lyrics.LyricsUiState
 import com.example.musicflow.core.account.AccountOAuthRedirects
+import com.example.musicflow.core.playback.QueuePlacement
 import com.example.musicflow.navigation.MusicFlowApp
 import com.example.musicflow.ui.theme.MusicFlowTheme
 import kotlinx.coroutines.Dispatchers
@@ -314,6 +315,18 @@ private val pickLyrics = registerForActivityResult(
                     },
                     onPlayOnlineTracks = { tracks, index ->
                         playerViewModel.playOnlineTracks(tracks, index)
+                    },
+                    onQueueDeviceSong = { song, placement ->
+                        playerViewModel.queueDeviceSong(song, placement)
+                    },
+                    onRemoveQueueItem = { index, version ->
+                        playerViewModel.removeQueueItem(index, version)
+                    },
+                    onMoveQueueItem = { from, to, version ->
+                        playerViewModel.moveQueueItem(from, to, version)
+                    },
+                    onClearQueueOthers = { version ->
+                        playerViewModel.clearQueueOthers(version)
                     },
 
                     onPlayPause = {

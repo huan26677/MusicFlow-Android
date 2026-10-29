@@ -36,6 +36,8 @@ import com.example.musicflow.core.history.RecentSong
 import com.example.musicflow.core.playback.PlayerUiState
 import com.example.musicflow.core.lyrics.LyricsUiState
 import com.example.musicflow.core.media.DeviceSong
+import com.example.musicflow.core.playback.QueuePlacement
+import androidx.media3.common.Player
 import com.example.musicflow.core.playlist.PlaylistTrack
 
 import com.example.musicflow.feature.home.HomeRoute
@@ -48,6 +50,7 @@ import com.example.musicflow.feature.playlist.PlaylistListRoute
 import com.example.musicflow.feature.playlist.PlaylistDetailRoute
 import com.example.musicflow.feature.player.MiniPlayer
 import com.example.musicflow.feature.player.NowPlayingScreen
+import com.example.musicflow.feature.player.QueueManagerScreen
 import com.example.musicflow.feature.search.SearchRoute
 import kotlinx.serialization.Serializable
 
@@ -72,6 +75,9 @@ data object AccountTab : NavKey
 data object NowPlaying : NavKey
 
 @Serializable
+data object QueueManagerPage : NavKey
+
+@Serializable
 data object PlaylistsRoute : NavKey
 
 @Serializable
@@ -90,6 +96,10 @@ fun MusicFlowApp(
     onPlayRecentSongs: (List<RecentSong>, Int) -> Unit,
     onPlayPlaylistTracks: (List<PlaylistTrack>, Int) -> Unit,
     onPlayOnlineTracks: (List<OnlineTrack>, Int) -> Unit,
+    onQueueDeviceSong: (DeviceSong, QueuePlacement) -> Unit,
+    onRemoveQueueItem: (Int, Long) -> Boolean,
+    onMoveQueueItem: (Int, Int, Long) -> Boolean,
+    onClearQueueOthers: (Long) -> Boolean,
 
     onPlayPause: () -> Unit,
     onPrevious: () -> Unit,
@@ -115,7 +125,7 @@ fun MusicFlowApp(
     val backStack = rememberNavBackStack(HomeTab)
 
     val currentRoute = backStack.last()
-    val isNowPlaying = currentRoute == NowPlaying
+    val isNowPlaying = currentRoute == NowPlaying || currentRoute == QueueManagerPage
 
     fun switchTab(tab: NavKey) {
         if (backStack.size != 1 || backStack.first() != tab) {
@@ -261,6 +271,13 @@ fun MusicFlowApp(
                 entry<SearchTab> {
                     SearchRoute(
                         initialQuery = savedSearchQuery,
+                        onQueueNext = if (state.connected && state.hasMedia && state.canEditQueue &&
+                            !state.shuffleEnabled && state.repeatMode != Player.REPEAT_MODE_ONE) {
+                            { song -> onQueueDeviceSong(song, QueuePlacement.NEXT) }
+                        } else null,
+                        onQueueEnd = if (state.connected && state.hasMedia && state.canEditQueue) {
+                            { song -> onQueueDeviceSong(song, QueuePlacement.END) }
+                        } else null,
                         onQueryRemembered = { query ->
                             savedSearchQuery = query
                         },
@@ -279,6 +296,13 @@ fun MusicFlowApp(
 
                 entry<LibraryTab> {
                     LibraryRoute(
+                        onQueueNext = if (state.connected && state.hasMedia && state.canEditQueue &&
+                            !state.shuffleEnabled && state.repeatMode != Player.REPEAT_MODE_ONE) {
+                            { song -> onQueueDeviceSong(song, QueuePlacement.NEXT) }
+                        } else null,
+                        onQueueEnd = if (state.connected && state.hasMedia && state.canEditQueue) {
+                            { song -> onQueueDeviceSong(song, QueuePlacement.END) }
+                        } else null,
                         onBack = {
                             switchTab(HomeTab)
                         },
@@ -299,6 +323,13 @@ fun MusicFlowApp(
 
                 entry<FavoritesRoute> { route ->
                     LibraryRoute(
+                        onQueueNext = if (state.connected && state.hasMedia && state.canEditQueue &&
+                            !state.shuffleEnabled && state.repeatMode != Player.REPEAT_MODE_ONE) {
+                            { song -> onQueueDeviceSong(song, QueuePlacement.NEXT) }
+                        } else null,
+                        onQueueEnd = if (state.connected && state.hasMedia && state.canEditQueue) {
+                            { song -> onQueueDeviceSong(song, QueuePlacement.END) }
+                        } else null,
                         initialFavoritesOnly = true,
                         initialShowAlbums = route.showAlbums,
 
@@ -389,6 +420,11 @@ fun MusicFlowApp(
                 entry<NowPlaying> {
                     NowPlayingScreen(
                         state = state,
+                        onOpenQueue = {
+                            if (backStack.lastOrNull() != QueueManagerPage) {
+                                backStack.add(QueueManagerPage)
+                            }
+                        },
 
                         onBack = {
                             if (backStack.size > 1) {
@@ -417,6 +453,20 @@ fun MusicFlowApp(
                         onSetCrossfadeDuration = onSetCrossfadeDuration,
                         lyrics = lyrics,
                         onPickLyrics = onPickLyrics
+                    )
+                }
+
+                entry<QueueManagerPage> {
+                    QueueManagerScreen(
+                        state = state,
+                        onBack = {
+                            if (backStack.size > 1) {
+                                backStack.removeAt(backStack.lastIndex)
+                            }
+                        },
+                        onMove = onMoveQueueItem,
+                        onRemove = onRemoveQueueItem,
+                        onClearOthers = onClearQueueOthers
                     )
                 }
             }

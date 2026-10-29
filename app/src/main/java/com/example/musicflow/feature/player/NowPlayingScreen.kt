@@ -42,7 +42,8 @@ fun NowPlayingScreen(
     onSetEqualizerBand: (Int, Int) -> Unit,
     onSetCrossfadeDuration: (Int) -> Unit,
     lyrics: LyricsUiState,
-    onPickLyrics: () -> Unit
+    onPickLyrics: () -> Unit,
+    onOpenQueue: () -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -170,6 +171,13 @@ fun NowPlayingScreen(
                     "${state.queueCount}",
             style = MaterialTheme.typography.bodySmall
         )
+
+        TextButton(
+            onClick = onOpenQueue,
+            enabled = state.connected
+        ) {
+            Text("☷ Xem và quản lý hàng đợi")
+        }
 
         Spacer(Modifier.height(24.dp))
 

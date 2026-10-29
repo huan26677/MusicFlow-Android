@@ -38,7 +38,9 @@ import com.example.musicflow.feature.playlist.rememberPlaylistViewModel
 fun SearchRoute(
     initialQuery: String,
     onQueryRemembered: (String) -> Unit,
-    onSongSelected: (List<DeviceSong>, Int) -> Unit
+    onSongSelected: (List<DeviceSong>, Int) -> Unit,
+    onQueueNext: ((DeviceSong) -> Unit)? = null,
+    onQueueEnd: ((DeviceSong) -> Unit)? = null
 ) {
     val context = LocalContext.current
 
@@ -129,6 +131,8 @@ fun SearchRoute(
             }
         },
         onSongSelected = onSongSelected,
+        onQueueNext = onQueueNext,
+        onQueueEnd = onQueueEnd,
         onAddToPlaylist = { song ->
             selectedPlaylistSong = song
         },
@@ -162,6 +166,8 @@ fun SearchScreen(
     onRefresh: () -> Unit,
     onSongSelected: (List<DeviceSong>, Int) -> Unit,
     onAddToPlaylist: (DeviceSong) -> Unit,
+    onQueueNext: ((DeviceSong) -> Unit)? = null,
+    onQueueEnd: ((DeviceSong) -> Unit)? = null,
     favoriteSongUris: Set<String> = emptySet(),
     onToggleFavorite: (DeviceSong) -> Unit = {}
 ) {
@@ -307,7 +313,9 @@ fun SearchScreen(
                     favoriteSongUris = favoriteSongUris,
                     onToggleFavorite = onToggleFavorite,
                     onAddToPlaylist = onAddToPlaylist,
-                    onSongSelected = onSongSelected
+                    onSongSelected = onSongSelected,
+                    onQueueNext = onQueueNext,
+                    onQueueEnd = onQueueEnd
                 )
             }
 
@@ -318,7 +326,9 @@ fun SearchScreen(
                     favoriteSongUris = favoriteSongUris,
                     onToggleFavorite = onToggleFavorite,
                     onAddToPlaylist = onAddToPlaylist,
-                    onSongSelected = onSongSelected
+                    onSongSelected = onSongSelected,
+                    onQueueNext = onQueueNext,
+                    onQueueEnd = onQueueEnd
                 )
             }
 
@@ -329,7 +339,9 @@ fun SearchScreen(
                     favoriteSongUris = favoriteSongUris,
                     onToggleFavorite = onToggleFavorite,
                     onAddToPlaylist = onAddToPlaylist,
-                    onSongSelected = onSongSelected
+                    onSongSelected = onSongSelected,
+                    onQueueNext = onQueueNext,
+                    onQueueEnd = onQueueEnd
                 )
             }
 
@@ -366,7 +378,9 @@ fun SearchScreen(
                             isFavorite = song.uri.toString() in favoriteSongUris,
                             onToggleFavorite = {
                                 onToggleFavorite(song)
-                            }
+                            },
+                            onQueueNext = onQueueNext?.let { action -> { action(song) } },
+                            onQueueEnd = onQueueEnd?.let { action -> { action(song) } }
                         )
                     }
                 }

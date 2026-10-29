@@ -43,7 +43,9 @@ fun LibraryRoute(
     onPickManual: () -> Unit,
     onSongSelected: (List<DeviceSong>, Int) -> Unit,
     initialFavoritesOnly: Boolean = false,
-    initialShowAlbums: Boolean = false
+    initialShowAlbums: Boolean = false,
+    onQueueNext: ((DeviceSong) -> Unit)? = null,
+    onQueueEnd: ((DeviceSong) -> Unit)? = null
 ) {
     val context = LocalContext.current
 
@@ -138,6 +140,8 @@ fun LibraryRoute(
             }
         },
         onSongSelected = onSongSelected,
+        onQueueNext = onQueueNext,
+        onQueueEnd = onQueueEnd,
         onAddToPlaylist = { song ->
             selectedPlaylistSong = song
         },
@@ -176,6 +180,8 @@ fun LibraryScreen(
     onRefresh: () -> Unit,
     onSongSelected: (List<DeviceSong>, Int) -> Unit,
     onAddToPlaylist: (DeviceSong) -> Unit,
+    onQueueNext: ((DeviceSong) -> Unit)? = null,
+    onQueueEnd: ((DeviceSong) -> Unit)? = null,
     favoriteSongUris: Set<String> = emptySet(),
     favoriteSongDetails: Map<String, FavoriteSongDetails> = emptyMap(),
     onToggleFavorite: (DeviceSong) -> Unit = {},
@@ -355,6 +361,8 @@ fun LibraryScreen(
                                 onToggleFavorite = onToggleFavorite,
                                 onSongSelected = onSongSelected,
                                 onAddToPlaylist = onAddToPlaylist,
+                                onQueueNext = onQueueNext,
+                                onQueueEnd = onQueueEnd,
                                 initialFavoritesOnly = initialFavoritesOnly
                             )
                         } else if (selectedCategory == "artists") {
@@ -367,7 +375,9 @@ fun LibraryScreen(
                                 favoriteSongUris = favoriteSongUris,
                                 onToggleFavorite = onToggleFavorite,
                                 onAddToPlaylist = onAddToPlaylist,
-                                onSongSelected = onSongSelected
+                                onSongSelected = onSongSelected,
+                                onQueueNext = onQueueNext,
+                                onQueueEnd = onQueueEnd
                             )
                         } else if (selectedCategory == "genres") {
                             val genreGroups = remember(current.songs) {
@@ -379,7 +389,9 @@ fun LibraryScreen(
                                 favoriteSongUris = favoriteSongUris,
                                 onToggleFavorite = onToggleFavorite,
                                 onAddToPlaylist = onAddToPlaylist,
-                                onSongSelected = onSongSelected
+                                onSongSelected = onSongSelected,
+                                onQueueNext = onQueueNext,
+                                onQueueEnd = onQueueEnd
                             )
                         } else {
                             val visibleSongs = if (favoritesOnly) {
@@ -431,7 +443,9 @@ fun LibraryScreen(
                                     isFavorite = song.uri.toString() in favoriteSongUris,
                                     onToggleFavorite = {
                                         onToggleFavorite(song)
-                                    }
+                                    },
+                                    onQueueNext = onQueueNext?.let { action -> { action(song) } },
+                                    onQueueEnd = onQueueEnd?.let { action -> { action(song) } }
                                 )
                             }
                         }
@@ -452,7 +466,9 @@ private fun ColumnScope.AlbumFavoritesContent(
     onToggleFavorite: (DeviceSong) -> Unit,
     onSongSelected: (List<DeviceSong>, Int) -> Unit,
     onAddToPlaylist: (DeviceSong) -> Unit,
-    initialFavoritesOnly: Boolean = false
+    initialFavoritesOnly: Boolean = false,
+    onQueueNext: ((DeviceSong) -> Unit)? = null,
+    onQueueEnd: ((DeviceSong) -> Unit)? = null
 ) {
     var favoritesOnly by rememberSaveable(initialFavoritesOnly) {
         mutableStateOf(initialFavoritesOnly)
@@ -569,7 +585,9 @@ private fun ColumnScope.AlbumFavoritesContent(
                                 in favoriteSongUris,
                             onToggleFavorite = {
                                 onToggleFavorite(song)
-                            }
+                            },
+                            onQueueNext = onQueueNext?.let { action -> { action(song) } },
+                            onQueueEnd = onQueueEnd?.let { action -> { action(song) } }
                         )
                     }
                 }

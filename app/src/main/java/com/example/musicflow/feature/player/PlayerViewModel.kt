@@ -10,6 +10,7 @@ import androidx.media3.common.MediaMetadata
 import com.example.musicflow.core.history.RecentSong
 import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.playback.PlaybackController
+import com.example.musicflow.core.playback.QueuePlacement
 import com.example.musicflow.core.playlist.PlaylistTrack
 import com.example.musicflow.core.playlist.PlaylistMediaItems
 import com.example.musicflow.core.online.OnlineTrack
@@ -71,24 +72,41 @@ class PlayerViewModel(
         songs: List<DeviceSong>,
         selectedIndex: Int
     ) {
-        val items = songs.map { song ->
-            MediaItem.Builder()
-                .setMediaId(song.mediaId ?: "device-${song.id}")
-                .setUri(song.uri)
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setTitle(song.title)
-                        .setArtist(song.artist)
-                        .build()
-                )
-                .build()
-        }
+        val items = songs.map(::deviceMediaItem)
 
         playbackController.playQueue(
             items,
             selectedIndex
         )
     }
+
+    /**
+     * The same MediaItem conversion is used by Play, Play Next and Queue End.
+     * More sources can call PlaybackController.enqueue with their own item.
+     */
+    fun queueDeviceSong(song: DeviceSong, placement: QueuePlacement): Boolean =
+        playbackController.enqueue(deviceMediaItem(song), placement)
+
+    fun removeQueueItem(index: Int, expectedVersion: Long): Boolean =
+        playbackController.removeQueueItem(index, expectedVersion)
+
+    fun moveQueueItem(fromIndex: Int, toIndex: Int, expectedVersion: Long): Boolean =
+        playbackController.moveQueueItem(fromIndex, toIndex, expectedVersion)
+
+    fun clearQueueOthers(expectedVersion: Long): Boolean =
+        playbackController.clearQueueOthers(expectedVersion)
+
+    private fun deviceMediaItem(song: DeviceSong): MediaItem =
+        MediaItem.Builder()
+            .setMediaId(song.mediaId ?: "device-${song.id}")
+            .setUri(song.uri)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(song.title)
+                    .setArtist(song.artist)
+                    .build()
+            )
+            .build()
 
     fun playRecentSongs(
         songs: List<RecentSong>,

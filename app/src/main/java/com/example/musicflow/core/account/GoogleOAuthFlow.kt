@@ -50,7 +50,7 @@ object GoogleOAuthFlow {
     fun isCallback(url: String): Boolean = runCatching {
         val uri = URI(url)
         uri.scheme == "musicflow" && uri.host == "auth" &&
-            uri.path == "/callback" && uri.fragment == null &&
+            uri.port == -1 && uri.path == "/callback" && uri.fragment == null &&
             uri.userInfo == null
     }.getOrDefault(false)
 
@@ -64,7 +64,9 @@ object GoogleOAuthFlow {
         require(pending != null && nowMs >= pending.createdAtMs &&
             nowMs - pending.createdAtMs <= MAX_AGE_MS
         ) { "Phiên đăng nhập Google đã hết hạn. Hãy thử lại." }
-        val values = URI(url).rawQuery.orEmpty()
+        val rawQuery = URI(url).rawQuery.orEmpty()
+        require(rawQuery.length <= 4096) { "Phản hồi Google quá dài." }
+        val values = rawQuery
             .split('&')
             .mapNotNull { item ->
                 val split = item.indexOf('=')

@@ -5,6 +5,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,7 +27,9 @@ fun SongRow(
     modifier: Modifier = Modifier,
     onAddToPlaylist: (() -> Unit)? = null,
     isFavorite: Boolean = false,
-    onToggleFavorite: (() -> Unit)? = null
+    onToggleFavorite: (() -> Unit)? = null,
+    onQueueNext: (() -> Unit)? = null,
+    onQueueEnd: (() -> Unit)? = null
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -120,6 +126,41 @@ fun SongRow(
                     text = "+",
                     style = MaterialTheme.typography.titleLarge
                 )
+            }
+        }
+
+        if (onQueueNext != null || onQueueEnd != null) {
+            var queueMenuOpen by remember { mutableStateOf(false) }
+            Box {
+                IconButton(
+                    onClick = { queueMenuOpen = true },
+                    modifier = Modifier.semantics {
+                        contentDescription = "Hàng đợi cho ${song.title}"
+                    }
+                ) { Text("⋮", style = MaterialTheme.typography.titleLarge) }
+                DropdownMenu(
+                    expanded = queueMenuOpen,
+                    onDismissRequest = { queueMenuOpen = false }
+                ) {
+                    if (onQueueNext != null) {
+                        DropdownMenuItem(
+                            text = { Text("Phát tiếp") },
+                            onClick = {
+                                queueMenuOpen = false
+                                onQueueNext()
+                            }
+                        )
+                    }
+                    if (onQueueEnd != null) {
+                        DropdownMenuItem(
+                            text = { Text("Thêm vào hàng đợi") },
+                            onClick = {
+                                queueMenuOpen = false
+                                onQueueEnd()
+                            }
+                        )
+                    }
+                }
             }
         }
     }

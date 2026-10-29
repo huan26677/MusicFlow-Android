@@ -135,6 +135,11 @@ class AccountApi(context: Context) {
         return GoogleOAuthFlow.authorizeUrl(base, pending)
     }
 
+    /** If no browser can open, do not leave an active verifier on disk. */
+    fun cancelGoogleSignIn() {
+        store.clearGooglePending()
+    }
+
     suspend fun finishGoogleSignIn(callbackUrl: String): AccountIdentity =
         withContext(Dispatchers.IO) {
             // One-time PKCE state: even a replayed callback cannot reuse it.

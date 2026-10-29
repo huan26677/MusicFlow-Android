@@ -49,3 +49,10 @@ Ngày triển khai: 2026-10-29. Supabase project: `vzvxpbwrftlnyvuhfoqn`.
 ## Bước kế tiếp
 
 Sau khi Google provider được bật: **Google Login / Account E2E**, kiểm thử trên emulator/thiết bị thật, khởi động lại app, đăng xuất, identity linking, rồi đồng bộ cloud với hai thiết bị. Tiếp tục milestone Full Product còn thiếu, Full Regression cuối giai đoạn.
+
+### Bổ sung 2026-10-29 — Security Hardening v2
+
+- Phiên refresh token và trạng thái PKCE (`musicflow_account_session_v1.xml`) được loại khỏi sao lưu Android 11 trở xuống và cloud backup / chuyển thiết bị Android 12 trở lên. Không loại các cấu hình/playlist khác khỏi backup.
+- Callback Google từ chối URI có port hoặc query vượt 4096 ký tự; các trường hợp trùng `flow`, fragment và lỗi OAuth được kiểm thử bổ sung. Nếu không mở được trình duyệt, xóa PKCE pending.
+- Script `scripts/run-account-google-hardening-v2-tests.ps1`: Python 4/4 PASS, Google JVM 12/12 PASS, build ứng dụng + APK AndroidTest PASS. Log `qa-logs/account-google-hardening-v2.log`, `FINAL_RESULT=BUILD_AND_UNIT_PASS`.
+- Chưa chạy restore thực trên thiết bị, chưa có Google Auth E2E hoặc kiểm thử cloud sync hai máy.

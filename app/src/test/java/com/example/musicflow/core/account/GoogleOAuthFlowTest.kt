@@ -68,4 +68,44 @@ class GoogleOAuthFlowTest {
             pending, 1003
         )
     }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsDuplicateFlow() {
+        GoogleOAuthFlow.validate(
+            "musicflow://auth/callback?flow=random_nonce_123456&flow=random_nonce_123456&code=x",
+            pending, 1003
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsCallbackWithPort() {
+        GoogleOAuthFlow.validate(
+            "musicflow://auth:443/callback?flow=random_nonce_123456&code=x",
+            pending, 1003
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsOversizedCallbackQuery() {
+        GoogleOAuthFlow.validate(
+            "musicflow://auth/callback?flow=random_nonce_123456&code=" + "x".repeat(5000),
+            pending, 1003
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsOAuthErrorEvenWithCode() {
+        GoogleOAuthFlow.validate(
+            "musicflow://auth/callback?flow=random_nonce_123456&code=x&error=access_denied",
+            pending, 1003
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsCallbackWithFragment() {
+        GoogleOAuthFlow.validate(
+            "musicflow://auth/callback?flow=random_nonce_123456&code=x#access_token=abc",
+            pending, 1003
+        )
+    }
 }

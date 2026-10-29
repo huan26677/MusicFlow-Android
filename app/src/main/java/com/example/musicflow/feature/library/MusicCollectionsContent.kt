@@ -86,7 +86,9 @@ internal fun ColumnScope.MusicCollectionsContent(
     favoriteSongUris: Set<String>,
     onToggleFavorite: (DeviceSong) -> Unit,
     onAddToPlaylist: (DeviceSong) -> Unit,
-    onSongSelected: (List<DeviceSong>, Int) -> Unit
+    onSongSelected: (List<DeviceSong>, Int) -> Unit,
+    onQueueNext: ((DeviceSong) -> Unit)? = null,
+    onQueueEnd: ((DeviceSong) -> Unit)? = null
 ) {
     var expandedKey by rememberSaveable { mutableStateOf<String?>(null) }
     Text("${collections.size} $title")
@@ -134,7 +136,9 @@ internal fun ColumnScope.MusicCollectionsContent(
                             isFavorite = song.uri.toString() in favoriteSongUris,
                             onToggleFavorite = {
                                 onToggleFavorite(song)
-                            }
+                            },
+                            onQueueNext = onQueueNext?.let { action -> { action(song) } },
+                            onQueueEnd = onQueueEnd?.let { action -> { action(song) } }
                         )
                     }
                 }
