@@ -932,8 +932,15 @@ Log.i(
 
 // Quay về Home để kiểm tra lịch sử hiển thị.
 composeRule.onNodeWithText("‹ Trở về")
+    .performScrollTo()
     .performClick()
 
+// Bottom navigation is hidden while Now Playing is displayed and reappears
+// after the NavDisplay transition. Wait for the semantics tree to settle.
+composeRule.waitUntil(10_000L) {
+    composeRule.onAllNodesWithText("Home")
+        .fetchSemanticsNodes().isNotEmpty()
+}
 composeRule.onNodeWithText("Home")
     .performClick()
 

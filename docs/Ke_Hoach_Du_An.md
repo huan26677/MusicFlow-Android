@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `2fe2194` — Licensed Online Rights v1 + ngoại lệ offline đã commit; Licensed Content Review & Publish v2 đang ở workspace, chưa commit |
+| HEAD Git hiện tại | `e6cd180` — Licensed Content Review & Publish v2 đã commit; Offline End-to-End Acceptance v1 đang ở workspace, chưa commit |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
@@ -41,8 +41,9 @@
 | MusicFlow UI/UX Polish v2 | Responsive Now Playing/Playlist/Account, cỡ chữ lớn, theme dễ truy cập; BUILD + JVM, Android API 30 **19/19 PASS**; log `qa-logs/musicflow-ui-polish-v2.log` |
 | Licensed Online Rights Metadata & Attribution v1 | Supabase đã áp dụng migration, RLS fail-closed; chỉ chặn URL online thiếu quyền, **không chặn offline tự tải**, kể cả ID `online:` cũ; 10/10 JVM + 21/21 Android API 30 PASS |
 | Licensed Content Review & Publish v2 | Supabase RPC v2 chỉ service_role, v1 bị thu hồi EXECUTE; admin Python ghi rights + audit, 17/17 Python PASS, rollback SQL trên DB PASS, Gradle/JVM PASS; chưa upload nhạc thật |
+| Offline End-to-End Acceptance v1 | MediaStore → Room Playlist → MediaSession → History → Queue Snapshot/Restore, 9/9 marker; build/JVM PASS, 22/22 Android API 30 PASS; `qa-logs/offline-e2e-acceptance-v1.log` |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Licensed Streaming Smoke v1 (cần bài có quyền thật)** hoặc tiếp tục Android/E2E offline nếu chưa có nội dung; không dùng nhạc không có quyền; Google Login/email thật ĐỂ CUỐI |
+| Bước tiếp theo | **Android Compatibility Matrix v2** — kiểm chứng offline/SAF/restart trên API 29/30/33/36; Licensed Streaming Smoke chờ audio có quyền thật; Google Login/email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -152,9 +153,9 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **Phát triển — đã kiểm thử backend** | **Licensed Content Review & Publish v2** | **Supabase migration + 17 Python unit + SQL rollback dry-run + Android build/JVM PASS** | `docs/Licensed_Content_Review_Publish_v2.md`, `qa-logs/licensed-publish-v2.log`; không có nhạc thật được upload |
 | **Phát triển — kế tiếp khi đủ quyền nội dung** | **Licensed Streaming Smoke v1** | CHƯA THỰC HIỆN | Một bài do chủ sở hữu cấp quyền thật, stage/review/publish → Android Media3 + background/seek/error; chưa cung cấp secret/audio |
 | **Hoãn tới cuối** | **Google Login + email thật + Auth/Cloud E2E** | HOÃN THEO QUYẾT ĐỊNH CHỦ DỰ ÁN | Chỉ kiểm thử thật khi gần hoàn thành Full Product và có credentials do chủ dự án tự cấu hình |
-| **P0** | **MVP End-to-End Acceptance v1** — Library/Search/Picker → Player → Playlist/History → restart | CHƯA NGHIỆM THU | Script UI/integration tests có assertions và log cho từng flow |
+| **P0 — đã test phần offline API 30** | **Offline End-to-End Acceptance v1** — MediaStore → Playlist → MediaSession → History → Queue restore | **22/22 Android PASS, 9/9 marker; còn force-stop/restart + đa API** | `qa-logs/offline-e2e-acceptance-v1.log`; `docs/Offline_End_To_End_Acceptance_v1.md`; không đánh đồng ExoPlayer mới với process restart thật |
 | **P0** | **Background Playback / System Controls QA** | V2 QA TỰ ĐỘNG PASS (API 30) — còn lockscreen và Bluetooth thực tế | Test lifecycle, audio focus, điều khiển từ MediaSession/notification/lock screen trong phạm vi khả thi; mọi điều kiện đã chốt đạt PASS |
-| **P0 — kế tiếp** | **Android Compatibility Matrix v2** | Đang thực hiện | Bộ test tự động trên các API đại diện (29/30/33/36): 55 bài chính + 3 SKIPPED, 40 marker + 4 SAF |
+| **P0 — kế tiếp** | **Android Compatibility Matrix v2** | Đang thực hiện, chưa có bằng chứng mới cho cả bốn API | Bộ test tự động trên các API đại diện (29/30/33/36): offline/SAF/permission/process restart, kết quả phân biệt từng thiết bị |
 | **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
 | **P1** | UI/accessibility/empty-state/error-state | Foundation v1 13/13 + Polish v2 19/19 Android PASS; toàn diện **CHƯA NGHIỆM THU** | Tiếp tục ma trận API, TalkBack thật, adaptive layout rộng và các trạng thái chưa chuẩn hóa |
 | **P1** | Hiệu năng và dữ liệu lớn | CHƯA NGHIỆM THU | Dataset cố định; ngưỡng thời gian/độ ổn định được chốt; không crash/ANR, không mất dữ liệu |
@@ -263,6 +264,15 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Offline End-to-End Acceptance v1 — BUILD/JVM + 22 ANDROID API 30 PASS
+
+- HEAD nền `e6cd180` (Licensed Content Review & Publish v2 đã push), Git tree sạch trước khi sửa. Không thay đổi production playback/online rights, chỉ thêm test E2E, điều chỉnh đồng bộ thao tác UI của test cũ, script QA và tài liệu; thay đổi mốc này chưa tự commit/push.
+- `OfflineAcceptanceFlowTest.kt`: tạo 2 tệp WAV kiểm thử lên MediaStore, quét nhạc qua `DeviceMusicScanner`, thêm vào Playlist Room, phát qua MediaSessionService, điều khiển bài tiếp, xác nhận lịch sử, tạm dừng/seek, snapshot và restore vào ExoPlayer mới; kiểm tra 9 marker bắt buộc. Dọn tệp/playlist/history test và phục hồi snapshot trước test. Không cần Supabase hoặc metadata bản quyền cho nhạc offline tự tải.
+- Bài service UI regression `mvpHomePlaylistNowPlayingThroughMediaSession` phát hiện chạm nút `‹ Trở về` ngoài viewport ngay sau nút `Tiếp` khiến test không vào Home; thêm `performScrollTo` trước click và đợi semantics Home xuất hiện. Chạy lại **3/3 service UI tests PASS**, gồm History UI và phát lại.
+- `scripts/run-offline-e2e-acceptance-v1-tests.ps1` chạy Gradle build/JVM, cài APK, 3 lượt Android instrumentation độc lập: core 10/10, Service UI 3/3, Media compatibility 9/9; yêu cầu đủ 9 marker logcat của E2E, `git diff --check`. Log `qa-logs/offline-e2e-acceptance-v1.log`, `TOTAL_ANDROID_TESTS=22`, `FINAL_RESULT=PASS`.
+- **Giới hạn:** bài E2E mới test restore bằng ExoPlayer mới, không thực sự force-stop/restart process, không có kiểm thử đầy đủ SAF picker/permission reboot/đa Android API trong mốc này; full product chưa nghiệm thu. Chi tiết tại `docs/Offline_End_To_End_Acceptance_v1.md`.
+- **Kế tiếp:** Android Compatibility Matrix v2 (API 29/30/33/36, SAF/permission/restart). Licensed Streaming Smoke giữ BLOCKED tới khi có nhạc có quyền phát thật; Google Login/email thật và cloud 2 máy E2E vẫn ở cuối.
 
 ### 2026-10-29 — Licensed Content Review & Publish v2 — SUPABASE + PYTHON + JVM BUILD PASS
 
