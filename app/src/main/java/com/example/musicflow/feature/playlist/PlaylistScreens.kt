@@ -471,7 +471,9 @@ fun PlaylistDetailRoute(
                                 }
 
                                 LazyColumn(
-                                    modifier = Modifier.weight(1f),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .testTag("playlist-detail-tracks"),
                                     verticalArrangement =
                                         Arrangement.spacedBy(4.dp)
                                 ) {

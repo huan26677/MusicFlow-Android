@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `0d47da9` — Full Product Regression Gate v1 - Part 2A đã commit; Part 2B RealPickerSafTest **2/2 PASS trong workspace**, chưa commit |
+| HEAD Git hiện tại | `84fa5d2` — Full Product Regression Gate v1 - Part 2B đã commit; Part 3 full Android/JVM API 30 **PASS trong workspace**, chưa commit |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
@@ -46,8 +46,9 @@
 | Full Product Regression Gate v1 - Part 1 | BUILD/JVM **99/99 PASS**; toàn bộ Android suite API 30 **89 total / 83 PASS / 3 FAIL / 3 SKIP** - **GATE FAIL**; chờ sửa MVP Previous và real SAF picker; `docs/Full_Product_Regression_Gate_v1_Part_1.md` |
 | Full Product Regression Gate v1 - Part 2A | Đã xác minh thao tác test trên Now Playing phải cuộn tới nút trước khi chạm; **BUILD/JVM PASS, 8/8 Android API 30 PASS**, `qa-logs/full-product-regression-v1-part2a-playback.log`; full gate vẫn chưa nghiệm thu |
 | Full Product Regression Gate v1 - Part 2B | UIAutomator chọn file thật + `SELECT` trong DocumentsUI; **2/2 Android API 30 PASS**, persisted READ, MediaSession Playback, 2-file queue + Next/History, Gradle/JVM PASS; `docs/Full_Product_Regression_Gate_v1_Part_2B.md` |
+| Full Product Regression Gate v1 - Part 3 | Toàn bộ Android/JVM API 30 **PASS**: JVM **99/99**, Android **86 PASS / 0 FAIL / 3 SKIP** từ 89 testcase; đã sửa lỗi timing/scroll Playlist Reorder và chạy lại suite; `qa-logs/full-product-regression-v1-part3.log` |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Full Product Regression Gate v1 – Part 3** — chạy lại toàn bộ Android/JVM API 30, phân tích pass/fail/skip theo XML, sửa riêng lỗi còn lại nếu có; Licensed Streaming Smoke chờ audio có quyền thật; Google Login/email thật ĐỂ CUỐI |
+| Bước tiếp theo | **Runtime Feature Acceptance — Sleep Timer v1** — kiểm thử thời gian hẹn dừng, cancel/restart, trạng thái MediaSession bằng Android instrumentation; từng tính năng một. Sau đó mới EQ/Lyrics/release QA. Licensed Streaming Smoke chờ audio có quyền thật; Google Login/email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -163,6 +164,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **P0 — đang xử lý từng phần** | **Full Product Regression Gate v1 - Part 1** | **BUILD/JVM PASS 99/99; Android API 30 FAIL: 83/89 PASS, 3 FAIL, 3 SKIP** | `docs/Full_Product_Regression_Gate_v1_Part_1.md`, `qa-logs/full-product-regression-v1-part1.log`; tiếp tục 2A MVP Previous và 2B SAF picker |
 | **P0 — đã sửa test và QA phần nhỏ** | **Full Product Regression Gate v1 - Part 2A** | **Build/JVM + 8/8 Android API 30 PASS** | `docs/Full_Product_Regression_Gate_v1_Part_2A.md`; không đổi production code, chờ Part 2B và full gate |
 | **P0 — QA đạt phần nhỏ** | **Full Product Regression Gate v1 - Part 2B** | **Build/JVM PASS + 2/2 Android API 30 PASS** | `docs/Full_Product_Regression_Gate_v1_Part_2B.md`, `qa-logs/full-product-regression-v1-part2b-saf.log`; có URI trả về thật và persisted READ; chờ full gate Part 3 |
+| **P0 — Full regression API 30 PASS** | **Full Product Regression Gate v1 - Part 3** | **99/99 JVM PASS, 86 Android PASS / 0 FAIL / 3 SKIP (89 total)** | `docs/Full_Product_Regression_Gate_v1_Part_3.md`, `qa-logs/full-product-regression-v1-part3.log`; vẫn cần runtime acceptance các tính năng build-only và thiết bị thật |
 | **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
 | **P1** | UI/accessibility/empty-state/error-state | Foundation v1 13/13 + Polish v2 19/19 Android PASS; toàn diện **CHƯA NGHIỆM THU** | Tiếp tục ma trận API, TalkBack thật, adaptive layout rộng và các trạng thái chưa chuẩn hóa |
 | **P1** | Hiệu năng và dữ liệu lớn | CHƯA NGHIỆM THU | Dataset cố định; ngưỡng thời gian/độ ổn định được chốt; không crash/ANR, không mất dữ liệu |
@@ -271,6 +273,15 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Full Product Regression Gate v1 - Part 3 — FULL ANDROID API 30 + JVM PASS
+
+- HEAD nền `84fa5d2`, working tree sạch trước khi sửa. Chạy đầy đủ `:app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest` và `:app:connectedDebugAndroidTest` trên `Pixel_5_API_30`, lấy kết quả từ JUnit XML mới (tránh XML cũ).
+- Lượt 1: JVM **99/99 PASS**, Android **85 PASS / 1 FAIL / 3 SKIP** (89 total). Ba lỗi MVP Previous/SAF từ baseline Part 1 đã được giải quyết ở Part 2A/2B; phát hiện riêng test UI Playlist Reorder gặp race giữa `setContent` và Room Flow cùng hàng bài thứ 3 nằm ngoài vùng lazy list.
+- Sửa `PlaylistPlaybackOrderTest` chờ danh sách tải và cuộn `performScrollToIndex` tới index 2/1/2 trước thao tác; thêm semantics testTag `playlist-detail-tracks` cho LazyColumn để test tìm được danh sách. Không đổi logic phát nhạc, database schema hay bản quyền online. Chạy riêng test **1/1 PASS** trên APK mới.
+- Lượt đầy đủ sau sửa: Gradle/JVM **PASS 99/99**, Android API 30 **86 PASS / 0 FAIL / 3 SKIP** (89 total), `GRADLE_ANDROID_EXIT=0`, `FINAL_RESULT=PASS`. Ba SKIP là các pha `SafPermissionRestartTest` cần runner riêng, từng được kiểm tra ở Android Compatibility Matrix v2 trên API 29/30/33/36. Script `scripts/run-full-regression-v1-part3.ps1`, log `qa-logs/full-product-regression-v1-part3.log`.
+- Kết quả xác nhận **full regression gate trên API 30**, không phải hoàn thành 100% MusicFlow 1.0. Còn Runtime QA Sleep Timer/EQ/Lyrics và các tính năng build-only, test thiết bị thật, release packaging, Google/email thật + cloud 2 thiết bị E2E để cuối, online audio phải có bản quyền.
+- **Tiếp theo:** Runtime Feature Acceptance — Sleep Timer v1 (mốc nhỏ); sau đó QA Equalizer/Lyrics riêng.
 
 ### 2026-10-29 — Full Product Regression Gate v1 - Part 2B — REAL SAF PICKER ĐÃ SỬA, 2/2 PASS
 

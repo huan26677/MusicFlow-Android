@@ -6,9 +6,12 @@ import android.util.Log
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextReplacement
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -460,6 +463,15 @@ class PlaylistPlaybackOrderTest {
                 )
             }
 
+            // Room's playlist Flow loads asynchronously; a full-suite run
+            // can be slower than a standalone test. Wait for the actual UI
+            // before trying to interact with the last LazyColumn row.
+            composeRule.waitUntil(10_000L) {
+                composeRule.onAllNodesWithText("QA UI Track 1")
+                    .fetchSemanticsNodes().isNotEmpty()
+            }
+            composeRule.onNodeWithTag("playlist-detail-tracks")
+                .performScrollToIndex(2)
             composeRule.onNodeWithContentDescription(
                 "Đưa QA UI Track 3 lên"
             ).performClick()
@@ -474,6 +486,8 @@ class PlaylistPlaybackOrderTest {
 
             composeRule.waitForIdle()
 
+            composeRule.onNodeWithTag("playlist-detail-tracks")
+                .performScrollToIndex(1)
             composeRule.onNodeWithContentDescription(
                 "Đưa QA UI Track 3 lên"
             ).performClick()
@@ -500,6 +514,8 @@ class PlaylistPlaybackOrderTest {
                 "PASS playlistUiReorderAndPlayAll"
             )
 
+            composeRule.onNodeWithTag("playlist-detail-tracks")
+                .performScrollToIndex(2)
             composeRule.onNodeWithText(
                 "QA UI Track 2"
             ).performClick()
