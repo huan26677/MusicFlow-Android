@@ -37,6 +37,94 @@ class PlaybackQueuePersistenceTest {
 
     private val context = instrumentation.targetContext
 
+    @Test
+    fun legacyOnlineSnapshotCannotAutoResumeWithoutRights() {
+        val store = PlaybackQueueStore(context, testPreferencesName())
+        var source: ExoPlayer? = null
+        var recovered: ExoPlayer? = null
+        try {
+            instrumentation.runOnMainSync {
+                val original = ExoPlayer.Builder(context).build()
+                source = original
+                original.setMediaItems(
+                    listOf(
+                        MediaItem.Builder().setMediaId("local-1")
+                            .setUri("content://media/external/audio/media/1").build(),
+                        MediaItem.Builder().setMediaId("online:old-2")
+                            .setUri("https://example.com/expired.mp3").build(),
+                        MediaItem.Builder().setMediaId("local-3")
+                            .setUri("content://media/external/audio/media/3").build()
+                    ),
+                    1,
+                    8000L
+                )
+                store.saveFromPlayer(original)
+                original.release()
+                source = null
+
+                val restored = ExoPlayer.Builder(context).build()
+                recovered = restored
+                assertTrue(store.restoreInto(restored))
+                assertEquals(2, restored.mediaItemCount)
+                assertEquals("local-1", restored.getMediaItemAt(0).mediaId)
+                assertEquals("local-3", restored.getMediaItemAt(1).mediaId)
+                assertEquals(1, restored.currentMediaItemIndex)
+                assertEquals(0L, restored.currentPosition)
+                assertFalse(restored.playWhenReady)
+            }
+        } finally {
+            instrumentation.runOnMainSync {
+                source?.release()
+                recovered?.release()
+                store.clear()
+            }
+        }
+    }
+
+    @Test
+    fun downloadedOfflineTrackWithOldOnlineIdRestoresNormally() {
+        val store = PlaybackQueueStore(context, testPreferencesName())
+        val file = createWav()
+        var original: ExoPlayer? = null
+        var restored: ExoPlayer? = null
+        try {
+            instrumentation.runOnMainSync {
+                val first = ExoPlayer.Builder(context).build()
+                original = first
+                first.setMediaItem(
+                    MediaItem.Builder()
+                        .setMediaId("online:downloaded-before")
+                        .setUri(Uri.fromFile(file))
+                        .setMediaMetadata(
+                            MediaMetadata.Builder()
+                                .setTitle("Nhạc offline đã tải")
+                                .build()
+                        )
+                        .build()
+                )
+                first.seekTo(4_200L)
+                store.saveFromPlayer(first)
+                first.release()
+                original = null
+
+                val second = ExoPlayer.Builder(context).build()
+                restored = second
+                assertTrue(store.restoreInto(second))
+                assertEquals("online:downloaded-before", second.currentMediaItem?.mediaId)
+                assertEquals(Uri.fromFile(file), second.currentMediaItem?.localConfiguration?.uri)
+                assertEquals(4_200L, second.currentPosition)
+                assertFalse(second.playWhenReady)
+            }
+        } finally {
+            instrumentation.runOnMainSync {
+                original?.release()
+                restored?.release()
+                store.clear()
+            }
+            file.delete()
+        }
+    }
+
     private fun testPreferencesName() =
         "musicflow_queue_qa_${System.nanoTime()}"
 

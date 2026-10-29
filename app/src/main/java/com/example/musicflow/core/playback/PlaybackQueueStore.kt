@@ -111,23 +111,30 @@ class PlaybackQueueStore(
             val index = snapshot.getInt("index")
             require(index in 0 until tracks.length())
 
-            val items = (0 until tracks.length()).map {
-                val saved = tracks.getJSONObject(it)
+            val surviving = (0 until tracks.length()).mapNotNull { originalIndex ->
+                val saved = tracks.getJSONObject(originalIndex)
 
                 val uri = saved.getString("uri")
                 require(uri.isNotBlank())
 
-                TrackMediaItems.fromStored(
+                TrackMediaItems.fromStoredOrNull(
                     mediaId = saved.getString("mediaId"),
                     audioUri = uri,
                     title = saved.optString("title"),
                     artist = saved.optString("artist")
-                )
+                )?.let { originalIndex to it }
             }
+            require(surviving.isNotEmpty()) { "Queue contains no permitted offline media" }
+            val currentSurvives = surviving.indexOfFirst { it.first == index }
+            val safeStartIndex = if (currentSurvives >= 0) currentSurvives
+                else surviving.indexOfFirst { it.first > index }
+                    .takeIf { it >= 0 } ?: 0
+            val items = surviving.map { it.second }
 
             val positionMs = snapshot
                 .getLong("positionMs")
                 .coerceAtLeast(0L)
+                .let { if (currentSurvives >= 0) it else 0L }
 
             val repeatMode = snapshot
                 .getInt("repeat")
@@ -141,7 +148,7 @@ class PlaybackQueueStore(
 
             player.setMediaItems(
                 items,
-                index,
+                safeStartIndex,
                 positionMs
             )
 

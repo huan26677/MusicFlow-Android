@@ -19,7 +19,9 @@ class SupabaseCatalogRepository(
         require(offset in 0..100_000) { "Trang danh mục không hợp lệ." }
         val base = OnlineCatalogEndpoint.normalize(projectUrl)
         val address = URL(
-            "$base/rest/v1/music_tracks?select=id,title,artist,album,duration_ms,stream_url" +
+            "$base/rest/v1/music_tracks?select=id,title,artist,album,duration_ms,stream_url," +
+                "rights_confirmed,license_code,license_url,attribution_text,source_url," +
+                "streaming_allowed,download_allowed,commercial_use_allowed,rights_verified_at" +
                 "&is_published=eq.true&rights_confirmed=eq.true" +
                 "&order=created_at.desc,id.desc&limit=25&offset=$offset"
         )
@@ -52,7 +54,8 @@ class SupabaseCatalogRepository(
                     durationMs = item.optLong("duration_ms", 0L),
                     streamUrl = url.takeIf {
                         it.startsWith("https://", ignoreCase = true)
-                    }
+                    },
+                    rights = OnlineRightsJson.fromSupabase(item)
                 )
             }
             OnlineCatalogPage(

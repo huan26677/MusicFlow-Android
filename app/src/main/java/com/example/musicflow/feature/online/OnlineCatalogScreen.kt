@@ -21,15 +21,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.Badge
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Surface
 import com.example.musicflow.core.online.OnlineTrack
+import com.example.musicflow.core.online.OnlineRightsPolicy
 import com.example.musicflow.core.media.TrackMediaItems
 import com.example.musicflow.ui.components.MusicFlowStatusKind
 import com.example.musicflow.ui.components.MusicFlowStatusPanel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -73,6 +80,8 @@ fun OnlineCatalogScreen(
     onPlayTrack: (List<OnlineTrack>, Int) -> Unit,
     isSupabaseManaged: Boolean = false
 ) {
+    var rightsDetail by remember { mutableStateOf<OnlineTrack?>(null) }
+    val uriHandler = LocalUriHandler.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -92,8 +101,8 @@ fun OnlineCatalogScreen(
 
         Text(
             "Kết nối API danh mục nhạc do bạn quản lý hoặc được cấp phép. " +
-                "Chỉ có thể chọn phát bài có URL HTTPS hợp lệ; " +
-                "quyền phát nhạc phải được xác nhận từ nguồn cung cấp.",
+                "Chỉ phát các bài có URL HTTPS, thông tin quyền phát và ghi công " +
+                "được nhà cung cấp xác nhận. Không tự cho phép tải nhạc.",
             style = MaterialTheme.typography.bodyMedium
         )
 
@@ -185,7 +194,8 @@ fun OnlineCatalogScreen(
                         items(state.tracks.size) { index ->
                             val track = state.tracks[index]
                             val canPlay = track.id.isNotBlank() &&
-                                track.streamUrl?.let(TrackMediaItems::isSafeHttpsMediaUrl) == true
+                                track.streamUrl?.let(TrackMediaItems::isSafeHttpsMediaUrl) == true &&
+                                OnlineRightsPolicy.canStream(track.rights)
                             ListItem(
                                 modifier = Modifier.clickable(
                                     enabled = canPlay
@@ -198,17 +208,32 @@ fun OnlineCatalogScreen(
                                     )
                                 },
                                 supportingContent = {
-                                    Text(
-                                        buildString {
-                                            append(track.artist)
-                                            track.album?.let {
-                                                append(" · ")
-                                                append(it)
-                                            }
-                                        },
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
+                                    Column {
+                                        Text(
+                                            buildString {
+                                                append(track.artist)
+                                                track.album?.let {
+                                                    append(" · ")
+                                                    append(it)
+                                                }
+                                            },
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            if (canPlay) "Có quyền phát trực tuyến"
+                                            else OnlineRightsPolicy.statusLabel(
+                                                OnlineRightsPolicy.streamingStatus(track.rights)
+                                            ),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = if (canPlay) MaterialTheme.colorScheme.primary
+                                                else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        TextButton(
+                                            onClick = { rightsDetail = track },
+                                            modifier = Modifier.testTag("track-rights-${track.id}")
+                                        ) { Text("Nguồn và giấy phép") }
+                                    }
                                 },
                                 trailingContent = {
                                     if (canPlay) {
@@ -241,5 +266,46 @@ fun OnlineCatalogScreen(
                 }
             }
         }
+    }
+
+    rightsDetail?.let { track ->
+        val rights = track.rights
+        AlertDialog(
+            onDismissRequest = { rightsDetail = null },
+            title = { Text("Nguồn và giấy phép") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(track.title, style = MaterialTheme.typography.titleMedium)
+                    Text("Nghệ sĩ: ${track.artist}")
+                    Text("Giấy phép: ${rights?.licenseCode ?: "Chưa khai báo"}")
+                    Text("Ghi công: ${rights?.attribution ?: "Chưa có thông tin"}")
+                    Text(OnlineRightsPolicy.statusLabel(
+                        OnlineRightsPolicy.streamingStatus(rights)
+                    ))
+                    Text(
+                        if (rights?.downloadAllowed == true &&
+                            OnlineRightsPolicy.canStream(rights)) {
+                            "Nguồn khai báo cho phép tải; MusicFlow chưa hỗ trợ tải nhạc online."
+                        } else "Không cho phép tải xuống trong MusicFlow."
+                    )
+                    rights?.sourceUrl?.takeIf(OnlineRightsPolicy::isSafeHttpsLink)?.let { url ->
+                        TextButton(onClick = { uriHandler.openUri(url) }) {
+                            Text("Mở nguồn gốc bài hát")
+                        }
+                    }
+                    rights?.licenseUrl?.takeIf(OnlineRightsPolicy::isSafeHttpsLink)?.let { url ->
+                        TextButton(onClick = { uriHandler.openUri(url) }) {
+                            Text("Đọc giấy phép")
+                        }
+                    }
+                    Text("Thông tin do nhà cung cấp khai báo; không thay thế việc " +
+                        "kiểm tra quyền sử dụng với chủ sở hữu.",
+                        style = MaterialTheme.typography.bodySmall)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { rightsDetail = null }) { Text("Đóng") }
+            }
+        )
     }
 }

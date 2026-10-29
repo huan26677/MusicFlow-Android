@@ -75,15 +75,17 @@ class PlayerViewModel(
             return
         }
 
-        val items = songs.map { song ->
-            TrackMediaItems.fromStored(
+        val available = songs.mapIndexedNotNull { index, song ->
+            TrackMediaItems.fromStoredOrNull(
                 song.mediaId, song.audioUri, song.title, song.artist
-            )
+            )?.let { index to it }
         }
+        val index = available.indexOfFirst { it.first == selectedIndex }
+        if (index < 0) return
 
         playbackController.playQueue(
-            items = items,
-            startIndex = selectedIndex
+            items = available.map { it.second },
+            startIndex = index
         )
     }
 
@@ -93,10 +95,9 @@ class PlayerViewModel(
     ) {
         if (selectedIndex !in tracks.indices) return
 
-        playbackController.playQueue(
-            items = PlaylistMediaItems.fromTracks(tracks),
-            startIndex = selectedIndex
-        )
+        val playable = PlaylistMediaItems.playableSelection(tracks, selectedIndex)
+            ?: return
+        playbackController.playQueue(items = playable.first, startIndex = playable.second)
     }
 
     fun togglePlayPause() =

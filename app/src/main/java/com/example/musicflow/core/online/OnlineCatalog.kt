@@ -22,7 +22,8 @@ data class OnlineTrack(
     val artist: String,
     val album: String?,
     val durationMs: Long,
-    val streamUrl: String? = null
+    val streamUrl: String? = null,
+    val rights: OnlineTrackRights? = null
 )
 
 data class OnlineCatalogPage(
@@ -170,7 +171,10 @@ class HttpsOnlineCatalogRepository : OnlineCatalogRepository {
                                 .trim().take(180).ifBlank { null }
                         },
                         durationMs = entry.optLong("durationMs", 0L)
-                            .coerceIn(0L, 24 * 60 * 60 * 1000L)
+                            .coerceIn(0L, 24 * 60 * 60 * 1000L),
+                        streamUrl = if (entry.isNull("streamUrl")) null
+                            else entry.optString("streamUrl").trim().takeIf { it.isNotBlank() },
+                        rights = OnlineRightsJson.fromExternal(entry)
                     )
                 )
             }

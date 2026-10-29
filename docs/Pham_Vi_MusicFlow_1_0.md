@@ -10,7 +10,7 @@
 
 | Thành phần | Phạm vi | Nghiệm thu cần có |
 |---|---|---|
-| Offline | MediaStore, SAF, audio playback nền | Mất quyền/file, resume, notification, restart |
+| Offline | Nhạc người dùng đã có hoặc tự tải về máy, MediaStore, SAF, audio playback nền; không yêu cầu metadata giấy phép online | Mất quyền/file, resume, notification, restart, playlist/history/queue |
 | Library | Bài hát, album, nghệ sĩ, thể loại, favorites | Không mất hoặc trùng dữ liệu cá nhân |
 | Player | Play/pause, seek, next/previous, shuffle/repeat, tốc độ | MediaSession nhất quán với UI |
 | Queue Manager | Phát tiếp, thêm cuối, xem, di chuyển, xóa, dọn | Không ngắt bài đang phát; lưu và khôi phục |
@@ -25,17 +25,18 @@
 
 ## Quyền lợi tài khoản — chính sách mục tiêu
 
-**Guest:** được sử dụng tất cả chức năng local cốt lõi (nghe file, queue, playlist, favorites, lyrics, EQ, Sleep Timer), và nội dung online nếu nguồn cho phép. Không có cloud sync.
+**Guest:** được sử dụng tất cả chức năng local cốt lõi (nghe tệp đã có/tự tải về điện thoại, queue, playlist, favorites, lyrics, EQ, Sleep Timer), và nội dung online nếu nguồn cho phép. Nhạc offline không cần Internet, tài khoản hoặc xác minh giấy phép bởi MusicFlow. Không có cloud sync.
 
 **Free:** như Guest và có tài khoản, cloud sync thủ công với quota do backend kiểm soát; lịch sử cloud Free hiện thiết kế giới hạn 30 ngày.
 
 **Premium:** mở rộng quota, tự động đồng bộ, lịch sử dài hơn và các tùy chỉnh chuyên sâu **chỉ khi thực tế đã được xây dựng và xác minh**. Không tự cấp Premium tại client.
 
-Không bật thanh toán thật hoặc quảng cáo bắt buộc trong giai đoạn dùng cá nhân. Nội dung âm nhạc phải có quyền sử dụng hợp pháp cho từng hình thức phát, tải, phân phối và thương mại; Premium không thay thế quyền bản quyền.
+Không bật thanh toán thật hoặc quảng cáo bắt buộc trong giai đoạn dùng cá nhân. **MusicFlow chỉ xác minh quyền streaming đối với nội dung online do MusicFlow cung cấp.** File offline người dùng tự lưu/tải xuống được phát như dữ liệu cục bộ; MusicFlow không xét duyệt bản quyền từng tệp riêng tư. Người dùng vẫn chịu trách nhiệm về nguồn tệp và việc sử dụng theo pháp luật; Premium không thay thế quyền bản quyền.
 
 ## Nguyên tắc bản quyền và kỹ thuật
 
 - Từng track online cần nguồn, định danh ổn định, credit, giấy phép, quyền streaming/download/commercial được xác minh. Ưu tiên CC0, CC BY hoặc giấy phép trực tiếp, tùy điều khoản cụ thể.
+- **Phân cách online/offline là URI thực, không phải tên hoặc ID:** tệp local qua `content://`, `file://`, hay đường dẫn tuyệt đối trên thiết bị được phát không cần `rights_confirmed`, ngay cả khi còn giữ ID bắt đầu bằng `online:` từ nguồn cũ. URL `https://` lưu cũ phải kiểm tra quyền trước khi phát lại.
 - Một MediaSessionService là nguồn chân lý về phát nhạc; source local/SAF/online quy về MediaItem; UI Compose dùng StateFlow và gửi commands tới ViewModel/controller.
 - Dữ liệu `content://` cá nhân không được gửi cloud; chỉ metadata tối thiểu và link lại trên từng thiết bị. RLS và entitlement kiểm soát ở backend.
 - Phát triển tính năng theo mốc build/JVM/instrumentation; Full QA và Auth E2E ở giai đoạn cuối. Không xem build-only là nghiệm thu.

@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import com.example.musicflow.core.online.OnlineTrack
+import com.example.musicflow.core.online.OnlineRightsPolicy
 import java.net.URI
 
 /**
@@ -45,6 +46,7 @@ object TrackMediaItems {
         )
 
     fun fromOnlineOrNull(track: OnlineTrack): MediaItem? {
+        if (!OnlineRightsPolicy.canStream(track.rights)) return null
         val address = track.streamUrl ?: return null
         if (!isSafeHttpsMediaUrl(address)) return null
         val source = runCatching {
@@ -60,9 +62,11 @@ object TrackMediaItems {
     }
 
     /**
-     * Stored references are already trusted as *legacy data format*, not as
-     * licensed network content. Preserve IDs/URIs without a silent migration;
-     * actual playback remains subject to Android's URI permissions.
+     * Stored references are trusted as a legacy data format, not as rights
+     * metadata. Only the actual playback location determines whether a saved
+     * item is local: a previously online track downloaded to device storage
+     * must remain playable even when its old mediaId begins with "online:".
+     * Android file/SAF access permissions still apply to that local file.
      */
     fun fromStored(
         mediaId: String,
@@ -70,14 +74,43 @@ object TrackMediaItems {
         title: String,
         artist: String?,
         album: String? = null
-    ): MediaItem =
-        mediaItem(
+    ): MediaItem {
+        require(isSafeStoredLocal(mediaId, audioUri)) {
+            "Stored remote streams require renewed rights validation before playback"
+        }
+        return mediaItem(
             mediaId = MediaSourceContract.stored(mediaId).mediaId,
             uri = Uri.parse(audioUri),
             title = title,
             artist = artist,
             album = album
         )
+    }
+
+    fun fromStoredOrNull(
+        mediaId: String,
+        audioUri: String,
+        title: String,
+        artist: String?,
+        album: String? = null
+    ): MediaItem? =
+        if (isSafeStoredLocal(mediaId, audioUri)) {
+            fromStored(mediaId, audioUri, title, artist, album)
+        } else null
+
+    fun isSafeStoredLocal(mediaId: String, audioUri: String): Boolean {
+        // mediaId is only a persistent identity, never proof that data is
+        // remote. Local copies may legitimately retain the same mediaId.
+        return runCatching {
+            val uri = URI(audioUri)
+            uri.scheme.equals("content", true) ||
+                uri.scheme.equals("file", true) ||
+                (uri.scheme == null &&
+                    uri.host == null &&
+                    audioUri.startsWith("/") &&
+                    !audioUri.startsWith("//"))
+        }.getOrDefault(false)
+    }
 
     fun isSafeHttpsMediaUrl(raw: String): Boolean {
         if (!raw.startsWith("https://", ignoreCase = true)) return false

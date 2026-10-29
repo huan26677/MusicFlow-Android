@@ -8,8 +8,8 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `c31c6e1` — UI/UX Foundation v1 đã commit; MusicFlow UI/UX Polish v2 đang ở workspace, chưa commit |
-| Phạm vi MusicFlow 1.0 | **Đã chốt** offline + online hợp pháp + library cá nhân + cloud; ưu tiên dùng cá nhân, mở rộng sau 1.0; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
+| HEAD Git hiện tại | `4f65879` — UI/UX Polish v2 đã commit; Licensed Online Rights & Attribution v1 đang ở workspace, chưa commit |
+| Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 | 55 bài chính PASS |
@@ -39,8 +39,9 @@
 | Core Media Source Contract v1 | Một điểm dựng MediaItem từ MediaStore/SAF/online, bảo toàn legacy; JVM 11/11, Android API 30 9/9 PASS; log `qa-logs/media-source-contract-v1.log` |
 | MusicFlow UI/UX Foundation v1 | Trạng thái UI thống nhất trên Home/Library/Search/Online/Queue, theme xanh ngọc–xanh đêm và TalkBack labels; BUILD + JVM, Android API 30 **13/13 PASS** |
 | MusicFlow UI/UX Polish v2 | Responsive Now Playing/Playlist/Account, cỡ chữ lớn, theme dễ truy cập; BUILD + JVM, Android API 30 **19/19 PASS**; log `qa-logs/musicflow-ui-polish-v2.log` |
+| Licensed Online Rights Metadata & Attribution v1 | Supabase đã áp dụng migration, RLS fail-closed; chỉ chặn URL online thiếu quyền, **không chặn offline tự tải**, kể cả ID `online:` cũ; 10/10 JVM + 21/21 Android API 30 PASS |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Licensed Online Rights Metadata & Attribution v1** — mô hình metadata cấp phép/ghi công và giới hạn phát hợp pháp; Google Login và email thật ĐỂ CUỐI |
+| Bước tiếp theo | **Licensed Content Review & Publish v2** — cập nhật công cụ quản trị xuất bản theo metadata quyền mới, audit và QA bằng dữ liệu giả; Google Login và email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -146,7 +147,8 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **Phát triển — đã test Android** | **Core Media Source Contract v1** | **11/11 JVM + 9/9 Android API 30 PASS** | `qa-logs/media-source-contract-v1.log`; chưa có streaming thật/cấp phép thật và signed URL resolver |
 | **Phát triển — đã test Android** | **MusicFlow UI/UX Foundation v1** | **Build/JVM + 13/13 Android API 30 PASS** | `qa-logs/musicflow-ui-foundation-v1.log`, `docs/MusicFlow_UI_UX_Foundation_v1.md`; chưa nghiệm thu bố cục đa cỡ chữ/thiết bị |
 | **Phát triển — đã test Android** | **MusicFlow UI/UX Polish v2** | **Build/JVM + 19/19 Android API 30 PASS** | `qa-logs/musicflow-ui-polish-v2.log`, `docs/MusicFlow_UI_UX_Polish_v2.md`; còn QA đa API và TalkBack thiết bị thật |
-| **Phát triển — kế tiếp** | **Licensed Online Rights Metadata & Attribution v1** | CHƯA TRIỂN KHAI | Rights/credit/source metadata có xác minh, hạn chế play/download sai quyền, không dùng nhạc lậu |
+| **Phát triển — đã test Android + Supabase** | **Licensed Online Rights Metadata & Attribution v1** | **Supabase migration PASS, 10 JVM + 21 Android PASS API 30** | Chỉ online streaming cần quyền; offline tự tải không cần kiểm tra; `docs/Licensed_Online_Rights_Attribution_v1.md`, `qa-logs/licensed-online-rights-v1.log`; chưa có bài online thật |
+| **Phát triển — kế tiếp** | **Licensed Content Review & Publish v2** | CHƯA TRIỂN KHAI | Công cụ quản trị/RPC phải ghi đủ license/source/attribution/rights-verified-at, không xuất bản nếu chưa xác minh; QA âm thanh thật sau |
 | **Hoãn tới cuối** | **Google Login + email thật + Auth/Cloud E2E** | HOÃN THEO QUYẾT ĐỊNH CHỦ DỰ ÁN | Chỉ kiểm thử thật khi gần hoàn thành Full Product và có credentials do chủ dự án tự cấu hình |
 | **P0** | **MVP End-to-End Acceptance v1** — Library/Search/Picker → Player → Playlist/History → restart | CHƯA NGHIỆM THU | Script UI/integration tests có assertions và log cho từng flow |
 | **P0** | **Background Playback / System Controls QA** | V2 QA TỰ ĐỘNG PASS (API 30) — còn lockscreen và Bluetooth thực tế | Test lifecycle, audio focus, điều khiển từ MediaSession/notification/lock screen trong phạm vi khả thi; mọi điều kiện đã chốt đạt PASS |
@@ -259,6 +261,25 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Xác nhận phạm vi bản quyền: CHỈ ONLINE, OFFLINE TỰ TẢI PHÁT BÌNH THƯỜNG — BUILD + TEST PASS
+
+- Chủ dự án xác nhận **chỉ nhạc phát từ catalog online MusicFlow mới cần quyền streaming đã xác minh**. Nhạc offline người dùng tự tải/tự lưu vào điện thoại vẫn phát bình thường qua MediaStore/SAF/file path, không cần đăng nhập, Internet, metadata giấy phép hay xét duyệt từ MusicFlow.
+- Sửa `TrackMediaItems.isSafeStoredLocal` dựa trên **URI thực tế** (`content://`, `file://`, đường dẫn file tuyệt đối), không chặn chỉ vì `mediaId` bắt đầu `online:`. Cùng lúc tiếp tục chặn URL remote `http://`/`https://` đã lưu mà không có quyền được xác minh lại. Không đổi identity, Room schema hay Supabase policy.
+- Android thêm `personalDownloadedOfflineFilesPlayEvenWithLegacyOnlineIds` (MediaStore, Downloads SAF, file URI và đường dẫn tuyệt đối), `downloadedOfflineTrackWithOldOnlineIdRestoresNormally` (queue snapshot offline với ID `online:`, khôi phục vị trí, không tự phát).
+- Chạy lại `scripts/run-licensed-online-rights-v1-tests.ps1`: `BUILD_AND_JVM_EXIT=0`, `OnlineRightsPolicyTest` **10/10**, emulator API 30 **21/21 Android PASS**, `FINAL_RESULT=PASS`, log `qa-logs/licensed-online-rights-v1.log`. Đây là kết quả trên workspace, chưa auto commit/push.
+- Phân biệt công cụ kiểm tra quyền của hệ thống với trách nhiệm nguồn tệp của người dùng: việc ứng dụng không kiểm tra nhạc offline không phải cho phép phân phối/tải trái phép. Bước tiếp theo vẫn **Licensed Content Review & Publish v2**; email/Google Auth thật để gần cuối.
+
+### 2026-10-29 — Licensed Online Rights Metadata & Attribution v1 — SUPABASE + BUILD + JVM + ANDROID PASS
+
+- HEAD nền `4f65879` (UI/UX Polish v2 đã commit), working tree sạch trước thay đổi; source mốc này chưa được tự commit/push.
+- Supabase dự án `vzvxpbwrftlnyvuhfoqn`: **đã áp dụng** migration `music_tracks_rights_attribution_v1`; thêm 8 trường `license_code, license_url, attribution_text, source_url, streaming_allowed, download_allowed, commercial_use_allowed, rights_verified_at`. Defaults không cấp quyền; CHECK code giấy phép. RLS public SELECT yêu cầu published + rights confirmed + verified timestamp + streamingAllowed + HTTPS source/stream + license + attribution. Kiểm tra lại cột và RLS, có **0 bài nhạc**, vai trò anon/authenticated chỉ SELECT. Security Advisor có một INFO `music_uploads` thiếu policy theo thiết kế không cho client truy cập, không phát hiện mới cho `music_tracks`.
+- Android: `OnlineTrackRights.kt` và `OnlineRightsJson.kt`, parse contract Supabase và external HTTPS catalog; `OnlineRightsPolicy` mặc định từ chối thiếu quyền, không suy diễn quyền tải từ quyền streaming; `TrackMediaItems.fromOnlineOrNull` + `OnlineCatalogScreen` kiểm tra quyền trước phát, hiển thị nguồn, ghi công, giấy phép và giới hạn tải.
+- Không cho khôi phục/phát lại URL online cũ thiếu rights từ Room Playlist, recent history hoặc Queue Store. Queue cũ chứa nhạc local xen online sẽ giữ các bài local và đặt vị trí phát 0 nếu bài cũ bị từ chối; không tự phát.
+- Build `:app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest` PASS; `OnlineRightsPolicyTest` **10/10 JVM**. Emulator `emulator-5554` API 30: `OnlineRightsJsonTest` 4/4, `OnlineRightsScreenTest` 2/2, `TrackMediaItemsTest` 8/8, `PlaybackQueuePersistenceTest` 4/4, `QueueManagerIntegrationTest` 1/1 — **19/19 PASS**. Vòng đầu gặp 1 assertion nhãn UI sai, sửa và chạy lại PASS.
+- Script `scripts/run-licensed-online-rights-v1-tests.ps1`, log `qa-logs/licensed-online-rights-v1.log`, marker `FINAL_RESULT=PASS`. Tài liệu `docs/Licensed_Online_Rights_Attribution_v1.md`; cập nhật cảnh báo hướng dẫn cũ `docs/Supabase_MusicFlow_v1.md` và `docs/Supabase_Licensed_Upload_v1.md`.
+- **Giới hạn P0:** công cụ quản trị `musicflow_licensed_upload.py` / RPC publish v1 chưa đưa tám trường quyền mới nên publish theo flow cũ sẽ **không hiện online**, đây là fail-closed có chủ đích; chưa thử audio thật có quyền, CDN/cache, signed URL renewal, phát từ lịch sử online sau rights refresh. Không giả định đã nghiệm thu licensed streaming.
+- **Kế tiếp:** Licensed Content Review & Publish v2; sau đó Licensed Streaming E2E Smoke với bài thật được chủ sở hữu cấp quyền. Google Login/email thật vẫn để cuối.
 
 ### 2026-10-29 — MusicFlow UI/UX Polish v2 — BUILD + JVM + ANDROID PASS
 

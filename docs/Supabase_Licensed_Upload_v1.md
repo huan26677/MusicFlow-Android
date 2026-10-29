@@ -1,5 +1,7 @@
 # MusicFlow — Licensed Content Upload v1
 
+> **Cập nhật 2026-10-29:** RLS `music_tracks` được siết theo `docs/Licensed_Online_Rights_Attribution_v1.md`. Công cụ stage/review/publish v1 dưới đây **chưa ghi tám trường quyền mới**, vì vậy dù RPC publish thành công, bài nhạc chưa hiển thị công khai. **Không sử dụng quy trình v1 để nghiệm thu phát nhạc online** trước khi có mốc Licensed Content Review & Publish v2.
+
 ## Trạng thái triển khai (2026-10-29)
 
 - Supabase project: `vzvxpbwrftlnyvuhfoqn`.

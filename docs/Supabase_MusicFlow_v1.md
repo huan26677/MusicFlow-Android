@@ -1,5 +1,7 @@
 # MusicFlow — Supabase backend v1 (2026-10-29)
 
+> **Cập nhật ngày 2026-10-29:** RLS và metadata bản quyền đã được nâng cấp qua migration `music_tracks_rights_attribution_v1`. Mô tả RLS/streaming ở phần v1 phía dưới là lịch sử, **không còn đủ để xuất bản nhạc**. Xem `docs/Licensed_Online_Rights_Attribution_v1.md`. Quyền streaming được xác minh, nguồn, ghi công và giấy phép hợp lệ là bắt buộc; công cụ publish cũ chưa gửi đủ trường này.
+
 ## Dự án đã kết nối
 
 - URL dự án: `https://vzvxpbwrftlnyvuhfoqn.supabase.co`.
@@ -10,7 +12,7 @@
 ## Trạng thái dữ liệu
 
 - Chưa upload bài hát / dữ liệu mẫu giả.
-- Có chính sách RLS: chỉ công khai bản ghi `is_published = true`, `rights_confirmed = true`, có `stream_url`.
+- Chính sách RLS v1 từng yêu cầu `is_published=true`, `rights_confirmed=true`, `stream_url`. **Hiện đã thay bằng chính sách chặt hơn:** cần cả `streaming_allowed`, `rights_verified_at`, `license_code`, `attribution_text`, `source_url` và license URL thích hợp.
 - Role anon/authenticated chỉ được SELECT; không được INSERT/UPDATE/DELETE từ ứng dụng.
 - Không tự đưa nhạc có bản quyền lên hệ thống nếu thiếu quyền cung cấp hoặc phát trực tuyến.
 
@@ -32,7 +34,7 @@
 
 ## Về streaming
 
-- Bài có `stream_url` HTTPS mới có thể nhấn phát, dùng cùng MediaSession và queue hiện có.
+- **Từ Rights v1:** chỉ URL HTTPS **và metadata quyền đầy đủ, đã được xác minh từ backend** mới có thể phát; URL một mình không còn đủ.
 - Không hỗ trợ token riêng từng người, signed URL hết hạn, DRM, download offline hoặc nội dung trả phí ở v1.
 - Vì URL xuất hiện trong Data API công khai, **không dùng URL bí mật hoặc luồng phát yêu cầu quyền riêng tư** trong bảng này. Bước tiếp theo phải thiết kế máy chủ cấp URL ngắn hạn hoặc Supabase Edge Function xác thực quyền truy cập.
 - Đặc biệt không sử dụng service_role hoặc secret key trong ứng dụng Android.
