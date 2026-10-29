@@ -55,6 +55,7 @@ fun AccountRoute(
         onSaveProfile = model::saveProfile,
         onSignOut = model::signOut,
         onSyncLibrary = model::syncLibrary,
+        onSyncHistory = model::syncHistory,
         onRelink = model::relink,
         onDeleteCloudPlaylist = model::deleteRemotePlaylist,
         onDeleteCloudFavorite = model::deleteRemoteFavorite
@@ -74,6 +75,7 @@ fun AccountScreen(
     onSaveProfile: () -> Unit,
     onSignOut: () -> Unit,
     onSyncLibrary: () -> Unit,
+    onSyncHistory: () -> Unit,
     onRelink: (CloudPendingMatch, String) -> Unit,
     onDeleteCloudPlaylist: (String) -> Unit,
     onDeleteCloudFavorite: (String) -> Unit
@@ -139,6 +141,13 @@ fun AccountScreen(
                 Text(if (state.syncing) "Đang đồng bộ..." else "Đồng bộ thư viện")
             }
             if (state.syncing) CircularProgressIndicator()
+            OutlinedButton(
+                onClick = onSyncHistory,
+                enabled = !state.loading && !state.syncing
+            ) { Text("Đồng bộ lịch sử nghe") }
+            Text("Đồng bộ thủ công: tên bài, nghệ sĩ, thời điểm nghe; " +
+                "Free chỉ xem 30 ngày, Premium xem dữ liệu cloud còn lưu.",
+                style = MaterialTheme.typography.bodySmall)
             state.syncSummary?.let { summary ->
                 Text("Bài chưa liên kết: ${summary.pending.size}",
                     style = MaterialTheme.typography.titleMedium)

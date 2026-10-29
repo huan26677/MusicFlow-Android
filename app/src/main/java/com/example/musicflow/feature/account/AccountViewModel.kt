@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.musicflow.core.account.AccountApi
 import com.example.musicflow.core.account.AccountIdentity
 import com.example.musicflow.core.account.CloudLibrarySync
+import com.example.musicflow.core.account.CloudHistorySync
 import com.example.musicflow.core.account.CloudSyncSummary
 import com.example.musicflow.core.account.CloudPendingMatch
 import kotlinx.coroutines.CancellationException
@@ -30,7 +31,8 @@ data class AccountUiState(
 
 class AccountViewModel(
     private val api: AccountApi,
-    private val cloudSync: CloudLibrarySync
+    private val cloudSync: CloudLibrarySync,
+    private val cloudHistory: CloudHistorySync
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         AccountUiState(configured = api.isConfigured)
@@ -229,6 +231,31 @@ class AccountViewModel(
         }
     }
 
+    fun syncHistory() {
+        if (_state.value.loading || _state.value.syncing ||
+            _state.value.account == null) return
+        viewModelScope.launch {
+            _state.update { it.copy(syncing = true, error = null, message = null) }
+            try {
+                val result = cloudHistory.sync()
+                _state.update {
+                    it.copy(syncing = false,
+                        message = "Lịch sử: gửi ${result.uploaded} bài, " +
+                            "khôi phục ${result.restored}; " +
+                            "${result.notOnDevice} bài chưa có trên thiết bị.")
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                _state.update {
+                    it.copy(syncing = false,
+                        error = "Không đồng bộ được lịch sử: " +
+                            (error.message ?: "Kiểm tra kết nối và quyền thư viện."))
+                }
+            }
+        }
+    }
+
     companion object {
         fun factory(context: Context): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
@@ -236,7 +263,8 @@ class AccountViewModel(
                     require(modelClass.isAssignableFrom(AccountViewModel::class.java))
                     val api = AccountApi(context.applicationContext)
                     val model = AccountViewModel(
-                        api, CloudLibrarySync(context.applicationContext, api)
+                        api, CloudLibrarySync(context.applicationContext, api),
+                        CloudHistorySync(context.applicationContext, api)
                     )
                     @Suppress("UNCHECKED_CAST")
                     return model as T

@@ -16,6 +16,22 @@ class RoomRecentHistoryRepository(
 
     private val dao = database.recentSongDao()
 
+    /**
+     * Merge remote metadata only after resolving it to local media.
+     * No imported URI is accepted from another device.
+     */
+    suspend fun mergeCloudRecent(restored: List<RecentSong>): Int =
+        database.withTransaction {
+            val existing = dao.getAll().map { it.toRecentSong() }
+            val merged = CloudHistoryRules.merge(existing, restored)
+            val existingKeys = existing.map { it.mediaId }.toSet()
+            dao.deleteAll()
+            dao.insertAll(merged.mapIndexed { index, item ->
+                item.toEntity(position = index)
+            })
+            merged.count { it.mediaId !in existingKeys }
+        }
+
     suspend fun record(song: RecentSong) {
         if (
             song.mediaId.isBlank() ||

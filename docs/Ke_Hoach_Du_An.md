@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `924301d` — Cloud Playlist & Favorites Sync v1 đang ở workspace, chưa commit |
+| HEAD Git hiện tại | `8f66af4` — History Sync v1 build PASS ở workspace, chưa commit |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 | 55 bài chính PASS |
 | Marker API 30 | 40/40 PASS |
@@ -29,7 +29,8 @@
 | Account & Subscription Foundation v1 | Guest/Free/Premium model; Supabase Auth email/password, profile RLS, entitlement read-only, Android Keystore; build và unit PASS, chưa QA email thật |
 | Cloud Playlist & Favorites Sync v1 | Manual opt-in, metadata-only, RPC merge/RLS theo owner, safe local relink; build/JVM PASS, chưa E2E đa thiết bị |
 | Cloud Sync Hardening v2 | Trigger quota, tombstone xóa cloud, UI relink thủ công, RPC merge, có source; chưa E2E đa thiết bị |
-| Bước tiếp theo | Kiểm tra E2E Auth + đồng bộ 2 thiết bị, rồi History Sync v1 và Google Login |
+| History Sync v1 | Supabase RLS, RPC metadata-only, UI đồng bộ thủ công; APK + AndroidTest build và JVM unit PASS (4/4 riêng History), chưa E2E |
+| Bước tiếp theo | Google Login Foundation v1; kiểm tra Auth + đồng bộ E2E 2 thiết bị khi có môi trường thử |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -125,7 +126,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 
 ## 5. Công việc tiếp theo: backlog theo thứ tự ưu tiên
 
-**Chế độ phát triển hiện hành (2026-10-29):** Chủ dự án ưu tiên hoàn thiện tính năng Full Product trước rồi mới chạy vòng QA/bug tổng thể. Các mục P0 QA/Release bên dưới vẫn giữ nguyên để nghiệm thu cuối, không được hiểu là đã PASS khi chỉ build thành công. Supabase Catalog/Streaming, Licensed Content Upload, Account/Auth và Cloud Sync v1 đã có source. **Chưa có nhạc được cấp phép; chưa test tài khoản thật và đồng bộ đa thiết bị E2E**. Feature tiếp theo: Cloud Sync Hardening v2; khi có nhạc hợp lệ thì Licensed Streaming Smoke. Billing, signed URL, podcast/radio còn là backlog.
+**Chế độ phát triển hiện hành (2026-10-29):** Chủ dự án ưu tiên hoàn thiện tính năng Full Product trước rồi mới chạy vòng QA/bug tổng thể. Các mục P0 QA/Release bên dưới vẫn giữ nguyên để nghiệm thu cuối, không được hiểu là đã PASS khi chỉ build thành công. Supabase Catalog/Streaming, Licensed Content Upload, Account/Auth, Cloud Sync và History Sync v1 đã có source. **Chưa có nhạc được cấp phép; chưa test tài khoản thật hay đồng bộ đa thiết bị E2E**. Feature tiếp theo: Google Login Foundation v1; khi có nhạc hợp lệ thì Licensed Streaming Smoke. Billing, signed URL, podcast/radio vẫn là backlog.
 
 | Ưu tiên | Bước / việc cần làm | Trạng thái | Điều kiện kết thúc bước |
 |---|---|---|---|
@@ -241,6 +242,18 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — History Sync v1 — BUILD + JVM PASS
+
+- HEAD trước sửa: `8f66af4` (`feat: harden cloud sync with quotas relink and soft delete`); workspace sạch khi bắt đầu, đến nay chưa commit/push.
+- Supabase migration `musicflow_cloud_recent_history_v1`: `cloud_recent_history` với RLS owner, chính sách Free 30 ngày/Premium còn hiệu lực, RPC `musicflow_merge_recent_history` security-invoker.
+- Đã xác minh grants: `anon_select=false`, `anon_rpc=false`, `authenticated_select=true`, `authenticated_rpc=true`, `authenticated_delete=false`; có `0` bản ghi lịch sử cloud.
+- Android thêm `CloudHistorySync.kt`, `CloudHistoryRules.kt`, `CloudHistoryRulesTest.kt`; merge Room history có giữ thời gian nghe mới hơn và tối đa 20 mục; nút đồng bộ lịch sử trong Account.
+- Chỉ truyền metadata tên bài/nghệ sĩ/thời điểm, không truyền URI file cục bộ.
+- Đã chạy Gradle `:app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest --console=plain` thực tế: `BUILD SUCCESSFUL in 31s`, mã thoát `0`. `CloudHistoryRulesTest`: 4/4 PASS, 0 skipped.
+- Log `qa-logs/history-sync-v1.log`, tài liệu `docs/History_Sync_v1.md`.
+- Giới hạn: build + JVM test, **chưa chạy instrumentation hay E2E tài khoản thật/2 máy**. Không đồng bộ xóa cloud khi xóa local. Full QA vẫn để cuối.
+- Bước tiếp theo: Google Login Foundation v1. MVP tổng thể CHƯA NGHIỆM THU.
 
 ### 2026-10-29 — Cloud Sync Hardening v2
 
