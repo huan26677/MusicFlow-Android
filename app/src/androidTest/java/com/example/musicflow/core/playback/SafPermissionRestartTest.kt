@@ -86,9 +86,15 @@ class SafPermissionRestartTest {
         if (node == null) return null
         val labels = listOfNotNull(
             node.text?.toString(),
-            node.contentDescription?.toString()
+            node.contentDescription?.toString(),
+            node.viewIdResourceName
         )
-        if (labels.any { it.trim().equals("Save", true) || it.trim().equals("Lưu", true) }) {
+        if (labels.any {
+                it.trim().equals("Save", true) ||
+                    it.trim().equals("Lưu", true) ||
+                    it.endsWith(":id/action_menu_save") ||
+                    it.endsWith(":id/save")
+            }) {
             return node
         }
         for (index in 0 until node.childCount) {
@@ -98,10 +104,38 @@ class SafPermissionRestartTest {
         return null
     }
 
+    private fun logDocumentUiTree() {
+        val root = instrumentation.uiAutomation.rootInActiveWindow
+        Log.w("MusicFlowSafQA", "SAVE_NOT_FOUND root=${root?.packageName}")
+        var n = 0
+        fun visit(node: AccessibilityNodeInfo?, depth: Int) {
+            if (node == null || n++ >= 80 || depth > 12) return
+            Log.w("MusicFlowSafQA",
+                "UI depth=$depth class=${node.className} id=${node.viewIdResourceName} " +
+                    "text=${node.text} desc=${node.contentDescription} clickable=${node.isClickable}")
+            for (i in 0 until node.childCount) visit(node.getChild(i), depth + 1)
+        }
+        visit(root, 0)
+    }
+
     private fun clickSaveInDocumentsUi(): Boolean {
-        val deadline = SystemClock.uptimeMillis() + 20_000L
+        // API 36 cold-boot emulator can show a transient SystemUI ANR while
+        // the system picker initializes. Explicitly choose "Wait" if shown;
+        // never treat this as a successful document selection.
+        val timeout = if (android.os.Build.VERSION.SDK_INT >= 36) 90_000L
+            else 30_000L
+        val deadline = SystemClock.uptimeMillis() + timeout
         while (SystemClock.uptimeMillis() < deadline) {
-            val target = findSaveAction(instrumentation.uiAutomation.rootInActiveWindow)
+            val root = instrumentation.uiAutomation.rootInActiveWindow
+            val systemWait = findSystemWaitAction(root)
+            if (systemWait != null) {
+                Log.w("MusicFlowSafQA",
+                    "SYSTEM_UI_ANR_ON_EMULATOR waiting for picker to recover")
+                systemWait.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                SystemClock.sleep(600)
+                continue
+            }
+            val target = findSaveAction(root)
             if (target != null) {
                 var clickable: AccessibilityNodeInfo? = target
                 while (clickable != null) {
@@ -113,7 +147,18 @@ class SafPermissionRestartTest {
             }
             SystemClock.sleep(200)
         }
+        logDocumentUiTree()
         return false
+    }
+
+    private fun findSystemWaitAction(node: AccessibilityNodeInfo?): AccessibilityNodeInfo? {
+        if (node == null) return null
+        val id = node.viewIdResourceName.orEmpty()
+        if (id == "android:id/aerr_wait" && node.isClickable) return node
+        for (index in 0 until node.childCount) {
+            findSystemWaitAction(node.getChild(index))?.let { return it }
+        }
+        return null
     }
 
     private fun persistedRead(uri: Uri): Boolean =

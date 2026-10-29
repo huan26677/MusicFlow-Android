@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `e6cd180` — Licensed Content Review & Publish v2 đã commit; Offline End-to-End Acceptance v1 đang ở workspace, chưa commit |
+| HEAD Git hiện tại | `d199bbb` — Offline End-to-End Acceptance v1 đã commit; Android Compatibility Matrix v2 đang ở workspace, chưa commit |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
@@ -42,8 +42,9 @@
 | Licensed Online Rights Metadata & Attribution v1 | Supabase đã áp dụng migration, RLS fail-closed; chỉ chặn URL online thiếu quyền, **không chặn offline tự tải**, kể cả ID `online:` cũ; 10/10 JVM + 21/21 Android API 30 PASS |
 | Licensed Content Review & Publish v2 | Supabase RPC v2 chỉ service_role, v1 bị thu hồi EXECUTE; admin Python ghi rights + audit, 17/17 Python PASS, rollback SQL trên DB PASS, Gradle/JVM PASS; chưa upload nhạc thật |
 | Offline End-to-End Acceptance v1 | MediaStore → Room Playlist → MediaSession → History → Queue Snapshot/Restore, 9/9 marker; build/JVM PASS, 22/22 Android API 30 PASS; `qa-logs/offline-e2e-acceptance-v1.log` |
+| Android Compatibility Matrix v2 | API **29/30/33/36**, mỗi API 18 offline + 4 restart + 4 SAF; **104/104 instrumented PASS**, 9 E2E markers/API, đổi PID thật khi force-stop; `docs/Android_Compatibility_Matrix_v2.md` |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Android Compatibility Matrix v2** — kiểm chứng offline/SAF/restart trên API 29/30/33/36; Licensed Streaming Smoke chờ audio có quyền thật; Google Login/email thật ĐỂ CUỐI |
+| Bước tiếp theo | **Full Product Regression Gate v1** — chạy toàn bộ Android/JVM suite và thống kê pass/fail/skip bằng script không hard-code test count; sau đó Release Candidate QA; Licensed Streaming Smoke chờ audio có quyền thật; Google Login/email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -153,9 +154,10 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **Phát triển — đã kiểm thử backend** | **Licensed Content Review & Publish v2** | **Supabase migration + 17 Python unit + SQL rollback dry-run + Android build/JVM PASS** | `docs/Licensed_Content_Review_Publish_v2.md`, `qa-logs/licensed-publish-v2.log`; không có nhạc thật được upload |
 | **Phát triển — kế tiếp khi đủ quyền nội dung** | **Licensed Streaming Smoke v1** | CHƯA THỰC HIỆN | Một bài do chủ sở hữu cấp quyền thật, stage/review/publish → Android Media3 + background/seek/error; chưa cung cấp secret/audio |
 | **Hoãn tới cuối** | **Google Login + email thật + Auth/Cloud E2E** | HOÃN THEO QUYẾT ĐỊNH CHỦ DỰ ÁN | Chỉ kiểm thử thật khi gần hoàn thành Full Product và có credentials do chủ dự án tự cấu hình |
-| **P0 — đã test phần offline API 30** | **Offline End-to-End Acceptance v1** — MediaStore → Playlist → MediaSession → History → Queue restore | **22/22 Android PASS, 9/9 marker; còn force-stop/restart + đa API** | `qa-logs/offline-e2e-acceptance-v1.log`; `docs/Offline_End_To_End_Acceptance_v1.md`; không đánh đồng ExoPlayer mới với process restart thật |
+| **P0 — đã test phần offline API 30** | **Offline End-to-End Acceptance v1** — MediaStore → Playlist → MediaSession → History → Queue restore | **22/22 Android PASS, 9/9 marker; matrix v2 sau đó kiểm tra force-stop + đa API** | `qa-logs/offline-e2e-acceptance-v1.log`; `docs/Offline_End_To_End_Acceptance_v1.md` |
 | **P0** | **Background Playback / System Controls QA** | V2 QA TỰ ĐỘNG PASS (API 30) — còn lockscreen và Bluetooth thực tế | Test lifecycle, audio focus, điều khiển từ MediaSession/notification/lock screen trong phạm vi khả thi; mọi điều kiện đã chốt đạt PASS |
-| **P0 — kế tiếp** | **Android Compatibility Matrix v2** | Đang thực hiện, chưa có bằng chứng mới cho cả bốn API | Bộ test tự động trên các API đại diện (29/30/33/36): offline/SAF/permission/process restart, kết quả phân biệt từng thiết bị |
+| **P0 — đã kiểm thử 4 API** | **Android Compatibility Matrix v2** | **104/104 PASS (26/API, API 29/30/33/36)** | `docs/Android_Compatibility_Matrix_v2.md`, 4 file `qa-logs/android-compat-matrix-v2-api-*.log`; bộ test đại diện, chưa phải full connectedDebugAndroidTest đa API |
+| **P0 — kế tiếp** | **Full Product Regression Gate v1** | CHƯA TRIỂN KHAI | Chạy toàn bộ instrumentation/JVM, phân biệt skip, fail, hardening và kiểm tra các nhóm chức năng còn thiếu QA runtime |
 | **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
 | **P1** | UI/accessibility/empty-state/error-state | Foundation v1 13/13 + Polish v2 19/19 Android PASS; toàn diện **CHƯA NGHIỆM THU** | Tiếp tục ma trận API, TalkBack thật, adaptive layout rộng và các trạng thái chưa chuẩn hóa |
 | **P1** | Hiệu năng và dữ liệu lớn | CHƯA NGHIỆM THU | Dataset cố định; ngưỡng thời gian/độ ổn định được chốt; không crash/ANR, không mất dữ liệu |
@@ -264,6 +266,16 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Android Compatibility Matrix v2 — 104/104 ANDROID INSTRUMENTATION PASS
+
+- HEAD nền `d199bbb` (Offline End-to-End Acceptance v1 đã push), working tree sạch trước khi thực hiện; mốc này chưa tự commit/push.
+- 4 emulator AVD có sẵn: `Pixel_5_API_29`, `Pixel_5_API_30`, `Pixel_5_API_33`, `Pixel_7_API_36`; API thực được xác nhận bằng `ro.build.version.sdk`. Giữ emulator API 30 đang dùng, chạy các API khác bằng serial riêng và dọn emulator QA sau cùng.
+- Thêm `scripts/run-android-compat-matrix-v2-device.ps1`: chạy trên serial được chỉ định, kiểm tra API/boot, cài APK, 18 bài offline/Media3/Playlist/Queue Persistence + 9 E2E markers, rồi chạy 4 pha restart thực và 4 pha SAF (prepare/verify sau force-stop và cleanup), kiểm tra marker và PID đổi thật. Không dùng số lượng test hard-coded của script QA legacy.
+- Kết quả `qa-logs/android-compat-matrix-v2-api-{29,30,33,36}.log`: **từng API 18/18 offline core, 4/4 restart, 4/4 SAF, FINAL_RESULT=PASS**; tổng **104/104 PASS**. Điểm mạnh: quyền SAF còn sau force-stop, file yêu thích SAF phát được; playlist/history/queue khôi phục trong tiến trình mới và không tự phát trái ý muốn.
+- API 36 lượt SAF đầu **FAIL** vì `System UI isn't responding` che DocumentsUI; cây accessibility ghi rõ hộp thoại Android, không suy diễn là lỗi MusicFlow. Cập nhật `SafPermissionRestartTest.kt` để nhận diện nút `android:id/aerr_wait`, chờ System UI hồi phục, hỗ trợ resource-id Save, tăng timeout API36, log cây UI khi fail; **phải nhận URI + persisted grant thật mới PASS**. Sau sửa, chạy lại full API36 **26/26 PASS**. API29/30/33 đã PASS trước sửa QA helper; production Android source, MediaSession và kiểm soát quyền online không đổi.
+- Tài liệu `docs/Android_Compatibility_Matrix_v2.md`. **Giới hạn:** chỉ representative regression 26/API, chưa full connectedDebugAndroidTest 4 API, chưa thiết bị thật/BT/lockscreen, chưa streaming thật; Google Login/email thật và cloud 2 thiết bị về cuối. Nhạc offline người dùng tự tải **không cần** MusicFlow xác minh bản quyền.
+- Bước tiếp theo: **Full Product Regression Gate v1** và sau đó Release Candidate QA.
 
 ### 2026-10-29 — Offline End-to-End Acceptance v1 — BUILD/JVM + 22 ANDROID API 30 PASS
 

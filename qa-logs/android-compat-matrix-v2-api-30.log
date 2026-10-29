@@ -1,0 +1,123 @@
+﻿MusicFlow Android Compatibility Matrix v2
+DATE=2026-10-29T16:17:10.8067487+07:00
+HEAD_BASE=d199bbb
+DEVICE=emulator-5554 EXPECTED_API=30
+ACTUAL_API=30 BOOT_COMPLETE=1
+INSTALL_app\build\outputs\apk\debug\app-debug.apk=Performing Streamed Install
+Success
+INSTALL_app\build\outputs\apk\androidTest\debug\app-debug-androidTest.apk=Performing Streamed Install
+Success
+
+com.example.musicflow.core.playback.OfflineAcceptanceFlowTest:.
+com.example.musicflow.core.media.TrackMediaItemsTest:.........
+com.example.musicflow.core.playback.PlaybackQueuePersistenceTest:.....
+com.example.musicflow.core.playlist.PlaylistPlaybackOrderTest:...
+
+Time: 18.764
+
+OK (18 tests)
+
+
+OFFLINE_CORE_EXIT=0
+OFFLINE_CORE_PASS=18
+MARKER_PASS mediaStoreScanner=True
+MARKER_PASS localPlaylistPersisted=True
+MARKER_PASS offlineMediaSessionPlaying=True
+MARKER_PASS offlineHistoryFirst=True
+MARKER_PASS offlineNextTrack=True
+MARKER_PASS offlineHistoryOrder=True
+MARKER_PASS offlineQueueSnapshot=True
+MARKER_PASS offlineQueueRestoredPaused=True
+MARKER_PASS offlinePlaylistUnchanged=True
+
+com.example.musicflow.core.playback.PlaybackProcessRestartTest:.
+
+Time: 0.415
+
+OK (1 test)
+
+
+RESTART_INITIAL_CLEANUP_EXIT=0
+RESTART_INITIAL_CLEANUP_PASS=1
+
+com.example.musicflow.core.playback.PlaybackProcessRestartTest:.
+
+Time: 13.599
+
+OK (1 test)
+
+
+RESTART_PREPARE_EXIT=0
+RESTART_PREPARE_PASS=1
+
+com.example.musicflow.core.playback.PlaybackProcessRestartTest:.
+
+Time: 15.938
+
+OK (1 test)
+
+
+RESTART_VERIFY_EXIT=0
+RESTART_VERIFY_PASS=1
+PROCESS_RESTART_NEW_PID=TRUE
+MARKER_PHASE_PREPARE_PASS=True
+MARKER_PHASE_VERIFY_PAUSED_PASS=True
+MARKER_PHASE_VERIFY_PASS=True
+MARKER_PASS historyPersistedAfterRestart=True
+
+com.example.musicflow.core.playback.PlaybackProcessRestartTest:.
+
+Time: 1.198
+
+OK (1 test)
+
+
+RESTART_CLEANUP_EXIT=0
+RESTART_CLEANUP_PASS=1
+RESTART_PHASES=4
+
+com.example.musicflow.core.playback.SafPermissionRestartTest:.
+
+Time: 0.913
+
+OK (1 test)
+
+
+SAF_INITIAL_CLEANUP_EXIT=0
+SAF_INITIAL_CLEANUP_PASS=1
+
+com.example.musicflow.core.playback.SafPermissionRestartTest:.
+
+Time: 12.929
+
+OK (1 test)
+
+
+SAF_PREPARE_EXIT=0
+SAF_PREPARE_PASS=1
+
+com.example.musicflow.core.playback.SafPermissionRestartTest:.
+
+Time: 8.989
+
+OK (1 test)
+
+
+SAF_VERIFY_EXIT=0
+SAF_VERIFY_PASS=1
+SAF_PROCESS_RESTART_NEW_PID=TRUE
+MARKER_SAF_PREPARE_PASS=True
+MARKER_SAF_PERSISTED_READ_PASS=True
+MARKER_SAF_FAVORITE_PLAYBACK_PASS=True
+
+com.example.musicflow.core.playback.SafPermissionRestartTest:.
+
+Time: 0.554
+
+OK (1 test)
+
+
+SAF_CLEANUP_EXIT=0
+SAF_CLEANUP_PASS=1
+SAF_PHASES=4
+FINAL_RESULT=PASS
