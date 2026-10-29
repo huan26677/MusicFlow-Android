@@ -26,6 +26,8 @@ import com.example.musicflow.core.playlist.LocalPlaylist
 import com.example.musicflow.core.playlist.PlaylistRules
 import com.example.musicflow.core.playlist.PlaylistTrack
 import com.example.musicflow.core.playlist.RoomPlaylistRepository
+import com.example.musicflow.ui.components.MusicFlowStatusKind
+import com.example.musicflow.ui.components.MusicFlowStatusPanel
 
 @Composable
 internal fun rememberPlaylistViewModel(): PlaylistViewModel {
@@ -117,23 +119,28 @@ fun PlaylistListRoute(
         when (val current = state) {
 
             PlaylistsUiState.Loading -> {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth()
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.LOADING,
+                    title = "Đang tải danh sách phát...",
+                    description = "Playlist của bạn được lưu ngay trên thiết bị."
                 )
             }
 
             is PlaylistsUiState.Error -> {
-                Text(
-                    current.message,
-                    color = MaterialTheme.colorScheme.error
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.ERROR,
+                    title = "Không thể tải playlist",
+                    description = current.message
                 )
             }
 
             is PlaylistsUiState.Ready -> {
                 if (current.playlists.isEmpty()) {
-                    Text(
-                        "Chưa có playlist nào. " +
-                                "Hãy tạo danh sách phát đầu tiên."
+                    MusicFlowStatusPanel(
+                        kind = MusicFlowStatusKind.EMPTY,
+                        title = "Chưa có playlist nào",
+                        description = "Hãy dùng nút Tạo playlist mới ở trên để " +
+                            "bắt đầu lưu nhạc yêu thích. Không cần đăng nhập."
                     )
                 } else {
                     Text(
@@ -385,15 +392,18 @@ fun PlaylistDetailRoute(
         when (val current = playlistsState) {
 
             PlaylistsUiState.Loading -> {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth()
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.LOADING,
+                    title = "Đang tải playlist...",
+                    description = "Đang đọc danh sách phát trên thiết bị."
                 )
             }
 
             is PlaylistsUiState.Error -> {
-                Text(
-                    current.message,
-                    color = MaterialTheme.colorScheme.error
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.ERROR,
+                    title = "Không thể mở playlist",
+                    description = current.message
                 )
             }
 
@@ -402,7 +412,13 @@ fun PlaylistDetailRoute(
                     .firstOrNull { it.id == playlistId }
 
                 if (playlist == null) {
-                    Text("Playlist không còn tồn tại.")
+                    MusicFlowStatusPanel(
+                        kind = MusicFlowStatusKind.EMPTY,
+                        title = "Playlist không còn tồn tại",
+                        description = "Danh sách phát này có thể đã bị xóa.",
+                        actionLabel = "Về danh sách phát",
+                        onAction = onBack
+                    )
                 } else {
                     Text(
                         text = playlist.name,
@@ -412,23 +428,28 @@ fun PlaylistDetailRoute(
                     when (val tracks = tracksState) {
 
                         PlaylistTracksUiState.Loading -> {
-                            LinearProgressIndicator(
-                                modifier = Modifier.fillMaxWidth()
+                            MusicFlowStatusPanel(
+                                kind = MusicFlowStatusKind.LOADING,
+                                title = "Đang tải bài hát...",
+                                description = "Đang đọc các bài trong playlist."
                             )
                         }
 
                         is PlaylistTracksUiState.Error -> {
-                            Text(
-                                tracks.message,
-                                color = MaterialTheme.colorScheme.error
+                            MusicFlowStatusPanel(
+                                kind = MusicFlowStatusKind.ERROR,
+                                title = "Không thể tải bài hát",
+                                description = tracks.message
                             )
                         }
 
                         is PlaylistTracksUiState.Ready -> {
                             if (tracks.tracks.isEmpty()) {
-                                Text(
-                                    "Playlist chưa có bài hát. " +
-                                        "Hãy thêm bài từ Library hoặc Search."
+                                MusicFlowStatusPanel(
+                                    kind = MusicFlowStatusKind.EMPTY,
+                                    title = "Playlist chưa có bài hát",
+                                    description = "Hãy thêm bài từ Thư viện hoặc Tìm kiếm. " +
+                                        "Tệp nhạc trên thiết bị sẽ không bị di chuyển."
                                 )
                             } else {
                                 Text(
@@ -459,34 +480,37 @@ fun PlaylistDetailRoute(
                                         key = { _, track -> track.mediaId }
                                     ) { index, track ->
 
-                                        ListItem(
+                                        Column(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .testTag("playlist-track-${track.mediaId}")
-                                                .clickable {
-                                                    onPlayTracks(
-                                                        tracks.tracks,
-                                                        index
+                                        ) {
+                                            // Keep actions on their own row: three trailing
+                                            // buttons used to hide titles at 200% font scale.
+                                            ListItem(
+                                                modifier = Modifier.fillMaxWidth().clickable {
+                                                    onPlayTracks(tracks.tracks, index)
+                                                },
+                                                headlineContent = {
+                                                    Text(
+                                                        text = track.title,
+                                                        maxLines = 2,
+                                                        overflow = TextOverflow.Ellipsis
                                                     )
                                                 },
-                                            headlineContent = {
-                                                Text(
-                                                    text = track.title,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis
-                                                )
-                                            },
-                                            supportingContent = {
-                                                Text(
-                                                    text = track.artist,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis
-                                                )
-                                            },
-                                            trailingContent = {
-                                                Row(
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
+                                                supportingContent = {
+                                                    Text(
+                                                        text = track.artist,
+                                                        maxLines = 2,
+                                                        overflow = TextOverflow.Ellipsis
+                                                    )
+                                                }
+                                            )
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.End,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
                                                     IconButton(
                                                         enabled = index > 0,
                                                         onClick = {
@@ -522,13 +546,17 @@ fun PlaylistDetailRoute(
                                                     TextButton(
                                                         onClick = {
                                                             removeTarget = track
+                                                        },
+                                                        modifier = Modifier.semantics {
+                                                            contentDescription =
+                                                                "Xóa ${track.title} khỏi playlist"
                                                         }
                                                     ) {
                                                         Text("Xóa")
                                                     }
-                                                }
                                             }
-                                        )
+                                            HorizontalDivider()
+                                        }
                                     }
                                 }
                             }

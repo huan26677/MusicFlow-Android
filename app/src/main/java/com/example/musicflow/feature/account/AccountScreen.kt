@@ -3,12 +3,14 @@ package com.example.musicflow.feature.account
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
@@ -29,11 +31,15 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import com.example.musicflow.core.account.CloudPendingMatch
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.musicflow.ui.components.MusicFlowStatusKind
+import com.example.musicflow.ui.components.MusicFlowStatusPanel
 
 @Composable
 fun AccountRoute(
@@ -98,11 +104,38 @@ fun AccountScreen(
     var confirming by remember { mutableStateOf<Pair<String, String>?>(null) }
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+            .testTag("account-scroll")
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text("Tài khoản", style = MaterialTheme.typography.headlineMedium)
-        if (state.loading) CircularProgressIndicator()
+        Text("Giao diện", style = MaterialTheme.typography.titleLarge)
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf(
+                "system" to "Hệ thống",
+                "dark" to "Tối",
+                "light" to "Sáng"
+            ).forEach { (mode, label) ->
+                FilterChip(
+                    selected = themeMode == mode,
+                    onClick = { onThemeModeChange(mode) },
+                    label = { Text(label) }
+                )
+            }
+        }
+        Text("Bạn có thể đổi giao diện mà không cần đăng nhập.",
+            style = MaterialTheme.typography.bodySmall)
+        HorizontalDivider()
+        if (state.loading) {
+            MusicFlowStatusPanel(
+                kind = MusicFlowStatusKind.LOADING,
+                title = "Đang xử lý tài khoản...",
+                description = "Bạn vẫn có thể dùng nhạc offline mà không cần đăng nhập."
+            )
+        }
         if (state.account == null) {
             Text("Khách — Miễn phí", style = MaterialTheme.typography.titleMedium)
             Text("Không cần đăng nhập để nghe nhạc offline, dùng Playlist, " +
@@ -122,12 +155,31 @@ fun AccountScreen(
                     visualTransformation = PasswordVisualTransformation(),
                     singleLine = true, modifier = Modifier.fillMaxWidth()
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = onSignIn, enabled = !state.loading) {
-                        Text("Đăng nhập")
-                    }
-                    OutlinedButton(onClick = onSignUp, enabled = !state.loading) {
-                        Text("Đăng ký Free")
+                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                    val compact = maxWidth < 360.dp ||
+                        LocalDensity.current.fontScale >= 1.35f
+                    if (compact) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(
+                                onClick = onSignIn,
+                                enabled = !state.loading,
+                                modifier = Modifier.fillMaxWidth()
+                            ) { Text("Đăng nhập") }
+                            OutlinedButton(
+                                onClick = onSignUp,
+                                enabled = !state.loading,
+                                modifier = Modifier.fillMaxWidth()
+                            ) { Text("Đăng ký Free") }
+                        }
+                    } else {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(onClick = onSignIn, enabled = !state.loading) {
+                                Text("Đăng nhập")
+                            }
+                            OutlinedButton(onClick = onSignUp, enabled = !state.loading) {
+                                Text("Đăng ký Free")
+                            }
+                        }
                     }
                 }
                 OutlinedButton(
@@ -228,25 +280,14 @@ fun AccountScreen(
                 Text("Đăng xuất")
             }
         }
-        state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        state.message?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
-        HorizontalDivider()
-        Text("Giao diện", style = MaterialTheme.typography.titleLarge)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(
-                "system" to "Hệ thống",
-                "dark" to "Tối",
-                "light" to "Sáng"
-            ).forEach { (mode, label) ->
-                FilterChip(
-                    selected = themeMode == mode,
-                    onClick = { onThemeModeChange(mode) },
-                    label = { Text(label) }
-                )
-            }
+        state.error?.let {
+            MusicFlowStatusPanel(
+                kind = MusicFlowStatusKind.ERROR,
+                title = "Thao tác tài khoản không thành công",
+                description = it
+            )
         }
-        Text("Giao diện và nhạc offline vẫn dùng được khi không đăng nhập.",
-            style = MaterialTheme.typography.bodySmall)
+        state.message?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
     }
     confirming?.let { (type, id) ->
         AlertDialog(

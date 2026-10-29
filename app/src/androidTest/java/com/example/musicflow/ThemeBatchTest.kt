@@ -4,8 +4,10 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -43,9 +45,14 @@ class ThemeBatchTest {
 
             // Actual Account filter chip is labeled "Tối". Scroll because
             // account content can exceed the emulator viewport.
+            // There are nested scroll axes: the theme chips scroll horizontally
+            // while the Account screen scrolls vertically. First reveal the
+            // theme section via the OUTER vertical scroll container.
+            composeRule.onNodeWithTag("account-scroll")
+                .performScrollToNode(hasText("Tối"))
+            composeRule.onNodeWithText("Tối").performClick()
             composeRule.onNodeWithText("Tối")
-                .performScrollTo()
-                .performClick()
+                .assertIsSelected()
 
             assertEquals(
                 "dark",
@@ -62,9 +69,9 @@ class ThemeBatchTest {
             composeRule.onNodeWithText("Account")
                 .performClick()
 
-            composeRule.onNodeWithText("Tối")
-                .performScrollTo()
-                .assertIsSelected()
+            composeRule.onNodeWithTag("account-scroll")
+                .performScrollToNode(hasText("Tối"))
+            composeRule.onNodeWithText("Tối").assertIsSelected()
 
             Log.i(
                 "MusicFlowFavoritesQA",

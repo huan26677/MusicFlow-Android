@@ -9,7 +9,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.musicflow.core.favorites.LocalFavoritesStore
 import androidx.compose.ui.Modifier
@@ -88,6 +91,34 @@ fun NowPlayingScreen(
         else -> "Lặp: Tắt"
     }
 
+    // The same callbacks work at normal and large font scales.
+    // Avoid three squeezed buttons on narrow screens.
+    val transport: @Composable (Modifier) -> Unit = { buttonModifier ->
+        OutlinedButton(
+            enabled = state.canPrevious,
+            onClick = onPrevious,
+            modifier = buttonModifier.heightIn(min = 48.dp)
+        ) { Text("Trước") }
+        Button(
+            enabled = state.hasMedia,
+            onClick = onPlayPause,
+            modifier = buttonModifier.heightIn(min = 48.dp)
+        ) {
+            Text(when {
+                state.playbackErrorMessage != null -> "Thử lại"
+                state.isPlaying -> "Tạm dừng"
+                else -> "Phát"
+            })
+        }
+        OutlinedButton(
+            enabled = state.canNext,
+            onClick = onNext,
+            modifier = buttonModifier.heightIn(min = 48.dp)
+        ) {
+            Text(if (state.playbackErrorMessage != null) "Bỏ qua" else "Tiếp")
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -119,7 +150,8 @@ fun NowPlayingScreen(
             uri = state.artworkUri,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(220.dp)
+                .widthIn(max = 300.dp)
+                .aspectRatio(1f)
                 .clip(RoundedCornerShape(28.dp))
         )
 
@@ -183,6 +215,9 @@ fun NowPlayingScreen(
 
         Slider(
             value = displayedPosition,
+            modifier = Modifier.semantics {
+                contentDescription = "Vị trí phát nhạc"
+            },
             onValueChange = {
                 isDragging = true
                 sliderValue = it
@@ -218,43 +253,20 @@ fun NowPlayingScreen(
 
         Spacer(Modifier.height(22.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement =
-                Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OutlinedButton(
-                enabled = state.canPrevious,
-                onClick = onPrevious
-            ) {
-                Text("Trước")
-            }
-
-            Button(
-                enabled = state.hasMedia,
-                onClick = onPlayPause
-            ) {
-                Text(
-                    when {
-                        state.playbackErrorMessage != null -> "Thử lại"
-                        state.isPlaying -> "Tạm dừng"
-                        else -> "Phát"
-                    }
-                )
-            }
-
-            OutlinedButton(
-                enabled = state.canNext,
-                onClick = onNext
-            ) {
-                Text(
-                    if (state.playbackErrorMessage != null) {
-                        "Bỏ qua"
-                    } else {
-                        "Tiếp"
-                    }
-                )
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val compact = maxWidth < 360.dp ||
+                LocalDensity.current.fontScale >= 1.35f
+            if (compact) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) { transport(Modifier.fillMaxWidth()) }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) { transport(Modifier.weight(1f)) }
             }
         }
 
@@ -413,6 +425,9 @@ fun NowPlayingScreen(
                     value = dragged.coerceIn(
                         eq.minLevelMb.toFloat(), eq.maxLevelMb.toFloat()
                     ),
+                    modifier = Modifier.semantics {
+                        contentDescription = "Equalizer $frequency"
+                    },
                     onValueChange = { dragged = it },
                     onValueChangeFinished = {
                         onSetEqualizerBand(band.index, dragged.toInt())
