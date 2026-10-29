@@ -100,7 +100,10 @@ class AccountApi(context: Context) {
         method: String,
         path: String,
         body: JSONObject? = null,
-        authenticated: Boolean = false
+        authenticated: Boolean = false,
+        prefer: String? = null,
+        allowRefresh: Boolean = true,
+        maxResponseBytes: Int = 256 * 1024
     ): String {
         check(isConfigured) { "Chưa cấu hình Supabase cho ứng dụng." }
         val connection = URL(base + path).openConnection() as HttpsURLConnection
@@ -110,6 +113,7 @@ class AccountApi(context: Context) {
         connection.instanceFollowRedirects = false
         connection.setRequestProperty("apikey", publishableKey)
         connection.setRequestProperty("Accept", "application/json")
+        if (prefer != null) connection.setRequestProperty("Prefer", prefer)
         if (authenticated) {
             val token = accessToken ?: error("Phiên đăng nhập đã hết hạn.")
             connection.setRequestProperty("Authorization", "Bearer $token")
@@ -125,6 +129,26 @@ class AccountApi(context: Context) {
                 }
             }
             val code = connection.responseCode
+            if (code == 401 && authenticated && allowRefresh) {
+                val refresh = store.read()
+                if (refresh != null) {
+                    val updated = runCatching {
+                        val payload = JSONObject(request(
+                            "POST", "/auth/v1/token?grant_type=refresh_token",
+                            JSONObject().put("refresh_token", refresh),
+                            allowRefresh = false
+                        ))
+                        applySession(payload)
+                    }.getOrDefault(false)
+                    if (updated) {
+                        return request(
+                            method, path, body, authenticated, prefer,
+                            allowRefresh = false,
+                            maxResponseBytes = maxResponseBytes
+                        )
+                    }
+                }
+            }
             if (code !in 200..299) {
                 val label = when (code) {
                     400, 401 -> "Email, mật khẩu hoặc phiên đăng nhập không hợp lệ."
@@ -141,7 +165,7 @@ class AccountApi(context: Context) {
                 while (true) {
                     val size = input.read(buffer)
                     if (size < 0) break
-                    require(result.size() + size <= 256 * 1024) {
+                    require(result.size() + size <= maxResponseBytes) {
                         "Phản hồi máy chủ quá lớn."
                     }
                     result.write(buffer, 0, size)
@@ -152,6 +176,20 @@ class AccountApi(context: Context) {
             connection.disconnect()
         }
     }
+
+    /**
+     * Internal Data API access for opted-in cloud sync.
+     * JWT comes from Auth, never from a caller or an untrusted URI.
+     */
+    internal fun cloudRequest(
+        method: String,
+        path: String,
+        body: JSONObject? = null,
+        prefer: String? = null
+    ): String = request(
+        method, path, body, authenticated = true, prefer = prefer,
+        maxResponseBytes = 4 * 1024 * 1024
+    )
 
     private fun applySession(reply: JSONObject): Boolean {
         val access = reply.optString("access_token")

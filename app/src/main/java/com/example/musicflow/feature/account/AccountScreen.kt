@@ -20,6 +20,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import com.example.musicflow.core.account.CloudPendingMatch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -47,7 +53,11 @@ fun AccountRoute(
         onSignIn = model::signIn,
         onSignUp = model::signUp,
         onSaveProfile = model::saveProfile,
-        onSignOut = model::signOut
+        onSignOut = model::signOut,
+        onSyncLibrary = model::syncLibrary,
+        onRelink = model::relink,
+        onDeleteCloudPlaylist = model::deleteRemotePlaylist,
+        onDeleteCloudFavorite = model::deleteRemoteFavorite
     )
 }
 
@@ -62,8 +72,13 @@ fun AccountScreen(
     onSignIn: () -> Unit,
     onSignUp: () -> Unit,
     onSaveProfile: () -> Unit,
-    onSignOut: () -> Unit
+    onSignOut: () -> Unit,
+    onSyncLibrary: () -> Unit,
+    onRelink: (CloudPendingMatch, String) -> Unit,
+    onDeleteCloudPlaylist: (String) -> Unit,
+    onDeleteCloudFavorite: (String) -> Unit
 ) {
+    var confirming by remember { mutableStateOf<Pair<String, String>?>(null) }
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(24.dp),
@@ -115,9 +130,61 @@ fun AccountScreen(
             Button(onClick = onSaveProfile, enabled = !state.loading) {
                 Text("Lưu hồ sơ")
             }
-            Text("Quyền Premium do máy chủ xác nhận. Chưa triển khai " +
-                "thu phí, Google Play Billing hoặc đồng bộ đa thiết bị.")
-            TextButton(onClick = onSignOut, enabled = !state.loading) {
+            Text("Đồng bộ Playlist và Favorites (thủ công). Chỉ gửi tên bài, " +
+                "nghệ sĩ và danh sách phát; không tải file nhạc lên cloud.")
+            Button(
+                onClick = onSyncLibrary,
+                enabled = !state.loading && !state.syncing
+            ) {
+                Text(if (state.syncing) "Đang đồng bộ..." else "Đồng bộ thư viện")
+            }
+            if (state.syncing) CircularProgressIndicator()
+            state.syncSummary?.let { summary ->
+                Text("Bài chưa liên kết: ${summary.pending.size}",
+                    style = MaterialTheme.typography.titleMedium)
+                summary.pending.take(30).forEach { pending ->
+                    var expanded by remember(pending) { mutableStateOf(false) }
+                    Text("${pending.title} — ${pending.artist}")
+                    TextButton(onClick = { expanded = true }, enabled = !state.syncing) {
+                        Text("Chọn bài trên thiết bị")
+                    }
+                    DropdownMenu(expanded = expanded, onDismissRequest = {
+                        expanded = false
+                    }) {
+                        summary.deviceSongs.take(150).forEach { song ->
+                            DropdownMenuItem(
+                                text = { Text("${song.title} — ${song.artist}") },
+                                onClick = {
+                                    expanded = false
+                                    onRelink(pending, song.uri.toString())
+                                }
+                            )
+                        }
+                    }
+                }
+                Text("Bản sao cloud (xóa không ảnh hưởng dữ liệu trên máy)",
+                    style = MaterialTheme.typography.titleMedium)
+                summary.cloudPlaylists.take(30).forEach { playlist ->
+                    TextButton(
+                        enabled = !state.syncing,
+                        onClick = { confirming = "playlist" to playlist.id }
+                    ) { Text("Xóa cloud: ${playlist.name}") }
+                }
+                summary.cloudFavorites.take(30).forEach { favorite ->
+                    TextButton(
+                        enabled = !state.syncing,
+                        onClick = { confirming = "favorite" to favorite.key }
+                    ) { Text("Xóa cloud: ${favorite.title}") }
+                }
+            }
+            Text("Bài nhạc ở điện thoại khác chỉ được liên kết lại nếu có " +
+                "một bài trùng duy nhất trên máy này. Không xóa Playlist local.")
+            Text("Premium do máy chủ xác nhận. Chưa có thanh toán, giới hạn " +
+                "thiết bị hoặc đồng bộ tự động.")
+            TextButton(
+                onClick = onSignOut,
+                enabled = !state.loading && !state.syncing
+            ) {
                 Text("Đăng xuất")
             }
         }
@@ -140,5 +207,23 @@ fun AccountScreen(
         }
         Text("Giao diện và nhạc offline vẫn dùng được khi không đăng nhập.",
             style = MaterialTheme.typography.bodySmall)
+    }
+    confirming?.let { (type, id) ->
+        AlertDialog(
+            onDismissRequest = { confirming = null },
+            title = { Text("Xóa bản sao trên cloud?") },
+            text = { Text("Thao tác này đánh dấu mục đã xóa trên Supabase; " +
+                "bản lưu trên máy sẽ không bị xóa.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (type == "playlist") onDeleteCloudPlaylist(id)
+                    else onDeleteCloudFavorite(id)
+                    confirming = null
+                }) { Text("Xóa trên cloud") }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirming = null }) { Text("Hủy") }
+            }
+        )
     }
 }

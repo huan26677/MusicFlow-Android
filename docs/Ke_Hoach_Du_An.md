@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `e7446bc` — Account & Subscription Foundation v1 đã triển khai trong workspace, chưa commit |
+| HEAD Git hiện tại | `924301d` — Cloud Playlist & Favorites Sync v1 đang ở workspace, chưa commit |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 | 55 bài chính PASS |
 | Marker API 30 | 40/40 PASS |
@@ -27,7 +27,9 @@
 | Supabase Backend v1 | Dự án Supabase đã kết nối; bảng public.music_tracks RLS; Data API read-only; client Android đọc danh mục và có luồng phát HTTPS hợp lệ; build-only |
 | Licensed Content Upload v1 | Hai bucket private/public, music_uploads RLS, RPC publish atomic, admin stage/review/publish; Python unit 8/8 PASS và Android build PASS; chưa upload thật |
 | Account & Subscription Foundation v1 | Guest/Free/Premium model; Supabase Auth email/password, profile RLS, entitlement read-only, Android Keystore; build và unit PASS, chưa QA email thật |
-| Bước tiếp theo | Cloud Playlist & Favorites Sync v1; Licensed Streaming Smoke khi có nhạc được cấp phép |
+| Cloud Playlist & Favorites Sync v1 | Manual opt-in, metadata-only, RPC merge/RLS theo owner, safe local relink; build/JVM PASS, chưa E2E đa thiết bị |
+| Cloud Sync Hardening v2 | Trigger quota, tombstone xóa cloud, UI relink thủ công, RPC merge, có source; chưa E2E đa thiết bị |
+| Bước tiếp theo | Kiểm tra E2E Auth + đồng bộ 2 thiết bị, rồi History Sync v1 và Google Login |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -123,7 +125,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 
 ## 5. Công việc tiếp theo: backlog theo thứ tự ưu tiên
 
-**Chế độ phát triển hiện hành (2026-10-29):** Chủ dự án ưu tiên hoàn thiện tính năng Full Product trước rồi mới chạy vòng QA/bug tổng thể. Các mục P0 QA/Release bên dưới vẫn giữ nguyên để nghiệm thu cuối, không được hiểu là đã PASS khi chỉ build thành công. Supabase Catalog/Streaming Foundation, Licensed Content Upload v1 và Account/Auth Foundation v1 đã có source. **Chưa có nhạc được cấp phép và chưa có test email/đăng nhập thực tế**. Feature tiếp theo: Cloud Playlist & Favorites Sync v1; khi có nhạc hợp lệ thì Licensed Streaming Smoke. Thanh toán Premium, signed URL, podcast/radio còn là backlog.
+**Chế độ phát triển hiện hành (2026-10-29):** Chủ dự án ưu tiên hoàn thiện tính năng Full Product trước rồi mới chạy vòng QA/bug tổng thể. Các mục P0 QA/Release bên dưới vẫn giữ nguyên để nghiệm thu cuối, không được hiểu là đã PASS khi chỉ build thành công. Supabase Catalog/Streaming, Licensed Content Upload, Account/Auth và Cloud Sync v1 đã có source. **Chưa có nhạc được cấp phép; chưa test tài khoản thật và đồng bộ đa thiết bị E2E**. Feature tiếp theo: Cloud Sync Hardening v2; khi có nhạc hợp lệ thì Licensed Streaming Smoke. Billing, signed URL, podcast/radio còn là backlog.
 
 | Ưu tiên | Bước / việc cần làm | Trạng thái | Điều kiện kết thúc bước |
 |---|---|---|---|
@@ -239,6 +241,26 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Cloud Sync Hardening v2
+
+- Tiếp tục trên workspace chưa commit của Cloud Sync v1 tại HEAD `924301d`; không ghi đè hoặc tạo commit/push tự động.
+- Supabase: migrations `musicflow_cloud_sync_hardening_quotas_tombstones_v2`, `musicflow_cloud_favorite_tombstone_v2`. Trigger server-side giới hạn Free 20 playlist + 500 favorites, Premium 200 + 2500 khi còn hạn; soft-delete RPC và gộp playlist có bảo vệ tombstone.
+- Android: UI trong tab Account để ghép các bài chưa khớp, xóa cloud có xác nhận mà không xóa dữ liệu local, phân trang cloud, cải thiện giới hạn phản hồi.
+- Bảo mật: RPC chỉ `authenticated`, không cấp cho `anon`; dữ liệu theo owner RLS. Chưa tạo nhạc mẫu hay tài khoản thật.
+- Tài liệu `docs/Cloud_Sync_Hardening_v2.md`. Build/log: `qa-logs/cloud-sync-hardening-v2.log`, kiểm chứng thực tế theo kết quả Gradle cuối.
+- Còn thiếu: thử thực tế hai thiết bị, mở rộng UI tìm kiếm bài relink và kiểm chứng các race conditions phức tạp. Full QA vẫn để cuối.
+
+### 2026-10-29 — Cloud Playlist & Favorites Sync v1
+
+- HEAD nền: `924301d` (`feat: add Supabase account authentication and subscription foundation`), working tree sạch trước khi sửa.
+- Supabase migrations: `musicflow_cloud_playlists_favorites_v1` tạo `cloud_playlists`, `cloud_favorites` với RLS owner; `musicflow_cloud_playlist_merge_rpc_v1` thêm RPC security-invoker, gộp metadata bài khi sync hai thiết bị và không cho anon gọi.
+- Đã kiểm tra security grants: anon không đọc cloud tables, không gọi RPC; authenticated không DELETE cloud data. Test RPC với identity giả trong transaction, cập nhật playlist hai lượt, xác nhận 2 bài + tên mới rồi ROLLBACK; dữ liệu cloud không lưu test record.
+- Android: `CloudLibrarySync.kt` + `CloudSyncRules.kt`; thêm merge idempotent vào `RoomPlaylistRepository` và `LocalFavoritesStore`, nút thủ công trong tab Account, trạng thái và kết quả sync; refresh Supabase Auth khi JWT hết hạn.
+- Chỉ đồng bộ tên + metadata, không upload file hay URI cục bộ; tải về chỉ liên kết bài nếu MediaStore có một ứng viên duy nhất. Không xóa Playlist/Favorites khi merge; chặn dùng cùng local library để upload sang tài khoản khác sau lần đồng bộ đầu.
+- JVM `CloudSyncRulesTest.kt`; build `:app:assembleDebug` + `:app:assembleDebugAndroidTest` + `:app:testDebugUnitTest` PASS, log `qa-logs/cloud-sync-v1.log`.
+- Chưa xác nhận sync thực tế bằng tài khoản/2 thiết bị; không có cloud quota hay xóa đồng bộ; chưa Full QA.
+- Tài liệu: `docs/Cloud_Playlists_Favorites_Sync_v1.md`. Bước tiếp theo: Cloud Sync Hardening v2 / Track Relink UX; sản phẩm CHƯA NGHIỆM THU.
 
 ### 2026-10-29 — Account & Subscription Foundation v1 — Build + JVM PASS
 

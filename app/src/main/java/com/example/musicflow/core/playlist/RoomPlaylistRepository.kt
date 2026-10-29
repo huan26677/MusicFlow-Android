@@ -17,6 +17,29 @@ class RoomPlaylistRepository(
 ) {
     private val dao = database.playlistDao()
 
+    /** Adds cloud metadata without replacing any existing local playlist/track. */
+    suspend fun mergeCloudPlaylist(
+        playlist: LocalPlaylist,
+        tracks: List<PlaylistTrack>
+    ): Int = database.withTransaction {
+        if (dao.getPlaylist(playlist.id) == null) {
+            dao.insertPlaylist(playlist.toEntity())
+        }
+        val present = dao.getTracks(playlist.id).map { it.mediaId }.toMutableSet()
+        var added = 0
+        tracks.forEach { track ->
+            if (track.mediaId.isNotBlank() && track.audioUri.isNotBlank() &&
+                present.add(track.mediaId)
+            ) {
+                dao.insertTrack(
+                    track.toEntity(playlist.id, dao.nextPosition(playlist.id))
+                )
+                added++
+            }
+        }
+        added
+    }
+
     fun observePlaylists(): Flow<List<LocalPlaylist>> =
         dao.observePlaylists().map { entities ->
             entities.map { it.toModel() }

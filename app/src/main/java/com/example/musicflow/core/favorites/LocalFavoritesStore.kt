@@ -2,6 +2,7 @@ package com.example.musicflow.core.favorites
 
 import android.content.Context
 import android.net.Uri
+import com.example.musicflow.core.media.DeviceSong
 import org.json.JSONObject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -59,6 +60,28 @@ class LocalFavoritesStore private constructor(
     )
 
     val albumIds = _albumIds.asStateFlow()
+
+    /** Idempotent merge for cloud sync; never toggles an existing favorite off. */
+    @Synchronized
+    fun addSongIfAbsent(song: DeviceSong): Boolean {
+        val key = song.uri.toString()
+        if (key in _songUris.value) return false
+        val uris = _songUris.value + key
+        val details = _songDetails.value + (
+            key to FavoriteSongDetails(song.title, song.artist)
+        )
+        val json = JSONObject()
+        details.forEach { (uri, item) ->
+            json.put(uri, JSONObject().put("title", item.title).put("artist", item.artist))
+        }
+        check(prefs.edit()
+            .putStringSet("song_uris", uris)
+            .putString("song_details", json.toString())
+            .commit()) { "Không lưu được bài hát yêu thích." }
+        _songDetails.value = details
+        _songUris.value = uris
+        return true
+    }
 
     @Synchronized
     fun toggleAlbum(albumId: Long) {

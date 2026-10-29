@@ -6,6 +6,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.musicflow.core.account.AccountApi
 import com.example.musicflow.core.account.AccountIdentity
+import com.example.musicflow.core.account.CloudLibrarySync
+import com.example.musicflow.core.account.CloudSyncSummary
+import com.example.musicflow.core.account.CloudPendingMatch
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,10 +23,15 @@ data class AccountUiState(
     val displayName: String = "",
     val message: String? = null,
     val error: String? = null,
-    val configured: Boolean = true
+    val configured: Boolean = true,
+    val syncing: Boolean = false,
+    val syncSummary: CloudSyncSummary? = null
 )
 
-class AccountViewModel(private val api: AccountApi) : ViewModel() {
+class AccountViewModel(
+    private val api: AccountApi,
+    private val cloudSync: CloudLibrarySync
+) : ViewModel() {
     private val _state = MutableStateFlow(
         AccountUiState(configured = api.isConfigured)
     )
@@ -123,7 +131,7 @@ class AccountViewModel(private val api: AccountApi) : ViewModel() {
     }
 
     fun signOut() {
-        if (_state.value.loading) return
+        if (_state.value.loading || _state.value.syncing) return
         viewModelScope.launch {
             _state.update { it.copy(loading = true, error = null) }
             api.signOut()
@@ -136,13 +144,102 @@ class AccountViewModel(private val api: AccountApi) : ViewModel() {
         }
     }
 
+    fun syncLibrary() {
+        if (_state.value.loading || _state.value.syncing ||
+            _state.value.account == null
+        ) return
+        viewModelScope.launch {
+            _state.update { it.copy(syncing = true, error = null, message = null) }
+            try {
+                val result = cloudSync.sync()
+                _state.update {
+                    it.copy(
+                        syncing = false,
+                        syncSummary = result,
+                        message = "Đồng bộ xong: lưu ${result.playlistsSaved} playlist, " +
+                            "${result.favoritesSaved} yêu thích; " +
+                            "khôi phục ${result.playlistsRestored} playlist, " +
+                            "liên kết ${result.tracksLinked} bài, " +
+                            "${result.favoritesLinked} yêu thích. " +
+                            "${result.unmatched} mục chưa tìm thấy trên thiết bị."
+                    )
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                _state.update {
+                    it.copy(
+                        syncing = false,
+                        error = "Đồng bộ chưa hoàn tất: " +
+                            (error.message ?: "Kiểm tra Internet và quyền thư viện.")
+                    )
+                }
+            }
+        }
+    }
+
+    fun relink(pending: CloudPendingMatch, uri: String) {
+        if (_state.value.syncing) return
+        viewModelScope.launch {
+            _state.update { it.copy(syncing = true, error = null) }
+            try {
+                cloudSync.linkManually(pending, uri)
+                _state.update {
+                    it.copy(syncing = false,
+                        syncSummary = it.syncSummary?.copy(
+                            pending = it.syncSummary.pending - pending
+                        ),
+                        message = "Đã liên kết bài. Nhấn Đồng bộ thư viện để cập nhật.")
+                }
+            } catch (error: Exception) {
+                _state.update { it.copy(syncing = false, error = error.message) }
+            }
+        }
+    }
+
+    fun deleteRemotePlaylist(id: String) {
+        if (_state.value.syncing) return
+        viewModelScope.launch {
+            _state.update { it.copy(syncing = true, error = null) }
+            try {
+                cloudSync.trashCloudPlaylist(id)
+                _state.update {
+                    it.copy(syncing = false, syncSummary = null,
+                        message = "Đã đánh dấu xóa bản sao cloud. Playlist trên máy vẫn giữ nguyên.")
+                }
+            } catch (error: Exception) {
+                _state.update { it.copy(syncing = false, error = error.message) }
+            }
+        }
+    }
+
+    fun deleteRemoteFavorite(key: String) {
+        if (_state.value.syncing) return
+        viewModelScope.launch {
+            _state.update { it.copy(syncing = true, error = null) }
+            try {
+                cloudSync.trashCloudFavorite(key)
+                _state.update {
+                    it.copy(syncing = false, syncSummary = null,
+                        message = "Đã đánh dấu xóa yêu thích trên cloud. Bản local vẫn còn.")
+                }
+            } catch (error: Exception) {
+                _state.update { it.copy(syncing = false, error = error.message) }
+            }
+        }
+    }
+
     companion object {
         fun factory(context: Context): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     require(modelClass.isAssignableFrom(AccountViewModel::class.java))
+                    val api = AccountApi(context.applicationContext)
+                    val model = AccountViewModel(
+                        api, CloudLibrarySync(context.applicationContext, api)
+                    )
                     @Suppress("UNCHECKED_CAST")
-                    return AccountViewModel(AccountApi(context.applicationContext)) as T
+                    return model as T
                 }
             }
     }
