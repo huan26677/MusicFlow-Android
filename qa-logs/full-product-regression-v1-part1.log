@@ -1,0 +1,24 @@
+﻿MusicFlow Full Product Regression Gate v1 - Part 1
+DATE=2026-10-29T16:49:11.1606453+07:00
+HEAD_BASE=23c4835
+ANALYZE_ONLY=True
+RESULTS_PROVENANCE=EXISTING_GRADLE_XML_VERIFY_TIMESTAMP_EXTERNALLY
+JVM_TOTAL=99
+JVM_PASS=99
+JVM_FAIL=0
+JVM_SKIP=0
+ANDROID_TOTAL=89
+ANDROID_PASS=83
+ANDROID_FAIL=3
+ANDROID_SKIP=3
+CASE=FAIL ANDROID com.example.musicflow.ExampleInstrumentedTest#mvpLibrarySearchToRealPlayer
+CASE=FAIL ANDROID com.example.musicflow.core.playback.RealPickerSafTest#realOpenMultipleDocumentsGrantsPersistedReadAndPlays
+CASE=FAIL ANDROID com.example.musicflow.core.playback.RealPickerSafTest#realOpenMultipleDocumentsSelectsTwoFilesAndNavigates
+CASE=SKIP ANDROID com.example.musicflow.core.playback.SafPermissionRestartTest#cleanupSafDocument
+CASE=SKIP ANDROID com.example.musicflow.core.playback.SafPermissionRestartTest#prepareSafDocument
+CASE=SKIP ANDROID com.example.musicflow.core.playback.SafPermissionRestartTest#verifySafAfterForceStop
+PHASED_PROCESS_RESTART_DEFAULT_RUN=NOT_A_VALID_RESTART_CHECK
+PHASED_SAF_DEFAULT_RUN=NOT_A_VALID_PERSISTED_GRANT_CHECK
+PHASED_RESTART_AND_SAF=SEE_ANDROID_COMPAT_MATRIX_V2_LOGS
+FAIL_REASON=REGRESSION_GATE_HAS_FAILURES
+FINAL_RESULT=FAIL

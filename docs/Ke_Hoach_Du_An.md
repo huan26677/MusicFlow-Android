@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `d199bbb` — Offline End-to-End Acceptance v1 đã commit; Android Compatibility Matrix v2 đang ở workspace, chưa commit |
+| HEAD Git hiện tại | `23c4835` — Android Compatibility Matrix v2 đã commit; Full Product Regression Gate v1 - Part 1 đang ở workspace, chưa commit |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
@@ -43,8 +43,9 @@
 | Licensed Content Review & Publish v2 | Supabase RPC v2 chỉ service_role, v1 bị thu hồi EXECUTE; admin Python ghi rights + audit, 17/17 Python PASS, rollback SQL trên DB PASS, Gradle/JVM PASS; chưa upload nhạc thật |
 | Offline End-to-End Acceptance v1 | MediaStore → Room Playlist → MediaSession → History → Queue Snapshot/Restore, 9/9 marker; build/JVM PASS, 22/22 Android API 30 PASS; `qa-logs/offline-e2e-acceptance-v1.log` |
 | Android Compatibility Matrix v2 | API **29/30/33/36**, mỗi API 18 offline + 4 restart + 4 SAF; **104/104 instrumented PASS**, 9 E2E markers/API, đổi PID thật khi force-stop; `docs/Android_Compatibility_Matrix_v2.md` |
+| Full Product Regression Gate v1 - Part 1 | BUILD/JVM **99/99 PASS**; toàn bộ Android suite API 30 **89 total / 83 PASS / 3 FAIL / 3 SKIP** - **GATE FAIL**; chờ sửa MVP Previous và real SAF picker; `docs/Full_Product_Regression_Gate_v1_Part_1.md` |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Full Product Regression Gate v1** — chạy toàn bộ Android/JVM suite và thống kê pass/fail/skip bằng script không hard-code test count; sau đó Release Candidate QA; Licensed Streaming Smoke chờ audio có quyền thật; Google Login/email thật ĐỂ CUỐI |
+| Bước tiếp theo | **Full Product Regression Gate v1 - Part 2A** — chẩn đoán và sửa bài MVP Previous (repro khi chạy riêng), rồi Part 2B auto-select SAF picker; cuối cùng rerun gate; Licensed Streaming Smoke chờ audio có quyền thật; Google Login/email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -157,7 +158,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **P0 — đã test phần offline API 30** | **Offline End-to-End Acceptance v1** — MediaStore → Playlist → MediaSession → History → Queue restore | **22/22 Android PASS, 9/9 marker; matrix v2 sau đó kiểm tra force-stop + đa API** | `qa-logs/offline-e2e-acceptance-v1.log`; `docs/Offline_End_To_End_Acceptance_v1.md` |
 | **P0** | **Background Playback / System Controls QA** | V2 QA TỰ ĐỘNG PASS (API 30) — còn lockscreen và Bluetooth thực tế | Test lifecycle, audio focus, điều khiển từ MediaSession/notification/lock screen trong phạm vi khả thi; mọi điều kiện đã chốt đạt PASS |
 | **P0 — đã kiểm thử 4 API** | **Android Compatibility Matrix v2** | **104/104 PASS (26/API, API 29/30/33/36)** | `docs/Android_Compatibility_Matrix_v2.md`, 4 file `qa-logs/android-compat-matrix-v2-api-*.log`; bộ test đại diện, chưa phải full connectedDebugAndroidTest đa API |
-| **P0 — kế tiếp** | **Full Product Regression Gate v1** | CHƯA TRIỂN KHAI | Chạy toàn bộ instrumentation/JVM, phân biệt skip, fail, hardening và kiểm tra các nhóm chức năng còn thiếu QA runtime |
+| **P0 — đang xử lý từng phần** | **Full Product Regression Gate v1 - Part 1** | **BUILD/JVM PASS 99/99; Android API 30 FAIL: 83/89 PASS, 3 FAIL, 3 SKIP** | `docs/Full_Product_Regression_Gate_v1_Part_1.md`, `qa-logs/full-product-regression-v1-part1.log`; tiếp tục 2A MVP Previous và 2B SAF picker |
 | **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
 | **P1** | UI/accessibility/empty-state/error-state | Foundation v1 13/13 + Polish v2 19/19 Android PASS; toàn diện **CHƯA NGHIỆM THU** | Tiếp tục ma trận API, TalkBack thật, adaptive layout rộng và các trạng thái chưa chuẩn hóa |
 | **P1** | Hiệu năng và dữ liệu lớn | CHƯA NGHIỆM THU | Dataset cố định; ngưỡng thời gian/độ ổn định được chốt; không crash/ANR, không mất dữ liệu |
@@ -266,6 +267,15 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-10-29 — Full Product Regression Gate v1 - Part 1 - Baseline Android FAIL, JVM PASS
+
+- HEAD nền `23c4835`, working tree sạch trước khi làm. Theo yêu cầu chủ dự án **chia Full QA thành các phần nhỏ**, không cố chạy toàn bộ Release QA hoặc thay đổi nhiều module cùng lúc.
+- `:app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest` **BUILD SUCCESSFUL**; Gradle XML **99/99 JVM PASS, 0 fail/skip** (15 suites).
+- `:app:connectedDebugAndroidTest` trên emulator Android 11 / API 30: Gradle báo FAIL; JUnit XML có **89 total / 83 PASS / 3 FAIL / 3 SKIP**. Ba lỗi: `ExampleInstrumentedTest.mvpLibrarySearchToRealPlayer` (timeout sau Previous), hai bài `RealPickerSafTest` (test chờ người chọn tài liệu thủ công). Bài MVP **chạy riêng vẫn FAIL**, cần kiểm tra logic thật, chưa kết luận lỗi app/test. Ba SKIP `SafPermissionRestartTest` là pha yêu cầu runner flags, từng PASS riêng ở matrix v2; không tự coi lần generic run là xác minh restart.
+- Thêm `scripts/run-full-product-regression-v1-part1.ps1`: đếm pass/fail/skip dựa trên JUnit XML, không hardcode test count; có `-AnalyzeOnly` để đọc lại XML mà không chạy device; luôn trả kết quả FAIL nếu có regression fail. Log `qa-logs/full-product-regression-v1-part1.log`, **FINAL_RESULT=FAIL** là kết quả đúng, không được báo PASS.
+- Giữ nguyên production source và quyền nghe offline tự tải; Supabase/email thật/Google Login không được đụng tới. `docs/Full_Product_Regression_Gate_v1_Part_1.md` ghi bằng chứng và giới hạn.
+- **Kế tiếp Part 2A:** chẩn đoán MVP Previous, sửa/test riêng; **Part 2B:** hoàn thiện tự động thao tác OpenMultipleDocuments thay vì đợi thủ công; sau đó mới chạy lại toàn bộ Android suite.
 
 ### 2026-10-29 — Android Compatibility Matrix v2 — 104/104 ANDROID INSTRUMENTATION PASS
 
