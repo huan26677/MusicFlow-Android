@@ -19,6 +19,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
@@ -129,6 +130,7 @@ fun mvpLibrarySearchToRealPlayer() {
     )
 
     var page by mutableStateOf("library")
+    var previousClicks = 0
     var searchState by mutableStateOf(
         SearchUiState(
             songs = songs,
@@ -185,7 +187,10 @@ fun mvpLibrarySearchToRealPlayer() {
                     onPickFiles = {},
                     onOpenLibrary = { page = "library" },
                     onPlayPause = playerViewModel::togglePlayPause,
-                    onPrevious = playerViewModel::previous,
+                    onPrevious = {
+                        previousClicks++
+                        playerViewModel.previous()
+                    },
                     onNext = playerViewModel::next,
                     onSeek = playerViewModel::seekTo,
                     onToggleShuffle =
@@ -222,7 +227,8 @@ fun mvpLibrarySearchToRealPlayer() {
         Log.i("MusicFlowMvpE2E", "PASS libraryUiToMediaSession")
 
         // Nút Previous / Next trên giao diện Now Playing.
-        composeRule.onNodeWithText("Trước").performClick()
+        composeRule.onNodeWithText("Trước").performScrollTo().performClick()
+        assertEquals("Previous button must invoke the real callback", 1, previousClicks)
 
         composeRule.waitUntil(20_000) {
             val state = controller.uiState.value
@@ -231,7 +237,7 @@ fun mvpLibrarySearchToRealPlayer() {
                 state.currentIndex == 1
         }
 
-        composeRule.onNodeWithText("Tiếp").performClick()
+        composeRule.onNodeWithText("Tiếp").performScrollTo().performClick()
 
         composeRule.waitUntil(20_000) {
             val state = controller.uiState.value
@@ -243,13 +249,13 @@ fun mvpLibrarySearchToRealPlayer() {
         Log.i("MusicFlowMvpE2E", "PASS nextPreviousFromUi")
 
         // Pause / Play phải thay đổi trạng thái phát thật.
-        composeRule.onNodeWithText("Tạm dừng").performClick()
+        composeRule.onNodeWithText("Tạm dừng").performScrollTo().performClick()
 
         composeRule.waitUntil(20_000) {
             !controller.uiState.value.isPlaying
         }
 
-        composeRule.onNodeWithText("Phát").performClick()
+        composeRule.onNodeWithText("Phát").performScrollTo().performClick()
 
         composeRule.waitUntil(20_000) {
             controller.uiState.value.isPlaying
@@ -258,7 +264,7 @@ fun mvpLibrarySearchToRealPlayer() {
         Log.i("MusicFlowMvpE2E", "PASS pauseResumeFromUi")
 
         // Đi đến Search và tìm bài Alpha.
-        composeRule.onNodeWithText("‹ Trở về").performClick()
+        composeRule.onNodeWithText("‹ Trở về").performScrollTo().performClick()
 
         composeRule.onNode(hasSetTextAction())
             .performTextInput("Alpha")
