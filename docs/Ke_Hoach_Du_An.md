@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git nền đã đối chiếu | `818be07` (`main = origin/main`) — Full Product Regression Gate v2 Part 1 đã commit/push; **Release Candidate QA / Packaging v1 Part 1 PASS trong workspace, chưa commit**, chi tiết bên dưới |
+| HEAD Git nền đã đối chiếu | `00f2d41` (`main = origin/main`) — Release Candidate QA / Packaging Part 1 đã commit/push; **Part 2 Release Playback Smoke v1 PASS API 30 trong workspace, chưa commit** |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
@@ -60,8 +60,9 @@
 | Advanced Search Runtime Acceptance v1 | **105/105 JVM + 14/14 Android API 30 PASS** (2 SearchRoute/MediaStore + 12 Playback/Queue/Offline regression), **13/13 marker**, tìm tiếng Việt không dấu, Album và queue thực; `docs/Advanced_Search_Runtime_Acceptance_v1.md` |
 | Full Product Regression Gate v2 — Part 1 | **PASS**: build/JVM **105/105**; toàn bộ Android instrumentation API 30 **112 PASS / 0 FAIL / 3 SKIP (115 total)**. Lượt đầu 2 FAIL tại CreateDocument Save, sửa QA helper và chạy lại 2/2 rồi full suite PASS. Xem `docs/Full_Product_Regression_Gate_v2_Part_1.md` |
 | Release Candidate QA / Packaging v1 — Part 1 | **PASS cho APK release-mode ký debug chỉ dùng nội bộ**: `assembleRelease` + lintVital, kiểm tra chữ ký v3, SHA-256, cài mới/chạy MainActivity và nâng cấp debug→QA release giữ internal marker trên emulator API 30; **chưa thể phát hành production vì thiếu release signing chính thức**. Xem `docs/Release_Candidate_QA_Packaging_v1_Part_1.md` |
+| Release Candidate QA / Packaging v1 — Part 2 | **PASS trên release-mode APK QA API 30**: 2 WAV MediaStore QA thật, Library → MediaSession phát, Pause/Resume/Next, Background Playback và MediaStyle notification; cleanup QA PASS. `scripts/run-release-playback-smoke-v1.ps1`, `qa-logs/release-playback-smoke-v1.log`, `docs/Release_Candidate_QA_Packaging_v1_Part_2.md` |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Release Candidate QA / Packaging — Part 2**: QA offline/playback trên bản release-mode ký QA, đánh giá Android API khác / thiết bị thật, xem xét tối ưu hóa và lên kế hoạch ký production sau khi chốt application ID. Licensed Streaming Smoke chờ nhạc có quyền thật; Google Login/email thật và cloud 2 thiết bị ĐỂ CUỐI |
+| Bước tiếp theo | **Release Candidate QA / Packaging — Part 3**: chạy lại Release Playback Smoke trên API 29/33/36 với các AVD sẵn có, rồi tiếp tục kiểm thử thiết bị thật và chuẩn bị version/app ID, signing production, AAB. Licensed Streaming Smoke chờ nhạc có quyền thật; Google Login/email thật và cloud 2 thiết bị ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** Các số `31/31`, `55/55` ở mốc cũ không phải số liệu full suite v2. Hiện có bằng chứng **105 JVM + 112 Android PASS / 0 FAIL / 3 SKIP** trên API 30 nhưng **không phải tỷ lệ hoàn thành 100% MusicFlow 1.0**. Log/test phải gắn với đúng bản code; chỉ có commit sau khi người dùng push mới xác nhận các sửa đổi đã lên GitHub.
@@ -141,7 +142,8 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | MVP Playlist → History → Replay v1 | 1 bài isolated PASS | **Fast QA PASS — API 30** | `69d5a559` · `qa-logs/mvp-playlist-history-v1.log` |
 | Session Recovery UI Acceptance v1 | 55 bài chính PASS | **Full QA PASS — API 30** | `d430cfc7` · `qa-logs/playback-process-restart-v1.log` |
 | Full Product Regression Gate v2 — Part 1 | 115 Android total (112 PASS + 3 SKIP), 105 JVM | **PASS — API 30, 0 FAIL; 3 SAF phase skips theo thiết kế** | Commit `818be07` · `qa-logs/full-product-regression-v2-part1.log` · `docs/Full_Product_Regression_Gate_v2_Part_1.md` |
-| Release Candidate QA / Packaging v1 — Part 1 | Build/lint release + ký QA, fresh/upgrade smoke API 30 | **PASS nội bộ; chưa có release ký production** | HEAD nền `818be07` · `qa-logs/release-candidate-packaging-v1.log` · `docs/Release_Candidate_QA_Packaging_v1_Part_1.md` (thay đổi chưa commit) |
+| Release Candidate QA / Packaging v1 — Part 1 | Build/lint release + ký QA, fresh/upgrade smoke API 30 | **PASS nội bộ; chưa có release ký production** | Commit `00f2d41` · `qa-logs/release-candidate-packaging-v1.log` · `docs/Release_Candidate_QA_Packaging_v1_Part_1.md` |
+| Release Candidate QA / Packaging v1 — Part 2 | Release-mode QA APK + 2 WAV MediaStore thực | **PASS Android API 30** — phát nhạc, Pause/Resume/Next, background, notification, cleanup | HEAD nền `00f2d41` · `qa-logs/release-playback-smoke-v1.log` · `docs/Release_Candidate_QA_Packaging_v1_Part_2.md` (thay đổi chưa commit) |
 
 **Không cộng** các con số 9 + 11 + ... + 31: đây là số lượng test của **các lần chạy tăng dần** với nhiều bài trùng nhau.
 
@@ -193,7 +195,8 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **P0 — runtime QA API 30 đạt** | **Advanced Search Runtime Acceptance v1** | **105 JVM PASS, 14/14 Android PASS** | `docs/Advanced_Search_Runtime_Acceptance_v1.md`, `qa-logs/advanced-search-runtime-v1.log`; 2 E2E + 12 hồi quy, Album, Unicode search, queue; Artist/Genre fallback |
 | **P0 — Full Regression API 30 đã đạt** | **Full Product Regression Gate v2 — Part 1** | **PASS: 105 JVM; 112 Android PASS / 0 FAIL / 3 SKIP (115 total)** | `docs/Full_Product_Regression_Gate_v2_Part_1.md`, `qa-logs/full-product-regression-v2-part1.log`; 2/2 SAF targeted và full suite sau sửa đã đạt |
 | **P0 — nội bộ QA đã đạt** | **Release Candidate QA / Packaging v1 — Part 1** | **PASS internal QA, KHÔNG PHẢI RELEASE PRODUCTION** | Build/lint release, QA signature v3, cài mới, nâng cấp cùng cert, internal marker giữ nguyên, SHA-256; `docs/Release_Candidate_QA_Packaging_v1_Part_1.md`, `qa-logs/release-candidate-packaging-v1.log` |
-| **P0 — kế tiếp** | **Release Candidate QA / Packaging — Part 2** | CHƯA THỰC HIỆN | Kiểm thử offline/playback trên APK release-mode, nhiều Android API / thiết bị thật; rà soát app ID/version, signing production và tối ưu hóa trước release |
+| **P0 — QA release-mode API 30 đã đạt** | **Release Candidate QA / Packaging — Part 2** | **PASS internal APK QA API 30; chưa phải release production** | 2 WAV thật, UI Library, MediaSession Play/Pause/Resume/Next, nền + MediaStyle; `docs/Release_Candidate_QA_Packaging_v1_Part_2.md`, `qa-logs/release-playback-smoke-v1.log` |
+| **P0 — kế tiếp** | **Release Candidate QA / Packaging — Part 3** | CHƯA THỰC HIỆN | Kiểm thử release-mode playback trên Android 29/33/36, thiết bị thật; rà soát ID gói/version, keystore production, App Bundle và tối ưu hóa |
 | **P1** | UI/accessibility/empty-state/error-state | Foundation v1 13/13 + Polish v2 19/19 Android PASS; toàn diện **CHƯA NGHIỆM THU** | Tiếp tục ma trận API, TalkBack thật, adaptive layout rộng và các trạng thái chưa chuẩn hóa |
 | **P1** | Hiệu năng và dữ liệu lớn | CHƯA NGHIỆM THU | Dataset cố định; ngưỡng thời gian/độ ổn định được chốt; không crash/ANR, không mất dữ liệu |
 | **Theo quyết định** | Phát hành Google Play | CHƯA CHỐT PHẠM VI | Chỉ mở milestone nếu chọn hình thức phân phối này |
@@ -301,6 +304,14 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-11-01 — Release Candidate QA / Packaging v1 Part 2 — RELEASE-MODE PLAYBACK API 30 PASS
+
+- HEAD nền `00f2d41c36bceb422caadcff34354390c7c6c2f5`, Git sạch lúc bắt đầu. Không sửa code Kotlin production, Supabase, kiểm tra bản quyền online hay tài khoản. Script `scripts/run-release-playback-smoke-v1.ps1` tự build assembleRelease, zipalign + ký QA bằng Android Debug keystore, verify signature v3 rồi dùng APK release-mode thật; SHA-256 `7A6E18284BB2923DF97A1C29B74CB721CEB2164F4A601367794D8E0E2DB13BDD`.
+- Trên emulator Pixel_5 API 30 tạo **hai WAV 40 giây thật** trong thư mục riêng do QA sở hữu, công bố đúng hai row MediaStore; nhấn thật Home → Library → bài A. MediaSession `state=3` và metadata đúng A. Android media key Pause `state=2`, Resume `state=3`, Next phát B `state=3`; nhấn Home còn phát ở nền, notification MediaStyle của MusicFlow xuất hiện. Tất cả marker PASS.
+- Script từ chối đè ứng dụng đã cài sẵn, chỉ xoá app, tệp WAV, row MediaStore và XML dump do chính lần QA tạo; `QA_CLEANUP=PASS`. Trong lần đầu helper chạy PowerShell 5.1 đọc sai Unicode khi script thiếu UTF-8 BOM, đã sửa encoding và chạy lại thành công. Lượt PASS sau khi bổ sung dọn XML vẫn đạt `FINAL_RESULT=PASS`. Log: `qa-logs/release-playback-smoke-v1.log`, báo cáo `docs/Release_Candidate_QA_Packaging_v1_Part_2.md`.
+- **Giới hạn:** Đây là smoke release QA trên API30, không phải full 115 Android tests trên APK release; chưa điện thoại thật, chưa API29/33/36 release, chưa ký production, chưa Audio Bluetooth/gapless quality, chưa tài khoản Google thật/cloud đa thiết bị/nhạc online cấp quyền. Chỉ file online do MusicFlow cung cấp mới cần quyền streaming; offline người dùng tự lưu nghe bình thường.
+- **Kế tiếp:** RC QA / Packaging Part 3 — release smoke đa API 29/33/36 và cổng phát hành artifact thật. Chưa phát hành.
 
 ### 2026-11-01 — Release Candidate QA / Packaging v1 Part 1 — INTERNAL QA PASS
 
