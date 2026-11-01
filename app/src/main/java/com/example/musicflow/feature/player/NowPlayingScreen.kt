@@ -324,6 +324,7 @@ fun NowPlayingScreen(
             listOf(0.75f, 1f, 1.25f, 1.5f, 2f)
                 .forEach { speed ->
                     FilterChip(
+                        modifier = Modifier.testTag("playback-speed-${speed}x"),
                         selected = kotlin.math.abs(
                             state.playbackSpeed - speed
                         ) < 0.01f,

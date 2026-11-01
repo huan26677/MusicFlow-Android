@@ -8,13 +8,13 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `6cf6d21` — Lyrics Runtime Acceptance v1 đã commit; Lyrics Import UI E2E v2 **Android API 30 11/11 PASS, JVM 105/105 PASS trong workspace**, chưa commit |
+| HEAD Git hiện tại | `3a59bc7` — Lyrics Import UI E2E v2 đã commit; Playback Speed Runtime Acceptance v1 **JVM 105/105 + Android API 30 10/10 PASS trong workspace**, chưa commit |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 | 55 bài chính PASS |
 | Marker API 30 | 40/40 PASS |
-| Playback Speed v1 | Đã có source |
+| Playback Speed v1 | **Runtime API 30 PASS:** 5 chip 0.75–2x qua Compose semantics → MediaSession, pause/resume/next giữ tốc độ/queue; invalid range bị từ chối, **2 Speed + 8 Playback regression = 10/10 Android PASS**. Còn kiểm thử touch theo tọa độ |
 | Sleep Timer v1 | **Runtime Android API 30 PASS:** đặt/query/thay/hủy, debug-only expiry 1–2 giây kiểm tra MediaSession tạm dừng/giữ queue; 3/3 Sleep + 8/8 Playback regression = **11/11 PASS**; chưa test multi-API/real device |
 | Lyrics v1 | Parser LRC, nhập/lưu URI SAF, đồng bộ dòng lời theo MediaSession seek; **6 JVM parser + 2 Android Lyrics + 8 Playback regression PASS** trên API 30; còn MainActivity picker-to-screen E2E |
 | Lyrics import | Android OpenDocument |
@@ -51,8 +51,9 @@
 | Equalizer Runtime Acceptance v1 | Gradle Build/JVM PASS; **2/2 Equalizer + 8/8 Playback/Queue regression = 10/10 Android API 30 PASS**, 6/6 marker; `docs/Equalizer_Runtime_Acceptance_v1.md` |
 | Lyrics Runtime Acceptance v1 | **105/105 JVM PASS**, Android API 30 **2/2 Lyrics + 8/8 Playback/Queue regression = 10/10 PASS**; thực tế SAF CreateDocument + persisted READ + parser + highlight khi MediaSession seek; `docs/Lyrics_Runtime_Acceptance_v1.md` |
 | Lyrics Import UI End-to-End v2 | **105/105 JVM PASS; 11/11 Android API 30 PASS** (1 MainActivity→DocumentsUI OpenDocument→Player E2E + 2 Lyrics v1 + 8 Playback/Queue), 7 E2E markers; `docs/Lyrics_Import_UI_E2E_v2.md` |
+| Playback Speed Runtime Acceptance v1 | **105 JVM PASS, 10/10 Android API 30 PASS** (2 Speed + 8 Playback/Queue); 7 marker; chạm chip bằng accessibility action, còn cần physical touch QA; `docs/Playback_Speed_Runtime_Acceptance_v1.md` |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Playback Speed Runtime Acceptance v1** — kiểm thử tốc độ phát 0.75–2x qua MediaSession thật và UI Now Playing, hồi quy pause/queue; mốc nhỏ. Licensed Streaming Smoke chờ nhạc có quyền thật; Google Login/email thật ĐỂ CUỐI |
+| Bước tiếp theo | **Playback Speed Touch Interaction QA v2** — xác minh bấm bằng sự kiện chạm thật trên các FilterChip cuộn ngang, sửa nếu phát hiện lỗi UX; sau đó Crossfade/Gapless Runtime Acceptance v1. Licensed Streaming Smoke chờ nhạc có quyền thật; Google Login/email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -173,8 +174,8 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **P0 — runtime QA đã đạt API 30** | **Equalizer Runtime Acceptance v1** | **10/10 Android PASS**, Build/JVM PASS | `docs/Equalizer_Runtime_Acceptance_v1.md`, `qa-logs/equalizer-runtime-v1.log`; chưa QA thực tế process-restart, audio frequency loopback |
 | **P0 — runtime QA đã đạt API 30** | **Lyrics Runtime Acceptance v1** | **105 JVM PASS, 10/10 Android targeted PASS** | `docs/Lyrics_Runtime_Acceptance_v1.md`, `qa-logs/lyrics-runtime-v1.log`; có SAF thật/URI grant và Compose highlight theo MediaSession seek, chưa UI nhập hoàn chỉnh |
 | **P0 — runtime QA đã đạt API 30** | **Lyrics Import UI E2E v2** | **105 JVM PASS, 11/11 Android targeted PASS** | `docs/Lyrics_Import_UI_E2E_v2.md`, `qa-logs/lyrics-import-ui-e2e-v2.log`; đã nhấn nút thật, chọn LRC trên DocumentsUI và đồng bộ highlight qua callback production |
-| **P0 — kế tiếp (mốc nhỏ)** | **Playback Speed Runtime Acceptance v1** | CHƯA THỰC HIỆN | MediaSession tốc độ 0.75/1/1.25/1.5/2x, pause/queue giữ nguyên, UI Now Playing |
-| **P0 — kế tiếp** | **Lyrics Runtime Acceptance v1** | CHƯA THỰC HIỆN | Test LRC Parser + SAF/URI import/persist, timestamp-synced lyric render, playback real MediaSession với WAV offline |
+| **P0 — runtime QA đã đạt API 30** | **Playback Speed Runtime Acceptance v1** | **105/105 JVM + 10/10 Android PASS** | `docs/Playback_Speed_Runtime_Acceptance_v1.md`, `qa-logs/playback-speed-runtime-v1.log`; chi tiết giới hạn touch riêng |
+| **P0 — kế tiếp (mốc nhỏ)** | **Playback Speed Touch Interaction QA v2** | CHƯA THỰC HIỆN | Kiểm chứng touch thực qua UIAutomator hoặc thiết bị thật trên các chip tốc độ cuộn ngang, không nhầm với OnClick trợ năng |
 | **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
 | **P1** | UI/accessibility/empty-state/error-state | Foundation v1 13/13 + Polish v2 19/19 Android PASS; toàn diện **CHƯA NGHIỆM THU** | Tiếp tục ma trận API, TalkBack thật, adaptive layout rộng và các trạng thái chưa chuẩn hóa |
 | **P1** | Hiệu năng và dữ liệu lớn | CHƯA NGHIỆM THU | Dataset cố định; ngưỡng thời gian/độ ổn định được chốt; không crash/ANR, không mất dữ liệu |
@@ -283,6 +284,15 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-11-01 — Playback Speed Runtime Acceptance v1 — BUILD/JVM + 10/10 ANDROID API 30 PASS
+
+- HEAD nền `3a59bc7`, working tree sạch khi bắt đầu. Đúng phạm vi Playback Speed, không thay Media3 logic, Supabase, online rights hoặc Auth/Cloud.
+- Tìm và sửa lỗi biên dịch **có sẵn ở LyricsImportUiE2eTest** từ commit trước: thêm thiếu import `android.content.Context`; nhờ đó toàn bộ AndroidTest build trở lại.
+- Thêm `PlaybackSpeedRuntimeTest.kt` với hai Media3 WAV offline thật: năm chip 0.75/1/1.25/1.5/2x cập nhật MediaSession và selected state; pause/resume và Next giữ 2x + queue, reset 1x; PlaybackController không nhận -1/0/0.49/2.01/NaN/+Inf, hai biên 0.5/2x hợp lệ. Cleanup tốc độ/queue/audio QA.
+- Tăng khả năng xác định chip tốc độ qua `Modifier.testTag("playback-speed-${speed}x")`, không thay đổi giao diện. **Ghi rõ giới hạn:** test touch theo tọa độ `performClick` không kích hoạt chip ổn định khi nằm trong scroll dọc/ngang; kiểm chứng callback bằng `SemanticsActions.OnClick` (accessibility action) là PASS, chưa chứng minh chạm vật lý. MiniPlayer/Play/Pause/Next vẫn được bấm bằng `performClick` trong test.
+- Script `scripts/run-playback-speed-runtime-v1-tests.ps1` + log `qa-logs/playback-speed-runtime-v1.log`: **105/105 JVM PASS**, **2/2 Speed + 8/8 Playback/Queue Android API 30 PASS**, 7/7 marker, Git diff check PASS, `FINAL_RESULT=PASS`. `docs/Playback_Speed_Runtime_Acceptance_v1.md` chứa bằng chứng, giới hạn, cleanup.
+- **Kế tiếp:** Playback Speed Touch Interaction QA v2 để xử lý nốt kiểm chứng thao tác chạm trên các chip, sau đó Crossfade/Gapless Runtime Acceptance v1. Google/email thật và Cloud E2E hai thiết bị để gần cuối; Licensed Streaming Smoke chờ audio có quyền.
 
 ### 2026-10-29 — Lyrics Import UI End-to-End v2 — FULL PICKER→MAINACTIVITY→PLAYER PASS
 
