@@ -1,0 +1,13 @@
+﻿MusicFlow API 36 initial smoke diagnostics — relevant excerpts only
+DATE=2026-11-01
+EXPECTED_OLD_PARSER=state=3
+ANDROID36_ACTUAL_STATE_FORMAT=PLAYING(3)
+ROOT_CAUSE=QA_DUMPSYS_PARSER_FORMAT_CHANGE
+PRODUCTION_PLAYBACK_LOGIC_CHANGED=FALSE
+--- DUMPSYS / LOGCAT SIGNAL ---
+      package=com.example.musicflow
+      state=PlaybackState {state=PLAYING(3), position=3271, buffered position=40000, speed=1.0, updated=361932, actions=7340027, custom actions=[], active item id=0, error=null}
+      metadata: size=4, description=AAA_MusicFlow_RC2_20261101_191005_6643620_A, Không rõ nghệ sĩ, null
+11-01 19:10:50.097   754  1560 D MediaSessionService: onSessionPlaybackStateChanged: record=com.example.musicflow/androidx.media3.session.id./3 (userId=0) playbackState=PlaybackState {state=PLAYING(3), position=0, buffered position=39900, speed=1.0, updated=358908, actions=7340027, custom actions=[], active item id=0, error=null}
+11-01 19:10:50.099   754  1968 D MediaSessionService: onSessionPlaybackStateChanged: record=com.example.musicflow/androidx.media3.session.id./3 (userId=0) playbackState=PlaybackState {state=PLAYING(3), position=0, buffered position=39900, speed=1.0, updated=358911, actions=7340027, custom actions=[], active item id=0, error=null}
+11-01 19:10:53.121   754  1976 D MediaSessionService: onSessionPlaybackStateChanged: record=com.example.musicflow/androidx.media3.session.id./3 (userId=0) playbackState=PlaybackState {state=PLAYING(3), position=3271, buffered position=40000, speed=1.0, updated=361932, actions=7340027, custom actions=[], active item id=0, error=null}

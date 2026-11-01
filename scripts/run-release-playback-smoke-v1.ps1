@@ -4,7 +4,14 @@
 # Refuses to replace any pre-existing MusicFlow installation.
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
-$log = Join-Path $root "qa-logs\release-playback-smoke-v1.log"
+# Preserve Part 2's committed API 30 log; collect separate evidence for API 29/33/36.
+$logName = if ($ExpectedApi -eq 30) {
+    "release-playback-smoke-v1.log"
+} else {
+    "release-playback-smoke-api$ExpectedApi-v1.log"
+}
+$log = Join-Path $root ("qa-logs\" + $logName)
+$diagnostic = Join-Path $root ("qa-logs\release-playback-smoke-api" + $ExpectedApi + "-diagnostics-v1.log")
 $work = Join-Path $root "app\build\rc-qa\release-playback"
 $pkg = "com.example.musicflow"
 $stamp = Get-Date -Format "yyyyMMdd_HHmmss_fffffff"
@@ -16,6 +23,7 @@ $files = @()
 $installed = $false
 $folderCreated = $false
 $passed = $false
+$preexistingApp = $false
 New-Item -ItemType Directory -Force -Path (Split-Path $log),$work | Out-Null
 Set-Content -LiteralPath $log -Value "MusicFlow RC2 release-mode playback QA" -Encoding UTF8
 
@@ -109,10 +117,17 @@ function TapLabel([string]$label, [switch]$Scroll) {
     throw ("UI_LABEL_MISSING_" + $label)
 }
 function AssertSession([string]$title, [int]$state) {
+    # Android 16 / API 36 prints PLAYING(3), PAUSED(2) in dumpsys,
+    # whereas API 29/30/33 prints the numeric state (3, 2).
+    $statePattern = switch ($state) {
+        3 { '(?:PLAYING\(3\)|3)' }
+        2 { '(?:PAUSED\(2\)|2)' }
+        default { [regex]::Escape([string]$state) }
+    }
     for ($i=0;$i -lt 16;$i++) {
         $dump = (Adb "MEDIA_SESSION" @("shell","dumpsys","media_session") -Quiet) -join [Environment]::NewLine
         $pattern = '(?s)package=com\.example\.musicflow.*?state=PlaybackState \{state=' +
-            $state + ',.*?metadata: size=\d+, description=' + [regex]::Escape($title) + ','
+            $statePattern + ',.*?metadata: size=\d+, description=' + [regex]::Escape($title) + ','
         if ($dump -match $pattern) {
             Log ("MEDIASESSION_STATE_" + $state + "=" + $title)
             return
@@ -145,7 +160,10 @@ try {
     if ($api.Trim() -ne "$ExpectedApi" -or $boot.Trim() -ne "1") {
         throw "EMULATOR_NOT_BOOTED_OR_WRONG_API"
     }
-    if (IsInstalled) { throw "PREEXISTING_MUSICFLOW_DO_NOT_UNINSTALL" }
+    if (IsInstalled) {
+        $preexistingApp = $true
+        throw "PREEXISTING_MUSICFLOW_DO_NOT_UNINSTALL"
+    }
     Run "BUILD_RELEASE" ".\gradlew.bat" @(":app:assembleRelease","--console=plain") -Quiet | Out-Null
     Log "BUILD_RELEASE=PASS"
     $unsigned = Join-Path $root "app\build\outputs\apk\release\app-release-unsigned.apk"
@@ -223,6 +241,27 @@ try {
     $passed = $true
 }catch{
     Log ("FAIL_REASON=" + $_.Exception.Message)
+    if ($adb -and (Test-Path -LiteralPath $adb)) {
+        try {
+            $sessionDump = @(& $adb -s $DeviceId shell dumpsys media_session 2>&1)
+            $appDump = @(& $adb -s $DeviceId shell dumpsys activity activities 2>&1)
+            $recentLogs = @(& $adb -s $DeviceId logcat -d -t 2500 2>&1)
+            $importantLogs = @($recentLogs | Where-Object {
+                $_ -match 'com\.example\.musicflow|AndroidRuntime|FATAL EXCEPTION|ForegroundService|MediaSession|ExoPlayer|MediaCodec|CCodec|PlayerImpl|PlaybackService|SecurityException'
+            } | Select-Object -Last 150)
+            @(
+                ("DATE=" + (Get-Date -Format o)),
+                ("FAIL_REASON=" + $_.Exception.Message),
+                "--- DUMPSYS MEDIA_SESSION ---"
+            ) + $sessionDump + @("--- DUMPSYS ACTIVITY ---") +
+                @($appDump | Select-String 'ResumedActivity|mResumedActivity|com.example.musicflow' -Context 1,1 | ForEach-Object {$_}) +
+                @("--- LOGCAT FILTERED ---") + $importantLogs |
+                Set-Content -LiteralPath $diagnostic -Encoding UTF8
+            Log ("FAIL_DIAGNOSTICS=" + $diagnostic)
+        } catch {
+            Log ("DIAGNOSTICS_CAPTURE_FAILED=" + $_.Exception.Message)
+        }
+    }
 }finally{
     if($adb -and (Test-Path -LiteralPath $adb)){
         if($installed){
@@ -242,7 +281,10 @@ try {
         }
         & $adb -s $DeviceId shell rm -f $uiDump 2>&1 | Out-Null
         $left = Rows | Where-Object { $_ -match [regex]::Escape($stamp) }
-        if (!(IsInstalled) -and @($left).Count -eq 0){
+        if ($preexistingApp -and !$installed -and $ids.Count -eq 0 -and
+            $files.Count -eq 0 -and !$folderCreated) {
+            Log "QA_CLEANUP=NOT_NEEDED_PREEXISTING_APP_PRESERVED"
+        } elseif (!(IsInstalled) -and @($left).Count -eq 0) {
             Log "QA_CLEANUP=PASS"
         } else {
             Log "QA_CLEANUP=FAIL"
