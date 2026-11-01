@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `6aa0549` — Crossfade/Gapless Runtime Acceptance v1 đã commit; Crossfade UI & Interruption QA v2 **JVM 105/105 + Android API 30 17/17 PASS trong workspace**, chưa commit |
+| HEAD Git hiện tại | `8c39415` — Crossfade UI & Interruption QA v2 đã commit; Playback Queue Actions Runtime Acceptance v1 **JVM 105/105 + Android API 30 13/13 PASS trong workspace**, chưa commit |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
@@ -34,7 +34,7 @@
 | History Sync v1 | Supabase RLS, RPC metadata-only, UI đồng bộ thủ công; APK + AndroidTest build và JVM unit PASS (4/4 riêng History), chưa E2E |
 | Google Login Foundation v1 | Android OAuth PKCE + nonce + callback + session; build Android + JVM PASS (7/7 Google unit tests); provider Supabase Google TẮT, chưa E2E |
 | Account & Google Security Hardening v2 | Loại trừ phiên Auth/PKCE khỏi Android backup và device transfer; kiểm tra callback bổ sung; 4/4 Python, 12/12 Google JVM, Android app + AndroidTest build PASS; chưa E2E |
-| Playback Queue Actions v1 | Phát tiếp / Thêm vào hàng đợi từ Library/Search; luật queue độc lập, có test; build + JVM PASS (8/8 queue rule tests), chưa Android runtime QA |
+| Playback Queue Actions v1 | **Runtime Android API 30 PASS**: UI LibraryScreen **Phát tiếp** / SearchScreen **Thêm vào hàng đợi** trên MediaSession/WAV thật, snapshot đúng và bài NEXT phát thật; từ chối shuffle/repeat-one/empty; **105 JVM + 13/13 Android PASS**. Chưa kiểm thử MediaStore/MainActivity route toàn phần |
 | Queue Manager UI v1 | Xem/xóa/di chuyển/dọn hàng đợi, giữ bài đang phát; 16/16 JVM và 3/3 Android instrumented trên API 30 PASS |
 | Core Media Source Contract v1 | Một điểm dựng MediaItem từ MediaStore/SAF/online, bảo toàn legacy; JVM 11/11, Android API 30 9/9 PASS; log `qa-logs/media-source-contract-v1.log` |
 | MusicFlow UI/UX Foundation v1 | Trạng thái UI thống nhất trên Home/Library/Search/Online/Queue, theme xanh ngọc–xanh đêm và TalkBack labels; BUILD + JVM, Android API 30 **13/13 PASS** |
@@ -55,8 +55,9 @@
 | Playback Speed Touch Interaction QA v2 | **JVM 105/105, Android API 30 12/12 PASS** (3 Speed + 8 Playback/Queue + 1 high-font physical touch), đủ 5 nút tốc độ chạm Android thật, swipe ngang ở font scale 150%; `docs/Playback_Speed_Touch_Interaction_QA_v2.md` |
 | Crossfade/Gapless Runtime Acceptance v1 | **JVM 105/105 + Android API 30 12/12 PASS** (4 Crossfade + 8 Playback/Queue); thực tế WAV offline, 3 MIX_STARTED + 3 HANDOFF_DONE cho 1/2/3 giây; **chưa đo gapless audio**, `docs/Crossfade_Gapless_Runtime_Acceptance_v1.md` |
 | Crossfade UI & Interruption QA v2 | **JVM 105/105 + Android API 30 17/17 PASS** (8 Crossfade runtime + 1 UI + 8 Playback/Queue), 4 hủy thật ở giai đoạn MIXING; `docs/Crossfade_UI_Interruption_QA_v2.md` |
+| Playback Queue Actions Runtime Acceptance v1 | **105/105 JVM + 13/13 Android API 30 PASS** (2 Library/Search Queue Actions + 11 Playback/Queue regression), snapshot và next-track thật; `docs/Playback_Queue_Actions_Runtime_Acceptance_v1.md` |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Playback Queue Actions Runtime Acceptance v1** — kiểm thử `Phát tiếp` và `Thêm vào hàng đợi` từ Library/Search với WAV offline qua MediaSession và queue thật; mốc nhỏ. Licensed Streaming Smoke chờ nhạc có quyền thật; Google Login/email thật ĐỂ CUỐI |
+| Bước tiếp theo | **Advanced Library Runtime Acceptance v1** — test MediaStore thực (WAV QA), quyền đọc và màn Library/nhóm Album/Artist; sau đó Advanced Search riêng. Licensed Streaming Smoke chờ nhạc có quyền thật; Google Login/email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -181,7 +182,8 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **P0 — touch QA đã đạt API 30** | **Playback Speed Touch Interaction QA v2** | **105 JVM PASS, 12/12 Android targeted PASS** | `docs/Playback_Speed_Touch_Interaction_QA_v2.md`, `qa-logs/playback-speed-touch-v2.log`; đã chạm đủ 5 chip bằng UiDevice và cuộn ngang thật ở font 150% |
 | **P0 — runtime QA API 30 đạt** | **Crossfade/Gapless Runtime Acceptance v1** | **105 JVM PASS, 12/12 Android PASS**, 13 marker | `docs/Crossfade_Gapless_Runtime_Acceptance_v1.md`, `qa-logs/crossfade-runtime-v1.log`; chưa đo audio gapless |
 | **P0 — UI/interruption QA đạt API 30** | **Crossfade UI & Interruption QA v2** | **105 JVM PASS, 17/17 Android PASS** | `docs/Crossfade_UI_Interruption_QA_v2.md`, `qa-logs/crossfade-ui-interruption-v2.log`; bốn lượt cancel giai đoạn MIXING thật, queue/volume bảo toàn |
-| **P0 — kế tiếp (mốc nhỏ)** | **Playback Queue Actions Runtime Acceptance v1** | CHƯA THỰC HIỆN | Từ Library/Search bấm `Phát tiếp` / `Thêm vào hàng đợi`, xác nhận thứ tự queue, bài đang phát và MediaSession không gián đoạn |
+| **P0 — runtime QA API 30 đạt** | **Playback Queue Actions Runtime Acceptance v1** | **105/105 JVM, 13/13 Android PASS** | `docs/Playback_Queue_Actions_Runtime_Acceptance_v1.md`, `qa-logs/playback-queue-actions-v1.log`; 2 UI + 11 regression, snapshot queue chính xác |
+| **P0 — kế tiếp (mốc nhỏ)** | **Advanced Library Runtime Acceptance v1** | CHƯA THỰC HIỆN | Tạo WAV thật trong MediaStore, quyền READ_EXTERNAL_STORAGE API 30, LibraryRoute quét/hiển thị/album/nghệ sĩ/MediaSession; sau đó Search riêng |
 | **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
 | **P1** | UI/accessibility/empty-state/error-state | Foundation v1 13/13 + Polish v2 19/19 Android PASS; toàn diện **CHƯA NGHIỆM THU** | Tiếp tục ma trận API, TalkBack thật, adaptive layout rộng và các trạng thái chưa chuẩn hóa |
 | **P1** | Hiệu năng và dữ liệu lớn | CHƯA NGHIỆM THU | Dataset cố định; ngưỡng thời gian/độ ổn định được chốt; không crash/ANR, không mất dữ liệu |
@@ -290,6 +292,15 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-11-01 — Playback Queue Actions Runtime Acceptance v1 — 105 JVM + 13/13 ANDROID API 30 PASS
+
+- HEAD nền `8c39415`, Git sạch trước khi bắt đầu. Chỉ thêm `QueueActionsRuntimeTest.kt` và script/tài liệu, **không thay đổi production code** hoặc chính sách streaming nhạc offline/online.
+- Hai bài Android dùng `LibraryScreen`/`SearchScreen` production, với `DeviceSong` WAV trong cache do test cấp, `PlayerViewModel.queueDeviceSong` và `PlaybackService`/MediaSession thực. Library **Phát tiếp** chèn vào ngay sau Alpha đang phát, Search **Thêm vào hàng đợi** chèn cuối; queue bốn bài và persisted snapshot giữ đúng thứ tự/vị trí, không pause hay reset, dùng Next thực sự phát bài mới chèn. Từ chối NEXT khi shuffle/repeat-one, item thiếu URI, và không tạo queue tự động khi rỗng.
+- Lượt đầu FAIL ở guard shuffle do **race giữa hai MediaController** cập nhật bất đồng bộ; sửa bài test chờ trạng thái `PlaybackController.uiState` đồng bộ trước khi gọi enqueue, không nới điều kiện guard. Chạy lại **2/2 PASS**.
+- `scripts/run-playback-queue-actions-v1-tests.ps1` + `qa-logs/playback-queue-actions-v1.log`: Gradle Build/JVM **105/105 PASS**, Queue Actions Android **2/2**, PlaybackService **3/3** + QueuePersistence **5/5** + QueueManagerIntegration **1/1** + QueueManagerScreen **2/2** = **11/11 regression**, tổng **13/13 Android API 30 PASS**, 7/7 marker, Git diff check PASS, `FINAL_RESULT=PASS`. Báo cáo `docs/Playback_Queue_Actions_Runtime_Acceptance_v1.md`.
+- **Giới hạn:** UI thật nhưng dữ liệu DeviceSong thử được cấp trực tiếp, chưa đi qua `MainActivity` navigation, MediaStore quét thật, quyền Android hoặc đầy đủ Library/Search route; chưa máy thật/multi API/full Android suite. Không tuyên bố nghiệm thu 100% MusicFlow 1.0.
+- **Tiếp theo:** Advanced Library Runtime Acceptance v1 theo từng mốc, sau đó Search Runtime v1; Google/email thật/Cloud E2E hai thiết bị vẫn ở cuối.
 
 ### 2026-11-01 — Crossfade UI & Interruption QA v2 — 105 JVM + 17/17 ANDROID API 30 PASS
 

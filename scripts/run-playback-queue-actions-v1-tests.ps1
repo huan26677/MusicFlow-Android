@@ -1,46 +1,131 @@
+param([string]$DeviceId = "emulator-5554")
+
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $log = Join-Path $root "qa-logs\playback-queue-actions-v1.log"
+$runner = "com.example.musicflow.test/androidx.test.runner.AndroidJUnitRunner"
 
-function Write-Log([string]$message) {
-    Write-Host $message
-    Add-Content -LiteralPath $log -Value $message -Encoding UTF8
+function Record([string]$line) {
+    Write-Host $line
+    Add-Content -LiteralPath $log -Value $line -Encoding UTF8
+}
+
+function Native([string]$exe, [string[]]$arguments) {
+    $old = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $lines = @(& $exe @arguments 2>&1)
+        $exit = [int]$LASTEXITCODE
+    } finally { $ErrorActionPreference = $old }
+    $output = $lines -join [char]10
+    Record $output
+    return [pscustomobject]@{ Exit = $exit; Output = $output }
+}
+
+function Instrument([string]$label, [string]$classes, [int]$count) {
+    $run = Native "adb" @(
+        "-s", $DeviceId, "shell", "am", "instrument", "-w",
+        "-e", "class", $classes, $runner
+    )
+    Record "${label}_EXIT=$($run.Exit)"
+    $noun = if ($count -eq 1) { "test" } else { "tests" }
+    if ($run.Exit -ne 0 -or
+        !$run.Output.Contains("OK ($count $noun)") -or
+        $run.Output -match "FAILURES|Error in|INSTRUMENTATION_FAILED") {
+        throw "${label}_FAILED"
+    }
+    Record "${label}_TESTS=$count"
 }
 
 Push-Location $root
 try {
-    Set-Content -LiteralPath $log -Value "MusicFlow Playback Queue Actions v1" -Encoding UTF8
-    Write-Log "DATE=$(Get-Date -Format o)"
-    Write-Log "HEAD_BASE=$(git rev-parse --short HEAD)"
-    Write-Log "BEGIN_ANDROID_BUILD_AND_JVM"
-    $old = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
-    try {
-        & .\gradlew.bat :app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest --console=plain 2>&1 |
-            ForEach-Object { Write-Log ([string]$_) }
-        $code = $LASTEXITCODE
-    } finally {
-        $ErrorActionPreference = $old
+    Set-Content -LiteralPath $log -Value "MusicFlow Playback Queue Actions Runtime Acceptance v1" -Encoding UTF8
+    Record "DATE=$(Get-Date -Format o)"
+    Record "HEAD_BASE=$(git rev-parse --short HEAD)"
+    Record "DEVICE=$DeviceId"
+    Record "OFFLINE_USER_AUDIO_REQUIRES_ONLINE_RIGHTS_CHECK=FALSE"
+    $api = Native "adb" @("-s", $DeviceId, "shell", "getprop", "ro.build.version.sdk")
+    $boot = Native "adb" @("-s", $DeviceId, "shell", "getprop", "sys.boot_completed")
+    if ($api.Exit -ne 0 -or $api.Output.Trim() -ne "30" -or
+        $boot.Exit -ne 0 -or $boot.Output.Trim() -ne "1") {
+        throw "EXPECTED_BOOTED_API_30_EMULATOR"
     }
-    Write-Log "BUILD_AND_JVM_EXIT=$code"
-    if ($code -ne 0) { throw "GRADLE_FAILED" }
 
-    $report = Join-Path $root "app\build\test-results\testDebugUnitTest\TEST-com.example.musicflow.core.playback.QueueInsertRulesTest.xml"
-    if (!(Test-Path -LiteralPath $report)) { throw "QUEUE_TEST_REPORT_MISSING" }
-    [xml]$xml = Get-Content -LiteralPath $report -Raw
-    $suite = $xml.testsuite
-    Write-Log "QUEUE_RULE_TESTS=$($suite.tests)"
-    Write-Log "QUEUE_RULE_FAILURES=$($suite.failures)"
-    Write-Log "QUEUE_RULE_ERRORS=$($suite.errors)"
-    if ([int]$suite.tests -lt 8 -or [int]$suite.failures -ne 0 -or
-        [int]$suite.errors -ne 0 -or [int]$suite.skipped -ne 0) {
-        throw "QUEUE_RULE_REGRESSION_FAILED"
+    $build = Native ".\gradlew.bat" @(
+        ":app:assembleDebug", ":app:assembleDebugAndroidTest",
+        ":app:testDebugUnitTest", "--console=plain"
+    )
+    Record "BUILD_JVM_EXIT=$($build.Exit)"
+    if ($build.Exit -ne 0 -or !$build.Output.Contains("BUILD SUCCESSFUL")) {
+        throw "GRADLE_BUILD_OR_JVM_FAILED"
     }
-    Write-Log "FINAL_RESULT=BUILD_AND_UNIT_PASS"
+    $reports = @(Get-ChildItem "app\build\test-results\testDebugUnitTest" -Filter "TEST-*.xml")
+    if ($reports.Count -eq 0) { throw "MISSING_JVM_REPORTS" }
+    $jvmTotal = 0
+    $jvmFail = 0
+    $jvmSkip = 0
+    foreach ($report in $reports) {
+        [xml]$xml = Get-Content $report.FullName -Raw -Encoding UTF8
+        foreach ($case in $xml.GetElementsByTagName("testcase")) {
+            $jvmTotal++
+            if ($case.GetElementsByTagName("failure").Count -gt 0 -or
+                $case.GetElementsByTagName("error").Count -gt 0) { $jvmFail++ }
+            elseif ($case.GetElementsByTagName("skipped").Count -gt 0) { $jvmSkip++ }
+        }
+    }
+    Record "JVM_TOTAL=$jvmTotal"
+    Record "JVM_FAIL=$jvmFail"
+    Record "JVM_SKIP=$jvmSkip"
+    if ($jvmFail -ne 0 -or $jvmSkip -ne 0) { throw "JVM_REGRESSION_FAILED" }
+
+    foreach ($apk in @(
+        "app\build\outputs\apk\debug\app-debug.apk",
+        "app\build\outputs\apk\androidTest\debug\app-debug-androidTest.apk"
+    )) {
+        $installed = Native "adb" @("-s", $DeviceId, "install", "-r", (Join-Path $root $apk))
+        if ($installed.Exit -ne 0 -or !$installed.Output.Contains("Success")) {
+            throw "APK_INSTALL_FAILED"
+        }
+    }
+    $null = Native "adb" @("-s", $DeviceId, "logcat", "-c")
+
+    Instrument "QUEUE_ACTIONS_RUNTIME" (
+        "com.example.musicflow.core.playback.QueueActionsRuntimeTest"
+    ) 2
+    $traceLines = @(& adb -s $DeviceId logcat -d -v brief 2>&1 |
+        Select-String "MusicFlowQueueActionsQA")
+    $trace = $traceLines -join [char]10
+    Record $trace
+    $markers = @(
+        "PASS offlineQueueReady",
+        "PASS libraryPlayNextOrder",
+        "PASS searchAppendAtTail",
+        "PASS queuePersistedInCorrectOrder",
+        "PASS insertedNextActuallyPlays",
+        "PASS shuffleRepeatAndInvalidRejected",
+        "PASS emptyQueueDoesNotAutoPlay"
+    )
+    foreach ($marker in $markers) {
+        if (!$trace.Contains($marker)) { throw "MISSING_QUEUE_ACTIONS_MARKER_$marker" }
+    }
+    Record "QUEUE_ACTIONS_RUNTIME_MARKERS=$($markers.Count)"
+
+    # Independent instrumentation session to detect side effects against
+    # the real playback service and persisted queue implementation.
+    Instrument "PLAYBACK_QUEUE_REGRESSION" (
+        "com.example.musicflow.core.playback.PlaybackServiceIntegrationTest," +
+        "com.example.musicflow.core.playback.PlaybackQueuePersistenceTest," +
+        "com.example.musicflow.core.playback.QueueManagerIntegrationTest," +
+        "com.example.musicflow.core.playback.QueueManagerScreenTest"
+    ) 11
+
+    $diff = Native "git" @("diff", "--check")
+    Record "GIT_DIFF_CHECK_EXIT=$($diff.Exit)"
+    if ($diff.Exit -ne 0) { throw "GIT_DIFF_CHECK_FAILED" }
+    Record "TOTAL_ANDROID_TESTS=13"
+    Record "FINAL_RESULT=PASS"
 } catch {
-    Write-Log "FAIL_REASON=$($_.Exception.Message)"
-    Write-Log "FINAL_RESULT=FAIL"
+    Record "FAIL_REASON=$($_.Exception.Message)"
+    Record "FINAL_RESULT=FAIL"
     exit 1
-} finally {
-    Pop-Location
-}
+} finally { Pop-Location }
