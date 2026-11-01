@@ -1,0 +1,339 @@
+﻿MusicFlow RC Packaging v1 - INTERNAL QA ONLY
+DATE=2026-11-01T18:27:35.3977898+07:00
+HEAD_BASE=818be079c29312afd5b627267eef5023a2cec11f
+QA_SIGNATURE=LOCAL_ANDROID_DEBUG_KEY_NOT_FOR_DISTRIBUTION
+RELEASE_SIGNING_CONFIG=NOT_CONFIGURED
+DEVICES List of devices attached
+DEVICES emulator-5554          device product:sdk_gphone_x86 model:sdk_gphone_x86 device:generic_x86_arm transport_id:1
+DEVICES 
+DEVICES_EXIT=0
+DEVICE_API 30
+DEVICE_API_EXIT=0
+DEVICE_BOOT 1
+DEVICE_BOOT_EXIT=0
+GRADLE_BUILD Calculating task graph as no cached configuration is available for tasks: :app:assembleRelease :app:assembleDebug
+GRADLE_BUILD > Task :app:preBuild UP-TO-DATE
+GRADLE_BUILD > Task :app:generateReleaseAssets UP-TO-DATE
+GRADLE_BUILD > Task :app:generateDebugAssets UP-TO-DATE
+GRADLE_BUILD > Task :app:preReleaseBuild UP-TO-DATE
+GRADLE_BUILD > Task :app:generateReleaseBuildConfig UP-TO-DATE
+GRADLE_BUILD > Task :app:checkReleaseDuplicateClasses UP-TO-DATE
+GRADLE_BUILD > Task :app:processReleaseNavigationResources UP-TO-DATE
+GRADLE_BUILD > Task :app:generateReleaseResources UP-TO-DATE
+GRADLE_BUILD > Task :app:extractProguardFiles UP-TO-DATE
+GRADLE_BUILD > Task :app:javaPreCompileRelease UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeReleaseJniLibFolders UP-TO-DATE
+GRADLE_BUILD > Task :app:mapReleaseSourceSetPaths UP-TO-DATE
+GRADLE_BUILD > Task :app:createReleaseCompatibleScreenManifests UP-TO-DATE
+GRADLE_BUILD > Task :app:checkReleaseAarMetadata UP-TO-DATE
+GRADLE_BUILD > Task :app:extractDeepLinksRelease UP-TO-DATE
+GRADLE_BUILD > Task :app:desugarReleaseFileDependencies UP-TO-DATE
+GRADLE_BUILD > Task :app:compileReleaseNavigationResources UP-TO-DATE
+GRADLE_BUILD > Task :app:packageReleaseResources UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeReleaseStartupProfile UP-TO-DATE
+GRADLE_BUILD > Task :app:extractReleaseVersionControlInfo UP-TO-DATE
+GRADLE_BUILD > Task :app:parseReleaseLocalResources UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeReleaseNativeLibs UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeReleaseAssets UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeReleaseArtProfile UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeReleaseResources UP-TO-DATE
+GRADLE_BUILD > Task :app:collectReleaseDependencies UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeExtDexRelease UP-TO-DATE
+GRADLE_BUILD > Task :app:generateReleaseRFile UP-TO-DATE
+GRADLE_BUILD > Task :app:writeReleaseAppMetadata UP-TO-DATE
+GRADLE_BUILD > Task :app:preDebugBuild UP-TO-DATE
+GRADLE_BUILD > Task :app:writeReleaseSigningConfigVersions UP-TO-DATE
+GRADLE_BUILD > Task :app:sdkReleaseDependencyData UP-TO-DATE
+GRADLE_BUILD > Task :app:stripReleaseDebugSymbols UP-TO-DATE
+GRADLE_BUILD > Task :app:compressReleaseAssets UP-TO-DATE
+GRADLE_BUILD > Task :app:generateDebugBuildConfig UP-TO-DATE
+GRADLE_BUILD > Task :app:extractReleaseNativeSymbolTables UP-TO-DATE
+GRADLE_BUILD > Task :app:generateDebugResources UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+GRADLE_BUILD > Task :app:javaPreCompileDebug UP-TO-DATE
+GRADLE_BUILD > Task :app:processReleaseMainManifest UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+GRADLE_BUILD > Task :app:generateDebugGlobalSynthetics UP-TO-DATE
+GRADLE_BUILD > Task :app:processReleaseManifest UP-TO-DATE
+GRADLE_BUILD > Task :app:desugarDebugFileDependencies UP-TO-DATE
+GRADLE_BUILD > Task :app:processReleaseManifestForPackage UP-TO-DATE
+GRADLE_BUILD > Task :app:mapDebugSourceSetPaths UP-TO-DATE
+GRADLE_BUILD > Task :app:packageDebugResources UP-TO-DATE
+GRADLE_BUILD > Task :app:checkDebugDuplicateClasses UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeLibDexDebug UP-TO-DATE
+GRADLE_BUILD > Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+GRADLE_BUILD > Task :app:kspReleaseKotlin UP-TO-DATE
+GRADLE_BUILD > Task :app:extractDeepLinksDebug UP-TO-DATE
+GRADLE_BUILD > Task :app:processDebugNavigationResources UP-TO-DATE
+GRADLE_BUILD > Task :app:checkDebugAarMetadata UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeDebugAssets UP-TO-DATE
+GRADLE_BUILD > Task :app:compileDebugNavigationResources UP-TO-DATE
+GRADLE_BUILD > Task :app:parseDebugLocalResources UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeDebugJniLibFolders UP-TO-DATE
+GRADLE_BUILD > Task :app:generateDebugRFile UP-TO-DATE
+GRADLE_BUILD > Task :app:compressDebugAssets UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeDebugNativeLibs UP-TO-DATE
+GRADLE_BUILD > Task :app:processDebugMainManifest UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeDebugResources UP-TO-DATE
+GRADLE_BUILD > Task :app:validateSigningDebug UP-TO-DATE
+GRADLE_BUILD > Task :app:stripDebugDebugSymbols UP-TO-DATE
+GRADLE_BUILD > Task :app:writeDebugAppMetadata UP-TO-DATE
+GRADLE_BUILD > Task :app:processDebugManifest UP-TO-DATE
+GRADLE_BUILD > Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+GRADLE_BUILD > Task :app:processDebugManifestForPackage UP-TO-DATE
+GRADLE_BUILD > Task :app:processReleaseResources UP-TO-DATE
+GRADLE_BUILD > Task :app:optimizeReleaseResources UP-TO-DATE
+GRADLE_BUILD > Task :app:kspDebugKotlin UP-TO-DATE
+GRADLE_BUILD > Task :app:processDebugResources UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeExtDexDebug UP-TO-DATE
+GRADLE_BUILD > Task :app:compileReleaseKotlin UP-TO-DATE
+GRADLE_BUILD > Task :app:processReleaseJavaRes UP-TO-DATE
+GRADLE_BUILD > Task :app:compileReleaseJavaWithJavac UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeReleaseJavaResource UP-TO-DATE
+GRADLE_BUILD > Task :app:dexBuilderRelease UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeDexRelease UP-TO-DATE
+GRADLE_BUILD > Task :app:generateReleaseLintVitalReportModel UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeReleaseGlobalSynthetics UP-TO-DATE
+GRADLE_BUILD > Task :app:compileReleaseArtProfile UP-TO-DATE
+GRADLE_BUILD > Task :app:lintVitalAnalyzeRelease UP-TO-DATE
+GRADLE_BUILD > Task :app:lintVitalReportRelease UP-TO-DATE
+GRADLE_BUILD > Task :app:lintVitalRelease
+GRADLE_BUILD > Task :app:packageRelease UP-TO-DATE
+GRADLE_BUILD > Task :app:assembleRelease UP-TO-DATE
+GRADLE_BUILD > Task :app:createReleaseApkListingFileRedirect UP-TO-DATE
+GRADLE_BUILD > Task :app:compileDebugKotlin UP-TO-DATE
+GRADLE_BUILD > Task :app:processDebugJavaRes UP-TO-DATE
+GRADLE_BUILD > Task :app:compileDebugJavaWithJavac UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeDebugJavaResource UP-TO-DATE
+GRADLE_BUILD > Task :app:dexBuilderDebug UP-TO-DATE
+GRADLE_BUILD > Task :app:mergeProjectDexDebug UP-TO-DATE
+GRADLE_BUILD > Task :app:packageDebug UP-TO-DATE
+GRADLE_BUILD > Task :app:assembleDebug UP-TO-DATE
+GRADLE_BUILD > Task :app:createDebugApkListingFileRedirect UP-TO-DATE
+GRADLE_BUILD 
+GRADLE_BUILD BUILD SUCCESSFUL in 4s
+GRADLE_BUILD 89 actionable tasks: 1 executed, 88 up-to-date
+GRADLE_BUILD Configuration cache entry stored.
+GRADLE_BUILD_EXIT=0
+GRADLE_RELEASE_AND_DEBUG_PASS=TRUE
+BADGING package: name='com.example.musicflow' versionCode='1' versionName='1.0' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'
+BADGING sdkVersion:'29'
+BADGING targetSdkVersion:'36'
+BADGING uses-permission: name='android.permission.FOREGROUND_SERVICE'
+BADGING uses-permission: name='android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK'
+BADGING uses-permission: name='android.permission.INTERNET'
+BADGING uses-permission: name='android.permission.READ_EXTERNAL_STORAGE' maxSdkVersion='32'
+BADGING uses-permission: name='android.permission.READ_MEDIA_AUDIO'
+BADGING uses-permission: name='android.permission.ACCESS_NETWORK_STATE'
+BADGING uses-permission: name='android.permission.WAKE_LOCK'
+BADGING uses-permission: name='com.example.musicflow.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'
+BADGING application-label:'MusicFlow'
+BADGING application-label-af:'MusicFlow'
+BADGING application-label-am:'MusicFlow'
+BADGING application-label-ar:'MusicFlow'
+BADGING application-label-as:'MusicFlow'
+BADGING application-label-az:'MusicFlow'
+BADGING application-label-be:'MusicFlow'
+BADGING application-label-bg:'MusicFlow'
+BADGING application-label-bn:'MusicFlow'
+BADGING application-label-bs:'MusicFlow'
+BADGING application-label-ca:'MusicFlow'
+BADGING application-label-cs:'MusicFlow'
+BADGING application-label-da:'MusicFlow'
+BADGING application-label-de:'MusicFlow'
+BADGING application-label-el:'MusicFlow'
+BADGING application-label-en-AU:'MusicFlow'
+BADGING application-label-en-CA:'MusicFlow'
+BADGING application-label-en-GB:'MusicFlow'
+BADGING application-label-en-IN:'MusicFlow'
+BADGING application-label-en-XC:'MusicFlow'
+BADGING application-label-es:'MusicFlow'
+BADGING application-label-es-US:'MusicFlow'
+BADGING application-label-et:'MusicFlow'
+BADGING application-label-eu:'MusicFlow'
+BADGING application-label-fa:'MusicFlow'
+BADGING application-label-fi:'MusicFlow'
+BADGING application-label-fr:'MusicFlow'
+BADGING application-label-fr-CA:'MusicFlow'
+BADGING application-label-gl:'MusicFlow'
+BADGING application-label-gu:'MusicFlow'
+BADGING application-label-hi:'MusicFlow'
+BADGING application-label-hr:'MusicFlow'
+BADGING application-label-hu:'MusicFlow'
+BADGING application-label-hy:'MusicFlow'
+BADGING application-label-in:'MusicFlow'
+BADGING application-label-is:'MusicFlow'
+BADGING application-label-it:'MusicFlow'
+BADGING application-label-iw:'MusicFlow'
+BADGING application-label-ja:'MusicFlow'
+BADGING application-label-ka:'MusicFlow'
+BADGING application-label-kk:'MusicFlow'
+BADGING application-label-km:'MusicFlow'
+BADGING application-label-kn:'MusicFlow'
+BADGING application-label-ko:'MusicFlow'
+BADGING application-label-ky:'MusicFlow'
+BADGING application-label-lo:'MusicFlow'
+BADGING application-label-lt:'MusicFlow'
+BADGING application-label-lv:'MusicFlow'
+BADGING application-label-mk:'MusicFlow'
+BADGING application-label-ml:'MusicFlow'
+BADGING application-label-mn:'MusicFlow'
+BADGING application-label-mr:'MusicFlow'
+BADGING application-label-ms:'MusicFlow'
+BADGING application-label-my:'MusicFlow'
+BADGING application-label-nb:'MusicFlow'
+BADGING application-label-ne:'MusicFlow'
+BADGING application-label-nl:'MusicFlow'
+BADGING application-label-or:'MusicFlow'
+BADGING application-label-pa:'MusicFlow'
+BADGING application-label-pl:'MusicFlow'
+BADGING application-label-pt:'MusicFlow'
+BADGING application-label-pt-BR:'MusicFlow'
+BADGING application-label-pt-PT:'MusicFlow'
+BADGING application-label-ro:'MusicFlow'
+BADGING application-label-ru:'MusicFlow'
+BADGING application-label-si:'MusicFlow'
+BADGING application-label-sk:'MusicFlow'
+BADGING application-label-sl:'MusicFlow'
+BADGING application-label-sq:'MusicFlow'
+BADGING application-label-sr:'MusicFlow'
+BADGING application-label-sr-Latn:'MusicFlow'
+BADGING application-label-sv:'MusicFlow'
+BADGING application-label-sw:'MusicFlow'
+BADGING application-label-ta:'MusicFlow'
+BADGING application-label-te:'MusicFlow'
+BADGING application-label-th:'MusicFlow'
+BADGING application-label-tl:'MusicFlow'
+BADGING application-label-tr:'MusicFlow'
+BADGING application-label-uk:'MusicFlow'
+BADGING application-label-ur:'MusicFlow'
+BADGING application-label-uz:'MusicFlow'
+BADGING application-label-vi:'MusicFlow'
+BADGING application-label-zh-CN:'MusicFlow'
+BADGING application-label-zh-HK:'MusicFlow'
+BADGING application-label-zh-TW:'MusicFlow'
+BADGING application-label-zu:'MusicFlow'
+BADGING application-icon-160:'res/E4.xml'
+BADGING application-icon-240:'res/E4.xml'
+BADGING application-icon-320:'res/E4.xml'
+BADGING application-icon-480:'res/E4.xml'
+BADGING application-icon-640:'res/E4.xml'
+BADGING application-icon-65534:'res/E4.xml'
+BADGING application: label='MusicFlow' icon='res/E4.xml'
+BADGING launchable-activity: name='com.example.musicflow.MainActivity'  label='MusicFlow' icon=''
+BADGING uses-library-not-required:'androidx.window.extensions'
+BADGING uses-library-not-required:'androidx.window.sidecar'
+BADGING feature-group: label=''
+BADGING   uses-feature: name='android.hardware.faketouch'
+BADGING   uses-implied-feature: name='android.hardware.faketouch' reason='default feature for all apps'
+BADGING main
+BADGING other-activities
+BADGING other-receivers
+BADGING other-services
+BADGING supports-screens: 'small' 'normal' 'large' 'xlarge'
+BADGING supports-any-density: 'true'
+BADGING locales: '--_--' 'af' 'am' 'ar' 'as' 'az' 'be' 'bg' 'bn' 'bs' 'ca' 'cs' 'da' 'de' 'el' 'en-AU' 'en-CA' 'en-GB' 'en-IN' 'en-XC' 'es' 'es-US' 'et' 'eu' 'fa' 'fi' 'fr' 'fr-CA' 'gl' 'gu' 'hi' 'hr' 'hu' 'hy' 'in' 'is' 'it' 'iw' 'ja' 'ka' 'kk' 'km' 'kn' 'ko' 'ky' 'lo' 'lt' 'lv' 'mk' 'ml' 'mn' 'mr' 'ms' 'my' 'nb' 'ne' 'nl' 'or' 'pa' 'pl' 'pt' 'pt-BR' 'pt-PT' 'ro' 'ru' 'si' 'sk' 'sl' 'sq' 'sr' 'sr-Latn' 'sv' 'sw' 'ta' 'te' 'th' 'tl' 'tr' 'uk' 'ur' 'uz' 'vi' 'zh-CN' 'zh-HK' 'zh-TW' 'zu'
+BADGING densities: '160' '240' '320' '480' '640' '65534'
+BADGING native-code: 'arm64-v8a' 'armeabi-v7a' 'x86' 'x86_64'
+BADGING_EXIT=0
+PACKAGE_VERSION_AND_SDK=PASS
+UNSIGNED_CHECK DOES NOT VERIFY
+UNSIGNED_CHECK ERROR: Missing META-INF/MANIFEST.MF
+UNSIGNED_CHECK_EXIT=1
+UNSIGNED_RELEASE_CONFIRMED=TRUE
+ZIPALIGN_EXIT=0
+QA_SIGN_EXIT=0
+QA_VERIFY Verifies
+QA_VERIFY Verified using v1 scheme (JAR signing): false
+QA_VERIFY Verified using v2 scheme (APK Signature Scheme v2): false
+QA_VERIFY Verified using v3 scheme (APK Signature Scheme v3): true
+QA_VERIFY Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+QA_VERIFY Verified using v4 scheme (APK Signature Scheme v4): false
+QA_VERIFY Verified for SourceStamp: false
+QA_VERIFY Number of signers: 1
+QA_VERIFY Signer #1 certificate DN: C=US, O=Android, CN=Android Debug
+QA_VERIFY Signer #1 certificate SHA-256 digest: bc78abfbd99baccf2d7fae77bf681a147b2023238c082698f53f0b16b8a59501
+QA_VERIFY Signer #1 certificate SHA-1 digest: ce4f733d18d15febd089be36f042b8e264c182c7
+QA_VERIFY Signer #1 certificate MD5 digest: 5ca611fd2349a0d1ec0b7f18b65149be
+QA_VERIFY Signer #1 key algorithm: RSA
+QA_VERIFY Signer #1 key size (bits): 2048
+QA_VERIFY Signer #1 public key SHA-256 digest: 28bc30635069ef3051268a9e46553235aa4cb36a58dc6f23f28348c75103c3eb
+QA_VERIFY Signer #1 public key SHA-1 digest: f05de5e00416d3fae060f5ca8cdfebeb62a8e1bc
+QA_VERIFY Signer #1 public key MD5 digest: b96e1c1a87f20fd2c406bc5348c1242b
+QA_VERIFY_EXIT=0
+QA_CERT Signer #1 certificate DN: C=US, O=Android, CN=Android Debug
+QA_CERT Signer #1 certificate SHA-256 digest: bc78abfbd99baccf2d7fae77bf681a147b2023238c082698f53f0b16b8a59501
+QA_CERT Signer #1 certificate SHA-1 digest: ce4f733d18d15febd089be36f042b8e264c182c7
+QA_CERT Signer #1 certificate MD5 digest: 5ca611fd2349a0d1ec0b7f18b65149be
+QA_CERT_EXIT=0
+DEBUG_CERT Signer #1 certificate DN: C=US, O=Android, CN=Android Debug
+DEBUG_CERT Signer #1 certificate SHA-256 digest: bc78abfbd99baccf2d7fae77bf681a147b2023238c082698f53f0b16b8a59501
+DEBUG_CERT Signer #1 certificate SHA-1 digest: ce4f733d18d15febd089be36f042b8e264c182c7
+DEBUG_CERT Signer #1 certificate MD5 digest: 5ca611fd2349a0d1ec0b7f18b65149be
+DEBUG_CERT_EXIT=0
+QA_AND_DEBUG_SIGNATURE_MATCH=TRUE
+QA_APK_SHA256=0A5F7ED7660EAFB4D111C4489F34B631A2D248C6C790FD50A30E59858171FB36
+QA_APK_SIZE=30230097
+QA_APK_PATH=E:\Du_An\MusicFlow\app\build\rc-qa\MusicFlow-1.0-qa-signed.apk
+PRODUCTION_RELEASE_APPROVED=FALSE
+BASELINE_INSTALL Performing Streamed Install
+BASELINE_INSTALL Success
+BASELINE_INSTALL_EXIT=0
+BASELINE_LAUNCH Starting: Intent { cmp=com.example.musicflow/.MainActivity }
+BASELINE_LAUNCH Status: ok
+BASELINE_LAUNCH LaunchState: COLD
+BASELINE_LAUNCH Activity: com.example.musicflow/.MainActivity
+BASELINE_LAUNCH TotalTime: 3459
+BASELINE_LAUNCH WaitTime: 3460
+BASELINE_LAUNCH Complete
+BASELINE_LAUNCH_EXIT=0
+BASELINE_PID 21812
+BASELINE_PID_EXIT=0
+MARKER_PUSH E:\Du_An\MusicFlow\app\build\rc-qa\qa-marker.txt: 1 file pushed, 0 skipped. 0.1 MB/s (32 bytes in 0.000s)
+MARKER_PUSH_EXIT=0
+MARKER_DIR_EXIT=0
+MARKER_CREATE_EXIT=0
+MARKER_BEFORE MUSICFLOW_RC_QA_0A5F7ED7660EAFB4
+MARKER_BEFORE_EXIT=0
+UPGRADE_INSTALL Performing Incremental Install
+UPGRADE_INSTALL Performing Streamed Install
+UPGRADE_INSTALL Success
+UPGRADE_INSTALL_EXIT=0
+UPGRADE_STOP_EXIT=0
+UPGRADED_RELEASE_LAUNCH Starting: Intent { cmp=com.example.musicflow/.MainActivity }
+UPGRADED_RELEASE_LAUNCH Status: ok
+UPGRADED_RELEASE_LAUNCH LaunchState: COLD
+UPGRADED_RELEASE_LAUNCH Activity: com.example.musicflow/.MainActivity
+UPGRADED_RELEASE_LAUNCH TotalTime: 1607
+UPGRADED_RELEASE_LAUNCH WaitTime: 1614
+UPGRADED_RELEASE_LAUNCH Complete
+UPGRADED_RELEASE_LAUNCH_EXIT=0
+UPGRADED_RELEASE_PID 21941
+UPGRADED_RELEASE_PID_EXIT=0
+BASELINE_RESTORE Performing Streamed Install
+BASELINE_RESTORE Success
+BASELINE_RESTORE_EXIT=0
+MARKER_AFTER MUSICFLOW_RC_QA_0A5F7ED7660EAFB4
+MARKER_AFTER_EXIT=0
+UPGRADE_INTERNAL_DATA_MARKER_PERSISTED=PASS
+BASELINE_UNINSTALL Success
+BASELINE_UNINSTALL_EXIT=0
+CLEAN_RELEASE_INSTALL Performing Incremental Install
+CLEAN_RELEASE_INSTALL Performing Streamed Install
+CLEAN_RELEASE_INSTALL Success
+CLEAN_RELEASE_INSTALL_EXIT=0
+CLEAN_RELEASE_LAUNCH Starting: Intent { cmp=com.example.musicflow/.MainActivity }
+CLEAN_RELEASE_LAUNCH Status: ok
+CLEAN_RELEASE_LAUNCH LaunchState: COLD
+CLEAN_RELEASE_LAUNCH Activity: com.example.musicflow/.MainActivity
+CLEAN_RELEASE_LAUNCH TotalTime: 1899
+CLEAN_RELEASE_LAUNCH WaitTime: 1912
+CLEAN_RELEASE_LAUNCH Complete
+CLEAN_RELEASE_LAUNCH_EXIT=0
+CLEAN_RELEASE_PID 22036
+CLEAN_RELEASE_PID_EXIT=0
+CLEAN_INSTALL_AND_LAUNCH=PASS
+CLEAN_RELEASE_UNINSTALL Success
+CLEAN_RELEASE_UNINSTALL_EXIT=0
+EMULATOR_PREEXISTING_APP_STATE_RESTORED=PASS
+FINAL_RESULT=PASS

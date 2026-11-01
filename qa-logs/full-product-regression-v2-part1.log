@@ -195,3 +195,52 @@ Pixel_5_API_30(AVD) - 11 Tests 13/115 completed. (0 skipped) (0 failed)
 Pixel_5_API_30(AVD) - 11 Tests 30/115 completed. (0 skipped) (0 failed)
 Pixel_5_API_30(AVD) - 11 Tests 32/115 completed. (0 skipped) (0 failed)
 Pixel_5_API_30(AVD) - 11 Tests 33/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 34/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 37/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 39/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 40/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 41/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 43/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 44/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 56/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 61/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 67/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 73/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 75/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 78/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 79/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 80/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 82/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 85/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 86/115 completed. (0 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 87/115 completed. (0 skipped) (0 failed)
+
+com.example.musicflow.core.playback.SafPermissionRestartTest > cleanupSafDocument[Pixel_5_API_30(AVD) - 11] [33mSKIPPED [0m
+
+com.example.musicflow.core.playback.SafPermissionRestartTest > prepareSafDocument[Pixel_5_API_30(AVD) - 11] [33mSKIPPED [0m
+
+com.example.musicflow.core.playback.SafPermissionRestartTest > verifySafAfterForceStop[Pixel_5_API_30(AVD) - 11] [33mSKIPPED [0m
+Pixel_5_API_30(AVD) - 11 Tests 94/115 completed. (3 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 98/115 completed. (3 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 106/115 completed. (3 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 112/115 completed. (3 skipped) (0 failed)
+Pixel_5_API_30(AVD) - 11 Tests 117/115 completed. (3 skipped) (0 failed)
+Finished 118 tests on Pixel_5_API_30(AVD) - 11
+
+BUILD SUCCESSFUL in 7m 49s
+73 actionable tasks: 1 executed, 72 up-to-date
+Configuration cache entry reused.
+GRADLE_ANDROID_EXIT=0
+ANDROID_PASS=112
+ANDROID_FAIL=0
+ANDROID_SKIP=3
+ANDROID_TOTAL=115
+CASE=SKIP ANDROID com.example.musicflow.core.playback.SafPermissionRestartTest#cleanupSafDocument
+CASE=SKIP ANDROID com.example.musicflow.core.playback.SafPermissionRestartTest#prepareSafDocument
+CASE=SKIP ANDROID com.example.musicflow.core.playback.SafPermissionRestartTest#verifySafAfterForceStop
+ANDROID_PHASED_SAF_RESTART_SKIPS=3
+ANDROID_UNEXPECTED_SKIP=0
+PHASED_SAF_RESTART_EVIDENCE=docs/Android_Compatibility_Matrix_v2.md
+ANDROID_RUN_FRESH_XML=TRUE
+GIT_DIFF_CHECK_EXIT=0
+FINAL_RESULT=PASS
