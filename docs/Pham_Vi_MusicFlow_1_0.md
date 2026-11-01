@@ -1,5 +1,7 @@
 # MusicFlow 1.0 — Phạm vi sản phẩm đã thống nhất
 
+> **CẬP NHẬT ƯU TIÊN 2026-11-01:** Chủ dự án đã xác định **điểm dừng tạm thời là bản APK demo có thể tải/cài trực tiếp để phục vụ dự án báo cáo**, không phải release 1.0 thương mại. **Không yêu cầu email thật, Google Login thật, thiết bị vật lý, đồng bộ cloud qua hai thiết bị thật, Google Play hoặc phát hành công khai.** Các chức năng chưa có kiểm thử E2E phải nêu rõ giới hạn; không trình bày như đã nghiệm thu. Khi hoàn thành APK demo, kiểm thử emulator và tài liệu báo cáo thì tạm dừng. Xem `docs/Muc_Tieu_Dung_Tam_APK_Bao_Cao.md` và `docs/Ke_Hoach_Du_An.md`. Các mốc sản phẩm/1.0 cũ bên dưới được giữ làm tài liệu kiến trúc và định hướng dài hạn, không phải checklist bắt buộc cho điểm dừng demo.
+
 **Ngày chốt:** 2026-10-29. **Trạng thái:** xác nhận phạm vi phát triển, KHÔNG đồng nghĩa đã nghiệm thu tất cả tính năng.
 
 ## Mục tiêu

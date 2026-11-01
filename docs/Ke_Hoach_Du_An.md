@@ -4,13 +4,24 @@
 > Đường dẫn trong repository: `docs/Ke_Hoach_Du_An.md`  
 > Mỗi lần bắt đầu công việc, **đọc file này trước**, sau đó đối chiếu `main` / commit mới nhất / source code / log trên GitHub. Không tiếp tục dựa trên trạng thái nhớ từ chat nếu đã có bằng chứng mới hơn.
 
+## QUYẾT ĐỊNH ƯU TIÊN 2026-11-01 — ĐIỂM DỪNG: APK DEMO / DỰ ÁN BÁO CÁO
+
+**Mục tiêu mới được chủ dự án xác nhận:** MusicFlow là **dự án báo cáo**. Hoàn thiện ứng dụng để **tải tệp APK và cài đặt trực tiếp phục vụ demo**, hoàn tất bàn giao/báo cáo rồi **tạm dừng**. **Không phát hành thật, không Google Play, không dùng email thật, không kiểm thử điện thoại thật, không bắt buộc đăng nhập Google thật hoặc đồng bộ cloud qua hai thiết bị thật.**
+
+**Các kế hoạch “Release Candidate / Packaging / Release Readiness”, production signing, Play App Signing và E2E tài khoản thật ở các mốc trước KHÔNG còn là yêu cầu bắt buộc tại điểm dừng demo.** Ưu tiên chức năng offline/local, APK cài được trên emulator, kiểm thử kỹ thuật phù hợp, và tài liệu báo cáo. Các tính năng online chỉ được phát nội dung có quyền; cloud/Auth/Premium chưa kiểm thử E2E phải công bố rõ trạng thái, không tuyên bố đã hoàn thiện toàn diện. **Đây là quyết định thay thế các mục tiêu “phát hành thật” cũ, không xóa lịch sử QA.**
+
+**Tiêu chí điểm dừng và việc làm tiếp:** xem `docs/Muc_Tieu_Dung_Tam_APK_Bao_Cao.md`. **Trạng thái 2026-11-01: HOÀN THÀNH BẢN DEMO/BÁO CÁO — TẠM DỪNG.** APK demo thực tế có tại `E:\Du_An\MusicFlow\dist\MusicFlow-1.0-Demo-Android.apk`; đã cài và kiểm thử chính APK này trên emulator. **Chưa phải sản phẩm thương mại hay nghiệm thu tính năng cloud/online E2E**. Không tự mở mốc phát triển mới.
+
 ## 0. Tóm tắt nhanh cho cuộc trò chuyện mới
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git nền đã đối chiếu | `b572414` (`main = origin/main`) — Release Candidate QA / Packaging Part 2 đã commit/push; **Part 3 Release Playback Smoke PASS API 29/33/36 và AAB unsigned BUILD SUCCESSFUL trong workspace, chưa commit** |
+| **ĐÍCH DỰ ÁN BÁO CÁO (quyết định mới nhất)** | **APK demo tải/cài trực tiếp, nghiệm thu trên emulator + báo cáo rồi TẠM DỪNG; KHÔNG phát hành thật, email thật, điện thoại thật, Google Play hoặc cloud hai thiết bị thật.** `docs/Muc_Tieu_Dung_Tam_APK_Bao_Cao.md` |
+| **TRẠNG THÁI DEMO** | **HOÀN THÀNH BẢN DEMO/BÁO CÁO — TẠM DỪNG**. `dist/MusicFlow-1.0-Demo-Android.apk` 30.230.097 byte; SHA-256 `ACE9AD765F75C7939C513210E2BBC1555F95E6504636303B423FB70598C2E750`; release-mode ký demo, WAV/MP3/FLAC smoke trên **chính APK bàn giao** API 30 PASS. `docs/Bao_Cao_Ban_Giao_MusicFlow_Demo_APK.md` |
+| HEAD Git nền đã đối chiếu | `1b8491d` (`main = origin/main`) — RC QA/Packaging Part 3 đã commit/push; **Part 4 và demo APK/tài liệu đang ở local workspace, chưa commit/push**. Tệp APK `dist/*.apk` được bỏ khỏi Git, phải lấy từ máy hoặc tái build bằng script |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
-| Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
+| Quyết định mới 2026-10-29 | Phát triển Full Product trước là kế hoạch ban đầu; **đã được thay thế ở điểm dừng hiện tại bằng mục tiêu APK demo/báo cáo, không làm email/Google/cloud hai thiết bị thật** |
+| Quyết định mới 2026-11-01 | **KHÔNG YÊU CẦU kiểm thử thiết bị thật**; các mốc tiếp theo dựa trên emulator/Gradle và artifact. Mục chỉ có thể đo trên phần cứng thật được ghi **chưa kiểm chứng**, không còn là điều kiện bắt buộc chặn phát triển |
 | Session Recovery v1 | Full QA PASS |
 | Android API 30 (full suite mới nhất) | **115 Android testcase: 112 PASS / 0 FAIL / 3 SKIP**, 105 JVM PASS ở Full Product Regression Gate v2 Part 1; 3 SKIP là test SAF theo pha riêng |
 | Marker API 30 (mốc cũ) | 40/40 PASS tại Session Recovery; không dùng thay kết quả full suite v2 |
@@ -20,7 +31,7 @@
 | Lyrics import | Android OpenDocument |
 | Lưu liên kết LRC theo audio URI | Đã triển khai |
 | Build Lyrics v1 + Sleep Timer v1 | `:app:assembleDebug` và `:app:assembleDebugAndroidTest` PASS ngày 2026-10-29; chỉ xác nhận biên dịch |
-| Full QA | **Full Android instrumentation API 30 v2 đã PASS**; nghiệm thu release trên nhiều thiết bị, cấu hình ký và Auth/Cloud/online có quyền thật vẫn để cuối |
+| Full QA | **Full Android instrumentation API 30 v2 đã PASS**; release-mode smoke emulator API 29/30/33/36 đã PASS; **miễn yêu cầu máy thật theo quyết định 2026-11-01**; signing và Auth/Cloud/online có quyền thật vẫn còn mở |
 | Equalizer v1 | **Runtime QA API 30 PASS:** AudioEffect gắn session Media3 thật, bật/tắt, chỉnh band, lưu cấu hình, controller reconnect; 2/2 EQ + 8/8 Playback/Queue = **10/10 Android PASS**. Chưa QA UI/tiến trình restart/thiết bị thật |
 | Crossfade/Gapless v1/v2 | **Runtime + UI/Interruption API 30 PASS:** 0/1/2/3s, UI chip selected/SessionCommand, MIX_STARTED và HANDOFF_DONE 1/2/3s, **4 MIX_CANCELLED stage=MIXING** do pause/seek/sửa queue/tắt, phục hồi volume 1/queue; **105 JVM + 17 Android PASS**. Chưa đo gapless âm thanh thực tế |
 | Library nâng cao v1 | **Runtime API 30 PASS**: READ_EXTERNAL_STORAGE, 3 WAV MediaStore/2 albumId thật, LibraryRoute scanner + play, Album/Artist playback + Genre fallback UI; **105 JVM + 14/14 Android PASS**; chưa test artist/genre tags thật hoặc máy thật |
@@ -62,8 +73,9 @@
 | Release Candidate QA / Packaging v1 — Part 1 | **PASS cho APK release-mode ký debug chỉ dùng nội bộ**: `assembleRelease` + lintVital, kiểm tra chữ ký v3, SHA-256, cài mới/chạy MainActivity và nâng cấp debug→QA release giữ internal marker trên emulator API 30; **chưa thể phát hành production vì thiếu release signing chính thức**. Xem `docs/Release_Candidate_QA_Packaging_v1_Part_1.md` |
 | Release Candidate QA / Packaging v1 — Part 2 | **PASS trên release-mode APK QA API 30**: 2 WAV MediaStore QA thật, Library → MediaSession phát, Pause/Resume/Next, Background Playback và MediaStyle notification; cleanup QA PASS. `scripts/run-release-playback-smoke-v1.ps1`, `qa-logs/release-playback-smoke-v1.log`, `docs/Release_Candidate_QA_Packaging_v1_Part_2.md` |
 | Release Candidate QA / Packaging v1 — Part 3 | **PASS trên release-mode APK QA API 29/33/36** (API 30 đã PASS từ Part 2): 2 WAV/Library/MediaSession Play-Pause-Resume-Next, nền + MediaStyle và cleanup; API 36 dùng parser QA mới hiểu `PLAYING(3)`. `bundleRelease` BUILD SUCCESSFUL, **AAB chưa ký**, chưa phát hành. `docs/Release_Candidate_QA_Packaging_v1_Part_3.md` |
+| Release Candidate QA / Packaging v1 — Part 4 | **PASS phạm vi QA emulator/API30**: MP3 và FLAC tổng hợp 40 giây, MediaStore đọc metadata và thời lượng thật, Library → MediaSession Play/Pause/Resume/Next, nền + MediaStyle, cleanup. **105/105 JVM + release APK/AAB build/audit PASS**, nhưng AAB chưa ký, app ID/version/production signing/R8 chưa chốt. `docs/Release_Candidate_QA_Packaging_v1_Part_4.md` |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Release Candidate QA / Packaging — Part 4 / Release Readiness**: checklist QA máy thật, codec MP3/FLAC/tai nghe, rà soát applicationId/version/Play Signing & keystore, AAB production, R8/hiệu năng. Licensed Streaming Smoke chờ nhạc có quyền thật; Google Login/email thật và cloud 2 thiết bị ĐỂ CUỐI |
+| Bước tiếp theo | **TẠM DỪNG** — không còn mốc bắt buộc trong phạm vi demo/báo cáo. Nếu có yêu cầu mới thì ưu tiên xem `docs/Bao_Cao_Ban_Giao_MusicFlow_Demo_APK.md` và `docs/Huong_Dan_Cai_Dat_MusicFlow_Demo_APK.md`, tiếp tục đúng phạm vi người dùng yêu cầu. Không tự làm production signing, Google Play, tài khoản thật hay test máy thật |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** Các số `31/31`, `55/55` ở mốc cũ không phải số liệu full suite v2. Hiện có bằng chứng **105 JVM + 112 Android PASS / 0 FAIL / 3 SKIP** trên API 30 nhưng **không phải tỷ lệ hoàn thành 100% MusicFlow 1.0**. Log/test phải gắn với đúng bản code; chỉ có commit sau khi người dùng push mới xác nhận các sửa đổi đã lên GitHub.
@@ -145,7 +157,8 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | Full Product Regression Gate v2 — Part 1 | 115 Android total (112 PASS + 3 SKIP), 105 JVM | **PASS — API 30, 0 FAIL; 3 SAF phase skips theo thiết kế** | Commit `818be07` · `qa-logs/full-product-regression-v2-part1.log` · `docs/Full_Product_Regression_Gate_v2_Part_1.md` |
 | Release Candidate QA / Packaging v1 — Part 1 | Build/lint release + ký QA, fresh/upgrade smoke API 30 | **PASS nội bộ; chưa có release ký production** | Commit `00f2d41` · `qa-logs/release-candidate-packaging-v1.log` · `docs/Release_Candidate_QA_Packaging_v1_Part_1.md` |
 | Release Candidate QA / Packaging v1 — Part 2 | Release-mode QA APK + 2 WAV MediaStore thực | **PASS Android API 30** — phát nhạc, Pause/Resume/Next, background, notification, cleanup | Commit `b572414` · `qa-logs/release-playback-smoke-v1.log` · `docs/Release_Candidate_QA_Packaging_v1_Part_2.md` |
-| Release Candidate QA / Packaging v1 — Part 3 | Release-mode APK QA 3 API mới; AAB unsigned | **PASS API 29/33/36** — đủ 2 WAV, MediaSession, background, MediaStyle và cleanup; AAB BUILD SUCCESSFUL | HEAD nền `b572414` · `qa-logs/release-playback-smoke-api29-v1.log` / `api33-v1.log` / `api36-v1.log` · `docs/Release_Candidate_QA_Packaging_v1_Part_3.md` (chưa commit) |
+| Release Candidate QA / Packaging v1 — Part 3 | Release-mode APK QA 3 API mới; AAB unsigned | **PASS API 29/33/36** — đủ 2 WAV, MediaSession, background, MediaStyle và cleanup; AAB BUILD SUCCESSFUL | Commit `1b8491d` · `qa-logs/release-playback-smoke-api29-v1.log` / `api33-v1.log` / `api36-v1.log` · `docs/Release_Candidate_QA_Packaging_v1_Part_3.md` |
+| Release Candidate QA / Packaging v1 — Part 4 | Release-mode API 30: MP3/FLAC + metadata; release artifact/JVM audit | **PASS internal QA: 2 codec / 105 JVM / APK+AAB audit; PRODUCTION_RELEASE_READY=FALSE** | HEAD nền `1b8491d` · `qa-logs/release-codec-smoke-api30-v1.log`, `qa-logs/release-readiness-v1.log` · `docs/Release_Candidate_QA_Packaging_v1_Part_4.md` (chưa commit) |
 
 **Không cộng** các con số 9 + 11 + ... + 31: đây là số lượng test của **các lần chạy tăng dần** với nhiều bài trùng nhau.
 
@@ -199,7 +212,9 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **P0 — nội bộ QA đã đạt** | **Release Candidate QA / Packaging v1 — Part 1** | **PASS internal QA, KHÔNG PHẢI RELEASE PRODUCTION** | Build/lint release, QA signature v3, cài mới, nâng cấp cùng cert, internal marker giữ nguyên, SHA-256; `docs/Release_Candidate_QA_Packaging_v1_Part_1.md`, `qa-logs/release-candidate-packaging-v1.log` |
 | **P0 — QA release-mode API 30 đã đạt** | **Release Candidate QA / Packaging — Part 2** | **PASS internal APK QA API 30; chưa phải release production** | 2 WAV thật, UI Library, MediaSession Play/Pause/Resume/Next, nền + MediaStyle; `docs/Release_Candidate_QA_Packaging_v1_Part_2.md`, `qa-logs/release-playback-smoke-v1.log` |
 | **P0 — QA release-mode đa API đã đạt** | **Release Candidate QA / Packaging — Part 3** | **PASS API 29/33/36; API 30 đã PASS trước; AAB unsigned build** | `docs/Release_Candidate_QA_Packaging_v1_Part_3.md`; chưa chạy full instrumentation 115 bài trên release-mode hay máy thật |
-| **P0 — kế tiếp** | **Release Candidate QA / Packaging — Part 4 / Release Readiness** | CHƯA THỰC HIỆN | QA codec thật, Bluetooth/máy thật, version/applicationId, production keystore/Play Signing/AAB đã ký, tối ưu hóa và performance |
+| **P0 — Release Readiness QA đạt** | **Release Candidate QA / Packaging — Part 4** | **PASS MP3/FLAC & 105 JVM / APK+AAB audit nội bộ; production vẫn CHƯA SẴN SÀNG** | `docs/Release_Candidate_QA_Packaging_v1_Part_4.md`, logs codec + readiness; thiết bị thật không còn là gate theo quyết định chủ dự án |
+| **P0 — ĐÍCH DEMO ĐÃ ĐẠT** | **APK demo cài trực tiếp + báo cáo bàn giao + tạm dừng** | **HOÀN THÀNH TRONG PHẠM VI BÁO CÁO — TẠM DỪNG** | `dist/MusicFlow-1.0-Demo-Android.apk`, `qa-logs/demo-apk-package-v1.log`, hai log WAV/MP3/FLAC trên chính APK; `docs/Bao_Cao_Ban_Giao_MusicFlow_Demo_APK.md` và hướng dẫn cài. Không phải production |
+| **Để sau khi chủ dự án yêu cầu lại** | R8/Play Signing/production release + login email/Google thật/cloud hai thiết bị thật | **HOÃN, KHÔNG LÀ ĐIỀU KIỆN ĐIỂM DỪNG** | Không tự khởi động các mốc này trong dự án báo cáo |
 | **P1** | UI/accessibility/empty-state/error-state | Foundation v1 13/13 + Polish v2 19/19 Android PASS; toàn diện **CHƯA NGHIỆM THU** | Tiếp tục ma trận API, TalkBack thật, adaptive layout rộng và các trạng thái chưa chuẩn hóa |
 | **P1** | Hiệu năng và dữ liệu lớn | CHƯA NGHIỆM THU | Dataset cố định; ngưỡng thời gian/độ ổn định được chốt; không crash/ANR, không mất dữ liệu |
 | **Theo quyết định** | Phát hành Google Play | CHƯA CHỐT PHẠM VI | Chỉ mở milestone nếu chọn hình thức phân phối này |
@@ -307,6 +322,30 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-11-01 — MUSICFLOW DEMO APK BÀN GIAO — HOÀN THÀNH PHẠM VI BÁO CÁO / TẠM DỪNG
+
+- Từ `HEAD=1b8491d19e76b72f541e277bb95cc7506a5c9939` và working tree hiện tại, tạo **APK demo thực tế có thể sideload** bằng `scripts/build-musicflow-demo-apk-v1.ps1`: Gradle `assembleRelease` PASS, `zipalign` + `apksigner` bằng Android Debug keystore QA, certificate v3 VERIFIED, APK **không debuggable**, `aapt` xác minh ID `com.example.musicflow`, `versionCode=1`, `versionName=1.0`, minSdk29 / targetSdk36.
+- **Tệp bàn giao cục bộ:** `E:\Du_An\MusicFlow\dist\MusicFlow-1.0-Demo-Android.apk` (30.230.097 byte), SHA-256 **`ACE9AD765F75C7939C513210E2BBC1555F95E6504636303B423FB70598C2E750`**; `dist/MusicFlow-1.0-Demo-Android.apk.sha256` lưu checksum. Binary APK nằm ngoài Git, không upload hoặc phát hành công khai.
+- Chạy smoke **trên chính APK trong `dist`**, không rebuild/re-sign: `qa-logs/demo-apk-smoke-wav-api30-v1.log` và `qa-logs/demo-apk-smoke-codec-api30-v1.log` đều **FINAL_RESULT=PASS**: fresh install, Library, MediaStore nhận WAV/MP3/FLAC, metadata codec, MediaSession Play/Pause/Resume/Next, Background Playback, MediaStyle notification, QA_CLEANUP=PASS. Cùng SHA trong cả hai log.
+- Bàn giao tài liệu `docs/Huong_Dan_Cai_Dat_MusicFlow_Demo_APK.md` (đường dẫn APK/checksum, cài emulator, sideload và lưu ý chữ ký) + `docs/Bao_Cao_Ban_Giao_MusicFlow_Demo_APK.md` (tóm tắt kiến trúc, test, chức năng, giới hạn và kết luận). `docs/Muc_Tieu_Dung_Tam_APK_Bao_Cao.md` chuyển sang trạng thái hoàn thành; **không cần email thật, điện thoại thật, sync hai thiết bị thật, Play, ký production**.
+- **Giới hạn nghiệm thu rõ ràng:** bản demo đạt theo phạm vi báo cáo, không phải ứng dụng thương mại hoàn chỉnh. Online licensed streaming thật, Google/email E2E và cloud hai thiết bị chưa nghiệm thu; full 115 bài Android instrumentation là debug test trước đây, không phải release full suite. Hệ thống chỉ kiểm tra giấy phép với nội dung online được MusicFlow cung cấp, không chặn nhạc offline người dùng tự lưu/tải.
+- **Điểm dừng tạm thời đã đến**: dừng các mốc phát triển tự động sau bàn giao, chỉ tiếp tục khi có yêu cầu mới của chủ dự án. Git thay đổi còn local chưa commit/push; commit code/tài liệu không đính kèm binary APK do `.gitignore`.
+
+### 2026-11-01 — ĐIỀU CHỈNH ĐÍCH DỰ ÁN — APK DEMO BÁO CÁO, KHÔNG RELEASE THẬT
+
+- Chủ dự án yêu cầu **tạm dừng tại bản MusicFlow hoàn thiện để tải APK cài trực tiếp và phục vụ báo cáo**. Không phát hành thật, không email thật, không thiết bị thật, không yêu cầu Google Login thật, không cloud E2E hai thiết bị thật. Đây là quyết định mới nhất thay thế roadmap production.
+- **Không thay đổi mã nguồn sản phẩm hoặc xóa QA cũ ở bước điều chỉnh phạm vi này.** Tiếp tục dựa vào bằng chứng release-mode APK QA/emulator đã có; vẫn phân biệt tính năng có source với tính năng đã nghiệm thu.
+- Đích cuối: chức năng demo hoạt động, APK có thể sideload và có chữ ký demo ổn định phù hợp phạm vi, checksum/hướng dẫn cài, báo cáo đã hoàn tất, rồi ghi trạng thái **HOÀN THÀNH BẢN DEMO/BÁO CÁO — TẠM DỪNG**. Hiện chưa kết luận hoàn thành; `docs/Muc_Tieu_Dung_Tam_APK_Bao_Cao.md` là checklist ưu tiên.
+
+### 2026-11-01 — Release Candidate QA / Packaging v1 Part 4 — MP3/FLAC + ARTIFACT/JVM AUDIT PASS
+
+- **Quyết định chủ dự án:** bỏ kiểm thử trên thiết bị thật khỏi cổng QA hiện tại. Giữ bằng chứng emulator, kiểm tra build và artifact; mọi phần phụ thuộc phần cứng thật vẫn ghi chưa kiểm chứng và **không đánh dấu PASS**.
+- HEAD nền `1b8491d19e76b72f541e277bb95cc7506a5c9939` (`main = origin/main`), Git sạch đầu phiên. Không đổi Kotlin production, Supabase, Auth/Cloud hay bản quyền online. Chỉ bổ sung công cụ QA trong `scripts/generate-release-codec-fixtures.py`, `scripts/run-release-playback-smoke-v1.ps1` (`-FixtureMode codec`), `scripts/run-release-readiness-audit-v1.ps1`.
+- **Release codec smoke Android API 30 PASS:** hai tệp tổng hợp nguyên bản MP3 và FLAC 40 giây, MediaStore nhận thời lượng thật + title/artist/album, UI Library phát MP3, MediaSession Pause/Resume/Next chuyển sang FLAC, phát nền + MediaStyle; `QA_CLEANUP=PASS` và `FINAL_RESULT=PASS`. Log `qa-logs/release-codec-smoke-api30-v1.log`; SHA-256 APK QA `ACE9AD765F75C7939C513210E2BBC1555F95E6504636303B423FB70598C2E750`. **WAV backcompat trên APK release API 30 cũng chạy lại PASS** trong `qa-logs/release-playback-smoke-wav-backcompat-v1.log`; log WAV cũ được khôi phục nguyên trạng. Không sửa điều kiện offline/online rights.
+- **Release artifact/JVM audit PASS:** Gradle `assembleRelease + bundleRelease + testDebugUnitTest` BUILD SUCCESSFUL; **105/105 JVM PASS**, APK release không debuggable, package/version/min/target đúng hiện tại; AAB có manifest+DEX. `qa-logs/release-readiness-v1.log` có `FINAL_RESULT=PASS` **chỉ cho audit**, `PRODUCTION_RELEASE_READY=FALSE`. AAB chưa ký SHA-256 `3E3DCE6793CF08A6653C7C1EF9C8E22B2E2265CBA797F37F7E947034D832E88C`.
+- Vẫn CHƯA release chính thức: `applicationId=com.example.musicflow` chưa chốt, versionCode=1/name=1.0 chưa có chiến lược, production signing/Play Signing chưa có, `optimization.enable=false` (R8 tắt), chưa chọn kênh phân phối. Không dùng khóa thật, không upload APK/AAB. Generator dùng FFmpeg dev-only trong `app/build/rc-qa` bị Git ignore.
+- **Kế tiếp:** RC QA/Packaging Part 5 — R8, kích thước và startup trên emulator, chuẩn bị hướng ký/phân phối khi ID/kênh được chốt; không thêm kiểm thử máy thật. Email/Google/cloud hai thiết bị tiếp tục ở cuối. Báo cáo `docs/Release_Candidate_QA_Packaging_v1_Part_4.md`.
 
 ### 2026-11-01 — Release Candidate QA / Packaging v1 Part 3 — MULTI-API RELEASE SMOKE PASS
 

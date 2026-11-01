@@ -20,6 +20,10 @@ captures/
 *.apk
 *.aab
 
+# Local sideload demo delivery bundle. Build with scripts/build-musicflow-demo-apk-v1.ps1
+# Keep the binary and its checksum off GitHub; the hash is recorded in docs.
+/dist/
+
 # Signing keys
 *.jks
 *.keystore

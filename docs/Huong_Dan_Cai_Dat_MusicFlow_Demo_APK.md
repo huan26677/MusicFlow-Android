@@ -1,0 +1,78 @@
+# Hướng dẫn cài đặt MusicFlow Demo APK — dự án báo cáo
+
+**Ngày đóng gói:** 2026-11-01. **Mục đích:** cài trực tiếp bản demo MusicFlow, không cần Google Play hoặc tài khoản thật.
+
+## Tệp APK bàn giao
+
+Tên tệp: `MusicFlow-1.0-Demo-Android.apk`
+
+Vị trí trên máy đang xây dựng dự án:
+
+```text
+E:\Du_An\MusicFlow\dist\MusicFlow-1.0-Demo-Android.apk
+```
+
+Kích thước: **30.230.097 byte** (xấp xỉ **30,2 MB**).
+
+**SHA-256:**
+
+```text
+ACE9AD765F75C7939C513210E2BBC1555F95E6504636303B423FB70598C2E750
+```
+
+Một file checksum cũng có tại `dist/MusicFlow-1.0-Demo-Android.apk.sha256`. Nếu sao chép tệp APK sang máy khác, dùng SHA-256 để xác nhận đúng bản đã kiểm thử.
+
+| Thuộc tính | Giá trị |
+|---|---|
+| Package ID | `com.example.musicflow` |
+| versionName | `1.0` |
+| versionCode | `1` |
+| Android tối thiểu | Android 10 — API 29 |
+| Android target | API 36 |
+| Chữ ký | **Android Debug certificate cục bộ**, chỉ cho bản demo/báo cáo |
+| Chế độ APK | **release-mode, không debuggable** |
+| Google Play | Không sử dụng |
+
+## Cách cài trên Android emulator
+
+Đảm bảo emulator đã chạy và chưa có MusicFlow cài trước đó, rồi mở PowerShell tại thư mục dự án:
+
+```powershell
+adb devices
+adb -s emulator-5554 install ".\dist\MusicFlow-1.0-Demo-Android.apk"
+adb -s emulator-5554 shell am start -n com.example.musicflow/.MainActivity
+```
+
+`emulator-5554` là mã của emulator đã được kiểm thử, có thể khác trên máy khác. Nếu đã có MusicFlow trên emulator với **chữ ký khác**, lệnh cập nhật sẽ thất bại do Android bảo vệ ứng dụng. **Không gỡ ứng dụng đã có nếu chưa sao lưu dữ liệu của ứng dụng đó.**
+
+## Cài trực tiếp từ tệp APK
+
+Có thể sao chép file `.apk` sang thiết bị Android phù hợp, mở tệp bằng trình quản lý tệp, cho phép cài ứng dụng từ nguồn đó theo hướng dẫn Android, rồi mở MusicFlow. **Đây là hướng dẫn thông thường; dự án không kiểm thử trên điện thoại thật theo yêu cầu.**
+
+Nên chỉ cài từ tệp gốc trong `dist` đã đối chiếu SHA-256. APK sử dụng debug certificate chỉ dành cho demo, không phải chữ ký phát hành chuyên nghiệp. Nếu sau này đổi khóa ký, APK mới có thể không nâng cấp trực tiếp lên bản demo này.
+
+## Cách trình diễn offline
+
+1. Mở MusicFlow và chọn sử dụng ở chế độ khách nếu có màn hình tài khoản; **không cần email thật**.
+2. Cho phép quyền đọc nhạc khi Android yêu cầu, rồi vào **Thư viện thiết bị**.
+3. Chọn tệp âm thanh đã có trên Android/emulator, thử Play/Pause, Next và màn hình Now Playing.
+4. Có thể giới thiệu thêm playlist, queue, lịch sử, tìm kiếm, lyrics, Sleep Timer, EQ theo tình trạng đã được ghi trong báo cáo kỹ thuật.
+5. Thoát ra Home để minh họa MediaSession và thông báo điều khiển nhạc nền.
+
+Nhạc **offline do người dùng tự lưu/tải** không bị MusicFlow yêu cầu xác nhận quyền streaming online. Nhạc **online do MusicFlow cung cấp** chỉ phát khi có nguồn và quyền phát hợp lệ; không dùng nguồn không có quyền để demo.
+
+## Nếu cần tạo lại APK demo
+
+Từ root dự án, chạy:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-musicflow-demo-apk-v1.ps1
+```
+
+Script build từ nguồn Kotlin, căn chỉnh và ký bằng Android Debug keystore của máy đó, kiểm tra `aapt` và `apksigner`, tạo file `.sha256` trong `dist` và log tại `qa-logs/demo-apk-package-v1.log`. Script **không ghi đè** một APK demo cùng tên nhưng khác SHA-256, để bảo vệ bản bàn giao đã chốt. Muốn tạo bản mới khác, cần lên phiên bản/tên file khác trong một bước phát triển sau.
+
+**Lưu ý:** Nếu chạy lại trên máy khác, debug keystore khác có thể tạo chữ ký/hash khác; không coi đó là cùng artifact bàn giao. **APK không được tự động upload lên GitHub hoặc Play Store.**
+
+## Tình trạng nghiệm thu
+
+Đã kiểm chứng trên Android emulator API 30 bằng **chính APK trong thư mục dist**: cài mới, mở Library, chơi WAV, MP3, FLAC, Play/Pause/Next, phát nền và MediaStyle Notification đều PASS, có cleanup QA. Xem `docs/Bao_Cao_Ban_Giao_MusicFlow_Demo_APK.md`.

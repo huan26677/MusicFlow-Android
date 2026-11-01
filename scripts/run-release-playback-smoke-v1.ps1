@@ -1,23 +1,43 @@
-﻿param([string]$DeviceId = "emulator-5554", [int]$ExpectedApi = 30)
+﻿param(
+    [string]$DeviceId = "emulator-5554",
+    [int]$ExpectedApi = 30,
+    [ValidateSet("wav", "codec")][string]$FixtureMode = "wav",
+    [string]$DemoApkPath = ""
+)
 
 # Release-mode, black-box playback test. Only synthetic WAVs in a unique QA folder.
 # Refuses to replace any pre-existing MusicFlow installation.
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 # Preserve Part 2's committed API 30 log; collect separate evidence for API 29/33/36.
-$logName = if ($ExpectedApi -eq 30) {
+$logName = if ($DemoApkPath -and $FixtureMode -eq "codec") {
+    "demo-apk-smoke-codec-api$ExpectedApi-v1.log"
+} elseif ($DemoApkPath -and $FixtureMode -eq "wav") {
+    "demo-apk-smoke-wav-api$ExpectedApi-v1.log"
+} elseif ($FixtureMode -eq "codec") {
+    "release-codec-smoke-api$ExpectedApi-v1.log"
+} elseif ($ExpectedApi -eq 30) {
     "release-playback-smoke-v1.log"
 } else {
     "release-playback-smoke-api$ExpectedApi-v1.log"
 }
 $log = Join-Path $root ("qa-logs\" + $logName)
-$diagnostic = Join-Path $root ("qa-logs\release-playback-smoke-api" + $ExpectedApi + "-diagnostics-v1.log")
+$diagnostic = Join-Path $root (
+    "qa-logs\release-playback-" + $FixtureMode + "-api" +
+    $ExpectedApi + "-diagnostics-v1.log"
+)
 $work = Join-Path $root "app\build\rc-qa\release-playback"
 $pkg = "com.example.musicflow"
 $stamp = Get-Date -Format "yyyyMMdd_HHmmss_fffffff"
 $folder = "/sdcard/Music/MusicFlow_RC2_$stamp"
 $uiDump = "/sdcard/musicflow_rc2_$stamp.xml"
-$tracks = @("AAA_MusicFlow_RC2_$($stamp)_A", "AAA_MusicFlow_RC2_$($stamp)_B")
+$trackPrefix = if ($FixtureMode -eq "codec") {
+    "AAA_MusicFlow_CODEC_$stamp"
+} else {
+    "AAA_MusicFlow_RC2_$stamp"
+}
+$tracks = @("${trackPrefix}_A", "${trackPrefix}_B")
+$extensions = if ($FixtureMode -eq "codec") { @("mp3", "flac") } else { @("wav", "wav") }
 $ids = @()
 $files = @()
 $installed = $false
@@ -75,10 +95,10 @@ function Rows {
         "content://media/external/audio/media","--projection",
         "_id:_display_name:is_pending:is_music:duration") -Quiet)
 }
-function FindId([string]$name) {
+function FindId([string]$name, [string]$extension) {
     for ($i=0;$i -lt 25;$i++) {
         $row = Rows | Where-Object {
-            $_ -match ("_display_name=" + [regex]::Escape($name+".wav") + "(?:,|$)")
+            $_ -match ("_display_name=" + [regex]::Escape($name+"."+$extension) + "(?:,|$)")
         } | Select-Object -First 1
         if ($row -and $row -match '_id=(\d+)') { return $Matches[1] }
         Start-Sleep -Milliseconds 400
@@ -143,6 +163,8 @@ try {
     Log "HEAD_BASE=$(git rev-parse HEAD)"
     Log "DEVICE=$DeviceId EXPECTED_API=$ExpectedApi"
     Log "SIGNING=DEBUG_KEY_QA_ONLY"
+    Log "FIXTURE_MODE=$FixtureMode"
+    Log "PREBUILT_DEMO_APK=$(if ($DemoApkPath) { 'TRUE' } else { 'FALSE' })"
     $sdk = if($env:ANDROID_HOME){$env:ANDROID_HOME}elseif($env:ANDROID_SDK_ROOT){
         $env:ANDROID_SDK_ROOT
     }else{Join-Path $env:LOCALAPPDATA "Android\Sdk"}
@@ -164,48 +186,97 @@ try {
         $preexistingApp = $true
         throw "PREEXISTING_MUSICFLOW_DO_NOT_UNINSTALL"
     }
-    Run "BUILD_RELEASE" ".\gradlew.bat" @(":app:assembleRelease","--console=plain") -Quiet | Out-Null
-    Log "BUILD_RELEASE=PASS"
-    $unsigned = Join-Path $root "app\build\outputs\apk\release\app-release-unsigned.apk"
-    $aligned = Join-Path $work "rc2-aligned.apk"
-    $apk = Join-Path $work "MusicFlow-1.0-RC2-QA.apk"
-    Run "ALIGN" $zip @("-f","-p","4",$unsigned,$aligned) -Quiet | Out-Null
-    Run "SIGN" $signer @("sign","--ks",$keystore,"--ks-key-alias","androiddebugkey",
-        "--ks-pass","pass:android","--key-pass","pass:android",
-        "--out",$apk,$aligned) -Quiet | Out-Null
+    if ($DemoApkPath) {
+        $apk = (Resolve-Path -LiteralPath $DemoApkPath -ErrorAction Stop).Path
+        $expectedFolder = [System.IO.Path]::GetFullPath((Join-Path $root "dist")) +
+            [System.IO.Path]::DirectorySeparatorChar
+        if (!$apk.StartsWith($expectedFolder,[System.StringComparison]::OrdinalIgnoreCase) -or
+            [System.IO.Path]::GetFileName($apk) -ne "MusicFlow-1.0-Demo-Android.apk") {
+            throw "DEMO_APK_MUST_BE_FROM_LOCAL_DIST"
+        }
+        Log "QA_USING_PREBUILT_DEMO_APK=TRUE"
+    } else {
+        Run "BUILD_RELEASE" ".\gradlew.bat" @(":app:assembleRelease","--console=plain") -Quiet | Out-Null
+        Log "BUILD_RELEASE=PASS"
+        $unsigned = Join-Path $root "app\build\outputs\apk\release\app-release-unsigned.apk"
+        $aligned = Join-Path $work "rc2-aligned.apk"
+        $apk = Join-Path $work "MusicFlow-1.0-RC2-QA.apk"
+        Run "ALIGN" $zip @("-f","-p","4",$unsigned,$aligned) -Quiet | Out-Null
+        Run "SIGN" $signer @("sign","--ks",$keystore,"--ks-key-alias","androiddebugkey",
+            "--ks-pass","pass:android","--key-pass","pass:android",
+            "--out",$apk,$aligned) -Quiet | Out-Null
+    }
     $verify = Run "VERIFY" $signer @("verify","--verbose","--print-certs",$apk) -Quiet
     if (!($verify -match '^Verifies$') -or
         !($verify -match 'Verified using v3 scheme .*true') -or
         !($verify -match 'CN=Android Debug')) { throw "QA_SIGNATURE_FAILED" }
     Log "QA_APK_SIGNATURE=PASS"
     Log "QA_APK_SHA256=$((Get-FileHash $apk -Algorithm SHA256).Hash)"
+    if ($FixtureMode -eq "codec") {
+        $generator = Join-Path $root "scripts\generate-release-codec-fixtures.py"
+        Run "CODEC_GENERATION" "python" @(
+            $generator, "--output", $work, "--prefix", $trackPrefix
+        ) | Out-Null
+        Log "CODEC_MP3_FLAC_FIXTURES=PASS"
+    }
     Adb "MKDIR" @("shell","mkdir",$folder) -Quiet | Out-Null
     $folderCreated = $true
-    foreach($name in $tracks){
-        $local = Join-Path $work ($name+".wav")
-        MakeWav $local
-        $remote = "$folder/$name.wav"
+    for ($index=0; $index -lt $tracks.Count; $index++) {
+        $name = $tracks[$index]
+        $extension = $extensions[$index]
+        $local = Join-Path $work ($name+"."+$extension)
+        if ($FixtureMode -eq "wav") { MakeWav $local }
+        $remote = "$folder/$name.$extension"
         Adb "PUSH" @("push",$local,$remote) -Quiet | Out-Null
         $files += $remote
         Adb "SCAN" @("shell","am","broadcast","-a",
             "android.intent.action.MEDIA_SCANNER_SCAN_FILE","-d","file://$remote") -Quiet | Out-Null
-        $id = FindId $name
+        $id = FindId $name $extension
         $ids += $id
         # ADB push may mark a newly created media row as pending on API 30.
         # Only touch the two exact rows that this QA run just created.
-        Adb "PUBLISH" @("shell","content","update","--uri",
+        $publishArgs=@("shell","content","update","--uri",
             "content://media/external/audio/media/$id",
-            "--bind","is_pending:i:0","--bind","is_music:i:1",
-            "--bind","duration:l:40000") -Quiet | Out-Null
+            "--bind","is_pending:i:0","--bind","is_music:i:1")
+        if ($FixtureMode -eq "wav") {
+            $publishArgs += @("--bind","duration:l:40000")
+        }
+        Adb "PUBLISH" $publishArgs -Quiet | Out-Null
     }
     $rows = Rows
-    foreach($name in $tracks) {
-        if(!($rows -match ([regex]::Escape($name+".wav") +
-            ", is_pending=0, is_music=1, duration=40000"))) {
-            throw "QA_AUDIO_NOT_PUBLISHED"
+    for ($index=0; $index -lt $tracks.Count; $index++) {
+        $name=$tracks[$index]
+        $ext=$extensions[$index]
+        $matched = @($rows | Where-Object {
+            $_ -match ("_display_name=" + [regex]::Escape("$name.$ext") + ", is_pending=0, is_music=1, duration=(\d+)")
+        })
+        if ($matched.Count -ne 1) { throw "QA_AUDIO_NOT_PUBLISHED_$ext" }
+        if ($FixtureMode -eq "codec") {
+            if ($matched[0] -notmatch 'duration=(\d+)' -or
+                [int]$Matches[1] -lt 38000 -or [int]$Matches[1] -gt 43000) {
+                throw "CODEC_DURATION_NOT_PARSED_$ext"
+            }
+        } elseif ($matched[0] -notmatch 'duration=40000') {
+            throw "WAV_DURATION_INVALID"
         }
     }
-    Log "QA_MEDIASTORE_WAV_2_OF_2=PASS"
+    if ($FixtureMode -eq "codec") {
+        $metadata = Adb "CODEC_METADATA" @("shell","content","query","--uri",
+            "content://media/external/audio/media","--projection",
+            "_display_name:title:artist:album:mime_type:duration") -Quiet
+        foreach ($name in $tracks) {
+            $line = @($metadata | Where-Object {
+                $_ -match ([regex]::Escape("title=$name") + "(?:,|$)")
+            }) | Select-Object -First 1
+            if (!$line -or $line -notmatch 'artist=MusicFlow QA Artist' -or
+                $line -notmatch 'album=MusicFlow QA Album') {
+                throw "CODEC_METADATA_TAGS_NOT_FOUND_$name"
+            }
+        }
+        Log "QA_MEDIASTORE_MP3_FLAC_METADATA_2_OF_2=PASS"
+    } else {
+        Log "QA_MEDIASTORE_WAV_2_OF_2=PASS"
+    }
     Adb "INSTALL" @("install",$apk) -Quiet | Out-Null
     $installed = $true
     $permission = if($ExpectedApi -ge 33) {
@@ -219,6 +290,9 @@ try {
     TapLabel $tracks[0] -Scroll
     AssertSession $tracks[0] 3
     Log "RELEASE_OFFLINE_PLAY=PASS"
+    if ($FixtureMode -eq "codec") {
+        Log "RELEASE_MP3_PLAY=PASS"
+    }
     Adb "PAUSE" @("shell","input","keyevent","127") -Quiet | Out-Null
     AssertSession $tracks[0] 2
     Log "RELEASE_PAUSE=PASS"
@@ -228,6 +302,7 @@ try {
     Adb "NEXT" @("shell","input","keyevent","87") -Quiet | Out-Null
     AssertSession $tracks[1] 3
     Log "RELEASE_NEXT=PASS"
+    if ($FixtureMode -eq "codec") { Log "RELEASE_FLAC_PLAY=PASS" }
     Adb "HOME" @("shell","input","keyevent","3") -Quiet | Out-Null
     AssertSession $tracks[1] 3
     Log "RELEASE_BACKGROUND=PASS"
