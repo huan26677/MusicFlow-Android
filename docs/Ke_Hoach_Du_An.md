@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `70704d3` — Playback Speed Runtime Acceptance v1 đã commit; Playback Speed Touch Interaction QA v2 **JVM 105/105 + Android API 30 12/12 PASS trong workspace**, chưa commit |
+| HEAD Git hiện tại | `36c55cc` — Playback Speed Touch Interaction QA v2 đã commit; Crossfade/Gapless Runtime Acceptance v1 **JVM 105/105 + Android API 30 12/12 PASS trong workspace**, chưa commit |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
@@ -22,7 +22,7 @@
 | Build Lyrics v1 + Sleep Timer v1 | `:app:assembleDebug` và `:app:assembleDebugAndroidTest` PASS ngày 2026-10-29; chỉ xác nhận biên dịch |
 | Full QA | Để cuối giai đoạn phát triển |
 | Equalizer v1 | **Runtime QA API 30 PASS:** AudioEffect gắn session Media3 thật, bật/tắt, chỉnh band, lưu cấu hình, controller reconnect; 2/2 EQ + 8/8 Playback/Queue = **10/10 Android PASS**. Chưa QA UI/tiến trình restart/thiết bị thật |
-| Crossfade/Gapless v1 | Có mã crossfade thử nghiệm (mặc định tắt) và giữ Media3 gapless tự nhiên; build-only, chưa runtime QA |
+| Crossfade/Gapless v1 | **Runtime API 30 PASS**: mặc định tắt, 0/1/2/3 giây config đúng, MIX_STARTED và HANDOFF_DONE đủ 1/2/3s, fallback khi speed 1.25x, queue giữ nguyên; **4 Crossfade + 8 Playback = 12/12 Android PASS**. Chưa đo chất lượng gapless thực tế |
 | Library nâng cao v1 | Bài hát / Album / Nghệ sĩ / Thể loại; có source, build ứng dụng + AndroidTest PASS, chưa runtime QA |
 | Search nâng cao v1 | Tìm bài hát, album, nghệ sĩ, thể loại có bỏ dấu; 4 bộ lọc, mở nhóm/phát/thêm Playlist; build ứng dụng + AndroidTest PASS, chưa runtime QA |
 | Online Catalog Foundation v1 | API HTTPS cấu hình được, repository metadata, phân trang và màn khám phá online; build ứng dụng + AndroidTest PASS; chưa có dịch vụ hay QA thực tế |
@@ -53,8 +53,9 @@
 | Lyrics Import UI End-to-End v2 | **105/105 JVM PASS; 11/11 Android API 30 PASS** (1 MainActivity→DocumentsUI OpenDocument→Player E2E + 2 Lyrics v1 + 8 Playback/Queue), 7 E2E markers; `docs/Lyrics_Import_UI_E2E_v2.md` |
 | Playback Speed Runtime Acceptance v1 | **105 JVM PASS, 10/10 Android API 30 PASS** (2 Speed + 8 Playback/Queue); 7 marker; chạm chip bằng accessibility action, còn cần physical touch QA; `docs/Playback_Speed_Runtime_Acceptance_v1.md` |
 | Playback Speed Touch Interaction QA v2 | **JVM 105/105, Android API 30 12/12 PASS** (3 Speed + 8 Playback/Queue + 1 high-font physical touch), đủ 5 nút tốc độ chạm Android thật, swipe ngang ở font scale 150%; `docs/Playback_Speed_Touch_Interaction_QA_v2.md` |
+| Crossfade/Gapless Runtime Acceptance v1 | **JVM 105/105 + Android API 30 12/12 PASS** (4 Crossfade + 8 Playback/Queue); thực tế WAV offline, 3 MIX_STARTED + 3 HANDOFF_DONE cho 1/2/3 giây; **chưa đo gapless audio**, `docs/Crossfade_Gapless_Runtime_Acceptance_v1.md` |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Crossfade/Gapless Runtime Acceptance v1** — kiểm chứng chuyển bài/transition runtime với WAV offline qua MediaSession, cấu hình thử nghiệm 0–3 giây, fallback và queue; không tuyên bố gapless chuẩn phòng đo nếu chưa có bằng chứng. Licensed Streaming Smoke chờ nhạc có quyền thật; Google Login/email thật ĐỂ CUỐI |
+| Bước tiếp theo | **Crossfade UI & Interruption QA v2** — thao tác 0/1/2/3 giây từ Now Playing và hủy/tua/dừng giữa chuyển tiếp, bảo toàn MediaSession và queue; không tuyên bố gapless chuẩn phòng đo nếu chưa đo. Licensed Streaming Smoke chờ nhạc có quyền thật; Google Login/email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -177,7 +178,8 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **P0 — runtime QA đã đạt API 30** | **Lyrics Import UI E2E v2** | **105 JVM PASS, 11/11 Android targeted PASS** | `docs/Lyrics_Import_UI_E2E_v2.md`, `qa-logs/lyrics-import-ui-e2e-v2.log`; đã nhấn nút thật, chọn LRC trên DocumentsUI và đồng bộ highlight qua callback production |
 | **P0 — runtime QA đã đạt API 30** | **Playback Speed Runtime Acceptance v1** | **105/105 JVM + 10/10 Android PASS** | `docs/Playback_Speed_Runtime_Acceptance_v1.md`, `qa-logs/playback-speed-runtime-v1.log`; chi tiết giới hạn touch riêng |
 | **P0 — touch QA đã đạt API 30** | **Playback Speed Touch Interaction QA v2** | **105 JVM PASS, 12/12 Android targeted PASS** | `docs/Playback_Speed_Touch_Interaction_QA_v2.md`, `qa-logs/playback-speed-touch-v2.log`; đã chạm đủ 5 chip bằng UiDevice và cuộn ngang thật ở font 150% |
-| **P0 — kế tiếp (mốc nhỏ)** | **Crossfade/Gapless Runtime Acceptance v1** | CHƯA THỰC HIỆN | Chuyển bài Media3 trên hai WAV offline, transition/crossfade 0/1/2/3s, fallback, bảo toàn queue, không quảng cáo gapless khi chưa đo |
+| **P0 — runtime QA API 30 đạt** | **Crossfade/Gapless Runtime Acceptance v1** | **105 JVM PASS, 12/12 Android PASS**, 13 marker | `docs/Crossfade_Gapless_Runtime_Acceptance_v1.md`, `qa-logs/crossfade-runtime-v1.log`; chưa đo audio gapless |
+| **P0 — kế tiếp (mốc nhỏ)** | **Crossfade UI & Interruption QA v2** | CHƯA THỰC HIỆN | UI thao tác 0/1/2/3 giây, cancel transition do pause/seek/queue; fallback không hỏng MediaSession |
 | **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
 | **P1** | UI/accessibility/empty-state/error-state | Foundation v1 13/13 + Polish v2 19/19 Android PASS; toàn diện **CHƯA NGHIỆM THU** | Tiếp tục ma trận API, TalkBack thật, adaptive layout rộng và các trạng thái chưa chuẩn hóa |
 | **P1** | Hiệu năng và dữ liệu lớn | CHƯA NGHIỆM THU | Dataset cố định; ngưỡng thời gian/độ ổn định được chốt; không crash/ANR, không mất dữ liệu |
@@ -286,6 +288,15 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-11-01 — Crossfade/Gapless Runtime Acceptance v1 — 105 JVM + 12/12 ANDROID PASS
+
+- HEAD nền `36c55cc`, working tree sạch trước khi bắt đầu. Kiểm tra `PlaybackCrossfade`, `TransitionContract`, `PlaybackService` qua MediaController thật, nhạc WAV offline do QA tạo; không thay bản quyền online, Auth/Supabase/cloud.
+- Bổ sung `CrossfadeRuntimeTest.kt` với 4 Android tests: GET/SET duration 0/1/2/3s và invalid; Crossfade tắt dùng Media3 forward transition; khi bật 1/2/3s qua real playback, **MIX_STARTED và HANDOFF_DONE đầy đủ cho từng mức**, queue/index/speed giữ đúng; khi speed 1.25x fallback chuyển bài thông thường.
+- `PlaybackCrossfade.kt` chỉ thêm `durationMs` vào hai log MIX/HANDOFF có sẵn để kiểm chứng chính xác từng cấu hình; không thay đổi thuật toán volume hoặc Media3 chính. Test khôi phục queue, trạng thái phát và Crossfade preference sau kiểm thử.
+- `scripts/run-crossfade-runtime-v1-tests.ps1` và `qa-logs/crossfade-runtime-v1.log`: Gradle Build/JVM **105/105 PASS**, Crossfade Android **4/4 PASS**, PlaybackServiceIntegration **3/3**, PlaybackQueuePersistence **5/5**, tổng **12/12 Android API 30**, 13/13 marker, `git diff --check` PASS, `FINAL_RESULT=PASS`. Đã sửa lỗi test đọc MediaController sai luồng; script QA lần đầu còn marker cũ và được sửa/chạy lại đến PASS.
+- **Giới hạn:** hai WAV PCM thử là âm thanh yên lặng; chỉ có bằng chứng runtime/engine state, chưa đo gapless âm thanh hay chất lượng mix thật, chưa UI Crossfade E2E, thiết bị thật, đa API và full Android suite. Báo cáo `docs/Crossfade_Gapless_Runtime_Acceptance_v1.md`.
+- **Tiếp theo:** Crossfade UI & Interruption QA v2 (mốc nhỏ), Google/email thật/Cloud hai thiết bị vẫn để cuối.
 
 ### 2026-11-01 — Playback Speed Touch Interaction QA v2 — 12/12 ANDROID + 105 JVM PASS
 

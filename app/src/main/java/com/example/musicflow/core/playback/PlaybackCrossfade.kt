@@ -151,7 +151,7 @@ internal class PlaybackCrossfade(
             next.volume = 0f
             next.play()
             stage = Stage.MIXING
-            Log.i("MusicFlowCrossfade", "MIX_STARTED from=${current.fromIndex} to=${current.toIndex}")
+            Log.i("MusicFlowCrossfade", "MIX_STARTED durationMs=$durationMs from=${current.fromIndex} to=${current.toIndex}")
         }
 
         if (stage == Stage.MIXING) {
@@ -220,7 +220,7 @@ internal class PlaybackCrossfade(
         primary.volume = fraction
         next.volume = 1f - fraction
         if (fraction >= 1f) {
-            Log.i("MusicFlowCrossfade", "HANDOFF_DONE index=${item.toIndex}")
+            Log.i("MusicFlowCrossfade", "HANDOFF_DONE durationMs=$durationMs index=${item.toIndex}")
             cancelTransition()
         }
     }
