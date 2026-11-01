@@ -175,6 +175,89 @@ class RealPickerSafTest {
         return false
     }
 
+    /**
+     * Android DocumentsUI does not always expose the Save action as text
+     * (especially after a prior picker leaves list/grid mode modified).
+     * Use the stable Android resource id first, then accessibility text.
+     * This still clicks the OS's real Save button and requires its real
+     * ActivityResult callback to finish before the test can pass.
+     */
+    private fun clickRealSaveAction(timeoutMs: Long = 25_000L): Boolean {
+        val deadline = SystemClock.uptimeMillis() + timeoutMs
+        while (SystemClock.uptimeMillis() < deadline) {
+            val root = instrumentation.uiAutomation.rootInActiveWindow
+            // The system Save panel is android:id/button1, not a
+            // com.google.android.documentsui action_menu_save toolbar item.
+            // Root-in-active-window can temporarily be "android" even while
+            // PickActivity is the focused window, so search with UiDevice
+            // across windows before relying on its package name.
+            val systemSave = device.findObject(By.res("android", "button1"))
+                ?: device.findObject(By.text("SAVE"))
+            if (systemSave != null &&
+                systemSave.isEnabled &&
+                systemSave.text?.equals("SAVE", ignoreCase = true) == true) {
+                val clicked = runCatching {
+                    systemSave.click()
+                    true
+                }.getOrDefault(false)
+                if (clicked) {
+                    Log.i("MusicFlowRealPickerQA", "CREATE_DOCUMENT_SAVE_SYSTEM_BUTTON")
+                    return true
+                }
+            }
+            if (root?.packageName?.toString() == "com.google.android.documentsui") {
+                // On API 30 the CreateDocument bottom bar is an android:id/button1
+                // button, not DocumentsUI's toolbar action_menu_save.
+                val saveById = device.findObject(By.res("android", "button1"))
+                if (saveById != null && saveById.isEnabled) {
+                    val tapped = runCatching {
+                        saveById.click()
+                        true
+                    }.getOrDefault(false)
+                    if (tapped) {
+                        Log.i("MusicFlowRealPickerQA", "CREATE_DOCUMENT_SAVE_BY_RESOURCE_ID")
+                        return true
+                    }
+                }
+                val saveByLabel = findNode(root) { label ->
+                    label.trim().equals("Save", ignoreCase = true) ||
+                        label.trim().equals("Lưu", ignoreCase = true)
+                }
+                if (clickNode(saveByLabel)) {
+                    Log.i("MusicFlowRealPickerQA", "CREATE_DOCUMENT_SAVE_BY_LABEL")
+                    return true
+                }
+                // Some Pixel_5 API 30 DocumentsUI builds draw the SAVE bar
+                // correctly but expose android:id/button1 with [0,0][0,0]
+                // accessibility bounds. Only use a physical tap if that exact
+                // native Save button is in the active picker hierarchy.
+                if (saveByLabel?.viewIdResourceName == "android:id/button1" &&
+                    saveByLabel.isEnabled
+                ) {
+                    val bounds = Rect()
+                    saveByLabel.getBoundsInScreen(bounds)
+                    if (bounds.isEmpty) {
+                        val density = context.resources.displayMetrics.density
+                        val x = device.displayWidth - (60 * density).toInt()
+                        val y = device.displayHeight - (64 * density).toInt()
+                        if (device.click(x, y)) {
+                            Log.i("MusicFlowRealPickerQA", "CREATE_DOCUMENT_SAVE_PHYSICAL_TAP x=$x y=$y")
+                            return true
+                        }
+                    }
+                }
+            }
+            SystemClock.sleep(200)
+        }
+        Log.e(
+            "MusicFlowRealPickerQA",
+            "CREATE_DOCUMENT_SAVE_TIMEOUT rootPackage=" +
+                instrumentation.uiAutomation.rootInActiveWindow?.packageName
+        )
+        logPickerUi("CREATE_DOCUMENT_SAVE_TIMEOUT")
+        return false
+    }
+
     private fun logPickerUi(stage: String) {
         val root =
             instrumentation.uiAutomation.rootInActiveWindow
@@ -519,10 +602,7 @@ class RealPickerSafTest {
 
             assertTrue(
                 "DocumentsUI Save/Lưu button not found",
-                clickNamedAction(20_000L) { label ->
-                    label.trim().equals("Save", true) ||
-                        label.trim().equals("Lưu", true)
-                }
+                clickRealSaveAction()
             )
             assertTrue(
                 "Source document was not created",
@@ -730,9 +810,7 @@ Log.i(
             launcher.launch(title)
         }
 
-        assertTrue("Save not found", clickNamedAction(20_000L) {
-            it.equals("Save", true) || it.equals("Lưu", true)
-        })
+        assertTrue("Save not found", clickRealSaveAction())
         assertTrue("Document creation timeout", finished.await(25, TimeUnit.SECONDS))
         assertNull(error.get())
 

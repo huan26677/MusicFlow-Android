@@ -1,13 +1,17 @@
 param([string]$DeviceId = "emulator-5554")
 
 # Full, unfiltered Android instrumentation gate on one API 30 emulator.
-# Unlike phased process-restart/SAF tests this run does not claim to reboot
-# the app; those scenarios are covered by separate multi-process QA scripts.
+# Phase-oriented SAF/process-restart tests have a deliberately separate
+# multi-process harness; never treat their unfiltered skips as passes.
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
-$log = Join-Path $root "qa-logs\full-product-regression-v1-part3.log"
+$log = Join-Path $root "qa-logs\full-product-regression-v2-part1.log"
 $jvmResults = Join-Path $root "app\build\test-results\testDebugUnitTest"
 $androidResults = Join-Path $root "app\build\outputs\androidTest-results\connected\debug"
+$gateMutex = [System.Threading.Mutex]::new(
+    $false, "Local\MusicFlow_FullRegressionGate_API30"
+)
+$ownsGateMutex = $false
 
 function Log([string]$line) {
     Write-Host $line
@@ -37,10 +41,20 @@ function CollectCases([string]$folder, [string]$kind) {
                     $case.GetElementsByTagName("error").Count -gt 0) { "FAIL" }
                 elseif ($case.GetElementsByTagName("skipped").Count -gt 0) { "SKIP" }
                 else { "PASS" }
+                $errorText = ""
+                if ($status -eq "FAIL") {
+                    $errors = @($case.GetElementsByTagName("failure")) +
+                        @($case.GetElementsByTagName("error"))
+                    $message = ($errors | ForEach-Object { $_.GetAttribute("message") } |
+                        Where-Object { $_ }) -join " | "
+                    $errorText = $message.Replace([char]10, " ").Replace([char]13, " ")
+                    if ($errorText.Length -gt 320) { $errorText = $errorText.Substring(0, 320) }
+                }
                 [pscustomobject]@{
                     Status = $status
                     Suite = [string]$case.classname
                     Name = [string]$case.name
+                    Message = $errorText
                 }
             }
         }
@@ -53,6 +67,7 @@ function CollectCases([string]$folder, [string]$kind) {
     foreach ($case in $result) {
         if ($case.Status -ne "PASS") {
             Log ("CASE=" + $case.Status + " " + $kind + " " + $case.Suite + "#" + $case.Name)
+            if ($case.Message) { Log ("CASE_ERROR=" + $case.Message) }
         }
     }
     return $result
@@ -60,9 +75,17 @@ function CollectCases([string]$folder, [string]$kind) {
 
 Push-Location $root
 try {
-    Set-Content -LiteralPath $log -Value "MusicFlow Full Product Regression v1 - Part 3" -Encoding UTF8
+    Set-Content -LiteralPath $log -Value "MusicFlow Full Product Regression Gate v2 - Part 1" -Encoding UTF8
     Log "DATE=$(Get-Date -Format o)"
     Log "HEAD_BASE=$(git rev-parse --short HEAD)"
+    $ownsGateMutex = $gateMutex.WaitOne(0)
+    if (!$ownsGateMutex) { throw "ANOTHER_FULL_REGRESSION_GATE_IS_RUNNING" }
+    $otherGradleTests = @(Get-CimInstance Win32_Process -Filter "name='java.exe'" |
+        Where-Object { $_.CommandLine -match ':app:connectedDebugAndroidTest' })
+    Log "OTHER_ANDROID_GRADLE_RUNS=$($otherGradleTests.Count)"
+    if ($otherGradleTests.Count -gt 0) {
+        throw "ANOTHER_CONNECTED_ANDROID_TEST_IS_RUNNING"
+    }
     # 'adb devices -l' may append product/model/transport metadata after
     # the 'device' state. Match state as a separate token, not end-of-line.
     $devices = @(& adb devices -l | Where-Object {
@@ -82,6 +105,9 @@ try {
     )
     if ($build -ne 0) { throw "BUILD_OR_JVM_FAILED" }
     $jvm = @(CollectCases $jvmResults "JVM")
+    if (@($jvm | Where-Object { $_.Status -ne "PASS" }).Count -gt 0) {
+        throw "JVM_HAS_FAILED_OR_SKIPPED_CASES"
+    }
 
     # Prevent stale XML from an earlier test attempt from appearing fresh.
     if (Test-Path $androidResults) {
@@ -89,8 +115,24 @@ try {
             Remove-Item -Force
     }
     $androidExit = RunGradle "GRADLE_ANDROID" @(":app:connectedDebugAndroidTest","--console=plain")
+    if ($androidExit -ne 0 -and
+        @(Get-ChildItem -LiteralPath $androidResults -File -Filter "TEST-*.xml" -ErrorAction SilentlyContinue).Count -eq 0) {
+        throw "CONNECTED_ANDROID_TEST_FAILED_BEFORE_JUNIT_XML"
+    }
     $android = @(CollectCases $androidResults "ANDROID")
-    Log "PHASED_SAF_RESTART_SKIPS=SEE_ANDROID_COMPAT_MATRIX_V2"
+    $allowedSkippedTests = @(
+        "cleanupSafDocument",
+        "prepareSafDocument",
+        "verifySafAfterForceStop"
+    )
+    $actualSkipped = @($android | Where-Object { $_.Status -eq "SKIP" })
+    $unexpectedSkip = @($actualSkipped | Where-Object {
+        $_.Suite -notlike "*SafPermissionRestartTest" -or
+        $_.Name -notin $allowedSkippedTests
+    })
+    Log "ANDROID_PHASED_SAF_RESTART_SKIPS=$($actualSkipped.Count)"
+    Log "ANDROID_UNEXPECTED_SKIP=$($unexpectedSkip.Count)"
+    Log "PHASED_SAF_RESTART_EVIDENCE=docs/Android_Compatibility_Matrix_v2.md"
     Log "ANDROID_RUN_FRESH_XML=TRUE"
     $diffOld = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
@@ -100,7 +142,7 @@ try {
     } finally { $ErrorActionPreference = $diffOld }
     Log "GIT_DIFF_CHECK_EXIT=$diffExit"
     if ($androidExit -ne 0 -or $diffExit -ne 0 -or
-        @($jvm | Where-Object { $_.Status -eq "FAIL" }).Count -gt 0 -or
+        $unexpectedSkip.Count -gt 0 -or
         @($android | Where-Object { $_.Status -eq "FAIL" }).Count -gt 0) {
         throw "FULL_REGRESSION_BLOCKED"
     }
@@ -109,4 +151,8 @@ try {
     Log ("FAIL_REASON=" + $_.Exception.Message)
     Log "FINAL_RESULT=FAIL"
     exit 1
-} finally { Pop-Location }
+} finally {
+    if ($ownsGateMutex) { $gateMutex.ReleaseMutex() }
+    $gateMutex.Dispose()
+    Pop-Location
+}

@@ -1,0 +1,11 @@
+﻿MusicFlow Full Product Regression Gate v2 - SAF targeted fix
+DATE=2026-11-01T18:04:38.5198406+07:00
+HEAD_BASE=87efadd
+DEVICE=emulator-5554 API=30
+TARGET=RealPickerSafTest
+ANDROID_TOTAL=2
+ANDROID_PASS=2
+ANDROID_FAIL=0
+ANDROID_SKIP=0
+TESTS=realOpenMultipleDocumentsGrantsPersistedReadAndPlays;realOpenMultipleDocumentsSelectsTwoFilesAndNavigates
+FINAL_RESULT=PASS

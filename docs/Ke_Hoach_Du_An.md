@@ -8,19 +8,19 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `a3055de` — Advanced Library Runtime Acceptance v1 đã commit; Advanced Search Runtime Acceptance v1 **JVM 105/105 + Android API 30 14/14 PASS trong workspace**, chưa commit |
+| HEAD Git nền đã đối chiếu | `87efadd` (`main = origin/main`) — Advanced Search Runtime Acceptance v1 đã commit; Full Product Regression Gate v2 Part 1 **105/105 JVM + 112 PASS / 0 FAIL / 3 SKIP Android API 30 (115 total)** trong workspace, **chưa commit các thay đổi của gate** |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
-| Android API 30 | 55 bài chính PASS |
-| Marker API 30 | 40/40 PASS |
+| Android API 30 (full suite mới nhất) | **115 Android testcase: 112 PASS / 0 FAIL / 3 SKIP**, 105 JVM PASS ở Full Product Regression Gate v2 Part 1; 3 SKIP là test SAF theo pha riêng |
+| Marker API 30 (mốc cũ) | 40/40 PASS tại Session Recovery; không dùng thay kết quả full suite v2 |
 | Playback Speed v1/v2 | **Runtime + Touch API 30 PASS:** 5 chip 0.75–2x qua Compose semantics **và chạm Android thật** → MediaSession, pause/resume/next giữ tốc độ/queue; font scale 150% có overflow và swipe thành công; **JVM 105 + 12 Android PASS**, chưa điện thoại thật |
 | Sleep Timer v1 | **Runtime Android API 30 PASS:** đặt/query/thay/hủy, debug-only expiry 1–2 giây kiểm tra MediaSession tạm dừng/giữ queue; 3/3 Sleep + 8/8 Playback regression = **11/11 PASS**; chưa test multi-API/real device |
 | Lyrics v1 | Parser LRC, nhập/lưu URI SAF, đồng bộ dòng lời theo MediaSession seek; **6 JVM parser + 2 Android Lyrics + 8 Playback regression PASS** trên API 30; còn MainActivity picker-to-screen E2E |
 | Lyrics import | Android OpenDocument |
 | Lưu liên kết LRC theo audio URI | Đã triển khai |
 | Build Lyrics v1 + Sleep Timer v1 | `:app:assembleDebug` và `:app:assembleDebugAndroidTest` PASS ngày 2026-10-29; chỉ xác nhận biên dịch |
-| Full QA | Để cuối giai đoạn phát triển |
+| Full QA | **Full Android instrumentation API 30 v2 đã PASS**; nghiệm thu release trên nhiều thiết bị, cấu hình ký và Auth/Cloud/online có quyền thật vẫn để cuối |
 | Equalizer v1 | **Runtime QA API 30 PASS:** AudioEffect gắn session Media3 thật, bật/tắt, chỉnh band, lưu cấu hình, controller reconnect; 2/2 EQ + 8/8 Playback/Queue = **10/10 Android PASS**. Chưa QA UI/tiến trình restart/thiết bị thật |
 | Crossfade/Gapless v1/v2 | **Runtime + UI/Interruption API 30 PASS:** 0/1/2/3s, UI chip selected/SessionCommand, MIX_STARTED và HANDOFF_DONE 1/2/3s, **4 MIX_CANCELLED stage=MIXING** do pause/seek/sửa queue/tắt, phục hồi volume 1/queue; **105 JVM + 17 Android PASS**. Chưa đo gapless âm thanh thực tế |
 | Library nâng cao v1 | **Runtime API 30 PASS**: READ_EXTERNAL_STORAGE, 3 WAV MediaStore/2 albumId thật, LibraryRoute scanner + play, Album/Artist playback + Genre fallback UI; **105 JVM + 14/14 Android PASS**; chưa test artist/genre tags thật hoặc máy thật |
@@ -58,11 +58,12 @@
 | Playback Queue Actions Runtime Acceptance v1 | **105/105 JVM + 13/13 Android API 30 PASS** (2 Library/Search Queue Actions + 11 Playback/Queue regression), snapshot và next-track thật; `docs/Playback_Queue_Actions_Runtime_Acceptance_v1.md` |
 | Advanced Library Runtime Acceptance v1 | **105/105 JVM + 14/14 Android API 30 PASS** (2 Advanced Library + 12 Playback/Queue/Offline regression); 3 WAV MediaStore thật, hai album thực, UI nhóm và playback; `docs/Advanced_Library_Runtime_Acceptance_v1.md` |
 | Advanced Search Runtime Acceptance v1 | **105/105 JVM + 14/14 Android API 30 PASS** (2 SearchRoute/MediaStore + 12 Playback/Queue/Offline regression), **13/13 marker**, tìm tiếng Việt không dấu, Album và queue thực; `docs/Advanced_Search_Runtime_Acceptance_v1.md` |
+| Full Product Regression Gate v2 — Part 1 | **PASS**: build/JVM **105/105**; toàn bộ Android instrumentation API 30 **112 PASS / 0 FAIL / 3 SKIP (115 total)**. Lượt đầu 2 FAIL tại CreateDocument Save, sửa QA helper và chạy lại 2/2 rồi full suite PASS. Xem `docs/Full_Product_Regression_Gate_v2_Part_1.md` |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Full Product Regression Gate v2 — Part 1** — chạy toàn bộ JVM/Android instrumentation API 30 không lọc sau loạt runtime milestone, phân loại lỗi và sửa từng phần; sau đó RC Packaging. Licensed Streaming Smoke chờ nhạc có quyền thật; Google Login/email thật ĐỂ CUỐI |
+| Bước tiếp theo | **Release Candidate QA / Packaging — Part 1**: kiểm tra release build, cấu hình ký/phân phối, khả năng cài mới/nâng cấp, smoke tests trên APK release, checksum và provenance. Licensed Streaming Smoke chờ nhạc có quyền thật; Google Login/email thật và cloud 2 thiết bị ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
-**LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
+**LƯU Ý QUAN TRỌNG:** Các số `31/31`, `55/55` ở mốc cũ không phải số liệu full suite v2. Hiện có bằng chứng **105 JVM + 112 Android PASS / 0 FAIL / 3 SKIP** trên API 30 nhưng **không phải tỷ lệ hoàn thành 100% MusicFlow 1.0**. Log/test phải gắn với đúng bản code; chỉ có commit sau khi người dùng push mới xác nhận các sửa đổi đã lên GitHub.
 
 ## 1. Thông tin dự án và nguồn sự thật
 
@@ -138,6 +139,7 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | MVP Playlist Navigation v1 | 55 PASS, 3 test theo pha SKIPPED | **Full QA PASS — API 30** | `18d5893a` · `qa-logs/mvp-playlist-navigation-v1.log` |
 | MVP Playlist → History → Replay v1 | 1 bài isolated PASS | **Fast QA PASS — API 30** | `69d5a559` · `qa-logs/mvp-playlist-history-v1.log` |
 | Session Recovery UI Acceptance v1 | 55 bài chính PASS | **Full QA PASS — API 30** | `d430cfc7` · `qa-logs/playback-process-restart-v1.log` |
+| Full Product Regression Gate v2 — Part 1 | 115 Android total (112 PASS + 3 SKIP), 105 JVM | **PASS — API 30, 0 FAIL; 3 SAF phase skips theo thiết kế** | HEAD nền `87efadd` · `qa-logs/full-product-regression-v2-part1.log` · `docs/Full_Product_Regression_Gate_v2_Part_1.md` (thay đổi chưa commit) |
 
 **Không cộng** các con số 9 + 11 + ... + 31: đây là số lượng test của **các lần chạy tăng dần** với nhiều bài trùng nhau.
 
@@ -187,8 +189,8 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **P0 — runtime QA API 30 đạt** | **Playback Queue Actions Runtime Acceptance v1** | **105/105 JVM, 13/13 Android PASS** | `docs/Playback_Queue_Actions_Runtime_Acceptance_v1.md`, `qa-logs/playback-queue-actions-v1.log`; 2 UI + 11 regression, snapshot queue chính xác |
 | **P0 — runtime QA API 30 đạt** | **Advanced Library Runtime Acceptance v1** | **105 JVM PASS, 14/14 Android PASS** | `docs/Advanced_Library_Runtime_Acceptance_v1.md`, `qa-logs/advanced-library-runtime-v1.log`; 2 UI/MediaStore + 12 hồi quy, hai album thật; artist/genre fallback của WAV |
 | **P0 — runtime QA API 30 đạt** | **Advanced Search Runtime Acceptance v1** | **105 JVM PASS, 14/14 Android PASS** | `docs/Advanced_Search_Runtime_Acceptance_v1.md`, `qa-logs/advanced-search-runtime-v1.log`; 2 E2E + 12 hồi quy, Album, Unicode search, queue; Artist/Genre fallback |
-| **P0 — kế tiếp (mốc nhỏ)** | **Full Product Regression Gate v2 — Part 1** | CHƯA THỰC HIỆN | JVM + toàn bộ Android instrumentation API 30 không lọc, JUnit counts pass/fail/skip rõ ràng, sửa phát hiện mới theo từng phần; tiếp đến RC Packaging |
-| **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
+| **P0 — Full Regression API 30 đã đạt** | **Full Product Regression Gate v2 — Part 1** | **PASS: 105 JVM; 112 Android PASS / 0 FAIL / 3 SKIP (115 total)** | `docs/Full_Product_Regression_Gate_v2_Part_1.md`, `qa-logs/full-product-regression-v2-part1.log`; 2/2 SAF targeted và full suite sau sửa đã đạt |
+| **P0 — kế tiếp** | **Release Candidate QA / Packaging — Part 1** | CHƯA THỰC HIỆN | Xem xét release signing/config, build release, cài mới/nâng cấp và smoke test trên release artifact; ghi checksum, log và truy vết theo commit, không sử dụng khóa ký thật khi chưa có cấu hình |
 | **P1** | UI/accessibility/empty-state/error-state | Foundation v1 13/13 + Polish v2 19/19 Android PASS; toàn diện **CHƯA NGHIỆM THU** | Tiếp tục ma trận API, TalkBack thật, adaptive layout rộng và các trạng thái chưa chuẩn hóa |
 | **P1** | Hiệu năng và dữ liệu lớn | CHƯA NGHIỆM THU | Dataset cố định; ngưỡng thời gian/độ ổn định được chốt; không crash/ANR, không mất dữ liệu |
 | **Theo quyết định** | Phát hành Google Play | CHƯA CHỐT PHẠM VI | Chỉ mở milestone nếu chọn hình thức phân phối này |
@@ -296,6 +298,16 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-11-01 — Full Product Regression Gate v2 / Part 1 — 105 JVM + 112 ANDROID API 30 PASS
+
+- HEAD nền `87efadd` (`main = origin/main`), Android emulator `emulator-5554` / Pixel_5_API_30, API 30. Không thay production Kotlin, Supabase, online rights, cloud hay tài khoản.
+- Lượt full unfiltered đầu tiên: **105 JVM PASS**, **110 Android PASS / 2 FAIL / 3 SKIP** (115 total), `FINAL_RESULT=FAIL`. Hai FAIL thuộc `RealPickerSafTest`, thông báo `Save not found` từ DocumentsUI CreateDocument. Giữ log ở `qa-logs/full-product-regression-v2-part1-initial-failure.log`.
+- Emulator từng có hộp thoại hệ thống `Bluetooth keeps stopping` che DocumentsUI; đã đóng hộp thoại và kiểm tra UI. Trên API 30 nút `SAVE` thật có id `android:id/button1`, đôi khi accessibility báo bounds rỗng. Cập nhật test helper để ưu tiên id này, giữ xác nhận ActivityResult + URI thật và fallback chạm màn hình chỉ khi nhận diện đúng native SAVE. Không suy diễn lỗi playback từ lỗi UI automation.
+- Chạy lại hai bài SAF từng lỗi bằng APK AndroidTest mới: **2/2 PASS**, log `qa-logs/full-product-regression-v2-part1-saf-fix.log`.
+- Chạy lại **toàn bộ** `scripts/run-full-regression-v2-part1.ps1` không lọc: **Gradle build/JVM PASS (105/105), Android 112 PASS / 0 FAIL / 3 SKIP (115 total)**; `ANDROID_UNEXPECTED_SKIP=0`, `GRADLE_ANDROID_EXIT=0`, `GIT_DIFF_CHECK_EXIT=0`, `FINAL_RESULT=PASS`. Log `qa-logs/full-product-regression-v2-part1.log`, chi tiết `docs/Full_Product_Regression_Gate_v2_Part_1.md`.
+- Ba bài SKIP duy nhất là `SafPermissionRestartTest` theo pha riêng đã kiểm thử trước đó trong `docs/Android_Compatibility_Matrix_v2.md`; không tính thành PASS của lượt này. Kết quả PASS giới hạn ở Android instrumentation API 30, không phải nghiệm thu hoàn chỉnh MusicFlow 1.0.
+- **Kế tiếp:** Release Candidate QA / Packaging — Part 1. Licensed Streaming Smoke phải đợi nội dung thật có quyền; Google/email thật và cloud E2E hai thiết bị để cuối.
 
 ### 2026-11-01 — Advanced Search Runtime Acceptance v1 — JVM 105 + 14/14 ANDROID API 30 PASS
 
