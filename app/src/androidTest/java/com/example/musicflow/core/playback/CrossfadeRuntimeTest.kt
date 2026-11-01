@@ -285,4 +285,109 @@ class CrossfadeRuntimeTest {
             assertEquals(3000, duration(media))
             Log.i("MusicFlowCrossfadeQA", "PASS variableSpeedForwardFallback")
         }
+
+    /**
+     * Enters the 3-second mixing window on the first 12-second WAV. The
+     * secondary player is audible during this window; an interruption must
+     * restore the primary volume and never advance the queue unexpectedly.
+     */
+    private fun enterMixingWindow(media: MediaController) {
+        setDuration(media, 3000)
+        resetToFirst(media)
+        main { media.seekTo(0, 7_300L) }
+        await("mixing window is active") {
+            media.isPlaying && media.currentMediaItemIndex == 0 &&
+                media.currentPosition in 9_400L..10_300L
+        }
+        // Media3 secondary starts at remaining <= 3000ms; the 80ms ticker
+        // has time to begin its actual mix before the interruption.
+        SystemClock.sleep(350L)
+    }
+
+    private fun assertQueueAndVolume(media: MediaController, count: Int = 2) {
+        main {
+            assertEquals(count, media.mediaItemCount)
+            assertEquals(0, media.currentMediaItemIndex)
+            assertEquals("crossfade-alpha", media.currentMediaItem?.mediaId)
+            assertEquals("crossfade-alpha", media.getMediaItemAt(0).mediaId)
+            if (count == 2) {
+                assertEquals("crossfade-beta", media.getMediaItemAt(1).mediaId)
+            }
+            assertEquals("Primary volume must recover after cancelling mix",
+                1f, media.volume, 0.001f)
+        }
+    }
+
+    @Test
+    fun pauseDuringMixingRestoresPrimaryAndKeepsPosition() =
+        withLocalQueue { media ->
+            enterMixingWindow(media)
+            main { media.pause() }
+            await("paused while first WAV remains selected") { !media.isPlaying }
+            SystemClock.sleep(500L)
+            assertQueueAndVolume(media)
+            main {
+                assertTrue(media.currentPosition in 9_000L..11_600L)
+            }
+            setDuration(media, 0)
+            main { media.play() }
+            await("resume after cancelled crossfade") {
+                media.isPlaying && media.currentMediaItemIndex == 0
+            }
+            Log.i("MusicFlowCrossfadeQA", "PASS pauseDuringMixKeepsQueue")
+        }
+
+    @Test
+    fun seekingBackwardDuringMixingCancelsSecondary() =
+        withLocalQueue { media ->
+            enterMixingWindow(media)
+            main { media.seekTo(0, 1_000L) }
+            await("primary seek backwards") {
+                media.isPlaying && media.currentMediaItemIndex == 0 &&
+                    media.currentPosition in 800L..3_000L
+            }
+            SystemClock.sleep(400L)
+            assertQueueAndVolume(media)
+            setDuration(media, 0)
+            Log.i("MusicFlowCrossfadeQA", "PASS seekDuringMixKeepsQueue")
+        }
+
+    @Test
+    fun editingQueueDuringMixingCancelsSecondaryWithoutGhostItem() =
+        withLocalQueue { media ->
+            enterMixingWindow(media)
+            var next: MediaItem? = null
+            main {
+                next = media.getMediaItemAt(1)
+                media.removeMediaItem(1)
+            }
+            await("removed next item safely") {
+                media.mediaItemCount == 1 && media.currentMediaItemIndex == 0 &&
+                    media.isPlaying
+            }
+            SystemClock.sleep(400L)
+            assertQueueAndVolume(media, 1)
+            main { media.addMediaItem(checkNotNull(next)) }
+            await("next item restored without ghost duplicate") {
+                media.mediaItemCount == 2 && media.currentMediaItemIndex == 0
+            }
+            assertQueueAndVolume(media)
+            setDuration(media, 0)
+            main { media.seekTo(0, 10_200L) }
+            awaitSecond(media, "clean Media3 transition after queue edit")
+            Log.i("MusicFlowCrossfadeQA", "PASS queueEditDuringMixNoGhost")
+        }
+
+    @Test
+    fun disablingCrossfadeDuringMixingRestoresNormalPlayback() =
+        withLocalQueue { media ->
+            enterMixingWindow(media)
+            setDuration(media, 0)
+            assertQueueAndVolume(media)
+            main { assertTrue(media.isPlaying) }
+            main { media.seekTo(0, 10_200L) }
+            awaitSecond(media, "ordinary forward transition after disabling mix")
+            assertEquals(0, duration(media))
+            Log.i("MusicFlowCrossfadeQA", "PASS disabledDuringMixFallsBackToMedia3")
+        }
 }

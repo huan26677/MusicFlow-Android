@@ -396,6 +396,7 @@ fun NowPlayingScreen(
         ) {
             listOf(0, 1000, 2000, 3000).forEach { duration ->
                 FilterChip(
+                    modifier = Modifier.testTag("crossfade-duration-${duration}ms"),
                     selected = state.crossfadeDurationMs == duration,
                     onClick = { onSetCrossfadeDuration(duration) },
                     label = { Text(if (duration == 0) "Tắt" else "${duration / 1000}s") }

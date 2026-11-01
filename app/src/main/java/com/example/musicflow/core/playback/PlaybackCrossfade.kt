@@ -226,6 +226,17 @@ internal class PlaybackCrossfade(
     }
 
     fun cancelTransition() {
+        if (secondary != null) {
+            // A completed handoff also releases the secondary player.
+            // Do not label that successful cleanup as an interrupted mix.
+            val event = if (stage == Stage.HANDOFF) "MIX_CLEANUP"
+                else "MIX_CANCELLED"
+            Log.i(
+                "MusicFlowCrossfade",
+                "$event stage=$stage from=${candidate?.fromIndex} " +
+                    "to=${candidate?.toIndex} primaryIndex=${primary.currentMediaItemIndex}"
+            )
+        }
         secondary?.let { player ->
             player.stop()
             player.release()
