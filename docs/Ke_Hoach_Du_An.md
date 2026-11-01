@@ -8,7 +8,7 @@
 
 | Mục | Trạng thái |
 |---|---|
-| HEAD Git hiện tại | `a4b045c` — Playback Queue Actions Runtime Acceptance v1 đã commit; Advanced Library Runtime Acceptance v1 **JVM 105/105 + Android API 30 14/14 PASS trong workspace**, chưa commit |
+| HEAD Git hiện tại | `a3055de` — Advanced Library Runtime Acceptance v1 đã commit; Advanced Search Runtime Acceptance v1 **JVM 105/105 + Android API 30 14/14 PASS trong workspace**, chưa commit |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | **Phát triển Full Product trước; dời email thật, Google Login E2E và xác nhận Auth/Cloud Sync hai thiết bị về giai đoạn cuối** |
 | Session Recovery v1 | Full QA PASS |
@@ -24,7 +24,7 @@
 | Equalizer v1 | **Runtime QA API 30 PASS:** AudioEffect gắn session Media3 thật, bật/tắt, chỉnh band, lưu cấu hình, controller reconnect; 2/2 EQ + 8/8 Playback/Queue = **10/10 Android PASS**. Chưa QA UI/tiến trình restart/thiết bị thật |
 | Crossfade/Gapless v1/v2 | **Runtime + UI/Interruption API 30 PASS:** 0/1/2/3s, UI chip selected/SessionCommand, MIX_STARTED và HANDOFF_DONE 1/2/3s, **4 MIX_CANCELLED stage=MIXING** do pause/seek/sửa queue/tắt, phục hồi volume 1/queue; **105 JVM + 17 Android PASS**. Chưa đo gapless âm thanh thực tế |
 | Library nâng cao v1 | **Runtime API 30 PASS**: READ_EXTERNAL_STORAGE, 3 WAV MediaStore/2 albumId thật, LibraryRoute scanner + play, Album/Artist playback + Genre fallback UI; **105 JVM + 14/14 Android PASS**; chưa test artist/genre tags thật hoặc máy thật |
-| Search nâng cao v1 | Tìm bài hát, album, nghệ sĩ, thể loại có bỏ dấu; 4 bộ lọc, mở nhóm/phát/thêm Playlist; build ứng dụng + AndroidTest PASS, chưa runtime QA |
+| Search nâng cao v1 | **Runtime API 30 PASS**: SearchRoute thật quét 3 WAV MediaStore (tiêu đề có dấu), tìm không dấu, Album play, Artist/Genre fallback, phát và queue append/next/persist qua MediaSession; **105 JVM + 14/14 Android PASS**. Chưa test Artist/Genre tags MP3/FLAC thật |
 | Online Catalog Foundation v1 | API HTTPS cấu hình được, repository metadata, phân trang và màn khám phá online; build ứng dụng + AndroidTest PASS; chưa có dịch vụ hay QA thực tế |
 | Supabase Backend v1 | Dự án Supabase đã kết nối; bảng public.music_tracks RLS; Data API read-only; client Android đọc danh mục và có luồng phát HTTPS hợp lệ; build-only |
 | Licensed Content Upload v1 | Hai bucket private/public, music_uploads RLS, RPC publish atomic, admin stage/review/publish; Python unit 8/8 PASS và Android build PASS; chưa upload thật |
@@ -57,8 +57,9 @@
 | Crossfade UI & Interruption QA v2 | **JVM 105/105 + Android API 30 17/17 PASS** (8 Crossfade runtime + 1 UI + 8 Playback/Queue), 4 hủy thật ở giai đoạn MIXING; `docs/Crossfade_UI_Interruption_QA_v2.md` |
 | Playback Queue Actions Runtime Acceptance v1 | **105/105 JVM + 13/13 Android API 30 PASS** (2 Library/Search Queue Actions + 11 Playback/Queue regression), snapshot và next-track thật; `docs/Playback_Queue_Actions_Runtime_Acceptance_v1.md` |
 | Advanced Library Runtime Acceptance v1 | **105/105 JVM + 14/14 Android API 30 PASS** (2 Advanced Library + 12 Playback/Queue/Offline regression); 3 WAV MediaStore thật, hai album thực, UI nhóm và playback; `docs/Advanced_Library_Runtime_Acceptance_v1.md` |
+| Advanced Search Runtime Acceptance v1 | **105/105 JVM + 14/14 Android API 30 PASS** (2 SearchRoute/MediaStore + 12 Playback/Queue/Offline regression), **13/13 marker**, tìm tiếng Việt không dấu, Album và queue thực; `docs/Advanced_Search_Runtime_Acceptance_v1.md` |
 | Kiến trúc mở rộng | Đã có kế hoạch module boundaries, source adapters, feature roadmap tại `docs/Kien_Truc_Mo_Rong_Va_Lo_Trinh_Full_Product.md`; chưa tách Gradle modules |
-| Bước tiếp theo | **Advanced Search Runtime Acceptance v1** — test SearchRoute/MediaStore thật, tìm không dấu và bộ lọc Bài hát/Album/Nghệ sĩ/Thể loại, playback & queue qua MediaSession; mốc nhỏ. Licensed Streaming Smoke chờ nhạc có quyền thật; Google Login/email thật ĐỂ CUỐI |
+| Bước tiếp theo | **Full Product Regression Gate v2 — Part 1** — chạy toàn bộ JVM/Android instrumentation API 30 không lọc sau loạt runtime milestone, phân loại lỗi và sửa từng phần; sau đó RC Packaging. Licensed Streaming Smoke chờ nhạc có quyền thật; Google Login/email thật ĐỂ CUỐI |
 | Sản phẩm tổng thể | CHƯA NGHIỆM THU |
 
 **LƯU Ý QUAN TRỌNG:** `31/31 PASS` là kết quả của bộ Android tests hiện có ở mốc v2; **không phải** tỷ lệ hoàn thành 100% ứng dụng. Commit HEAD mới nhất có thể chỉ thay đổi tài liệu, không đồng nghĩa một vòng QA mới đã chạy.
@@ -185,7 +186,8 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 | **P0 — UI/interruption QA đạt API 30** | **Crossfade UI & Interruption QA v2** | **105 JVM PASS, 17/17 Android PASS** | `docs/Crossfade_UI_Interruption_QA_v2.md`, `qa-logs/crossfade-ui-interruption-v2.log`; bốn lượt cancel giai đoạn MIXING thật, queue/volume bảo toàn |
 | **P0 — runtime QA API 30 đạt** | **Playback Queue Actions Runtime Acceptance v1** | **105/105 JVM, 13/13 Android PASS** | `docs/Playback_Queue_Actions_Runtime_Acceptance_v1.md`, `qa-logs/playback-queue-actions-v1.log`; 2 UI + 11 regression, snapshot queue chính xác |
 | **P0 — runtime QA API 30 đạt** | **Advanced Library Runtime Acceptance v1** | **105 JVM PASS, 14/14 Android PASS** | `docs/Advanced_Library_Runtime_Acceptance_v1.md`, `qa-logs/advanced-library-runtime-v1.log`; 2 UI/MediaStore + 12 hồi quy, hai album thật; artist/genre fallback của WAV |
-| **P0 — kế tiếp (mốc nhỏ)** | **Advanced Search Runtime Acceptance v1** | CHƯA THỰC HIỆN | SearchRoute + MediaStore thật, text không dấu và tab Album/Artist/Genre, phát/queue, ghi nhận giới hạn metadata thật |
+| **P0 — runtime QA API 30 đạt** | **Advanced Search Runtime Acceptance v1** | **105 JVM PASS, 14/14 Android PASS** | `docs/Advanced_Search_Runtime_Acceptance_v1.md`, `qa-logs/advanced-search-runtime-v1.log`; 2 E2E + 12 hồi quy, Album, Unicode search, queue; Artist/Genre fallback |
+| **P0 — kế tiếp (mốc nhỏ)** | **Full Product Regression Gate v2 — Part 1** | CHƯA THỰC HIỆN | JVM + toàn bộ Android instrumentation API 30 không lọc, JUnit counts pass/fail/skip rõ ràng, sửa phát hiện mới theo từng phần; tiếp đến RC Packaging |
 | **P0** | **Release Candidate QA / Packaging** | CHƯA XÁC MINH | Bản release ký đúng, cài mới/nâng cấp, smoke test chạy trên artifact release, checksum và log có thể truy vết theo commit |
 | **P1** | UI/accessibility/empty-state/error-state | Foundation v1 13/13 + Polish v2 19/19 Android PASS; toàn diện **CHƯA NGHIỆM THU** | Tiếp tục ma trận API, TalkBack thật, adaptive layout rộng và các trạng thái chưa chuẩn hóa |
 | **P1** | Hiệu năng và dữ liệu lớn | CHƯA NGHIỆM THU | Dataset cố định; ngưỡng thời gian/độ ổn định được chốt; không crash/ANR, không mất dữ liệu |
@@ -294,6 +296,15 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-11-01 — Advanced Search Runtime Acceptance v1 — JVM 105 + 14/14 ANDROID API 30 PASS
+
+- HEAD nền `a3055de` (Advanced Library v1 đã commit/push), Git sạch lúc bắt đầu. Chỉ thêm Android test + QA script/log + tài liệu; không thay Kotlin production, quyền streaming hay Supabase/Auth/Cloud.
+- `AdvancedSearchRuntimeTest.kt` publish **3 WAV 35 giây vào MediaStore thật**, hai album và ba title **Tình Yêu / Đường Về / Khúc Nhạc** có dấu; test `SearchRoute`/SearchViewModel thực tìm **tinh yeu / duong ve / khuc nhac** không dấu, phát audio offline MediaSession, thêm cuối/chèn tiếp, xác nhận snapshot/Next phát bài vừa chèn. Bài thứ hai kiểm tra nhóm Album và phát nhóm, nhóm fallback Artist/Genre, no-results UI.
+- Test build lượt đầu FAIL vì import `onNode` không tồn tại, đã sửa. Android lượt đầu bài nhóm Album FAIL do trùng text ở ô query và album result; selector được sửa `onAllNodesWithText(...).onLast()`, chạy lại **2/2 Android Search PASS**. Không có thay đổi source production.
+- `scripts/run-advanced-search-runtime-v1-tests.ps1` + `qa-logs/advanced-search-runtime-v1.log`: **105/105 JVM PASS**, Search 2/2 với **13/13 marker**, PlaybackService 3/3 + QueuePersistence 5/5 + QueueManagerIntegration 1/1 + QueueManagerScreen 2/2 + OfflineAcceptanceFlow 1/1, **12/12 regression**, tổng **14/14 Android API 30 PASS**, Git diff check PASS, `FINAL_RESULT=PASS`.
+- Giới hạn: Artist/Genre metadata của WAV thử là unknown/fallback, chưa tagged MP3/FLAC; route dựng Compose trực tiếp, chưa qua tab MainActivity; quyền READ_EXTERNAL_STORAGE cấp qua pm grant, chưa Android permission dialog; chưa điện thoại thật/multi API hoặc full unfiltered Android suite. Báo cáo `docs/Advanced_Search_Runtime_Acceptance_v1.md`.
+- **Kế tiếp:** Full Product Regression Gate v2 Part 1 (toàn bộ Android suite API30 mới), sau đó sửa lỗi từng phần và Release Candidate QA/Packaging. Google/email thật và Cloud E2E hai thiết bị vẫn ở cuối, Licensed Streaming chỉ khi có nhạc đã được cấp quyền.
 
 ### 2026-11-01 — Advanced Library Runtime Acceptance v1 — JVM 105 + 14/14 ANDROID API 30 PASS
 
