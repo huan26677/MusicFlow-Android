@@ -22,6 +22,9 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.UiDevice
+import androidx.compose.ui.test.assertIsDisplayed
+import kotlin.math.roundToInt
 import com.example.musicflow.MainActivity
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -40,6 +43,7 @@ class PlaybackSpeedRuntimeTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val context = instrumentation.targetContext
+    private val device by lazy { UiDevice.getInstance(instrumentation) }
 
     private data class Snapshot(
         val media: List<MediaItem>,
@@ -101,6 +105,49 @@ class PlaybackSpeedRuntimeTest {
     private fun expectSpeed(media: MediaController, value: Float) {
         waitState("real MediaSession speed $value") {
             abs(media.playbackParameters.speed - value) < 0.001f
+        }
+    }
+
+    /** Dispatches a real Android touch to a Compose element's screen center. */
+    private fun physicalTapAtChip(value: Float, player: MediaController) {
+        val tag = "playback-speed-${value}x"
+        val element = compose.onNodeWithTag(tag)
+        element.assertIsDisplayed()
+        val windowBounds = element.fetchSemanticsNode().boundsInWindow
+        val screenLocation = IntArray(2)
+        val windowLocation = IntArray(2)
+        main {
+            val decor = compose.activity.window.decorView
+            decor.getLocationOnScreen(screenLocation)
+            decor.getLocationInWindow(windowLocation)
+        }
+        val x = (windowBounds.center.x + screenLocation[0] -
+            windowLocation[0]).roundToInt()
+        val y = (windowBounds.center.y + screenLocation[1] -
+            windowLocation[1]).roundToInt()
+        Log.i("MusicFlowSpeedTouchQA",
+            "REAL_TAP value=$value bounds=$windowBounds screen=($x,$y) " +
+                "screenSize=${device.displayWidth}x${device.displayHeight}")
+        // After a font-scale configuration change, the OS can briefly lose
+        // the first input event while focus/layout settles. Retry only actual
+        // injected touchscreen events, never semantic OnClick or direct
+        // Player.setPlaybackSpeed as a fallback.
+        for (attempt in 1..3) {
+            compose.waitForIdle()
+            device.waitForIdle(800L)
+            assertTrue("Real screen tap was rejected by device", device.click(x, y))
+            try {
+                waitState("physical tap $value", 2_000L) {
+                    abs(player.playbackParameters.speed - value) < 0.001f
+                }
+                Log.i("MusicFlowSpeedTouchQA",
+                    "REAL_TAP_CONFIRMED value=$value attempt=$attempt")
+                return
+            } catch (e: AssertionError) {
+                Log.w("MusicFlowSpeedTouchQA",
+                    "REAL_TAP_RETRY value=$value attempt=$attempt")
+                if (attempt == 3) throw e
+            }
         }
     }
 
@@ -179,6 +226,65 @@ class PlaybackSpeedRuntimeTest {
             b.delete()
         }
     }
+
+    @Test
+    fun physicalTouchOnSpeedChipsWorksAcrossHorizontalScroll() =
+        withOfflineQueue { player ->
+            compose.waitUntil(15_000L) {
+                compose.onAllNodesWithContentDescription(
+                    "Mở trình phát: Speed QA Track Alpha, MusicFlow QA"
+                ).fetchSemanticsNodes().isNotEmpty()
+            }
+            compose.onNodeWithContentDescription(
+                "Mở trình phát: Speed QA Track Alpha, MusicFlow QA"
+            ).performClick()
+            // The speed Row scrolls *horizontally* inside the whole Player
+            // screen's *vertical* scroll. Calling performScrollTo on the chip
+            // reaches the nearest horizontal parent and cannot reveal the row
+            // vertically. Scroll a sibling heading after that row instead.
+            compose.onNodeWithText("Hẹn giờ tắt nhạc").performScrollTo()
+            compose.waitForIdle()
+
+            physicalTapAtChip(0.75f, player)
+            expectSpeed(player, 0.75f)
+            Log.i("MusicFlowSpeedTouchQA", "PASS physicalTapFirstSpeed")
+
+            for (value in listOf(1f, 1.25f)) {
+                physicalTapAtChip(value, player)
+                expectSpeed(player, value)
+            }
+            Log.i("MusicFlowSpeedTouchQA", "PASS physicalTapVisibleMiddleSpeeds")
+
+            // The final chip is beyond the screen width. Swipe the horizontal
+            // row with actual input events and then tap the visible 2x chip.
+            val screenBounds = compose.onNodeWithTag("playback-speed-0.75x")
+                .fetchSemanticsNode().boundsInWindow
+            val lastBefore = compose.onNodeWithTag("playback-speed-2.0x")
+                .fetchSemanticsNode().boundsInWindow
+            Log.i("MusicFlowSpeedTouchQA", "LAST_BEFORE_HORIZONTAL_SWIPE=$lastBefore")
+            val y = (screenBounds.center.y).roundToInt()
+            val screenWidth = device.displayWidth
+            device.swipe(
+                (screenWidth * 0.84f).toInt(), y,
+                (screenWidth * 0.17f).toInt(), y, 18
+            )
+            device.waitForIdle(2000L)
+            val lastAfter = compose.onNodeWithTag("playback-speed-2.0x")
+                .fetchSemanticsNode().boundsInWindow
+            Log.i("MusicFlowSpeedTouchQA", "LAST_AFTER_HORIZONTAL_SWIPE=$lastAfter")
+            if (lastBefore.right <= lastBefore.left) {
+                assertTrue("2x was not revealed by actual horizontal swipe",
+                    lastAfter.right > lastAfter.left)
+                Log.i("MusicFlowSpeedTouchQA",
+                    "PASS horizontalOverflowRevealedByPhysicalSwipe")
+            }
+            for (value in listOf(1.5f, 2f)) {
+                physicalTapAtChip(value, player)
+                expectSpeed(player, value)
+            }
+            Log.i("MusicFlowSpeedTouchQA", "PASS physicalSwipeAndTapLastSpeed")
+            Log.i("MusicFlowSpeedTouchQA", "PASS fivePhysicalSpeedTouches")
+        }
 
     @Test
     fun nowPlayingSpeedChipsControlRealMediaSession() = withOfflineQueue { player ->
