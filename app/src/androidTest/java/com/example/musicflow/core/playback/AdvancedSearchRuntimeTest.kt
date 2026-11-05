@@ -15,6 +15,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
@@ -338,7 +339,7 @@ class AdvancedSearchRuntimeTest {
                 onSongSelected = vm::playDeviceSongs
             )
         }
-        compose.onNodeWithText("Album").performClick()
+        compose.onNodeWithTag("search-category-albums").performClick()
         awaitText(album)
         // The same album name also appears as EditableText in SearchRoute's
         // query field. The last matching node is the result-group row.
@@ -354,20 +355,20 @@ class AdvancedSearchRuntimeTest {
         Log.i("MusicFlowSearchQA", "PASS searchAlbumGroupPlayback")
 
         changeQuery("khong ro nghe si")
-        compose.onNodeWithText("Nghệ sĩ").performClick()
+        compose.onNodeWithTag("search-category-artists").performClick()
         awaitText("Không rõ nghệ sĩ")
         compose.onNodeWithText("Không rõ nghệ sĩ").performClick()
         awaitText("Phát toàn bộ")
         Log.i("MusicFlowSearchQA", "PASS searchArtistFallbackGroup")
 
         changeQuery("khong ro the loai")
-        compose.onNodeWithText("Thể loại").performClick()
+        compose.onNodeWithTag("search-category-genres").performClick()
         awaitText("Không rõ thể loại")
         compose.onNodeWithText("Không rõ thể loại").performClick()
         awaitText("Phát toàn bộ")
         Log.i("MusicFlowSearchQA", "PASS searchGenreFallbackGroup")
 
-        compose.onNodeWithText("Bài hát").performClick()
+        compose.onNodeWithTag("search-category-songs").performClick()
         changeQuery("musicflow-no-match-999999")
         awaitText("Không tìm thấy bài hát phù hợp")
         Log.i("MusicFlowSearchQA", "PASS searchNoResultsState")

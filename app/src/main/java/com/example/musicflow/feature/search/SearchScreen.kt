@@ -9,15 +9,21 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 
@@ -44,7 +50,8 @@ fun SearchRoute(
     onQueryRemembered: (String) -> Unit,
     onSongSelected: (List<DeviceSong>, Int) -> Unit,
     onQueueNext: ((DeviceSong) -> Unit)? = null,
-    onQueueEnd: ((DeviceSong) -> Unit)? = null
+    onQueueEnd: ((DeviceSong) -> Unit)? = null,
+    onOpenLibrary: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
 
@@ -137,6 +144,7 @@ fun SearchRoute(
         onSongSelected = onSongSelected,
         onQueueNext = onQueueNext,
         onQueueEnd = onQueueEnd,
+        onOpenLibrary = onOpenLibrary,
         onAddToPlaylist = { song ->
             selectedPlaylistSong = song
         },
@@ -172,6 +180,7 @@ fun SearchScreen(
     onAddToPlaylist: (DeviceSong) -> Unit,
     onQueueNext: ((DeviceSong) -> Unit)? = null,
     onQueueEnd: ((DeviceSong) -> Unit)? = null,
+    onOpenLibrary: (() -> Unit)? = null,
     favoriteSongUris: Set<String> = emptySet(),
     onToggleFavorite: (DeviceSong) -> Unit = {}
 ) {
@@ -185,22 +194,33 @@ fun SearchScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Tìm kiếm",
-                style = MaterialTheme.typography.headlineSmall
-            )
-
-            if (hasPermission) {
-                TextButton(
-                    onClick = onRefresh,
-                    enabled = !state.isLoading
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val compact = maxWidth < 360.dp || LocalDensity.current.fontScale >= 1.35f
+            if (compact) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text("Quét lại")
+                    Text("Tìm kiếm", style = MaterialTheme.typography.headlineSmall)
+                    if (hasPermission && state.isLoaded && state.songs.isNotEmpty()) {
+                        TextButton(
+                            onClick = onRefresh,
+                            enabled = !state.isLoading
+                        ) { Text("Quét lại") }
+                    }
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Tìm kiếm", style = MaterialTheme.typography.headlineSmall)
+                    if (hasPermission && state.isLoaded && state.songs.isNotEmpty()) {
+                        TextButton(
+                            onClick = onRefresh,
+                            enabled = !state.isLoading
+                        ) { Text("Quét lại") }
+                    }
                 }
             }
         }
@@ -210,10 +230,19 @@ fun SearchScreen(
                 kind = MusicFlowStatusKind.PERMISSION,
                 title = "Cần quyền đọc nhạc",
                 description = "Để tìm kiếm nhạc trên thiết bị, hãy cấp quyền đọc âm thanh. " +
+                    "Bạn vẫn có thể chọn tệp nhạc riêng trong Thư viện mà không cần cấp quyền quét toàn bộ. " +
                     "Nếu đã từ chối nhiều lần, hãy mở quyền ứng dụng trong Cài đặt.",
                 actionLabel = "Cấp quyền",
                 onAction = onRequestPermission
             )
+            if (onOpenLibrary != null) {
+                OutlinedButton(
+                    onClick = onOpenLibrary,
+                    modifier = Modifier.fillMaxWidth().testTag("search-open-library")
+                ) {
+                    Text("Mở Thư viện để chọn tệp nhạc")
+                }
+            }
 
             return@Column
         }
@@ -221,23 +250,32 @@ fun SearchScreen(
         OutlinedTextField(
             value = state.query,
             onValueChange = onQueryChange,
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Bài hát, album, nghệ sĩ hoặc thể loại") },
+            modifier = Modifier.fillMaxWidth().testTag("search-query"),
+            label = { Text("Tìm nhạc trên thiết bị") },
             placeholder = { Text("Ví dụ: duong ve nha") },
             singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             trailingIcon = {
                 if (state.query.isNotEmpty()) {
                     IconButton(
                         onClick = { onQueryChange("") },
-                        modifier = Modifier.semantics {
+                        modifier = Modifier.testTag("search-clear-query").semantics {
                             contentDescription = "Xóa nội dung tìm kiếm"
                         }
                     ) {
-                        Text("×")
+                        Icon(Icons.Filled.Close, contentDescription = null)
                     }
                 }
             }
         )
+
+        if (state.query.isBlank()) {
+            Text(
+                "Tìm theo bài hát, nghệ sĩ, album hoặc thể loại — có thể nhập không dấu.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
 
         if (state.isLoaded && state.query.isNotBlank()) {
             Row(
@@ -247,15 +285,18 @@ fun SearchScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 listOf(
-                    "songs" to "Bài hát",
-                    "albums" to "Album",
-                    "artists" to "Nghệ sĩ",
-                    "genres" to "Thể loại"
-                ).forEach { (category, label) ->
+                    Triple("songs", "Bài hát", state.results.size),
+                    Triple("albums", "Album", state.albumResults.size),
+                    Triple("artists", "Nghệ sĩ", state.artistResults.size),
+                    Triple("genres", "Thể loại", state.genreResults.size)
+                ).forEach { (category, label, count) ->
                     FilterChip(
                         selected = selectedCategory == category,
                         onClick = { selectedCategory = category },
-                        label = { Text(label) }
+                        label = {
+                            Text(if (state.isFiltering) label else "$label ($count)")
+                        },
+                        modifier = Modifier.testTag("search-category-$category")
                     )
                 }
             }
@@ -294,17 +335,27 @@ fun SearchScreen(
                 MusicFlowStatusPanel(
                     kind = MusicFlowStatusKind.EMPTY,
                     title = "Không tìm thấy bài hát nào trên thiết bị",
-                    description = "Hãy thêm tệp nhạc hoặc kiểm tra quyền đọc âm thanh.",
+                    description = "Tìm kiếm chỉ dùng thư viện âm thanh Android đã quét. " +
+                        "Bạn có thể chọn tệp nhạc thủ công trong Thư viện.",
                     actionLabel = "Quét lại",
                     onAction = onRefresh
                 )
+                if (onOpenLibrary != null) {
+                    OutlinedButton(
+                        onClick = onOpenLibrary,
+                        modifier = Modifier.fillMaxWidth().testTag("search-open-library")
+                    ) {
+                        Text("Mở Thư viện để chọn tệp nhạc")
+                    }
+                }
             }
 
             state.query.isBlank() -> {
                 MusicFlowStatusPanel(
                     kind = MusicFlowStatusKind.INFO,
                     title = "Bạn muốn nghe gì?",
-                    description = "Nhập tên bài hát, album, nghệ sĩ hoặc thể loại để tìm kiếm."
+                    description = "Nhập từ khóa để tìm nhạc đã được quét trên thiết bị. " +
+                        "Không cần đăng nhập để tìm hoặc phát nhạc offline."
                 )
             }
 
@@ -359,7 +410,18 @@ fun SearchScreen(
                 MusicFlowStatusPanel(
                     kind = MusicFlowStatusKind.EMPTY,
                     title = "Không tìm thấy bài hát phù hợp",
-                    description = "Thử từ khóa ngắn hơn hoặc tìm bằng tên nghệ sĩ."
+                    description = if (
+                        state.albumResults.isNotEmpty() ||
+                        state.artistResults.isNotEmpty() ||
+                        state.genreResults.isNotEmpty()
+                    ) {
+                        "Không có bài hát khớp trực tiếp. Bạn có kết quả ở mục Album, " +
+                            "Nghệ sĩ hoặc Thể loại phía trên."
+                    } else {
+                        "Thử từ khóa ngắn hơn, tìm không dấu hoặc nhập tên nghệ sĩ."
+                    },
+                    actionLabel = "Xóa tìm kiếm",
+                    onAction = { onQueryChange("") }
                 )
             }
 

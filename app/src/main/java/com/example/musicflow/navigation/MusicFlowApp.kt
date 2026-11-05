@@ -286,6 +286,7 @@ fun MusicFlowApp(
                 entry<SearchTab> {
                     SearchRoute(
                         initialQuery = savedSearchQuery,
+                        onOpenLibrary = { switchTab(LibraryTab) },
                         onQueueNext = if (state.connected && state.hasMedia && state.canEditQueue &&
                             !state.shuffleEnabled && state.repeatMode != Player.REPEAT_MODE_ONE) {
                             { song -> onQueueDeviceSong(song, QueuePlacement.NEXT) }
