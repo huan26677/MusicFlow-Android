@@ -1,5 +1,6 @@
 package com.example.musicflow.feature.account
 
+import android.net.Uri
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -49,7 +50,11 @@ private fun draftStatus(value: String): String = when (value) {
 }
 
 @Composable
-internal fun CreatorDraftStudio(rpc: suspend (String, JSONObject) -> String) {
+internal fun CreatorDraftStudio(
+    rpc: suspend (String, JSONObject) -> String,
+    upload: suspend (String, String, Uri) -> Unit = { _, _, _ -> error("QA only") },
+    download: suspend (String, Uri) -> Unit = { _, _ -> error("QA only") }
+) {
     val scope = rememberCoroutineScope()
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -69,6 +74,7 @@ internal fun CreatorDraftStudio(rpc: suspend (String, JSONObject) -> String) {
     var creditRole by remember { mutableStateOf("performer") }
     var credits by remember { mutableStateOf<List<CreatorCredit>>(emptyList()) }
     var confirmSubmit by remember { mutableStateOf(false) }
+    var attachmentsReady by remember { mutableStateOf(false) }
 
     fun reload() {
         if (busy) return
@@ -87,6 +93,7 @@ internal fun CreatorDraftStudio(rpc: suspend (String, JSONObject) -> String) {
     }
 
     fun newDraft() {
+        attachmentsReady = false
         editingId = null; title = ""; artist = ""; album = ""; holder = ""
         license = "UNVERIFIED"; evidence = ""; streaming = false
         credits = emptyList(); creditName = ""; creditRole = "performer"
@@ -94,6 +101,7 @@ internal fun CreatorDraftStudio(rpc: suspend (String, JSONObject) -> String) {
     }
 
     fun editDraft(row: JSONObject) {
+        attachmentsReady = false
         editingId = row.optString("id")
         title = row.optString("title")
         artist = row.optString("artist")
@@ -177,7 +185,8 @@ internal fun CreatorDraftStudio(rpc: suspend (String, JSONObject) -> String) {
         Text("Creator Studio • Bản nháp tác phẩm", style = MaterialTheme.typography.titleMedium)
         Text(
             "Lưu thông tin tác phẩm và tín chỉ trên Supabase. " +
-                "Duyệt hồ sơ không đồng nghĩa được phát hành; chưa có tính năng tải bản thu lên.",
+                "Sau khi lưu nháp, tải bản thu thử và bằng chứng bản quyền riêng tư. " +
+                "Duyệt hồ sơ không đồng nghĩa được phát hành online.",
             style = MaterialTheme.typography.bodySmall
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -291,6 +300,14 @@ internal fun CreatorDraftStudio(rpc: suspend (String, JSONObject) -> String) {
                 modifier = Modifier.fillMaxWidth().testTag("draft-save")
             ) { Text("Lưu nháp lên Supabase") }
             if (editingId != null) {
+                CreatorPrivateAttachmentPanel(
+                    draftId = editingId!!,
+                    editable = true,
+                    rpc = rpc,
+                    upload = upload,
+                    download = download,
+                    onReadyChange = { attachmentsReady = it }
+                )
                 val saved = drafts.firstOrNull { it.optString("id") == editingId }
                 val savedCredits = saved?.optJSONArray("credits")
                 val matchesSaved = saved != null &&
@@ -313,7 +330,7 @@ internal fun CreatorDraftStudio(rpc: suspend (String, JSONObject) -> String) {
                     onClick = { confirmSubmit = true },
                     enabled = !busy && CreatorDraftRules.canSubmit(
                         title, artist, holder, license, evidence, streaming, credits
-                    ) && matchesSaved,
+                    ) && matchesSaved && attachmentsReady,
                     modifier = Modifier.fillMaxWidth().testTag("draft-submit")
                 ) { Text("Gửi bản nháp đã lưu để xét duyệt") }
             }
@@ -341,7 +358,10 @@ internal fun CreatorDraftStudio(rpc: suspend (String, JSONObject) -> String) {
 }
 
 @Composable
-internal fun CreatorDraftReviewPanel(rpc: suspend (String, JSONObject) -> String) {
+internal fun CreatorDraftReviewPanel(
+    rpc: suspend (String, JSONObject) -> String,
+    download: suspend (String, Uri) -> Unit = { _, _ -> error("QA only") }
+) {
     val scope = rememberCoroutineScope()
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -390,6 +410,13 @@ internal fun CreatorDraftReviewPanel(rpc: suspend (String, JSONObject) -> String
                     Text("• ${credit.optString("name")} — ${credit.optString("contribution")}")
                 }
             }
+            CreatorPrivateAttachmentPanel(
+                draftId = row.optString("id"),
+                editable = false,
+                rpc = rpc,
+                upload = { _, _, _ -> error("Reviewer cannot upload") },
+                download = download
+            )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(
                     onClick = { confirm = row to true },

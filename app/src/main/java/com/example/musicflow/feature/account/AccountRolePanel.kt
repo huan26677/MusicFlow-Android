@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import android.net.Uri
 import com.example.musicflow.BuildConfig
 import com.example.musicflow.core.account.AccountIdentity
 import com.example.musicflow.core.account.MusicFlowAccess
@@ -42,6 +43,8 @@ import org.json.JSONObject
 internal fun AccountRolePanel(
     identity: AccountIdentity,
     onClose: () -> Unit,
+    upload: suspend (String, String, Uri) -> Unit = { _, _, _ -> error("QA only") },
+    download: suspend (String, Uri) -> Unit = { _, _ -> error("QA only") },
     rpc: suspend (String, JSONObject) -> String
 ) {
     val scope = rememberCoroutineScope()
@@ -194,7 +197,7 @@ internal fun AccountRolePanel(
                 }
 
                 if (access.isCreator) {
-                    CreatorDraftStudio(rpc = rpc)
+                    CreatorDraftStudio(rpc = rpc, upload = upload, download = download)
                 }
                 if (BuildConfig.DEBUG && access.isDeveloper) {
                     HorizontalDivider()
@@ -348,7 +351,7 @@ internal fun AccountRolePanel(
                     }
                 }
                 if (access.canReviewCreators) {
-                    CreatorDraftReviewPanel(rpc = rpc)
+                    CreatorDraftReviewPanel(rpc = rpc, download = download)
                 }
                 if (access.canModerateCatalog) {
                     HorizontalDivider()

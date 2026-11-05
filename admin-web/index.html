@@ -124,6 +124,30 @@ async function authFetch(path,body){
   return raw?JSON.parse(raw):null;
 }
 const rpc=(name,body)=>authFetch("/rest/v1/rpc/"+name,body);
+async function downloadCreatorPrivate(path,kind,mime){
+  if(!session || !/^[a-f0-9-]{36}\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.[a-z0-9]{3,4}$/.test(path)){
+    throw Error("Đường dẫn chứng cứ không hợp lệ.");
+  }
+  const response=await fetch(session.url+
+    "/storage/v1/object/authenticated/musicflow-creator-submissions/"+path,{
+      method:"GET",
+      headers:{"apikey":session.key,"Authorization":"Bearer "+session.token}
+    });
+  if(!response.ok)throw Error("Không có quyền tải tệp hoặc phiên đã hết hạn ("+response.status+").");
+  if(Number(response.headers.get("content-length")||"0")>6291456){
+    throw Error("Tệp vượt giới hạn bản demo.");
+  }
+  const blob=await response.blob();
+  if(blob.size>6291456)throw Error("Tệp vượt giới hạn bản demo.");
+  const ext=({"application/pdf":".pdf","image/jpeg":".jpg","image/png":".png",
+    "audio/mpeg":".mp3","audio/mp4":".m4a","audio/ogg":".ogg",
+    "audio/flac":".flac","audio/wav":".wav","audio/x-wav":".wav"})[mime]||".bin";
+  const anchor=document.createElement("a");
+  const objectUrl=URL.createObjectURL(blob);
+  anchor.href=objectUrl;anchor.download="musicflow-"+kind+ext;
+  anchor.click();
+  setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);
+}
 function reason(){
   const result=$("reason").value.trim();
   if(result.length<5)throw Error("Hãy ghi lý do ít nhất 5 ký tự.");
@@ -234,7 +258,7 @@ $("load-creators").addEventListener("click",()=>perform(async()=>{
 $("load-drafts").addEventListener("click",()=>perform(async()=>{
   const rows=await rpc("musicflow_pending_drafts",{});
   const list=$("draft-list");list.replaceChildren();
-  rows.forEach(draft=>{
+  for(const draft of rows){
     const row=node("div","",list);row.className="item";
     node("h3",draft.title+" — "+draft.artist,row);
     node("p","Người gửi: "+draft.creator_email+" · Chủ bản ghi âm: "+
@@ -245,6 +269,16 @@ $("load-drafts").addEventListener("click",()=>perform(async()=>{
     (draft.credits||[]).forEach(credit=>
       node("p",credit.name+" — "+credit.contribution,row)
     );
+    const attachments=await rpc("musicflow_creator_upload_list",{p_draft_id:draft.id});
+    attachments.forEach(file=>{
+      const kind=file.kind==="audio"?"Bản thu mẫu":"Chứng cứ bản quyền";
+      node("span",kind+" · "+(file.state==="uploaded"?"Đã lưu":"Chưa tải xong"),row);
+      if(file.state==="uploaded"){
+        btn("Tải "+kind+" để xem",row,()=>perform(()=>
+          downloadCreatorPrivate(file.path,file.kind,file.mime)
+        ),true);
+      }
+    });
     [true,false].forEach(approve=>{
       btn(approve?"Duyệt hồ sơ":"Yêu cầu chỉnh sửa",row,()=>perform(async()=>{
         const why=reason();
@@ -255,7 +289,7 @@ $("load-drafts").addEventListener("click",()=>perform(async()=>{
         row.remove();
       }),!approve);
     });
-  });
+  }
   if(rows.length===0)node("p","Không có hồ sơ tác phẩm chờ duyệt.",list);
 }));
 $("load-tracks").addEventListener("click",()=>perform(async()=>{

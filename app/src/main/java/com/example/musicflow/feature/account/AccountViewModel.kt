@@ -1,6 +1,7 @@
 package com.example.musicflow.feature.account
 
 import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -59,6 +60,10 @@ class AccountViewModel(
 
     /** Uses the existing authenticated AccountApi session; RPCs recheck roles in SQL. */
     suspend fun roleRpc(name: String, body: JSONObject): String = api.roleRpc(name, body)
+    suspend fun uploadCreatorFile(draftId: String, kind: String, uri: Uri) =
+        api.uploadCreatorFile(draftId, kind, uri)
+    suspend fun downloadCreatorFile(path: String, destination: Uri) =
+        api.downloadCreatorFile(path, destination)
 
     init {
         viewModelScope.launch {

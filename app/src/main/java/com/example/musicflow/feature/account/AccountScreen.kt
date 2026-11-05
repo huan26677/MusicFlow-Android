@@ -102,7 +102,9 @@ fun AccountRoute(
             AccountRolePanel(
                 identity = account,
                 onClose = { rolesOpen = false },
-                rpc = model::roleRpc
+                rpc = model::roleRpc,
+                upload = model::uploadCreatorFile,
+                download = model::downloadCreatorFile
             )
         }
     }

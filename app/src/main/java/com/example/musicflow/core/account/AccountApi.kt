@@ -116,6 +116,11 @@ internal class AccountTokenStore(context: Context) {
 }
 
 class AccountApi(context: Context) {
+    private val creatorStorage = CreatorPrivateStorage(
+        context.applicationContext,
+        token = { accessToken },
+        rpc = { name, args -> roleRpc(name, args) }
+    )
     private val store = AccountTokenStore(context)
     private val base = BuildConfig.SUPABASE_URL.trimEnd('/')
     private val publishableKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY
@@ -294,10 +299,19 @@ class AccountApi(context: Context) {
                 "musicflow_creator_my_drafts",
                 "musicflow_creator_submit_draft",
                 "musicflow_pending_drafts",
-                "musicflow_review_draft"
+                "musicflow_review_draft",
+                "musicflow_creator_upload_reserve",
+                "musicflow_creator_upload_confirm",
+                "musicflow_creator_upload_list"
             )) { "Chức năng chưa được hỗ trợ." }
             cloudRequest("POST", "/rest/v1/rpc/$name", args)
         }
+
+    suspend fun uploadCreatorFile(draftId: String, kind: String, uri: android.net.Uri) =
+        creatorStorage.upload(draftId, kind, uri)
+
+    suspend fun downloadCreatorFile(path: String, destination: android.net.Uri) =
+        creatorStorage.download(path, destination)
 
     private fun applySession(reply: JSONObject): Boolean {
         val access = reply.optString("access_token")
