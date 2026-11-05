@@ -18,6 +18,7 @@
 |---|---|
 | **ĐÍCH DỰ ÁN BÁO CÁO (quyết định mới nhất)** | **APK demo tải/cài trực tiếp, nghiệm thu trên emulator + báo cáo rồi TẠM DỪNG; KHÔNG phát hành thật, email thật, điện thoại thật, Google Play hoặc cloud hai thiết bị thật.** `docs/Muc_Tieu_Dung_Tam_APK_Bao_Cao.md` |
 | **TRẠNG THÁI DEMO** | **HOÀN THÀNH BẢN DEMO/BÁO CÁO — TẠM DỪNG**. `dist/MusicFlow-1.0-Demo-Android.apk` 30.230.097 byte; SHA-256 `ACE9AD765F75C7939C513210E2BBC1555F95E6504636303B423FB70598C2E750`; release-mode ký demo, WAV/MP3/FLAC smoke trên **chính APK bàn giao** API 30 PASS. `docs/Bao_Cao_Ban_Giao_MusicFlow_Demo_APK.md` |
+| **Kiểm tra bổ sung 2026-11-05 — Tài khoản/Auth/Admin** | **Đã chạy trực tiếp trên APK demo/emulator**: tab Account, Signup/Signin với dữ liệu trống/thiếu và thông báo lỗi **PASS phạm vi UI validation**; Supabase email provider bật, Google provider tắt, email confirmation bắt buộc; backend hiện **0 Auth user, 0 profile, 0 entitlement**. **Đăng ký/xác nhận email/đăng nhập thành công E2E CHƯA THỬ vì không dùng email thật**. **Chưa có giao diện Admin app/web; chỉ có công cụ CLI quản trị nội dung**. 17/17 JVM liên quan tài khoản/OAuth PASS. `docs/Kiem_Tra_Tai_Khoan_Dang_Nhap_Admin_v1.md`; `qa-logs/account-auth-admin-audit-v1.log`. Demo vẫn ở trạng thái tạm dừng |
 | HEAD Git nền đã đối chiếu | `1b8491d` (`main = origin/main`) — RC QA/Packaging Part 3 đã commit/push; **Part 4 và demo APK/tài liệu đang ở local workspace, chưa commit/push**. Tệp APK `dist/*.apk` được bỏ khỏi Git, phải lấy từ máy hoặc tái build bằng script |
 | Phạm vi MusicFlow 1.0 | **Đã chốt**: file offline người dùng tự tải/tự lưu **nghe bình thường, không xét duyệt giấy phép**; chỉ online từ MusicFlow cần quyền streaming; có library + cloud; dùng cá nhân trước; xem `docs/Pham_Vi_MusicFlow_1_0.md` |
 | Quyết định mới 2026-10-29 | Phát triển Full Product trước là kế hoạch ban đầu; **đã được thay thế ở điểm dừng hiện tại bằng mục tiêu APK demo/báo cáo, không làm email/Google/cloud hai thiết bị thật** |
@@ -322,6 +323,13 @@ Phân biệt ba thuật ngữ: **Đã triển khai** = có code; **QA PASS** = c
 - **Mục 1/2/7:** sửa khi môi trường, mục tiêu hay quy trình thay đổi.
 
 ## 8. Nhật ký thay đổi — giữ lịch sử
+
+### 2026-11-05 — KIỂM TRA BỔ SUNG TÀI KHOẢN / ĐĂNG KÝ / ĐĂNG NHẬP / ADMIN
+
+- Git HEAD `8095a22`, working tree sạch đầu lượt; dùng APK demo đã bàn giao, **không sửa Kotlin production**. Tạo AVD QA API 30 riêng, cài `dist/MusicFlow-1.0-Demo-Android.apk` và cold launch PASS; tab Account có email, mật khẩu, `Đăng ký Free` và `Đăng nhập`. Ở form trống/thiếu mật khẩu, hai thao tác trả lỗi xác minh dữ liệu đúng, không tạo tài khoản.
+- Supabase Auth settings trực tiếp `/auth/v1/settings`: `external.email=true`, `external.google=false`, `mailer_autoconfirm=false`; Google Login trong app bị khóa và thông báo provider chưa được cấu hình. SQL **read-only**: `auth.users=0`, `public.account_profiles=0`, `public.account_entitlements=0`; bảng hồ sơ/entitlement có RLS, không thấy bảng role/admin trong schema `public`. **Không có signup confirm email hay signin thành công E2E vì chủ dự án không dùng email thật**. 17/17 JVM (5 AccountTier + 12 GoogleOAuthFlow) PASS; không đánh đồng unit tests với E2E.
+- Kiểm tra source `AccountScreen.kt` / `AccountApi.kt` và navigation: **có giao diện tài khoản Guest/Free/Premium**, **chưa có giao diện Admin Android/web**. Có `scripts/musicflow_licensed_upload.py` CLI `stage`/`publish` dùng quyền backend riêng, không phải dashboard admin.
+- QA AVD `MusicFlow_AuthQA_API30` và thư mục còn sót đã được xóa; giữ nguyên bốn AVD gốc. Không đổi Supabase schema, không thêm người dùng, không dùng mật khẩu/email thật hoặc mở phát hành. Báo cáo `docs/Kiem_Tra_Tai_Khoan_Dang_Nhap_Admin_v1.md`; log `qa-logs/account-auth-admin-audit-v1.log`. **Trạng thái dự án demo/báo cáo: vẫn hoàn thành và tạm dừng**.
 
 ### 2026-11-01 — MUSICFLOW DEMO APK BÀN GIAO — HOÀN THÀNH PHẠM VI BÁO CÁO / TẠM DỪNG
 
