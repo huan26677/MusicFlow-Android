@@ -10,8 +10,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.ui.platform.testTag
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -172,25 +179,33 @@ fun MusicFlowApp(
 
                         tabs.forEach { tab ->
                             val label = when (tab) {
-                                HomeTab -> "Home"
-                                SearchTab -> "Search"
-                                LibraryTab -> "Library"
-                                else -> "Account"
+                                HomeTab -> "Trang chủ"
+                                SearchTab -> "Tìm kiếm"
+                                LibraryTab -> "Thư viện"
+                                else -> "Tài khoản"
                             }
 
-                            val symbol = when (tab) {
-                                HomeTab -> "⌂"
-                                SearchTab -> "⌕"
-                                LibraryTab -> "♫"
-                                else -> "⚙"
+                            val tabIcon = when (tab) {
+                                HomeTab -> Icons.Filled.Home
+                                SearchTab -> Icons.Filled.Search
+                                LibraryTab -> Icons.AutoMirrored.Filled.List
+                                else -> Icons.Filled.Person
                             }
 
                             NavigationBarItem(
                                 selected = currentRoute == tab ||
                                     (tab == LibraryTab && currentRoute is FavoritesRoute),
                                 onClick = { switchTab(tab) },
-                                icon = { Text(symbol) },
-                                label = { Text(label) }
+                                icon = { Icon(tabIcon, contentDescription = null) },
+                                label = { Text(label) },
+                                modifier = Modifier.testTag(
+                                    when (tab) {
+                                        HomeTab -> "nav-home"
+                                        SearchTab -> "nav-search"
+                                        LibraryTab -> "nav-library"
+                                        else -> "nav-account"
+                                    }
+                                )
                             )
                         }
                     }

@@ -21,7 +21,7 @@ class AccountAuthUiTest {
     @Test
     fun signupTabInlineErrorsGoogleDisabledAndGuestNavigation() {
         ActivityScenario.launch(MainActivity::class.java).use {
-            rule.onNodeWithText("Account").performClick()
+            rule.onNodeWithText("Tài khoản").performClick()
             rule.onNodeWithTag("account-signup-tab").performClick()
             rule.onNodeWithTag("account-confirm-password").assertExists()
             rule.onNodeWithTag("account-submit").performClick()
@@ -33,7 +33,7 @@ class AccountAuthUiTest {
             rule.onNodeWithTag("account-scroll")
                 .performScrollToNode(hasTestTag("account-guest"))
             rule.onNodeWithTag("account-guest").performClick()
-            rule.onNodeWithText("Home").assertExists()
+            rule.onNodeWithText("Trang chủ").assertExists()
         }
     }
 }

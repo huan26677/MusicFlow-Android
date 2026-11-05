@@ -285,7 +285,7 @@ fun LibraryScreen(
                 }
 
                 Button(onClick = onPickManual) {
-                    Text("Chọn MP3")
+                    Text("Chọn tệp nhạc")
                 }
             }
 
@@ -294,7 +294,7 @@ fun LibraryScreen(
                     kind = MusicFlowStatusKind.PERMISSION,
                     title = "Cần quyền truy cập nhạc",
                     description = "Cho phép đọc âm thanh để quét thư viện Android. " +
-                        "Bạn vẫn có thể chọn tệp riêng bằng nút Chọn MP3 ở trên. " +
+                        "Bạn vẫn có thể chọn tệp âm thanh riêng bằng nút Chọn tệp nhạc. " +
                         "Nếu đã từ chối nhiều lần, hãy kiểm tra quyền trong Cài đặt.",
                     actionLabel = "Cấp quyền",
                     onAction = onRefresh
@@ -346,7 +346,7 @@ fun LibraryScreen(
                             kind = MusicFlowStatusKind.EMPTY,
                             title = "Thư viện chưa có nhạc",
                             description = "Không tìm thấy bài hát nào được Android phân loại " +
-                                "là nhạc. Hãy dùng nút Chọn MP3 ở phía trên để mở tệp thủ công."
+                                "là nhạc. Hãy chọn tệp nhạc thủ công (MP3, FLAC, WAV...)."
                         )
                     }
 
@@ -430,7 +430,7 @@ fun LibraryScreen(
                                 description = if (favoritesOnly) {
                                     "Chạm vào hình trái tim trên bài hát để lưu vào mục yêu thích."
                                 } else {
-                                    "Hãy quét lại thư viện hoặc chọn tệp MP3 từ thiết bị."
+                                    "Hãy quét lại thư viện hoặc chọn tệp âm thanh từ thiết bị."
                                 },
                                 actionLabel = if (favoritesOnly) null else "Quét lại",
                                 onAction = if (favoritesOnly) null else onRefresh

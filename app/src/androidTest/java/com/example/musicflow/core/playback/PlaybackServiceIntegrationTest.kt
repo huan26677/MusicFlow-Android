@@ -686,7 +686,7 @@ class PlaybackServiceIntegrationTest {
             composeRule.onNodeWithText("Mở thư viện thiết bị")
                 .performClick()
 
-            composeRule.onNodeWithText("Chọn MP3")
+            composeRule.onNodeWithText("Chọn tệp nhạc")
                 .performClick()
 
             composeRule.waitUntil(10_000L) {
@@ -938,10 +938,10 @@ composeRule.onNodeWithText("‹ Trở về")
 // Bottom navigation is hidden while Now Playing is displayed and reappears
 // after the NavDisplay transition. Wait for the semantics tree to settle.
 composeRule.waitUntil(10_000L) {
-    composeRule.onAllNodesWithText("Home")
+composeRule.onAllNodesWithText("Trang chủ")
         .fetchSemanticsNodes().isNotEmpty()
 }
-composeRule.onNodeWithText("Home")
+composeRule.onNodeWithText("Trang chủ")
     .performClick()
 
 composeRule.onNodeWithText("Nghe gần đây")

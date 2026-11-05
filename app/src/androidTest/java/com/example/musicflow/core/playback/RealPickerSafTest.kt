@@ -287,7 +287,7 @@ class RealPickerSafTest {
                 text.startsWith("musicflow_real_picker_")
             val isActionLabel =
                 text.lowercase() in actionLabels ||
-                text.equals("Chọn MP3", ignoreCase = true)
+                text.equals("Chọn tệp nhạc", ignoreCase = true)
             val isImportantView =
                 (node.viewIdResourceName ?: "").let { id ->
                     id.contains(

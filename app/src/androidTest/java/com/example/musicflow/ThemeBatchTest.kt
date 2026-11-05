@@ -40,7 +40,7 @@ class ThemeBatchTest {
                 MainActivity::class.java
             )
 
-            composeRule.onNodeWithText("Account")
+            composeRule.onNodeWithText("Tài khoản")
                 .performClick()
 
             // Actual Account filter chip is labeled "Tối". Scroll because
@@ -66,7 +66,7 @@ class ThemeBatchTest {
                 MainActivity::class.java
             )
 
-            composeRule.onNodeWithText("Account")
+            composeRule.onNodeWithText("Tài khoản")
                 .performClick()
 
             composeRule.onNodeWithTag("account-scroll")

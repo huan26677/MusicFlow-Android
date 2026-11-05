@@ -84,8 +84,8 @@ class MusicFlowUiFoundationTest {
         compose.onNodeWithTag("musicflow-status-empty").assertExists()
         compose.onNodeWithText("Thư viện chưa có nhạc").assertExists()
         // The toolbar picker is always available without any account.
-        compose.onAllNodesWithText("Chọn MP3").assertCountEquals(1)
-        compose.onAllNodesWithText("Chọn MP3")[0].performClick()
+        compose.onAllNodesWithText("Chọn tệp nhạc").assertCountEquals(1)
+        compose.onAllNodesWithText("Chọn tệp nhạc")[0].performClick()
         compose.runOnIdle { assertEquals(1, picked) }
     }
 

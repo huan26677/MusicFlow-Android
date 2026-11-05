@@ -75,6 +75,13 @@ fun HomeRoute(
     val actionError by homeViewModel.actionError
         .collectAsStateWithLifecycle()
 
+    val guidePreferences = remember(context) {
+        context.getSharedPreferences("musicflow_home_guide_v3", android.content.Context.MODE_PRIVATE)
+    }
+    var showFirstUseGuide by rememberSaveable {
+        mutableStateOf(!guidePreferences.getBoolean("dismissed", false))
+    }
+
     HomeScreen(
         state = state,
         historyState = historyState,
@@ -91,7 +98,12 @@ fun HomeRoute(
         actionError = actionError,
         onDismissActionError = homeViewModel::dismissActionError,
         onRemoveRecentSong = homeViewModel::removeRecentSong,
-        onClearHistory = homeViewModel::clearRecentHistory
+        onClearHistory = homeViewModel::clearRecentHistory,
+        showFirstUseGuide = showFirstUseGuide,
+        onDismissFirstUseGuide = {
+            guidePreferences.edit().putBoolean("dismissed", true).apply()
+            showFirstUseGuide = false
+        }
     )
 }
 
@@ -112,7 +124,9 @@ fun HomeScreen(
     onDismissActionError: () -> Unit,
     onRemoveRecentSong: (String) -> Unit,
     onClearHistory: () -> Unit,
-    onOpenOnlineCatalog: () -> Unit = {}
+    onOpenOnlineCatalog: () -> Unit = {},
+    showFirstUseGuide: Boolean = false,
+    onDismissFirstUseGuide: () -> Unit = {}
 ) {
     var showClearDialog by rememberSaveable {
         mutableStateOf(false)
@@ -131,10 +145,34 @@ fun HomeScreen(
         )
 
         Text(
-            text = "Khám phá và thưởng thức nhạc của bạn.",
+            text = "Chọn nhạc yêu thích và nghe theo cách của bạn.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
+        if (state.hasMedia) {
+            OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Tiếp tục nghe", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        state.title, style = MaterialTheme.typography.titleLarge,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        state.artist, style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis
+                    )
+                    Button(
+                        onClick = onOpenPlayer,
+                        modifier = Modifier.fillMaxWidth().testTag("home-continue-listening")
+                    ) { Text("Mở trình phát nhạc") }
+                }
+            }
+        }
 
         Card(
             modifier = Modifier.fillMaxWidth()
@@ -144,105 +182,59 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "Khám phá nhạc",
+                    text = "Bắt đầu nghe",
                     style = MaterialTheme.typography.titleLarge
                 )
 
                 Button(
                     onClick = onOpenLibrary,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().testTag("home-library-action")
                 ) {
                     Text("Mở thư viện thiết bị")
                 }
 
                 OutlinedButton(
                     onClick = onOpenSearch,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().testTag("home-search-action")
                 ) {
                     Text("Tìm kiếm bài hát")
                 }
 
                 OutlinedButton(
                     onClick = onOpenPlaylists,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().testTag("home-playlist-action")
                 ) {
                     Text("Danh sách phát của tôi")
-                }
-
-                OutlinedButton(
-                    onClick = onOpenOnlineCatalog,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Khám phá nhạc online")
-                }
-
-                HorizontalDivider()
-
-                Text(
-                    text = "Yêu thích của tôi",
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                OutlinedButton(
-                    onClick = onOpenFavoriteSongs,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("♥ Bài hát yêu thích ($favoriteSongCount)")
-                }
-
-                OutlinedButton(
-                    onClick = onOpenFavoriteAlbums,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("♥ Album yêu thích ($favoriteAlbumCount)")
                 }
             }
         }
 
-        if (state.hasMedia) {
+        if (showFirstUseGuide) {
             OutlinedCard(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().testTag("home-first-use-guide")
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Bài hát hiện tại",
+                        text = "Mới dùng MusicFlow?",
                         style = MaterialTheme.typography.titleMedium
                     )
-
                     Text(
-                        text = state.title,
-                        style = MaterialTheme.typography.titleLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    Text(
-                        text = state.artist,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    Text(
-                        text = state.status,
+                        "1. Mở Thư viện để quét nhạc hoặc chọn tệp âm thanh.\n" +
+                            "2. Chạm vào một bài hát để phát.\n" +
+                            "3. Dùng trình phát thu nhỏ để tạm dừng hoặc mở màn hình phát.",
                         style = MaterialTheme.typography.bodySmall
                     )
-
-                    TextButton(onClick = onOpenPlayer) {
-                        Text("Mở Now Playing")
+                    TextButton(
+                        onClick = onDismissFirstUseGuide,
+                        modifier = Modifier.testTag("home-guide-dismiss")
+                    ) {
+                        Text("Đã hiểu")
                     }
                 }
             }
-        } else {
-            Text(
-                text = "Chưa có bài hát nào đang được chọn.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
 
         Row(
@@ -360,6 +352,27 @@ fun HomeScreen(
                         }
                     }
                 }
+            }
+        }
+
+        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text("Khám phá thêm", style = MaterialTheme.typography.titleMedium)
+                OutlinedButton(
+                    onClick = onOpenFavoriteSongs,
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("♥ Bài hát yêu thích ($favoriteSongCount)") }
+                OutlinedButton(
+                    onClick = onOpenFavoriteAlbums,
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("♥ Album yêu thích ($favoriteAlbumCount)") }
+                OutlinedButton(
+                    onClick = onOpenOnlineCatalog,
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Khám phá nhạc online") }
             }
         }
     }

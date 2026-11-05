@@ -531,7 +531,7 @@ fun NowPlayingScreen(
         }
 
         TextButton(onClick = onPickFiles) {
-            Text("Chọn MP3 từ thiết bị")
+                Text("Chọn tệp nhạc từ thiết bị")
         }
     }
 }
