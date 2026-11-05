@@ -128,6 +128,18 @@ class AccountApi(context: Context) {
             .optJSONObject("external")?.optBoolean("google", false) == true
     }
 
+    /**
+     * Supabase hosted Auth controls email confirmation on the server.
+     * This read-only settings check cannot disable it from Android.
+     * null = setting unavailable, true = user must confirm email.
+     */
+    suspend fun emailConfirmationRequired(): Boolean? = withContext(Dispatchers.IO) {
+        val settings = JSONObject(request("GET", "/auth/v1/settings"))
+        if (!settings.has("mailer_autoconfirm") ||
+            settings.isNull("mailer_autoconfirm")
+        ) null else !settings.getBoolean("mailer_autoconfirm")
+    }
+
     fun prepareGoogleSignIn(): String {
         check(isConfigured) { "Supabase chưa được cấu hình." }
         val pending = GoogleOAuthFlow.create()

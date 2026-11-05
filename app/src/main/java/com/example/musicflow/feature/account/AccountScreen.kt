@@ -12,12 +12,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -26,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -35,6 +39,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -44,7 +51,8 @@ import com.example.musicflow.ui.components.MusicFlowStatusPanel
 @Composable
 fun AccountRoute(
     themeMode: String,
-    onThemeModeChange: (String) -> Unit
+    onThemeModeChange: (String) -> Unit,
+    onContinueAsGuest: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val factory = remember(context) {
@@ -57,6 +65,9 @@ fun AccountRoute(
         state, themeMode, onThemeModeChange,
         onEmailChange = model::emailChanged,
         onPasswordChange = model::passwordChanged,
+        onConfirmPasswordChange = model::confirmPasswordChanged,
+        onAuthModeChange = model::authModeChanged,
+        onContinueAsGuest = onContinueAsGuest,
         onDisplayNameChange = model::displayNameChanged,
         onSignIn = model::signIn,
         onSignUp = model::signUp,
@@ -78,7 +89,8 @@ fun AccountRoute(
         onSyncHistory = model::syncHistory,
         onRelink = model::relink,
         onDeleteCloudPlaylist = model::deleteRemotePlaylist,
-        onDeleteCloudFavorite = model::deleteRemoteFavorite
+        onDeleteCloudFavorite = model::deleteRemoteFavorite,
+        onDemoModeChange = model::demoModeChanged
     )
 }
 
@@ -89,6 +101,9 @@ fun AccountScreen(
     onThemeModeChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
+    onConfirmPasswordChange: (String) -> Unit = {},
+    onAuthModeChange: (AccountAuthMode) -> Unit = {},
+    onContinueAsGuest: () -> Unit = {},
     onDisplayNameChange: (String) -> Unit,
     onSignIn: () -> Unit,
     onSignUp: () -> Unit,
@@ -99,36 +114,24 @@ fun AccountScreen(
     onSyncHistory: () -> Unit,
     onRelink: (CloudPendingMatch, String) -> Unit,
     onDeleteCloudPlaylist: (String) -> Unit,
-    onDeleteCloudFavorite: (String) -> Unit
+    onDeleteCloudFavorite: (String) -> Unit,
+    onDemoModeChange: (Boolean) -> Unit = {}
 ) {
     var confirming by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    var confirmPasswordVisible by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .testTag("account-scroll")
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Tài khoản", style = MaterialTheme.typography.headlineMedium)
-        Text("Giao diện", style = MaterialTheme.typography.titleLarge)
-        Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            listOf(
-                "system" to "Hệ thống",
-                "dark" to "Tối",
-                "light" to "Sáng"
-            ).forEach { (mode, label) ->
-                FilterChip(
-                    selected = themeMode == mode,
-                    onClick = { onThemeModeChange(mode) },
-                    label = { Text(label) }
-                )
-            }
-        }
-        Text("Bạn có thể đổi giao diện mà không cần đăng nhập.",
-            style = MaterialTheme.typography.bodySmall)
-        HorizontalDivider()
+        Text("Tài khoản MusicFlow", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            "Đăng nhập để lưu hồ sơ và đồng bộ dữ liệu với Supabase. " +
+                "Bạn vẫn nghe nhạc offline bình thường khi chưa có tài khoản.",
+            style = MaterialTheme.typography.bodyMedium
+        )
         if (state.loading) {
             MusicFlowStatusPanel(
                 kind = MusicFlowStatusKind.LOADING,
@@ -137,72 +140,152 @@ fun AccountScreen(
             )
         }
         if (state.account == null) {
-            Text("Khách — Miễn phí", style = MaterialTheme.typography.titleMedium)
-            Text("Không cần đăng nhập để nghe nhạc offline, dùng Playlist, " +
-                "Lyrics, Equalizer và các tính năng trên thiết bị.")
-            if (!state.configured) {
+            Text("Chào mừng bạn!", style = MaterialTheme.typography.titleLarge)
+            PrimaryTabRow(
+                selectedTabIndex = if (state.authMode == AccountAuthMode.SIGN_IN) 0 else 1
+            ) {
+                Tab(
+                    selected = state.authMode == AccountAuthMode.SIGN_IN,
+                    onClick = {
+                        passwordVisible = false
+                        confirmPasswordVisible = false
+                        onAuthModeChange(AccountAuthMode.SIGN_IN)
+                    },
+                    enabled = !state.loading,
+                    text = { Text("Đăng nhập") },
+                    modifier = Modifier.testTag("account-signin-tab")
+                )
+                Tab(
+                    selected = state.authMode == AccountAuthMode.SIGN_UP,
+                    onClick = {
+                        passwordVisible = false
+                        confirmPasswordVisible = false
+                        onAuthModeChange(AccountAuthMode.SIGN_UP)
+                    },
+                    enabled = !state.loading,
+                    text = { Text("Tạo tài khoản") },
+                    modifier = Modifier.testTag("account-signup-tab")
+                )
+            }
+            if (state.authMode == AccountAuthMode.SIGN_UP) {
+                val confirmationNote = when (state.emailConfirmationRequired) {
+                    false -> "Không cần xác nhận email. Tài khoản được lưu trên Supabase."
+                    true -> "Supabase đang yêu cầu xác nhận email. Bạn cần tắt " +
+                        "Confirm email trong Supabase trước khi đăng ký không cần thư."
+                    null -> "Đăng ký bằng Supabase. Vui lòng kiểm tra kết nối mạng."
+                }
+                Text(
+                    confirmationNote,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (state.emailConfirmationRequired == true) {
+                        MaterialTheme.colorScheme.error
+                    } else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            if (!state.configured && !state.demoMode) {
                 Text("Chưa cấu hình Supabase Auth cho bản build này.",
                     color = MaterialTheme.colorScheme.error)
             } else {
                 OutlinedTextField(
                     value = state.email, onValueChange = onEmailChange,
                     label = { Text("Email") },
-                    singleLine = true, modifier = Modifier.fillMaxWidth()
+                    placeholder = { Text("ten@example.com") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email, imeAction = ImeAction.Next
+                    ),
+                    isError = state.emailError != null,
+                    supportingText = state.emailError?.let { message ->
+                        { Text(message) }
+                    },
+                    modifier = Modifier.fillMaxWidth().testTag("account-email")
                 )
                 OutlinedTextField(
                     value = state.password, onValueChange = onPasswordChange,
                     label = { Text("Mật khẩu") },
-                    visualTransformation = PasswordVisualTransformation(),
-                    singleLine = true, modifier = Modifier.fillMaxWidth()
+                    visualTransformation = if (passwordVisible) {
+                        VisualTransformation.None
+                    } else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        TextButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Text(if (passwordVisible) "Ẩn" else "Hiện")
+                        }
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = if (state.authMode == AccountAuthMode.SIGN_UP) {
+                            ImeAction.Next
+                        } else ImeAction.Done
+                    ),
+                    isError = state.passwordError != null,
+                    supportingText = {
+                        Text(state.passwordError ?: "Bắt buộc — tối thiểu 6 ký tự")
+                    },
+                    modifier = Modifier.fillMaxWidth().testTag("account-password")
                 )
-                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                    val compact = maxWidth < 360.dp ||
-                        LocalDensity.current.fontScale >= 1.35f
-                    if (compact) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(
-                                onClick = onSignIn,
-                                enabled = !state.loading,
-                                modifier = Modifier.fillMaxWidth()
-                            ) { Text("Đăng nhập") }
-                            OutlinedButton(
-                                onClick = onSignUp,
-                                enabled = !state.loading,
-                                modifier = Modifier.fillMaxWidth()
-                            ) { Text("Đăng ký Free") }
-                        }
-                    } else {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = onSignIn, enabled = !state.loading) {
-                                Text("Đăng nhập")
-                            }
-                            OutlinedButton(onClick = onSignUp, enabled = !state.loading) {
-                                Text("Đăng ký Free")
-                            }
-                        }
-                    }
-                }
-                OutlinedButton(
-                    onClick = onGoogleSignIn,
-                    enabled = !state.loading && state.googleAvailable == true
-                ) {
-                    Text("Tiếp tục với Google")
-                }
-                if (state.googleAvailable == false) {
-                    Text(
-                        "Đăng nhập Google chưa được bật trong Supabase. " +
-                            "Cần cấu hình Google Cloud OAuth trước khi sử dụng.",
-                        style = MaterialTheme.typography.bodySmall
+                if (state.authMode == AccountAuthMode.SIGN_UP) {
+                    OutlinedTextField(
+                        value = state.confirmPassword,
+                        onValueChange = onConfirmPasswordChange,
+                        label = { Text("Nhập lại mật khẩu") },
+                        visualTransformation = if (confirmPasswordVisible) {
+                            VisualTransformation.None
+                        } else PasswordVisualTransformation(),
+                        trailingIcon = {
+                            TextButton(onClick = {
+                                confirmPasswordVisible = !confirmPasswordVisible
+                            }) { Text(if (confirmPasswordVisible) "Ẩn" else "Hiện") }
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password, imeAction = ImeAction.Done
+                        ),
+                        isError = state.confirmPasswordError != null,
+                        supportingText = state.confirmPasswordError?.let { message ->
+                            { Text(message) }
+                        },
+                        modifier = Modifier.fillMaxWidth().testTag("account-confirm-password")
                     )
-                } else if (state.googleAvailable == null) {
-                    Text("Chưa xác minh được cấu hình Google Login.",
-                        style = MaterialTheme.typography.bodySmall)
+                }
+                Button(
+                    onClick = if (state.authMode == AccountAuthMode.SIGN_UP) onSignUp else onSignIn,
+                    enabled = !state.loading && state.configured,
+                    modifier = Modifier.fillMaxWidth().testTag("account-submit")
+                ) {
+                    Text(if (state.authMode == AccountAuthMode.SIGN_UP) {
+                        "Tạo tài khoản"
+                    } else "Đăng nhập")
                 }
             }
+            state.error?.let {
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.ERROR,
+                    title = "Không thể xác thực tài khoản",
+                    description = it
+                )
+            }
+            state.message?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+            HorizontalDivider()
+            Text("Hoặc", style = MaterialTheme.typography.bodySmall)
+            OutlinedButton(
+                onClick = onGoogleSignIn,
+                enabled = false,  // Reserved for a later release; never start OAuth here.
+                modifier = Modifier.fillMaxWidth().testTag("account-google-disabled")
+            ) { Text("Tiếp tục với Google") }
+            Text(
+                "Đăng nhập Google chưa hoạt động trong phiên bản này.",
+                style = MaterialTheme.typography.bodySmall
+            )
+            TextButton(
+                onClick = onContinueAsGuest,
+                modifier = Modifier.fillMaxWidth().testTag("account-guest")
+            ) { Text("Tiếp tục nghe nhạc không đăng nhập") }
         } else {
             val identity = state.account
             Text(
-                if (identity.tier == "premium") "Premium" else "Free",
+                if (state.demoSession) "Tài khoản Demo — Free"
+                else if (identity.tier == "premium") "Premium" else "Free",
                 style = MaterialTheme.typography.titleLarge
             )
             Text(identity.email)
@@ -215,6 +298,13 @@ fun AccountScreen(
             Button(onClick = onSaveProfile, enabled = !state.loading) {
                 Text("Lưu hồ sơ")
             }
+            if (state.demoSession) {
+                Text(
+                    "Tài khoản Demo được lưu trên thiết bị, không dùng Supabase. " +
+                        "Tài khoản này không có quyền Premium và không đồng bộ cloud.",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            } else {
             Text("Đồng bộ Playlist và Favorites (thủ công). Chỉ gửi tên bài, " +
                 "nghệ sĩ và danh sách phát; không tải file nhạc lên cloud.")
             Button(
@@ -273,6 +363,7 @@ fun AccountScreen(
                 "một bài trùng duy nhất trên máy này. Không xóa Playlist local.")
             Text("Premium do máy chủ xác nhận. Chưa có thanh toán, giới hạn " +
                 "thiết bị hoặc đồng bộ tự động.")
+            }
             TextButton(
                 onClick = onSignOut,
                 enabled = !state.loading && !state.syncing
@@ -280,14 +371,31 @@ fun AccountScreen(
                 Text("Đăng xuất")
             }
         }
-        state.error?.let {
-            MusicFlowStatusPanel(
-                kind = MusicFlowStatusKind.ERROR,
-                title = "Thao tác tài khoản không thành công",
-                description = it
-            )
+        if (state.account != null) {
+            state.error?.let {
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.ERROR,
+                    title = "Thao tác tài khoản không thành công",
+                    description = it
+                )
+            }
+            state.message?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
         }
-        state.message?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+        HorizontalDivider()
+        Text("Giao diện", style = MaterialTheme.typography.titleMedium)
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf("system" to "Hệ thống", "dark" to "Tối", "light" to "Sáng")
+                .forEach { (mode, label) ->
+                    FilterChip(
+                        selected = themeMode == mode,
+                        onClick = { onThemeModeChange(mode) },
+                        label = { Text(label) }
+                    )
+                }
+        }
     }
     confirming?.let { (type, id) ->
         AlertDialog(

@@ -5,7 +5,10 @@
 param(
     [ValidateSet(
         "MusicFlow-1.0-Demo-Android.apk",
-        "MusicFlow-1.0-Demo-AuthFeedback-Android.apk"
+        "MusicFlow-1.0-Demo-AuthFeedback-Android.apk",
+        "MusicFlow-1.0-Demo-LocalAccount-Android.apk",
+        "MusicFlow-1.0-Demo-SupabaseSignup-Android.apk",
+        "MusicFlow-1.0-Demo-AuthUX-Android.apk"
     )]
     [string]$OutputName = "MusicFlow-1.0-Demo-Android.apk"
 )
@@ -13,10 +16,20 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $dist = Join-Path $root "dist"
 $temp = Join-Path $root "app\build\rc-qa\demo-apk"
-$logName = if ($OutputName -eq "MusicFlow-1.0-Demo-Android.apk") {
-    "demo-apk-package-v1.log"
-} else {
-    "demo-apk-auth-feedback-package-v1.log"
+$logName = switch ($OutputName) {
+    "MusicFlow-1.0-Demo-Android.apk" { "demo-apk-package-v1.log" }
+    "MusicFlow-1.0-Demo-AuthFeedback-Android.apk" {
+        "demo-apk-auth-feedback-package-v1.log"
+    }
+    "MusicFlow-1.0-Demo-LocalAccount-Android.apk" {
+        "demo-apk-local-account-package-v1.log"
+    }
+    "MusicFlow-1.0-Demo-SupabaseSignup-Android.apk" {
+        "demo-apk-supabase-signup-package-v1.log"
+    }
+    "MusicFlow-1.0-Demo-AuthUX-Android.apk" {
+        "demo-apk-auth-ux-package-v1.log"
+    }
 }
 $log = Join-Path $root ("qa-logs\" + $logName)
 $filename = $OutputName

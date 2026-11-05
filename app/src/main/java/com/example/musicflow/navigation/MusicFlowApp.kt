@@ -358,7 +358,8 @@ fun MusicFlowApp(
                 entry<AccountTab> {
                     AccountRoute(
                         themeMode = themeMode,
-                        onThemeModeChange = onThemeModeChange
+                        onThemeModeChange = onThemeModeChange,
+                        onContinueAsGuest = { switchTab(HomeTab) }
                     )
                 }
 
