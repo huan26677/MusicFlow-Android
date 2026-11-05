@@ -15,6 +15,8 @@
 
 ## B. Việc ChatGPT không nên tự làm: chỉ định Owner
 
+**CẬP NHẬT 2026-11-05 — ĐÃ HOÀN THÀNH:** chủ dự án đã tự kích hoạt Owner và SQL chỉ đọc xác nhận `owner_count = 1`. **KHÔNG chạy lại SQL bootstrap Owner bên dưới!** Phần B cũ chỉ dùng tham khảo cách đã thực hiện; từ giờ dùng **`docs/Owner_Dashboard_Bao_Cao_v1.md`** và mục B2 để chuẩn bị tài khoản demo.
+
 **Vì sao:** các tài khoản hiện có chưa chứng minh ai thực sự là chủ sở hữu. Supabase demo đang có chế độ đăng ký không xác nhận email, nên **chỉ nhìn email không đủ**. Nếu bot tự gán Owner cho một user bất kỳ có thể cấp quyền quản trị sai người.
 
 **Các bước bạn có thể làm MIỄN PHÍ:**
@@ -33,6 +35,16 @@
    
    Kết quả mong đợi **1**; nếu vẫn 0, **đừng** sửa trực tiếp user bất kỳ theo phỏng đoán. Lưu kết quả đã che email/UUID vào log QA.
 6. Đăng xuất/đăng nhập lại trong APK debug hoặc web console nội bộ, rồi mới dùng Owner để cấp role Developer/PlatformAdmin/Artist/Author cho **tài khoản thử được bạn tạo**. Không đưa khóa quản trị vào APK.
+
+### B2. Sau khi đã có Owner (không tốn phí)
+
+1. Trên APK mới, vào **Tài khoản → Đăng nhập** bằng tài khoản Owner do bạn kiểm soát. Nếu đã đăng nhập từ trước, hãy đăng xuất rồi đăng nhập lại để làm mới vai trò.
+2. Vào **Vai trò và quản trị MusicFlow → Owner • Tổng quan bản demo**. Nhấn **Làm mới tổng quan**: phải có **1 Owner**. Nếu không hiển thị, chưa xác nhận E2E; kiểm tra đúng email/UUID ở Supabase Dashboard, không cung cấp mật khẩu cho assistant.
+3. Muốn tiện xem trên PC: trong thư mục gốc dự án chạy `python -m http.server 8765 --directory admin-web`, mở `http://127.0.0.1:8765` và đăng nhập Owner. Chỉ dùng localhost, không đưa web console lên Internet.
+4. Tạo các tài khoản **Free QA riêng** (mỗi actor một email thử do bạn kiểm soát), sau đó Owner mở **Quản lý người dùng → Tải danh sách**; chọn đúng tài khoản QA, nhập lý do và cấp `platform_admin`/`moderator`/`artist`/`author`. **Không chọn chính tài khoản Owner** để tự cấp vai trò khác.
+5. Khi cấp quyền PlatformAdmin, chỉ định phạm vi riêng `manage_users`, `review_creators` hoặc `moderate_catalog` nếu cần. Moderator **không cần** và cũng không được cấp phạm vi PlatformAdmin.
+6. Đăng xuất/đăng nhập từng account QA để kiểm tra từng actor, nhập bài nháp và chứng cứ **tự tạo/có quyền sử dụng** để demo. Moderator chỉ duyệt metadata, không phát hành trực tuyến.
+7. Nếu E2E không đạt, giữ trạng thái **chưa kiểm thử**, vẫn có thể trình bày luồng offline/role Dashboard theo mức MVP. Không cần trả phí hoặc mua gói Premium.
 
 ## C. Demo phần offline mà không cần Owner
 
@@ -58,11 +70,11 @@
 
 ## E. Khi ChatGPT bị chặn bởi công cụ hoặc việc bên ngoài
 
-- **Xác minh danh tính Owner:** cần chính chủ thực hiện trên Dashboard; ChatGPT có thể chuẩn bị SQL và QA sau khi bạn xác nhận, nhưng không được tự chọn account.
+- **Xác minh danh tính Owner:** chủ dự án đã tự thực hiện và SQL xác nhận **1 Owner**. Không cần bootstrap lần nữa; khi thử E2E, chỉ chính chủ đăng nhập bằng mật khẩu của mình.
 - **Nhận giấy phép cho nhạc của bên thứ ba:** không được suy đoán. Dùng nhạc tự tạo hoặc nhạc CC0/CC-BY có nguồn và điều khoản phù hợp; lưu giấy phép/credit; bản có CC-BY phải ghi attribution.
 - **Google OAuth thật, email SMTP, Play Store, thanh toán Premium:** **không bắt buộc cho báo cáo**; để lại backlog, không mua dịch vụ.
 - **Kiểm thử phần cứng hoặc cloud 2 thiết bị thật:** không phải tiêu chí bàn giao hiện tại. Nếu sau này trường yêu cầu, có thể dùng hai emulator để thử, tránh tạo phụ phí.
-- **Kiểm thử E2E Creator/Owner:** chỉ có thể kết luận thành công sau khi đã bootstrap Owner chính xác và có hai tài khoản thử hợp lệ; hiện chưa được làm.
+- **Kiểm thử E2E Creator/Owner:** Owner đã có, nhưng vẫn cần tạo các tài khoản QA hợp lệ và đăng nhập bằng từng actor để thử thực tế; **chưa được làm E2E**.
 
 ## F. Điểm dừng phù hợp báo cáo
 

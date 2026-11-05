@@ -302,7 +302,8 @@ class AccountApi(context: Context) {
                 "musicflow_review_draft",
                 "musicflow_creator_upload_reserve",
                 "musicflow_creator_upload_confirm",
-                "musicflow_creator_upload_list"
+                "musicflow_creator_upload_list",
+                "musicflow_owner_demo_summary"
             )) { "Chức năng chưa được hỗ trợ." }
             cloudRequest("POST", "/rest/v1/rpc/$name", args)
         }

@@ -233,6 +233,9 @@ internal fun AccountRolePanel(
                         qaConnection?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
                     }
                 }
+                if (access.isOwner) {
+                    OwnerDemoDashboard(rpc = rpc)
+                }
                 if (access.canManageUsers) {
                     HorizontalDivider()
                     Text("Quản lý người dùng", style = MaterialTheme.typography.titleMedium)

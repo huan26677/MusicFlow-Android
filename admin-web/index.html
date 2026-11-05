@@ -46,6 +46,14 @@ button:disabled{cursor:not-allowed;opacity:.5}button:focus-visible,input:focus-v
 <textarea id="reason" maxlength="300" rows="2"></textarea></label>
 <button class="secondary" id="logout">Đăng xuất</button>
 </section>
+<section class="panel" id="owner-summary-panel" hidden>
+<h2>Owner · Tổng quan demo MusicFlow</h2>
+<p>Số liệu tổng hợp từ Supabase, chỉ tài khoản Owner được xem. Không hiển thị mật khẩu, khóa API hoặc dữ liệu cá nhân.</p>
+<button id="owner-summary-refresh" type="button">Làm mới tổng quan</button>
+<div id="owner-summary-metrics" class="grid" aria-live="polite"></div>
+<p id="owner-summary-next"></p>
+<p class="small">Gợi ý demo: tạo tài khoản Free thử nghiệm → Owner cấp Artist/Moderator/PlatformAdmin → Creator gửi nháp và chứng cứ → Moderator duyệt metadata. Không phát hành nhạc online từ hồ sơ này.</p>
+</section>
 <section class="panel" id="users-panel" hidden>
 <h2>Người dùng</h2>
 <label>Tìm email<input id="user-search" placeholder="Nhập email hoặc để trống"></label>
@@ -125,6 +133,41 @@ async function authFetch(path,body){
   return raw?JSON.parse(raw):null;
 }
 const rpc=(name,body)=>authFetch("/rest/v1/rpc/"+name,body);
+async function refreshOwnerSummary(){
+  if(!session||!hasRole("owner"))throw Error("Chỉ Owner được xem tổng quan.");
+  const stats=await rpc("musicflow_owner_demo_summary",{});
+  const layout=$("owner-summary-metrics");
+  layout.replaceChildren();
+  const fields=[
+    ["owner_count","Owner"],
+    ["user_count","Người dùng"],
+    ["platform_admin_count","PlatformAdmin"],
+    ["moderator_count","Moderator"],
+    ["artist_count","Nghệ sĩ"],
+    ["author_count","Tác giả"],
+    ["developer_count","Developer"],
+    ["creator_requests_pending","Đơn Creator chờ duyệt"],
+    ["drafts_pending","Nháp tác phẩm chờ duyệt"],
+    ["drafts_metadata_approved","Metadata đã duyệt"],
+    ["creator_files_uploaded","Tệp private đã xác nhận"]
+  ];
+  fields.forEach(([key,label])=>{
+    const value=stats[key];
+    if(!Number.isSafeInteger(value)||value<0)throw Error("Số liệu tổng quan không hợp lệ.");
+    const tile=node("div","",layout);tile.className="item";
+    node("strong",String(value),tile);
+    node("p",label,tile);
+  });
+  const missing=[];
+  if(stats.platform_admin_count===0)missing.push("PlatformAdmin");
+  if(stats.moderator_count===0)missing.push("Moderator");
+  if(stats.artist_count===0&&stats.author_count===0)missing.push("Artist/Author");
+  $("owner-summary-next").textContent=stats.owner_count!==1
+    ?"Cảnh báo: cần kiểm tra số Owner trong Supabase."
+    :missing.length
+      ?"Để demo đủ actor, hãy tạo các tài khoản Free thử riêng và cấp: "+missing.join(", ")+"."
+      :"Đã có các vai trò chính. Có thể thử luồng Creator → Moderator trên tài khoản QA.";
+}
 async function downloadCreatorPrivate(path,kind,mime){
   if(!session || !/^[a-f0-9-]{36}\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.[a-z0-9]{3,4}$/.test(path)){
     throw Error("Đường dẫn chứng cứ không hợp lệ.");
@@ -161,7 +204,9 @@ async function perform(task){
 function reset(){
   session=null;selected=null;access={roles:[],permissions:[]};
   $("password").value="";
-  ["session-panel","users-panel","owner-panel","creators-panel","drafts-panel","tracks-panel"]
+  $("owner-summary-metrics").replaceChildren();
+  $("owner-summary-next").textContent="";
+  ["session-panel","owner-summary-panel","users-panel","owner-panel","creators-panel","drafts-panel","tracks-panel"]
     .forEach(id=>setVisible(id,false));
   setVisible("login-panel",true);
 }
@@ -190,6 +235,7 @@ $("login-form").addEventListener("submit",async e=>{
     }
     setVisible("login-panel",false);
     setVisible("session-panel",true);
+    setVisible("owner-summary-panel",hasRole("owner"));
     setVisible("users-panel",allowed("manage_users"));
     setVisible("owner-panel",hasRole("owner"));
     setVisible("creators-panel",allowed("review_creators"));
@@ -198,9 +244,14 @@ $("login-form").addEventListener("submit",async e=>{
     $("roles-label").textContent="Vai trò: "+access.roles.join(", ") +
       " · Quyền: "+access.permissions.join(", ");
     message("Đã đăng nhập và xác minh quyền.");
+    if(hasRole("owner")){
+      try{await refreshOwnerSummary();}
+      catch(_){$("owner-summary-next").textContent="Chưa tải được tổng quan, thử nhấn Làm mới.";}
+    }
   }catch(error){reset();message(error.message||"Không thể đăng nhập.",true);}
 });
 $("logout").addEventListener("click",()=>{reset();message("Đã xóa phiên trong bộ nhớ trang.");});
+$("owner-summary-refresh").addEventListener("click",()=>perform(refreshOwnerSummary));
 $("load-users").addEventListener("click",()=>perform(async()=>{
   const rows=await rpc("musicflow_admin_users",{p_search:$("user-search").value.trim(),p_limit:20});
   const list=$("user-list");list.replaceChildren();
@@ -229,6 +280,12 @@ async function change(kind,enable){
     await rpc("musicflow_set_admin_permission",{
       p_user_id:selected.id,p_permission:item,p_grant:enable,p_reason:why
     });
+  }
+  try{
+    await refreshOwnerSummary();
+  }catch(_){
+    $("owner-summary-next").textContent=
+      "Quyền đã cập nhật; chưa thể tải lại tổng quan. Bấm Làm mới để kiểm tra.";
   }
 }
 ["grant-role","revoke-role","grant-permission","revoke-permission"].forEach(id=>{

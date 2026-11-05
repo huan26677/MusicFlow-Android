@@ -30,8 +30,9 @@ Trạng thái quy ước: **Đã có** = mã nguồn có và đã có QA phù h�
 | Author | UC-AU06–AU08 | Upload tài liệu, gửi duyệt, theo dõi; quyền chia doanh thu/hợp đồng | Tệp + duyệt MVP; chia doanh thu kế hoạch |
 | PlatformAdmin | UC-AD01–AD05 | Đăng nhập web nội bộ, tìm người dùng khi có `manage_users`, duyệt role Creator khi có `review_creators` | MVP role/RPC |
 | PlatformAdmin | UC-AD06–AD10 | Duyệt metadata nháp, xem chứng cứ, quản lý catalog theo `moderate_catalog`, khiếu nại, khóa/mở tài khoản | Duyệt/nhạc online MVP; khiếu nại/khóa kế hoạch |
-| Owner | UC-O01–O08 | Owner Console, quản lý user, cấp/thu hồi PlatformAdmin/Developer/Artist/Author, cấp phạm vi, duyệt, audit | Backend/UI MVP; **chưa có Owner được xác minh/cấp** |
-| Owner | UC-O09–O11 | Dashboard thống kê, khóa tài khoản, chuyển quyền Owner | Kế hoạch |
+| Owner | UC-O01–O08 | Owner Console, quản lý user, cấp/thu hồi PlatformAdmin/Developer/Artist/Author, cấp phạm vi, duyệt, audit | Backend/UI MVP; SQL đã xác nhận **1 Owner** do chủ dự án vừa kích hoạt; chưa Owner login E2E |
+| Owner | UC-O09 | Xem thống kê số lượng tài khoản/vai trò/Creator và các bước demo tiếp theo | **Owner Dashboard v1:** SQL/Android/Web, **3/3 JVM + 7/7 Android targeted PASS**; chưa Owner login E2E |
+| Owner | UC-O10–O11 | Khóa tài khoản, chuyển quyền Owner | Kế hoạch |
 | Moderator | UC-M01–M04 | Xem nháp đã gửi, metadata/credit/chứng cứ private, quyết định chỉ về metadata và ghi lý do | **MVP Moderator Review v1**: SQL/backend + UI targeted QA PASS; **chưa E2E Moderator thật** |
 | Moderator | UC-M05–M06 | Xử lý báo cáo vi phạm bản quyền, chuyển cấp/đề xuất gỡ nhạc | **Kế hoạch**; không được cấp role hoặc tự phát hành streaming |
 | Developer | UC-D01–D04 | Đăng nhập chuẩn, lối tắt debug/QA, xem phiên bản/môi trường, kiểm tra phiên/role với Supabase | MVP debug-only |
@@ -109,7 +110,8 @@ flowchart LR
 |---|---|---|---|
 | P0 | Chốt bảng Use Case/actor và kịch bản bảo vệ báo cáo | Tài liệu này + hướng dẫn demo, khớp mã nguồn | ChatGPT |
 | Hoàn tất MVP | **Moderator Review v1 — chỉ duyệt metadata**, không cấp role/streaming | SQL/Android/Web và targeted QA PASS; chờ Owner xác minh để thử E2E | ChatGPT |
-| P0 bị chặn | **Xác minh & bootstrap Owner** (không tự gán) | Chủ dự án xác nhận đúng UID/email, SQL Editor cấp 1 Owner | **Chủ dự án** |
+| Hoàn thành thao tác | **Owner bootstrap** | Chủ dự án đã thực hiện; SQL kiểm tra chỉ đọc xác nhận **1 Owner** | **Chủ dự án** |
+| Hoàn thành MVP | **Owner Dashboard v1 cho demo** | Tổng hợp các actor và hướng dẫn cấp quyền; SQL deny non-Owner và targeted QA PASS | ChatGPT |
 | P1 | QA E2E Creator → Owner/Moderator bằng tài khoản thử | Role thật, nháp + tệp + quyết định, không ảnh hưởng nhạc công khai | ChatGPT + chủ dự án |
 | P1 | Chỉnh UI/UX, hoàn thiện báo cáo & video/tài liệu demo | APK sideload, ảnh chụp màn hình, demo offline ổn định | ChatGPT + chủ dự án |
 | Sau báo cáo | Upload audio lớn, web hosting công khai, Premium payment, Google OAuth thật, chống lạm dụng production | Chỉ phát triển khi chủ dự án đổi phạm vi | **Không bắt buộc** |

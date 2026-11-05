@@ -66,8 +66,8 @@ Chỉ khi đối chiếu được danh tính/UUID với chủ dự án và Owner
 begin;
 do $$
 declare
-    target_id uuid := '<UUID_TAI_KHOAN_OWNER>'::uuid;
-    target_email text := '<EMAIL_DUNG_VOI_UUID>';
+    target_id uuid := 'a20fb14d-31ef-4ef3-bc72-ecbb8c4bff78'::uuid;
+    target_email text := 'huan26677@gmail.com';
 begin
     if exists (select 1 from musicflow_private.user_roles where role = 'owner') then
         raise exception 'Owner exists: use a separately approved transfer procedure';
