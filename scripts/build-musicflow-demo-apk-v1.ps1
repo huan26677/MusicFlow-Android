@@ -2,12 +2,24 @@
 # Uses the existing local Android DEBUG keystore for QA/demo ONLY.
 # Not for Google Play, public distribution, production or sensitive accounts.
 # Does not push/upload artifacts, reset Git, or alter emulator/app data.
+param(
+    [ValidateSet(
+        "MusicFlow-1.0-Demo-Android.apk",
+        "MusicFlow-1.0-Demo-AuthFeedback-Android.apk"
+    )]
+    [string]$OutputName = "MusicFlow-1.0-Demo-Android.apk"
+)
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $dist = Join-Path $root "dist"
 $temp = Join-Path $root "app\build\rc-qa\demo-apk"
-$log = Join-Path $root "qa-logs\demo-apk-package-v1.log"
-$filename = "MusicFlow-1.0-Demo-Android.apk"
+$logName = if ($OutputName -eq "MusicFlow-1.0-Demo-Android.apk") {
+    "demo-apk-package-v1.log"
+} else {
+    "demo-apk-auth-feedback-package-v1.log"
+}
+$log = Join-Path $root ("qa-logs\" + $logName)
+$filename = $OutputName
 $destination = Join-Path $dist $filename
 $wasSuccessful = $false
 

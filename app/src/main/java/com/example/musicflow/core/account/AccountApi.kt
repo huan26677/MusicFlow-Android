@@ -209,14 +209,24 @@ class AccountApi(context: Context) {
                 }
             }
             if (code !in 200..299) {
-                val label = when (code) {
-                    400, 401 -> "Email, mật khẩu hoặc phiên đăng nhập không hợp lệ."
-                    403 -> "Không có quyền truy cập tài nguyên này."
-                    422 -> "Email hoặc mật khẩu không hợp lệ hoặc đã được đăng ký."
-                    429 -> "Thao tác quá nhanh. Hãy thử lại sau."
-                    else -> "Máy chủ trả về lỗi HTTP $code."
+                val authErrorCode = if (path.startsWith("/auth/v1/")) {
+                    runCatching {
+                        connection.errorStream?.bufferedReader(Charsets.UTF_8)?.use { reader ->
+                            val buffer = CharArray(4096)
+                            val length = reader.read(buffer)
+                            if (length <= 0) null else {
+                                val errorBody = JSONObject(String(buffer, 0, length))
+                                val backendCode = errorBody.optString("code").ifBlank {
+                                    errorBody.optString("error_code")
+                                }
+                                backendCode.takeIf { it.isNotBlank() }
+                            }
+                        }
+                    }.getOrNull()
+                } else {
+                    null
                 }
-                error(label)
+                error(AccountAuthErrorLabels.forResponse(code, authErrorCode))
             }
             return connection.inputStream.use { input ->
                 val result = ByteArrayOutputStream()
