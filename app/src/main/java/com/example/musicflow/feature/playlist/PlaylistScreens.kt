@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -13,7 +16,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -74,6 +79,9 @@ fun PlaylistListRoute(
     var nameInput by rememberSaveable {
         mutableStateOf("")
     }
+    var searchText by rememberSaveable {
+        mutableStateOf("")
+    }
 
     Column(
         modifier = Modifier
@@ -81,18 +89,22 @@ fun PlaylistListRoute(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            TextButton(onClick = onBack) {
-                Text("‹ Trở về")
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val compact = maxWidth < 360.dp || LocalDensity.current.fontScale >= 1.35f
+            if (compact) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TextButton(onClick = onBack) { Text("‹ Trở về") }
+                    Text("Danh sách phát", style = MaterialTheme.typography.headlineSmall)
+                }
+            } else {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    TextButton(onClick = onBack) { Text("‹ Trở về") }
+                    Text("Danh sách phát", style = MaterialTheme.typography.headlineSmall)
+                }
             }
-
-            Text(
-                "Danh sách phát",
-                style = MaterialTheme.typography.headlineSmall
-            )
         }
 
         Button(
@@ -143,18 +155,42 @@ fun PlaylistListRoute(
                             "bắt đầu lưu nhạc yêu thích. Không cần đăng nhập."
                     )
                 } else {
+                    OutlinedTextField(
+                        value = searchText,
+                        onValueChange = { searchText = it },
+                        label = { Text("Tìm playlist") },
+                        placeholder = { Text("Nhập tên danh sách phát") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        modifier = Modifier.fillMaxWidth().testTag("playlist-search")
+                    )
+                    val visiblePlaylists = remember(current.playlists, searchText) {
+                        filterPlaylistNames(current.playlists, searchText)
+                    }
                     Text(
-                        "${current.playlists.size} playlist",
+                        if (searchText.isBlank()) {
+                            "${current.playlists.size} playlist"
+                        } else {
+                            "Tìm thấy ${visiblePlaylists.size}/${current.playlists.size} playlist"
+                        },
                         style = MaterialTheme.typography.bodySmall
                     )
-
+                    if (visiblePlaylists.isEmpty()) {
+                        MusicFlowStatusPanel(
+                            kind = MusicFlowStatusKind.EMPTY,
+                            title = "Không tìm thấy playlist",
+                            description = "Thử tên khác hoặc xóa từ khóa tìm kiếm.",
+                            actionLabel = "Xóa tìm kiếm",
+                            onAction = { searchText = "" }
+                        )
+                    } else {
                     LazyColumn(
                         modifier = Modifier.weight(1f),
                         verticalArrangement =
                             Arrangement.spacedBy(4.dp)
                     ) {
                         items(
-                            items = current.playlists,
+                            items = visiblePlaylists,
                             key = { it.id }
                         ) { playlist ->
                             var expanded by remember {
@@ -171,7 +207,7 @@ fun PlaylistListRoute(
                                 headlineContent = {
                                     Text(
                                         playlist.name,
-                                        maxLines = 1,
+                                        maxLines = 2,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                 },
@@ -180,13 +216,15 @@ fun PlaylistListRoute(
                                 },
                                 trailingContent = {
                                     Box {
-                                        TextButton(
+                                        IconButton(
                                             onClick = { expanded = true },
-                                            modifier = Modifier.semantics {
-                                                contentDescription = "Tùy chọn ${playlist.name}"
-                                            }
+                                            modifier = Modifier
+                                                .testTag("playlist-options-${playlist.id}")
+                                                .semantics {
+                                                    contentDescription = "Tùy chọn ${playlist.name}"
+                                                }
                                         ) {
-                                            Text("Tùy chọn")
+                                            Icon(Icons.Filled.MoreVert, contentDescription = null)
                                         }
 
                                         DropdownMenu(
@@ -220,6 +258,7 @@ fun PlaylistListRoute(
                                 }
                             )
                         }
+                    }
                     }
                 }
             }
@@ -258,7 +297,7 @@ fun PlaylistListRoute(
                         label = { Text("Tên playlist") },
                         singleLine = true,
                         isError = !validName,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().testTag("playlist-name-input")
                     )
 
                     Text(
@@ -487,8 +526,8 @@ fun PlaylistDetailRoute(
                                                 .fillMaxWidth()
                                                 .testTag("playlist-track-${track.mediaId}")
                                         ) {
-                                            // Keep actions on their own row: three trailing
-                                            // buttons used to hide titles at 200% font scale.
+                                            // Keep a full-width title; actions live in one
+                                            // menu to prevent overflow at large font scales.
                                             ListItem(
                                                 modifier = Modifier.fillMaxWidth().clickable {
                                                     onPlayTracks(tracks.tracks, index)
@@ -513,49 +552,27 @@ fun PlaylistDetailRoute(
                                                 horizontalArrangement = Arrangement.End,
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                    IconButton(
-                                                        enabled = index > 0,
-                                                        onClick = {
-                                                            vm.moveTrack(
-                                                                playlistId = playlistId,
-                                                                mediaId = track.mediaId,
-                                                                offset = -1
-                                                            )
-                                                        },
-                                                        modifier = Modifier.semantics {
-                                                            contentDescription = "Đưa ${track.title} lên"
-                                                        }
-                                                    ) {
-                                                        Text("↑")
-                                                    }
-
-                                                    IconButton(
-                                                        enabled = index < tracks.tracks.lastIndex,
-                                                        onClick = {
-                                                            vm.moveTrack(
-                                                                playlistId = playlistId,
-                                                                mediaId = track.mediaId,
-                                                                offset = 1
-                                                            )
-                                                        },
-                                                        modifier = Modifier.semantics {
-                                                            contentDescription = "Đưa ${track.title} xuống"
-                                                        }
-                                                    ) {
-                                                        Text("↓")
-                                                    }
-
-                                                    TextButton(
-                                                        onClick = {
-                                                            removeTarget = track
-                                                        },
-                                                        modifier = Modifier.semantics {
-                                                            contentDescription =
-                                                                "Xóa ${track.title} khỏi playlist"
-                                                        }
-                                                    ) {
-                                                        Text("Xóa")
-                                                    }
+                                                PlaylistTrackOptions(
+                                                    mediaId = track.mediaId,
+                                                    title = track.title,
+                                                    canMoveUp = index > 0,
+                                                    canMoveDown = index < tracks.tracks.lastIndex,
+                                                    onMoveUp = {
+                                                        vm.moveTrack(
+                                                            playlistId = playlistId,
+                                                            mediaId = track.mediaId,
+                                                            offset = -1
+                                                        )
+                                                    },
+                                                    onMoveDown = {
+                                                        vm.moveTrack(
+                                                            playlistId = playlistId,
+                                                            mediaId = track.mediaId,
+                                                            offset = 1
+                                                        )
+                                                    },
+                                                    onRequestRemove = { removeTarget = track }
+                                                )
                                             }
                                             HorizontalDivider()
                                         }

@@ -472,6 +472,8 @@ class PlaylistPlaybackOrderTest {
             }
             composeRule.onNodeWithTag("playlist-detail-tracks")
                 .performScrollToIndex(2)
+            composeRule.onNodeWithTag("playlist-track-options-${ids[2]}")
+                .performClick()
             composeRule.onNodeWithContentDescription(
                 "Đưa QA UI Track 3 lên"
             ).performClick()
@@ -488,6 +490,8 @@ class PlaylistPlaybackOrderTest {
 
             composeRule.onNodeWithTag("playlist-detail-tracks")
                 .performScrollToIndex(1)
+            composeRule.onNodeWithTag("playlist-track-options-${ids[2]}")
+                .performClick()
             composeRule.onNodeWithContentDescription(
                 "Đưa QA UI Track 3 lên"
             ).performClick()
@@ -555,7 +559,7 @@ class PlaylistPlaybackOrderTest {
             composeRule.onNodeWithText("Tạo playlist mới")
                 .performClick()
 
-            composeRule.onNode(hasSetTextAction())
+            composeRule.onNodeWithTag("playlist-name-input")
                 .performTextReplacement(originalName)
 
             composeRule.onNodeWithText("Tạo")
@@ -588,7 +592,7 @@ class PlaylistPlaybackOrderTest {
             composeRule.onNodeWithText("Đổi tên")
                 .performClick()
 
-            composeRule.onNode(hasSetTextAction())
+            composeRule.onNodeWithTag("playlist-name-input")
                 .performTextReplacement(renamedName)
 
             composeRule.onNodeWithText("Lưu")
