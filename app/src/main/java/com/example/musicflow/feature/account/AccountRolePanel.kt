@@ -350,7 +350,7 @@ internal fun AccountRolePanel(
                         }
                     }
                 }
-                if (access.canReviewCreators) {
+                if (access.canReviewMetadata) {
                     CreatorDraftReviewPanel(rpc = rpc, download = download)
                 }
                 if (access.canModerateCatalog) {

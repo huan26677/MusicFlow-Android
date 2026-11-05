@@ -104,6 +104,7 @@ let session=null, selected=null, access={roles:[],permissions:[]};
 const hasRole = r => access.roles.includes(r);
 const allowed = p => hasRole("owner") ||
   (hasRole("platform_admin") && access.permissions.includes(p));
+const canReviewMetadata = () => allowed("review_creators") || hasRole("moderator");
 function message(text,bad=false){$("notice").textContent=text;$("notice").setAttribute("role",bad?"alert":"status");}
 function node(tag,text,parent){const el=document.createElement(tag);el.textContent=String(text??"");parent.append(el);return el;}
 function btn(label,parent,handler,secondary=false){
@@ -184,15 +185,15 @@ $("login-form").addEventListener("submit",async e=>{
     if(!json.access_token)throw Error("Không có phiên hợp lệ.");
     session={url,key,token:json.access_token};
     access=await rpc("musicflow_my_access",{});
-    if(!hasRole("owner")&&!hasRole("platform_admin")){
-      reset();throw Error("Tài khoản này không có quyền quản trị nền tảng.");
+    if(!hasRole("owner")&&!hasRole("platform_admin")&&!hasRole("moderator")){
+      reset();throw Error("Tài khoản này không có quyền quản trị hoặc kiểm duyệt.");
     }
     setVisible("login-panel",false);
     setVisible("session-panel",true);
     setVisible("users-panel",allowed("manage_users"));
     setVisible("owner-panel",hasRole("owner"));
     setVisible("creators-panel",allowed("review_creators"));
-    setVisible("drafts-panel",allowed("review_creators"));
+    setVisible("drafts-panel",canReviewMetadata());
     setVisible("tracks-panel",allowed("moderate_catalog"));
     $("roles-label").textContent="Vai trò: "+access.roles.join(", ") +
       " · Quyền: "+access.permissions.join(", ");

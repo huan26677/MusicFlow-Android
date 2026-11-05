@@ -48,4 +48,23 @@ class MusicFlowAccessTest {
         assertTrue(artist.isCreator)
         assertFalse(artist.canManageUsers)
     }
+
+    @Test fun moderatorReviewsMetadataButCannotGrantRolesOrPublish() {
+        val moderator = MusicFlowAccess(roles = setOf("moderator"))
+        assertTrue(moderator.isModerator)
+        assertTrue(moderator.canReviewMetadata)
+        assertFalse(moderator.canReviewCreators)
+        assertFalse(moderator.canManageUsers)
+        assertFalse(moderator.canModerateCatalog)
+        assertFalse(moderator.isOwner)
+    }
+
+    @Test fun moderatorPermissionTextCannotCreateAdminRights() {
+        val forged = MusicFlowAccess(
+            roles = setOf("moderator"), permissions = setOf("manage_users", "moderate_catalog")
+        )
+        assertTrue(forged.canReviewMetadata)
+        assertFalse(forged.canManageUsers)
+        assertFalse(forged.canModerateCatalog)
+    }
 }

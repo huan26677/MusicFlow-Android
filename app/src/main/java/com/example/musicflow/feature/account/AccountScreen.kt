@@ -337,6 +337,8 @@ fun AccountScreen(
                     Text(
                         if (identity.access.isOwner || identity.access.isPlatformAdmin) {
                             "Quản trị nền tảng và vai trò"
+                        } else if (identity.access.isModerator) {
+                            "Kiểm duyệt hồ sơ tác phẩm"
                         } else if (identity.access.isCreator) {
                             "Hồ sơ nghệ sĩ / tác giả"
                         } else "Đăng ký nghệ sĩ / tác giả và xem quyền"

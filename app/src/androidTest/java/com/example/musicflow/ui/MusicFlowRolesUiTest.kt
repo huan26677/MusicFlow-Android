@@ -89,6 +89,30 @@ class MusicFlowRolesUiTest {
         compose.onNodeWithTag("admin-search-user").assertDoesNotExist()
     }
 
+    @Test fun moderatorCanReviewDraftMetadataButNotRolesUsersOrCatalog() {
+        compose.setContent {
+            MusicFlowTheme {
+                AccountRolePanel(listener, onClose = {}) { name, _ ->
+                    when (name) {
+                        "musicflow_my_access" ->
+                            """{"roles":["moderator"],"permissions":[]}"""
+                        else -> "[]"
+                    }
+                }
+            }
+        }
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("draft-review-load")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("draft-review-load").assertExists()
+        compose.onNodeWithTag("admin-search-user").assertDoesNotExist()
+        compose.onNodeWithTag("admin-reason").assertDoesNotExist()
+        compose.onNodeWithTag("developer-quick-access").assertDoesNotExist()
+        compose.onNodeWithText("Tải yêu cầu đang chờ").assertDoesNotExist()
+        compose.onNodeWithText("Tải danh mục cần kiểm duyệt").assertDoesNotExist()
+    }
+
     @Test fun creatorRequestUsesServerRpcAndNeverSelfAssignsRole() {
         var called = false
         compose.setContent {

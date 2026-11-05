@@ -10,11 +10,14 @@ data class MusicFlowAccess(
     val isOwner get() = "owner" in roles
     val isPlatformAdmin get() = "platform_admin" in roles
     val isDeveloper get() = "developer" in roles
+    val isModerator get() = "moderator" in roles
     val isCreator get() = "artist" in roles || "author" in roles
     val canManageUsers get() = isOwner ||
         (isPlatformAdmin && "manage_users" in permissions)
     val canReviewCreators get() = isOwner ||
         (isPlatformAdmin && "review_creators" in permissions)
+    /** Moderator reviews submitted work metadata, NOT creator-role applications. */
+    val canReviewMetadata get() = canReviewCreators || isModerator
     val canModerateCatalog get() = isOwner ||
         (isPlatformAdmin && "moderate_catalog" in permissions)
 
