@@ -121,6 +121,8 @@ class CrossfadeUiE2eTest {
             compose.onNodeWithContentDescription(
                 "Mở trình phát: Crossfade UI QA, MusicFlow QA"
             ).performClick()
+            compose.onNodeWithTag("player-advanced-toggle")
+                .performScrollTo().performClick()
 
             // Scroll the outer vertical Player by its following heading,
             // not by the nested horizontally scrollable FilterChip.

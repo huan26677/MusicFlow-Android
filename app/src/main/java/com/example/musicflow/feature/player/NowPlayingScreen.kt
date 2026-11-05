@@ -8,6 +8,7 @@ import androidx.compose.foundation.verticalScroll
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalContext
@@ -72,6 +73,9 @@ fun NowPlayingScreen(
 
     var sliderValue by remember {
         mutableFloatStateOf(0f)
+    }
+    var advancedExpanded by rememberSaveable {
+        mutableStateOf(false)
     }
 
     LaunchedEffect(state.currentIndex) {
@@ -309,7 +313,34 @@ fun NowPlayingScreen(
         }
 
         Spacer(Modifier.height(16.dp))
+        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                TextButton(
+                    onClick = { advancedExpanded = !advancedExpanded },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("player-advanced-toggle")
+                ) {
+                    Text(
+                        if (advancedExpanded) "Thu gọn tùy chỉnh"
+                        else "Tùy chỉnh phát nhạc"
+                    )
+                }
+                Text(
+                    "Tốc độ ${state.playbackSpeed}x • " +
+                        if (state.sleepTimerRemainingMs > 0L) "Đang hẹn giờ tắt"
+                        else "Chưa hẹn giờ",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
 
+        if (advancedExpanded) {
+        Spacer(Modifier.height(16.dp))
         Text(
             text = "Tốc độ phát",
             style = MaterialTheme.typography.titleMedium
@@ -442,6 +473,7 @@ fun NowPlayingScreen(
             }
         }
 
+        }
         Spacer(Modifier.height(24.dp))
         HorizontalDivider()
 

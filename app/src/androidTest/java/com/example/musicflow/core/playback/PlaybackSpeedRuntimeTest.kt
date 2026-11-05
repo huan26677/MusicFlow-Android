@@ -238,6 +238,8 @@ class PlaybackSpeedRuntimeTest {
             compose.onNodeWithContentDescription(
                 "Mở trình phát: Speed QA Track Alpha, MusicFlow QA"
             ).performClick()
+            compose.onNodeWithTag("player-advanced-toggle")
+                .performScrollTo().performClick()
             // The speed Row scrolls *horizontally* inside the whole Player
             // screen's *vertical* scroll. Calling performScrollTo on the chip
             // reaches the nearest horizontal parent and cannot reveal the row
@@ -296,6 +298,8 @@ class PlaybackSpeedRuntimeTest {
         compose.onNodeWithContentDescription(
             "Mở trình phát: Speed QA Track Alpha, MusicFlow QA"
         ).performClick()
+        compose.onNodeWithTag("player-advanced-toggle")
+            .performScrollTo().performClick()
 
         for (value in listOf(0.75f, 1f, 1.25f, 1.5f, 2f)) {
             compose.onNodeWithTag("playback-speed-${value}x")

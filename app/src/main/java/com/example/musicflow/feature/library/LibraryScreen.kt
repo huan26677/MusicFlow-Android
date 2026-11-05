@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -199,6 +200,10 @@ fun LibraryScreen(
     var selectedCategory by rememberSaveable(initialShowAlbums) {
         mutableStateOf(if (initialShowAlbums) "albums" else "songs")
     }
+    var songSort by rememberSaveable {
+        mutableStateOf(LibrarySongSort.TITLE)
+    }
+    var sortMenuExpanded by remember { mutableStateOf(false) }
 
     val scannedSongs = (uiState as? LibraryUiState.Success)
         ?.songs.orEmpty()
@@ -403,12 +408,15 @@ fun LibraryScreen(
                                 onQueueEnd = onQueueEnd
                             )
                         } else {
-                            val visibleSongs = if (favoritesOnly) {
+                            val unsortedSongs = if (favoritesOnly) {
                             current.songs.filter {
                                 it.uri.toString() in favoriteSongUris
                             } + pickedFavorites
                         } else {
                             current.songs
+                        }
+                        val visibleSongs = remember(unsortedSongs, songSort) {
+                            sortLibrarySongs(unsortedSongs, songSort)
                         }
 
                         FilterChip(
@@ -437,7 +445,38 @@ fun LibraryScreen(
                             )
                         }
 
-                        Text("${visibleSongs.size} bài hát")
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("${visibleSongs.size} bài hát")
+                            Box {
+                                OutlinedButton(
+                                    onClick = { sortMenuExpanded = true },
+                                    modifier = Modifier.testTag("library-sort-button")
+                                ) {
+                                    Text("Sắp xếp: ${songSort.label}")
+                                }
+                                DropdownMenu(
+                                    expanded = sortMenuExpanded,
+                                    onDismissRequest = { sortMenuExpanded = false }
+                                ) {
+                                    LibrarySongSort.entries.forEach { option ->
+                                        DropdownMenuItem(
+                                            text = { Text(option.label) },
+                                            onClick = {
+                                                songSort = option
+                                                sortMenuExpanded = false
+                                            },
+                                            modifier = Modifier.testTag(
+                                                "library-sort-${option.name.lowercase()}"
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
 
                         LazyColumn(
                             modifier = Modifier.weight(1f),

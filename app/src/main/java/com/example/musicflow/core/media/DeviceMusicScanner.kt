@@ -18,7 +18,9 @@ data class DeviceSong(
     val album: String = "Không rõ album",
     val mediaId: String? = null,
     val artistId: Long? = null,
-    val genres: List<String> = emptyList()
+    val genres: List<String> = emptyList(),
+    /** MediaStore DATE_ADDED is seconds since Unix epoch; 0 for manually chosen items. */
+    val dateAddedSeconds: Long = 0L
 )
 
 object DeviceMusicScanner {
@@ -40,7 +42,8 @@ object DeviceMusicScanner {
                 MediaStore.Audio.Media.DURATION,
                 MediaStore.Audio.Media.ALBUM_ID,
                 MediaStore.Audio.Media.ALBUM,
-                MediaStore.Audio.Media.ARTIST_ID
+                MediaStore.Audio.Media.ARTIST_ID,
+                MediaStore.Audio.Media.DATE_ADDED
             )
 
             // Chỉ lấy file Android phân loại là nhạc.
@@ -90,6 +93,9 @@ object DeviceMusicScanner {
                 )
                 val artistIdColumn = cursor.getColumnIndexOrThrow(
                     MediaStore.Audio.Media.ARTIST_ID
+                )
+                val dateAddedColumn = cursor.getColumnIndex(
+                    MediaStore.Audio.Media.DATE_ADDED
                 )
 
                 while (cursor.moveToNext()) {
@@ -157,7 +163,10 @@ object DeviceMusicScanner {
                             albumId = albumId,
                             album = albumName,
                             artistId = artistId,
-                            genres = genresBySongId[id].orEmpty()
+                            genres = genresBySongId[id].orEmpty(),
+                            dateAddedSeconds = if (
+                                dateAddedColumn < 0 || cursor.isNull(dateAddedColumn)
+                            ) 0L else cursor.getLong(dateAddedColumn).coerceAtLeast(0L)
                         )
                     )
                 }
