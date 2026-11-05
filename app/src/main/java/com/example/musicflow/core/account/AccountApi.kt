@@ -24,7 +24,8 @@ data class AccountIdentity(
     val email: String,
     val displayName: String,
     val tier: String,
-    val expiresAt: String?
+    val expiresAt: String?,
+    val access: MusicFlowAccess = MusicFlowAccess.NONE
 )
 
 /**
@@ -272,6 +273,32 @@ class AccountApi(context: Context) {
         maxResponseBytes = 4 * 1024 * 1024
     )
 
+    /** Fixed allow-list. Every mutation must also pass server-side role checks. */
+    suspend fun roleRpc(name: String, args: JSONObject = JSONObject()): String =
+        withContext(Dispatchers.IO) {
+            require(name in setOf(
+                "musicflow_my_access",
+                "musicflow_admin_users",
+                "musicflow_manage_role",
+                "musicflow_set_admin_permission",
+                "musicflow_apply_creator",
+                "musicflow_my_creator_requests",
+                "musicflow_pending_creators",
+                "musicflow_review_creator",
+                "musicflow_my_creator_profile",
+                "musicflow_save_creator_profile",
+                "musicflow_admin_tracks",
+                "musicflow_review_track",
+                "musicflow_owner_audit",
+                "musicflow_creator_draft_save",
+                "musicflow_creator_my_drafts",
+                "musicflow_creator_submit_draft",
+                "musicflow_pending_drafts",
+                "musicflow_review_draft"
+            )) { "Chức năng chưa được hỗ trợ." }
+            cloudRequest("POST", "/rest/v1/rpc/$name", args)
+        }
+
     private fun applySession(reply: JSONObject): Boolean {
         val access = reply.optString("access_token")
         val refresh = reply.optString("refresh_token")
@@ -344,6 +371,13 @@ class AccountApi(context: Context) {
             ))
             val entitlement = entitlements.optJSONObject(0)
             val expiry = entitlement?.optString("expires_at").orEmpty()
+            // Fail closed on missing role API / transient outages: NEVER infer
+            // privileged roles from email, Premium tier or local metadata.
+            val access = runCatching {
+                MusicFlowAccess.fromResponse(
+                    JSONObject(roleRpc("musicflow_my_access"))
+                )
+            }.getOrDefault(MusicFlowAccess.NONE)
             AccountIdentity(
                 userId = id,
                 email = email,
@@ -352,7 +386,8 @@ class AccountApi(context: Context) {
                     entitlement?.optString("tier"),
                     expiry
                 ),
-                expiresAt = expiry.ifBlank { null }
+                expiresAt = expiry.ifBlank { null },
+                access = access
             )
         }
 

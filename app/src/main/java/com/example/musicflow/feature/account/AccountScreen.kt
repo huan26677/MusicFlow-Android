@@ -34,6 +34,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import com.example.musicflow.core.account.CloudPendingMatch
+import com.example.musicflow.BuildConfig
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -43,6 +44,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.musicflow.ui.components.MusicFlowStatusKind
@@ -60,6 +62,7 @@ fun AccountRoute(
     }
     val model: AccountViewModel = viewModel(factory = factory)
     val state by model.state.collectAsStateWithLifecycle()
+    var rolesOpen by rememberSaveable { mutableStateOf(false) }
 
     AccountScreen(
         state, themeMode, onThemeModeChange,
@@ -90,8 +93,19 @@ fun AccountRoute(
         onRelink = model::relink,
         onDeleteCloudPlaylist = model::deleteRemotePlaylist,
         onDeleteCloudFavorite = model::deleteRemoteFavorite,
-        onDemoModeChange = model::demoModeChanged
+        onDemoModeChange = model::demoModeChanged,
+        onRoleTools = { rolesOpen = true }
     )
+    val account = state.account
+    if (rolesOpen && account != null && !state.demoSession) {
+        Dialog(onDismissRequest = { rolesOpen = false }) {
+            AccountRolePanel(
+                identity = account,
+                onClose = { rolesOpen = false },
+                rpc = model::roleRpc
+            )
+        }
+    }
 }
 
 @Composable
@@ -115,7 +129,8 @@ fun AccountScreen(
     onRelink: (CloudPendingMatch, String) -> Unit,
     onDeleteCloudPlaylist: (String) -> Unit,
     onDeleteCloudFavorite: (String) -> Unit,
-    onDemoModeChange: (Boolean) -> Unit = {}
+    onDemoModeChange: (Boolean) -> Unit = {},
+    onRoleTools: () -> Unit = {}
 ) {
     var confirming by remember { mutableStateOf<Pair<String, String>?>(null) }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
@@ -297,6 +312,40 @@ fun AccountScreen(
             )
             Button(onClick = onSaveProfile, enabled = !state.loading) {
                 Text("Lưu hồ sơ")
+            }
+            if (!state.demoSession) {
+                HorizontalDivider()
+                Text("Vai trò và quyền truy cập", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    "Gói ${identity.tier.uppercase()} — quyền quản trị là quyền riêng " +
+                        "do Supabase cấp, không đi kèm Premium.",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                if (identity.access.roles.isNotEmpty()) {
+                    Text(
+                        "Vai trò: ${identity.access.roles.joinToString(", ")}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                OutlinedButton(
+                    onClick = onRoleTools,
+                    enabled = !state.loading,
+                    modifier = Modifier.fillMaxWidth().testTag("account-role-tools")
+                ) {
+                    Text(
+                        if (identity.access.isOwner || identity.access.isPlatformAdmin) {
+                            "Quản trị nền tảng và vai trò"
+                        } else if (identity.access.isCreator) {
+                            "Hồ sơ nghệ sĩ / tác giả"
+                        } else "Đăng ký nghệ sĩ / tác giả và xem quyền"
+                    )
+                }
+                if (BuildConfig.DEBUG && identity.access.isDeveloper) {
+                    OutlinedButton(
+                        onClick = onRoleTools,
+                        modifier = Modifier.fillMaxWidth().testTag("account-developer-shortcut")
+                    ) { Text("Công cụ nhà phát triển (QA)") }
+                }
             }
             if (state.demoSession) {
                 Text(

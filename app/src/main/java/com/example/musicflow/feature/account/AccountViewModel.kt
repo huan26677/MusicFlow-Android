@@ -12,6 +12,7 @@ import com.example.musicflow.core.account.CloudLibrarySync
 import com.example.musicflow.core.account.CloudHistorySync
 import com.example.musicflow.core.account.CloudSyncSummary
 import com.example.musicflow.core.account.CloudPendingMatch
+import org.json.JSONObject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,6 +56,9 @@ class AccountViewModel(
         AccountUiState(configured = api.isConfigured, demoMode = false)
     )
     val state = _state.asStateFlow()
+
+    /** Uses the existing authenticated AccountApi session; RPCs recheck roles in SQL. */
+    suspend fun roleRpc(name: String, body: JSONObject): String = api.roleRpc(name, body)
 
     init {
         viewModelScope.launch {

@@ -1,13 +1,13 @@
 # MusicFlow — Kế hoạch Owner, quản trị viên nền tảng, Developer, tác giả và nghệ sĩ
 
 **Ngày bổ sung:** 2026-11-05  
-**Trạng thái:** **BACKLOG / CHƯA TRIỂN KHAI**. Mô hình quản trị được chỉnh theo yêu cầu: **Owner**, **Cộng tác quản trị viên nền tảng (PlatformAdmin)**, **Developer có lối tắt vào khu vực phát triển/QA**. Đây là kế hoạch, chưa có trong APK demo hiện tại.
+**Trạng thái cập nhật 2026-11-05:** **ĐÃ TRIỂN KHAI BẢN NỀN TẢNG (MVP), CHƯA HOÀN TẤT TOÀN BỘ ROADMAP**. Đã có schema/RPC phân quyền Supabase, giao diện Owner/PlatformAdmin nội bộ, lối tắt Developer debug và yêu cầu/hồ sơ Nghệ sĩ/Tác giả. **Owner chưa được cấp** do cần xác minh tài khoản chủ sở hữu; Creator Studio tải audio/bằng chứng, khóa tài khoản Auth và xử lý khiếu nại nâng cao vẫn ở backlog. Xem `docs/Trien_Khai_Vai_Tro_Owner_Admin_Developer_v1.md`.
 
 ## 1. Tình trạng hiện có
 
 - Android: đăng ký/đăng nhập Supabase bằng email + mật khẩu, Guest/Free/Premium và một số quyền cloud phụ thuộc entitlement máy chủ. Có màn Account cho người nghe.
 - Supabase: có `auth.users`, `account_profiles`, `account_entitlements`, bảng catalog và công cụ quản trị nhạc bản quyền bằng **CLI nội bộ**. **CLI không phải giao diện quản trị viên**, không có vai trò Admin/Artist/Author riêng dành cho đăng nhập sử dụng app/web.
-- **Chưa có:** vai trò Owner/PlatformAdmin/Developer, trang quản trị người dùng, lối tắt Developer, hồ sơ tác giả/nghệ sĩ, cổng gửi tác phẩm, xác minh danh tính/quyền sử dụng và duyệt bài qua dashboard. Không tuyên bố các chức năng này đã nghiệm thu.
+- **Hiện đã bổ sung mã nguồn/backend:** role Owner/PlatformAdmin/Developer, quản trị người dùng và cấp quyền trong dashboard nội bộ, lối tắt Developer debug, gửi/duyệt yêu cầu creator và hồ sơ cơ bản. **Chưa có Owner được chỉ định và chưa có** kho upload audio Creator Studio, duyệt chứng cứ bản quyền Creator end-to-end, đình chỉ Auth nâng cao hay hệ thống khiếu nại hoàn chỉnh. Không nhầm mốc code/MVP với toàn bộ sản phẩm đã nghiệm thu.
 
 ## 2. Mô hình tài khoản mục tiêu
 
@@ -83,7 +83,7 @@
 
 ## 5. Thứ tự ưu tiên so với điểm dừng hiện tại
 
-- **Hiện tại:** MusicFlow đã có APK demo phục vụ báo cáo; các mốc A1–A4, gồm A2.5 **được ghi nhận, chưa được bắt đầu**. Không làm thay đổi yêu cầu sideload demo, không yêu cầu email thật hay phát hành Play.
+- **Hiện tại:** MusicFlow đã có APK demo phục vụ báo cáo. **A1 có schema/RPC nền tảng**, A2 dashboard nội bộ, A2.5 debug quick access; **A3 đã bổ sung Creator Studio v1 với bản nháp metadata/tín chỉ/bằng chứng khai báo, gửi duyệt và quản trị viên duyệt/trả sửa trên Supabase**. A4 có audit + moderation cơ bản. **Chưa nghiệm thu E2E A2–A4 vì chưa có Owner thực được xác minh**; chưa có Creator upload audio/ảnh/giấy phép lên Storage, host web hay khóa tài khoản đầy đủ. Kết quả targeted QA của v1 tại `docs/Creator_Studio_v1.md`. Không làm thay đổi mục tiêu sideload/demo, không yêu cầu email thật hay phát hành Play.
 - **Khi chủ dự án yêu cầu phát triển nhánh vai trò:** bắt đầu bằng **A1 (role schema + security acceptance)**, tiếp theo A2 Owner/PlatformAdmin Web, A2.5 Developer Quick Access khi cần bản QA, A3 Creator Studio; tránh làm UI giả có nút quản trị nhưng backend chưa kiểm quyền.
 - **Tài khoản QA:** trước khi cho thử Owner/PlatformAdmin/Developer/Creator phải có backend đúng vai trò và kịch bản QA tách biệt; không tự cấp quyền cho tài khoản người dùng đang tồn tại.
 

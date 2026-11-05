@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MusicFlow · Quản trị nền tảng</title>
+<style>
+:root{font-family:system-ui,Arial,sans-serif;color:#192b35;background:#f5f8fb}
+*{box-sizing:border-box}body{margin:0}.shell{max-width:980px;margin:0 auto;padding:24px}
+h1{margin:0 0 4px;font-size:26px}h2{font-size:20px;margin:0 0 12px}
+p{line-height:1.55;color:#405463}.panel{background:white;border-radius:16px;padding:20px;margin:18px 0;border:1px solid #d6e1e7}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+label{display:block;font-size:14px;font-weight:600;margin:8px 0}
+input,select,textarea{width:100%;min-height:44px;border:1px solid #aabcc7;border-radius:9px;padding:9px;font:inherit;margin-top:5px}
+button{min-height:44px;border:0;border-radius:9px;background:#135c79;color:#fff;font:inherit;padding:9px 15px;cursor:pointer;margin:5px 6px 5px 0}
+button.secondary{background:#eaf0f5;color:#1d4054;border:1px solid #aabcc7}
+button:disabled{cursor:not-allowed;opacity:.5}button:focus-visible,input:focus-visible{outline:3px solid #ffb54e}
+.list{margin:10px 0}.item{padding:10px 2px;border-bottom:1px solid #e3eaf0;overflow-wrap:anywhere}
+#notice{white-space:pre-wrap}#notice[role=alert]{color:#a52f27}
+.small{font-size:13px}section[hidden],div[hidden]{display:none!important}
+@media(max-width:500px){.shell{padding:12px}.panel{padding:14px}}
+</style>
+</head>
+<body>
+<main class="shell">
+<h1>MusicFlow · Quản trị nền tảng</h1>
+<p>Chỉ dành cho Owner và quản trị viên được ủy quyền. Quyền được kiểm tra tại Supabase cho từng thao tác; không sử dụng khóa service_role.</p>
+<section class="panel" id="login-panel">
+<h2>Đăng nhập quản trị</h2>
+<form id="login-form">
+<div class="grid">
+<label>Supabase URL<input id="url" type="url" required placeholder="https://...supabase.co" autocomplete="url"></label>
+<label>Publishable key<input id="key" type="text" required placeholder="sb_publishable_..." autocomplete="off"></label>
+<label>Email<input id="email" type="email" required autocomplete="username"></label>
+<label>Mật khẩu<input id="password" type="password" required autocomplete="current-password"></label>
+</div>
+<button type="submit">Đăng nhập</button>
+</form>
+<p class="small">Mật khẩu và phiên chỉ giữ trong bộ nhớ của trang; không lưu vào localStorage. Không mở trang này trên thiết bị công cộng.</p>
+</section>
+<p id="notice" aria-live="polite"></p>
+<section class="panel" id="session-panel" hidden>
+<h2>Phiên quản trị</h2>
+<p id="roles-label"></p>
+<label>Lý do hành động quản trị (bắt buộc, 5–300 ký tự)
+<textarea id="reason" maxlength="300" rows="2"></textarea></label>
+<button class="secondary" id="logout">Đăng xuất</button>
+</section>
+<section class="panel" id="users-panel" hidden>
+<h2>Người dùng</h2>
+<label>Tìm email<input id="user-search" placeholder="Nhập email hoặc để trống"></label>
+<button id="load-users">Tải danh sách</button>
+<div id="user-list" class="list" aria-live="polite"></div>
+</section>
+<section class="panel" id="owner-panel" hidden>
+<h2>Owner · Phân quyền</h2>
+<p id="selected-user">Hãy chọn tài khoản từ danh sách.</p>
+<div class="grid">
+<label>Vai trò<select id="role">
+<option value="platform_admin">PlatformAdmin</option>
+<option value="developer">Developer</option>
+<option value="moderator">Moderator</option>
+<option value="artist">Nghệ sĩ</option>
+<option value="author">Tác giả</option>
+</select></label>
+<label>Phạm vi cộng tác<select id="permission">
+<option value="manage_users">Quản lý danh sách người dùng</option>
+<option value="review_creators">Duyệt creator</option>
+<option value="moderate_catalog">Quản lý phát nhạc online</option>
+</select></label>
+</div>
+<div>
+<button id="grant-role">Cấp vai trò</button>
+<button id="revoke-role" class="secondary">Thu hồi vai trò</button>
+<button id="grant-permission">Cấp phạm vi</button>
+<button id="revoke-permission" class="secondary">Thu hồi phạm vi</button>
+</div>
+<button id="load-audit" class="secondary">Xem nhật ký quản trị</button>
+<div id="audit-list" class="list"></div>
+<p class="small">Owner không thể bị cấp lại hoặc thu hồi tại đây. Chuyển Owner chỉ dùng quy trình được xác minh riêng.</p>
+</section>
+<section class="panel" id="creators-panel" hidden>
+<h2>Duyệt Tác giả / Nghệ sĩ</h2>
+<button id="load-creators">Tải yêu cầu chờ</button>
+<div id="creator-list" class="list"></div>
+</section>
+<section class="panel" id="drafts-panel" hidden>
+<h2>Creator Studio · Duyệt bản nháp tác phẩm</h2>
+<p>Chỉ duyệt hồ sơ, tín chỉ và khai báo quyền. <strong>Không phát hành bản ghi âm</strong> hoặc cấp phép streaming qua bước này.</p>
+<button id="load-drafts">Tải nháp chờ duyệt</button>
+<div id="draft-list" class="list"></div>
+</section>
+<section class="panel" id="tracks-panel" hidden>
+<h2>Kiểm duyệt nhạc online</h2>
+<p>Chỉ xuất bản bản ghi đã xác minh giấy phép và quyền phát trực tuyến. Nhạc offline cá nhân không thuộc quy trình này.</p>
+<button id="load-tracks">Tải danh sách nhạc</button>
+<div id="track-list" class="list"></div>
+</section>
+</main>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+let session=null, selected=null, access={roles:[],permissions:[]};
+const hasRole = r => access.roles.includes(r);
+const allowed = p => hasRole("owner") ||
+  (hasRole("platform_admin") && access.permissions.includes(p));
+function message(text,bad=false){$("notice").textContent=text;$("notice").setAttribute("role",bad?"alert":"status");}
+function node(tag,text,parent){const el=document.createElement(tag);el.textContent=String(text??"");parent.append(el);return el;}
+function btn(label,parent,handler,secondary=false){
+  const el=node("button",label,parent);if(secondary)el.className="secondary";
+  el.type="button";el.addEventListener("click",handler);return el;
+}
+function setVisible(id,show){$(id).hidden=!show;}
+async function authFetch(path,body){
+  if(!session)throw Error("Chưa đăng nhập.");
+  const response=await fetch(session.url+path,{
+    method:"POST",
+    headers:{"apikey":session.key,"Authorization":"Bearer "+session.token,
+      "Content-Type":"application/json","Accept":"application/json"},
+    body:JSON.stringify(body||{})
+  });
+  const raw=await response.text();
+  if(!response.ok)throw Error("Máy chủ từ chối ("+response.status+"). Kiểm tra quyền hoặc dữ liệu.");
+  return raw?JSON.parse(raw):null;
+}
+const rpc=(name,body)=>authFetch("/rest/v1/rpc/"+name,body);
+function reason(){
+  const result=$("reason").value.trim();
+  if(result.length<5)throw Error("Hãy ghi lý do ít nhất 5 ký tự.");
+  return result;
+}
+async function perform(task){
+  try{message("Đang thực hiện…");await task();message("Thao tác đã hoàn thành.");}
+  catch(e){message(e.message||"Có lỗi.",true);}
+}
+function reset(){
+  session=null;selected=null;access={roles:[],permissions:[]};
+  $("password").value="";
+  ["session-panel","users-panel","owner-panel","creators-panel","drafts-panel","tracks-panel"]
+    .forEach(id=>setVisible(id,false));
+  setVisible("login-panel",true);
+}
+$("login-form").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const url=$("url").value.trim().replace(/\/+$/,"");
+  const key=$("key").value.trim();
+  const email=$("email").value.trim(), password=$("password").value;
+  if(!/^https:\/\/[a-z0-9.-]+\.supabase\.co$/i.test(url)||!key.startsWith("sb_publishable_")){
+    message("URL Supabase hoặc publishable key không hợp lệ.",true);return;
+  }
+  try{
+    message("Đang xác thực…");
+    const response=await fetch(url+"/auth/v1/token?grant_type=password",{
+      method:"POST",headers:{"apikey":key,"Content-Type":"application/json"},
+      body:JSON.stringify({email,password})
+    });
+    $("password").value="";
+    if(!response.ok)throw Error("Đăng nhập không thành công.");
+    const json=await response.json();
+    if(!json.access_token)throw Error("Không có phiên hợp lệ.");
+    session={url,key,token:json.access_token};
+    access=await rpc("musicflow_my_access",{});
+    if(!hasRole("owner")&&!hasRole("platform_admin")){
+      reset();throw Error("Tài khoản này không có quyền quản trị nền tảng.");
+    }
+    setVisible("login-panel",false);
+    setVisible("session-panel",true);
+    setVisible("users-panel",allowed("manage_users"));
+    setVisible("owner-panel",hasRole("owner"));
+    setVisible("creators-panel",allowed("review_creators"));
+    setVisible("drafts-panel",allowed("review_creators"));
+    setVisible("tracks-panel",allowed("moderate_catalog"));
+    $("roles-label").textContent="Vai trò: "+access.roles.join(", ") +
+      " · Quyền: "+access.permissions.join(", ");
+    message("Đã đăng nhập và xác minh quyền.");
+  }catch(error){reset();message(error.message||"Không thể đăng nhập.",true);}
+});
+$("logout").addEventListener("click",()=>{reset();message("Đã xóa phiên trong bộ nhớ trang.");});
+$("load-users").addEventListener("click",()=>perform(async()=>{
+  const rows=await rpc("musicflow_admin_users",{p_search:$("user-search").value.trim(),p_limit:20});
+  const list=$("user-list");list.replaceChildren();
+  rows.forEach(user=>{
+    const row=node("div","",list);row.className="item";
+    node("span",user.email+" • "+user.tier+" • "+user.roles.join(", "),row);
+    btn("Chọn",row,()=>{
+      selected=user;
+      $("selected-user").textContent="Đã chọn: "+user.email;
+      message("Đã chọn tài khoản; hãy nhập lý do trước khi cấp/thu hồi.");
+    },true);
+  });
+  if(rows.length===0)node("p","Không tìm thấy tài khoản.",list);
+}));
+async function change(kind,enable){
+  if(!hasRole("owner"))throw Error("Chỉ Owner có quyền này.");
+  if(!selected)throw Error("Chưa chọn tài khoản.");
+  const why=reason();
+  const item=kind==="role"?$("role").value:$("permission").value;
+  if(!confirm((enable?"Cấp ":"Thu hồi ")+item+" cho "+selected.email+"?"))return;
+  if(kind==="role"){
+    await rpc("musicflow_manage_role",{
+      p_user_id:selected.id,p_role:item,p_grant:enable,p_reason:why
+    });
+  }else{
+    await rpc("musicflow_set_admin_permission",{
+      p_user_id:selected.id,p_permission:item,p_grant:enable,p_reason:why
+    });
+  }
+}
+["grant-role","revoke-role","grant-permission","revoke-permission"].forEach(id=>{
+  $(id).addEventListener("click",()=>perform(()=>change(
+    id.includes("permission")?"permission":"role",id.startsWith("grant")
+  )));
+});
+$("load-creators").addEventListener("click",()=>perform(async()=>{
+  const rows=await rpc("musicflow_pending_creators",{});
+  const list=$("creator-list");list.replaceChildren();
+  rows.forEach(app=>{
+    const row=node("div","",list);row.className="item";
+    node("p",app.email+" — "+app.requested_name+" ("+app.requested_role+")",row);
+    node("p",app.note||"",row);
+    [true,false].forEach(accept=>{
+      btn(accept?"Duyệt":"Từ chối",row,()=>perform(async()=>{
+        const why=reason();
+        if(!confirm((accept?"Duyệt ":"Từ chối ")+app.requested_name+"?"))return;
+        await rpc("musicflow_review_creator",{
+          p_application:app.id,p_approve:accept,p_reason:why
+        });
+        row.remove();
+      }),!accept);
+    });
+  });
+  if(rows.length===0)node("p","Không có yêu cầu chờ duyệt.",list);
+}));
+$("load-drafts").addEventListener("click",()=>perform(async()=>{
+  const rows=await rpc("musicflow_pending_drafts",{});
+  const list=$("draft-list");list.replaceChildren();
+  rows.forEach(draft=>{
+    const row=node("div","",list);row.className="item";
+    node("h3",draft.title+" — "+draft.artist,row);
+    node("p","Người gửi: "+draft.creator_email+" · Chủ bản ghi âm: "+
+      draft.rights_holder,row);
+    node("p","Giấy phép: "+draft.license_code+
+      " · Quyền streaming tự khai: "+(draft.streaming_claimed?"Có":"Không"),row);
+    node("p","Bằng chứng khai báo: "+draft.rights_reference,row);
+    (draft.credits||[]).forEach(credit=>
+      node("p",credit.name+" — "+credit.contribution,row)
+    );
+    [true,false].forEach(approve=>{
+      btn(approve?"Duyệt hồ sơ":"Yêu cầu chỉnh sửa",row,()=>perform(async()=>{
+        const why=reason();
+        if(!confirm((approve?"Duyệt hồ sơ ":"Yêu cầu sửa ")+draft.title+"?"))return;
+        await rpc("musicflow_review_draft",{
+          p_id:draft.id,p_approve:approve,p_reason:why
+        });
+        row.remove();
+      }),!approve);
+    });
+  });
+  if(rows.length===0)node("p","Không có hồ sơ tác phẩm chờ duyệt.",list);
+}));
+$("load-tracks").addEventListener("click",()=>perform(async()=>{
+  const rows=await rpc("musicflow_admin_tracks",{});
+  const list=$("track-list");list.replaceChildren();
+  rows.forEach(track=>{
+    const row=node("div","",list);row.className="item";
+    node("p",track.title+" — "+track.artist+
+      " | "+track.license_code+" | quyền phát: "+(track.streaming_allowed?"Có":"Chưa"),row);
+    [true,false].forEach(publish=>{
+      const control=btn(publish?"Xuất bản":"Gỡ phát",row,()=>perform(async()=>{
+        const why=reason();
+        if(!confirm((publish?"Xuất bản ":"Gỡ phát ")+track.title+"?"))return;
+        await rpc("musicflow_review_track",{
+          p_track:track.id,p_publish:publish,p_reason:why
+        });
+      }),!publish);
+      if(publish&&(!track.rights_confirmed||!track.streaming_allowed))control.disabled=true;
+    });
+  });
+  if(rows.length===0)node("p","Không có bản ghi trong catalog.",list);
+}));
+$("load-audit").addEventListener("click",()=>perform(async()=>{
+  const rows=await rpc("musicflow_owner_audit",{});
+  const list=$("audit-list");list.replaceChildren();
+  rows.forEach(row=>{
+    const item=node("div",row.created_at+" — "+row.action,list);item.className="item";
+  });
+  if(rows.length===0)node("p","Chưa có sự kiện quản trị.",list);
+}));
+</script>
+</body></html>
