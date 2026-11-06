@@ -28,12 +28,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import android.net.Uri
 import com.example.musicflow.BuildConfig
 import com.example.musicflow.core.account.AccountIdentity
 import com.example.musicflow.core.account.AccountWorkspace
 import com.example.musicflow.core.account.AccountWorkspacePlan
+import com.example.musicflow.core.account.AccountTaskGuide
 import com.example.musicflow.core.account.CreatorApplicationUiRules
 import com.example.musicflow.core.account.MusicFlowAccess
 import kotlinx.coroutines.CancellationException
@@ -79,6 +82,12 @@ internal fun AccountRolePanel(
     var audits by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
     var developerOpen by remember { mutableStateOf(false) }
     var qaConnection by remember { mutableStateOf<String?>(null) }
+    var studioExpanded by remember(identity.userId) { mutableStateOf(false) }
+    var ownerOverviewExpanded by remember(identity.userId) { mutableStateOf(false) }
+    var usersLoaded by remember(identity.userId) { mutableStateOf(false) }
+    var pendingLoaded by remember(identity.userId) { mutableStateOf(false) }
+    var tracksLoaded by remember(identity.userId) { mutableStateOf(false) }
+    var auditLoaded by remember(identity.userId) { mutableStateOf(false) }
 
     fun runAction(name: String, args: JSONObject = JSONObject(), ok: (String) -> Unit) {
         if (busy) return
@@ -137,10 +146,13 @@ internal fun AccountRolePanel(
             modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text("Vai trò và quản trị MusicFlow", style = MaterialTheme.typography.titleLarge)
+            Text("Vai trò và quản trị MusicFlow", style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.semantics { heading() })
             Text(identity.email, style = MaterialTheme.typography.bodySmall)
             Text(if (!checked) "Đang kiểm tra vai trò..." else
-                "Vai trò: " + access.roles.ifEmpty { setOf("Người nghe") }.joinToString(", "))
+                "Vai trò: " + access.roles.sorted().takeIf { it.isNotEmpty() }
+                    ?.joinToString(", ") { AccountWorkspacePlan.roleLabel(it) }
+                    .orEmpty().ifBlank { "Người nghe" })
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             info?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
 
@@ -161,6 +173,12 @@ internal fun AccountRolePanel(
                         reviewConfirm = null
                         developerOpen = false
                         selectedWorkspace = null
+                        ownerOverviewExpanded = false
+                        studioExpanded = false
+                        usersLoaded = false
+                        pendingLoaded = false
+                        tracksLoaded = false
+                        auditLoaded = false
                         runAction("musicflow_my_access") { raw ->
                             access = MusicFlowAccess.fromResponse(JSONObject(raw))
                             info = "Đã kiểm tra lại vai trò trực tiếp từ Supabase."
@@ -171,7 +189,8 @@ internal fun AccountRolePanel(
             }
 
             if (checked) {
-                Text("Khu vực làm việc", style = MaterialTheme.typography.titleMedium)
+                Text("Khu vực làm việc", style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.semantics { heading() })
                 Row(
                     modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -185,11 +204,15 @@ internal fun AccountRolePanel(
                                 reviewConfirm = null
                             },
                             label = { Text(workspace.title) },
-                            modifier = Modifier.testTag("role-workspace-${workspace.name.lowercase()}")
+                            modifier = Modifier.heightIn(min = 48.dp)
+                                .testTag("role-workspace-${workspace.name.lowercase()}")
                         )
                     }
                 }
                 Text(currentWorkspace.description, style = MaterialTheme.typography.bodySmall)
+                Text(AccountTaskGuide.nextStep(currentWorkspace, access),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.testTag("workspace-next-step"))
                 if (currentWorkspace == AccountWorkspace.CREATOR) {
                 HorizontalDivider()
                 Text("Tài khoản tác giả / nghệ sĩ", style = MaterialTheme.typography.titleMedium)
@@ -290,7 +313,15 @@ internal fun AccountRolePanel(
                 }
 
                 if (access.isCreator) {
-                    CreatorDraftStudio(rpc = rpc, upload = upload, download = download)
+                    OutlinedButton(
+                        onClick = { studioExpanded = !studioExpanded },
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                            .testTag("creator-studio-toggle")
+                    ) { Text(if (studioExpanded) "Thu gọn kho tác phẩm"
+                        else "Mở kho tác phẩm và bản nháp") }
+                    if (studioExpanded) {
+                        CreatorDraftStudio(rpc = rpc, upload = upload, download = download)
+                    }
                 }
                 }
                 if (currentWorkspace == AccountWorkspace.DEVELOPER &&
@@ -330,11 +361,18 @@ internal fun AccountRolePanel(
                 }
                 if (currentWorkspace == AccountWorkspace.MANAGEMENT) {
                 if (access.isOwner) {
-                    OwnerDemoDashboard(rpc = rpc)
+                    OutlinedButton(
+                        onClick = { ownerOverviewExpanded = !ownerOverviewExpanded },
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                            .testTag("owner-overview-toggle")
+                    ) { Text(if (ownerOverviewExpanded) "Thu gọn tổng quan Owner"
+                        else "Xem tổng quan và tiến độ demo") }
+                    if (ownerOverviewExpanded) OwnerDemoDashboard(rpc = rpc)
                 }
                 if (access.canManageUsers) {
                     HorizontalDivider()
-                    Text("Quản lý người dùng", style = MaterialTheme.typography.titleMedium)
+                    Text("Quản lý người dùng", style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.semantics { heading() })
                     OutlinedTextField(
                         value = search, onValueChange = { search = it.take(80) },
                         label = { Text("Tìm email người dùng") },
@@ -342,17 +380,29 @@ internal fun AccountRolePanel(
                     )
                     Button(
                         onClick = {
+                            users = emptyList()
+                            selected = null
+                            usersLoaded = false
                             runAction(
                                 "musicflow_admin_users",
                                 JSONObject().put("p_search", search.trim()).put("p_limit", 20)
-                            ) { users = JSONArray(it).rows(); info = "Đã tải ${users.size} người dùng." }
+                            ) {
+                                users = JSONArray(it).rows()
+                                usersLoaded = true
+                                info = "Đã tải ${users.size} người dùng."
+                            }
                         },
-                        enabled = !busy
+                        enabled = !busy,
+                        modifier = Modifier.heightIn(min = 48.dp).testTag("admin-users-load")
                     ) { Text("Tải danh sách tài khoản") }
+                    if (usersLoaded && users.isEmpty()) {
+                        Text("Không có tài khoản phù hợp. Thử đổi từ khóa rồi tải lại.",
+                            modifier = Modifier.testTag("admin-users-empty"))
+                    }
                     users.forEach { user ->
                         OutlinedButton(
                             onClick = { selected = user },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth().testTag("admin-user-item")
                         ) { Text("${user.optString("email")} • ${user.optString("tier")}") }
                     }
                 }
@@ -408,9 +458,20 @@ internal fun AccountRolePanel(
                         ) { Text("Thu hồi quyền") }
                     }
                     OutlinedButton(
-                        onClick = { runAction("musicflow_owner_audit") { audits = JSONArray(it).rows() } },
+                        onClick = {
+                            audits = emptyList()
+                            auditLoaded = false
+                            runAction("musicflow_owner_audit") {
+                                audits = JSONArray(it).rows()
+                                auditLoaded = true
+                            }
+                        },
                         enabled = !busy
                     ) { Text("Xem nhật ký quản trị") }
+                    if (auditLoaded && audits.isEmpty()) {
+                        Text("Chưa có bản ghi quản trị để hiển thị.",
+                            modifier = Modifier.testTag("owner-audit-empty"))
+                    }
                     audits.take(30).forEach {
                         Text("${it.optString("created_at")} — ${it.optString("action")}")
                     }
@@ -422,12 +483,19 @@ internal fun AccountRolePanel(
                     Text("Duyệt yêu cầu sáng tạo", style = MaterialTheme.typography.titleMedium)
                     OutlinedButton(
                         onClick = {
+                            pending = emptyList()
+                            pendingLoaded = false
                             runAction("musicflow_pending_creators") {
                                 pending = JSONArray(it).rows()
+                                pendingLoaded = true
                             }
                         }, enabled = !busy,
                         modifier = Modifier.testTag("creator-review-load-pending")
                     ) { Text("Tải yêu cầu đang chờ") }
+                    if (pendingLoaded && pending.isEmpty()) {
+                        Text("Hiện không có yêu cầu Creator đang chờ duyệt.",
+                            modifier = Modifier.testTag("creator-review-empty"))
+                    }
                     pending.forEach { application ->
                         Text(
                             "${application.optString("email")} — ${application.optString("requested_name")} " +
@@ -454,9 +522,20 @@ internal fun AccountRolePanel(
                     HorizontalDivider()
                     Text("Quản lý phát nhạc online", style = MaterialTheme.typography.titleMedium)
                     OutlinedButton(
-                        onClick = { runAction("musicflow_admin_tracks") { tracks = JSONArray(it).rows() } },
+                        onClick = {
+                            tracks = emptyList()
+                            tracksLoaded = false
+                            runAction("musicflow_admin_tracks") {
+                                tracks = JSONArray(it).rows()
+                                tracksLoaded = true
+                            }
+                        },
                         enabled = !busy
                     ) { Text("Tải danh mục cần kiểm duyệt") }
+                    if (tracksLoaded && tracks.isEmpty()) {
+                        Text("Không có bản ghi online cần kiểm tra lúc này.",
+                            modifier = Modifier.testTag("moderation-tracks-empty"))
+                    }
                     tracks.forEach { track ->
                         Text("${track.optString("title")} • ${track.optString("license_code")}")
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -486,7 +565,8 @@ internal fun AccountRolePanel(
                 }
             }
             HorizontalDivider()
-            TextButton(onClick = onClose, modifier = Modifier.fillMaxWidth()) { Text("Đóng") }
+            TextButton(onClick = onClose,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Đóng") }
         }
     }
 

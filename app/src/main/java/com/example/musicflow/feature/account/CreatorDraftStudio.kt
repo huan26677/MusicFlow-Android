@@ -80,14 +80,15 @@ internal fun CreatorDraftStudio(
         if (busy) return
         scope.launch {
             busy = true; error = null; info = null
+            hasLoaded = false; drafts = emptyList()
             try {
                 val data = JSONArray(rpc("musicflow_creator_my_drafts", JSONObject()))
                 drafts = (0 until data.length()).mapNotNull(data::optJSONObject)
                 hasLoaded = true
             } catch (cancelled: CancellationException) {
                 throw cancelled
-            } catch (failure: Exception) {
-                error = failure.message ?: "Chưa tải được nháp."
+            } catch (_: Exception) {
+                error = "Chưa tải được bản nháp. Kiểm tra Internet và nhấn Tải nháp của tôi để thử lại."
             } finally { busy = false }
         }
     }
@@ -190,15 +191,24 @@ internal fun CreatorDraftStudio(
             style = MaterialTheme.typography.bodySmall
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { reload() }, enabled = !busy) { Text("Tải nháp của tôi") }
+            OutlinedButton(onClick = { reload() }, enabled = !busy,
+                modifier = Modifier.testTag("creator-drafts-load")
+            ) { Text("Tải nháp của tôi") }
             Button(onClick = { newDraft() }, enabled = !busy,
                 modifier = Modifier.testTag("creator-new-draft")
             ) { Text("Tạo nháp") }
         }
+        if (!hasLoaded && !busy && error == null) {
+            Text("Nhấn Tải nháp của tôi để xem tác phẩm đã lưu, hoặc Tạo nháp để bắt đầu.",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.testTag("creator-drafts-start-hint"))
+        }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         info?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
         if (hasLoaded && drafts.isEmpty()) {
-            Text("Chưa có bản nháp nào.", style = MaterialTheme.typography.bodySmall)
+            Text("Chưa có tác phẩm nào. Nhấn Tạo nháp để bắt đầu hồ sơ tác phẩm đầu tiên.",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.testTag("creator-drafts-empty"))
         }
         drafts.forEach { item ->
             Text(
