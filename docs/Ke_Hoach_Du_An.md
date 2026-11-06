@@ -6,6 +6,8 @@
 
 > **CẬP NHẬT MỚI 2026-11-06 (Role Access Refresh v1):** Android và Web Admin đã có nút kiểm tra lại vai trò từ Supabase với cơ chế ẩn quyền cũ khi RPC lỗi/thu hồi. **8 JVM + 7 Android UI + 4 web JS PASS**, DB role matrix 8/8 PASS, HTTP anon 3/3 DENIED, APK QA mới cài/cold launch PASS. **JWT password-login E2E 8 tài khoản chưa chạy**; xem `docs/Account_Role_Refresh_Demo_v1.md`. Phạm vi vẫn là demo/báo cáo, không tự production.
 
+> **MỚI NHẤT 2026-11-06 — Creator Application Review UX v2:** Hồ sơ Nghệ sĩ/Tác giả đã có trạng thái xét duyệt tiếng Việt, ngăn gửi đơn trùng khi pending, hiện review note; Owner/PlatformAdmin phải xác nhận rõ quyết định và lý do 5–300 ký tự trước RPC. **12/12 JVM + 10/10 Android UI trên API30 PASS**, build/ký APK QA, cài/cold launch chính APK PASS. **Không xét duyệt thật đơn pending**, giữ nguyên một Owner và một đơn QA chờ; xem `docs/Creator_Application_Review_UX_v2.md`.
+
 ## QUYẾT ĐỊNH ƯU TIÊN 2026-11-01 — ĐIỂM DỪNG: APK DEMO / DỰ ÁN BÁO CÁO
 
 **Mục tiêu mới được chủ dự án xác nhận:** MusicFlow là **dự án báo cáo**. Hoàn thiện ứng dụng để **tải tệp APK và cài đặt trực tiếp phục vụ demo**, hoàn tất bàn giao/báo cáo rồi **tạm dừng**. **Không phát hành thật, không Google Play, không dùng email thật, không kiểm thử điện thoại thật, không bắt buộc đăng nhập Google thật hoặc đồng bộ cloud qua hai thiết bị thật.**
@@ -1537,6 +1539,16 @@ Bước tiếp theo: Hoàn thiện nghiệm thu SAF và background/system contro
 - **APK demo:** `dist/MusicFlow-1.0-Demo-RoleRefreshV1-Android.apk`, 31.065.789 byte, SHA256 `5CBD72907E1553E860FBE354664804853472B32395AC7C45081788CE86BBBF60`; build release-mode, ký QA, `zipalign`/`apksigner`/`aapt` PASS, **cài nâng cấp và cold launch chính APK** `Status: ok`, `LaunchState: COLD`, process chạy PASS. AVD `MusicFlow_RoleRefreshV1_QA_API30` đã dừng/xóa; giữ nguyên các AVD cũ.
 - **Bằng chứng:** `docs/Account_Role_Refresh_Demo_v1.md`, `qa-logs/account-role-refresh-v1-build.log`, `qa-logs/account-role-refresh-v1-qa.log`, `qa-logs/demo-apk-role-refresh-v1-package.log`. Không đụng service key, tài khoản Owner, chuyển repo public hay nội dung online chưa đủ bản quyền.
 - **Bước tiếp:** nghiệm thu tương tác đăng nhập bằng **JWT thật** từ mật khẩu QA do chủ dự án tự nhập vào Android/Web (không cần đưa mật khẩu cho assistant), kiểm tra badge và quyền live theo từng persona, test workflow Creator pending sau khi đã sao lưu cách khôi phục trạng thái, ghi log và làm báo cáo. Không tuyên bố phần E2E này PASS trước khi có bằng chứng.
+
+### 2026-11-06 — CREATOR APPLICATION REVIEW UX v2 — TARGETED QA PASS
+
+- **HEAD khi bắt đầu:** `df35479` trên `main`, worktree sạch. Không sửa vai trò/tài khoản Supabase, không tự đăng nhập Owner, không đẩy GitHub hay thay đổi bảo mật repo.
+- **Nguồn sự thật:** Supabase hosted có sẵn partial unique index `musicflow_creator_one_pending` trên `(user_id, requested_role)` với trạng thái `pending`. Read-only SQL xác nhận **1 đơn Creator đang pending và 1 Owner** trước/sau test. Không cần migration mới.
+- **Android:** trong `AccountRolePanel`, tải `musicflow_my_creator_requests` trước khi cho gửi; trình bày `pending/approved/rejected` bằng tiếng Việt kèm `review_note`, ngăn gửi lặp cùng role khi pending, hiển thị yêu cầu mới khi server xác nhận. Owner/PlatformAdmin xem email/vai trò/nghệ danh/giới thiệu, ghi lý do 5–300 ký tự, duyệt/từ chối qua AlertDialog **xác nhận/hủy**; chỉ ẩn đơn khi RPC `musicflow_review_creator` trả `true`, lỗi trả `false` giữ nguyên. Khi refresh role, xóa cache người dùng/đơn/audit/quyết định trước đó.
+- **QA:** `CreatorApplicationUiRulesTest` **4/4 JVM PASS**, `MusicFlowAccessTest` **8/8 JVM PASS**, tổng **12/12**. `CreatorApplicationReviewUiTest` **3/3 Android UI PASS**, `MusicFlowRolesUiTest` **7/7 Android UI PASS**, tổng **10/10** trên AVD Android API30 mới/tách biệt. Lần build đầu có import Compose test sai, đã sửa và test lại PASS. Không chạy full media regression hay JWT post-seed 8 tài khoản thật.
+- **APK:** `dist/MusicFlow-1.0-Demo-CreatorReviewV2-Android.apk`, 31.065.789 bytes, SHA256 `B1A7B9A0D4010B49683F96CC67E80660BC89053E2745667C4ED7D3EE0663A95A`; `assembleRelease` + `zipalign` + `apksigner` + `aapt` **PASS**, ký QA, không debuggable. **Chính APK** đã được cài nâng cấp và cold launch `Status: ok`, `LaunchState: COLD`, process đang chạy trên API30 QA PASS. Dừng/xóa AVD QA riêng `MusicFlow_CreatorReviewV2_QA_API30`, không xóa các AVD người dùng.
+- **Bằng chứng:** `docs/Creator_Application_Review_UX_v2.md`, `scripts/run-creator-application-review-v2-tests.ps1`, `qa-logs/musicflow-creator-application-review-v2-build.log`, `qa-logs/musicflow-creator-application-review-v2-qa.log`, `qa-logs/demo-apk-creator-review-v2-package.log`.
+- **Giới hạn/bước tiếp:** Đăng nhập thực bằng tài khoản QA trên Android/Web để nghiệm thu JWT, vòng xét duyệt + audit E2E, nhưng phải chuẩn bị cách giữ/tạo lại đơn pending nếu muốn dùng lại trong buổi báo cáo. Không giả báo E2E PASS, không tự publish âm thanh hay phát hành commercial.
 
 ## 9. Câu lệnh khởi động cuộc trò chuyện mới
 

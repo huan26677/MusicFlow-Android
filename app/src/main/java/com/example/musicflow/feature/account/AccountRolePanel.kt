@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import android.net.Uri
 import com.example.musicflow.BuildConfig
 import com.example.musicflow.core.account.AccountIdentity
+import com.example.musicflow.core.account.CreatorApplicationUiRules
 import com.example.musicflow.core.account.MusicFlowAccess
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -61,11 +62,13 @@ internal fun AccountRolePanel(
     var permission by remember { mutableStateOf("manage_users") }
     var reason by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf<Pair<String, Boolean>?>(null) }
+    var reviewConfirm by remember { mutableStateOf<Pair<JSONObject, Boolean>?>(null) }
 
     var creatorType by remember { mutableStateOf("artist") }
     var creatorName by remember { mutableStateOf("") }
     var creatorBio by remember { mutableStateOf("") }
     var myRequests by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
+    var requestsLoaded by remember(identity.userId) { mutableStateOf(false) }
     var pending by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
     var tracks by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
     var audits by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
@@ -103,7 +106,20 @@ internal fun AccountRolePanel(
         } finally {
             checked = true
         }
+        // Read-only: determine existing pending applications before enabling submit.
+        try {
+            myRequests = JSONArray(rpc("musicflow_my_creator_requests", JSONObject())).rows()
+            requestsLoaded = true
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            requestsLoaded = false
+        }
     }
+
+    val hasPendingSelectedRole = CreatorApplicationUiRules.hasPendingRole(
+        myRequests.map { it.optString("requested_role") to it.optString("status") }, creatorType
+    )
 
     Surface(
         modifier = Modifier.fillMaxWidth().heightIn(max = 600.dp),
@@ -128,6 +144,14 @@ internal fun AccountRolePanel(
                         // When the network/RPC fails, the panel stays fail-closed.
                         access = MusicFlowAccess.NONE
                         qaConnection = null
+                        users = emptyList()
+                        selected = null
+                        pending = emptyList()
+                        tracks = emptyList()
+                        audits = emptyList()
+                        confirm = null
+                        reviewConfirm = null
+                        developerOpen = false
                         runAction("musicflow_my_access") { raw ->
                             access = MusicFlowAccess.fromResponse(JSONObject(raw))
                             info = "Đã kiểm tra lại vai trò trực tiếp từ Supabase."
@@ -150,6 +174,12 @@ internal fun AccountRolePanel(
                             )
                         }
                     }
+                    if (!requestsLoaded) {
+                        Text("Chưa kiểm tra được đơn hiện có. Hãy tải tình trạng xét duyệt trước khi gửi đơn mới.")
+                    } else if (hasPendingSelectedRole) {
+                        Text("Bạn đã có đơn ${CreatorApplicationUiRules.roleLabel(creatorType)} đang chờ duyệt. Không cần gửi lại.",
+                            modifier = Modifier.testTag("creator-pending-hint"))
+                    }
                 } else {
                     Text("Bạn đã có vai trò sáng tạo được phê duyệt.")
                 }
@@ -171,9 +201,19 @@ internal fun AccountRolePanel(
                                 JSONObject().put("p_role", creatorType)
                                     .put("p_name", creatorName.trim())
                                     .put("p_note", creatorBio.trim())
-                            ) { info = "Đã gửi yêu cầu. Vai trò chỉ có sau khi được duyệt." }
+                            ) {
+                                // Only mark pending after the server has accepted the request.
+                                myRequests = listOf(JSONObject()
+                                    .put("requested_role", creatorType)
+                                    .put("requested_name", creatorName.trim())
+                                    .put("status", "pending")) + myRequests
+                                requestsLoaded = true
+                                info = "Đã gửi yêu cầu. Vai trò chỉ có sau khi được duyệt."
+                            }
                         },
-                        enabled = !busy && creatorName.trim().length in 2..80,
+                        enabled = CreatorApplicationUiRules.canSubmit(
+                            access.isCreator, requestsLoaded, busy, creatorName, hasPendingSelectedRole
+                        ),
                         modifier = Modifier.fillMaxWidth().testTag("creator-request")
                     ) { Text("Đề nghị xét duyệt") }
                 } else {
@@ -201,16 +241,23 @@ internal fun AccountRolePanel(
                 OutlinedButton(
                     enabled = !busy,
                     onClick = {
+                        requestsLoaded = false
                         runAction("musicflow_my_creator_requests") {
                             myRequests = JSONArray(it).rows()
+                            requestsLoaded = true
                         }
-                    }
+                    },
+                    modifier = Modifier.testTag("creator-load-requests")
                 ) { Text("Xem tình trạng xét duyệt") }
                 myRequests.forEach {
                     Text(
-                        "${it.optString("requested_role")}: " +
-                            "${it.optString("requested_name")} — ${it.optString("status")}"
+                        "${CreatorApplicationUiRules.roleLabel(it.optString("requested_role"))}: " +
+                            "${it.optString("requested_name")} — " +
+                            CreatorApplicationUiRules.statusLabel(it.optString("status")),
+                        modifier = Modifier.testTag("creator-request-status")
                     )
+                    val note = it.optString("review_note").trim()
+                    if (note.isNotBlank()) Text("Phản hồi xét duyệt: $note")
                 }
 
                 if (access.isCreator) {
@@ -344,27 +391,23 @@ internal fun AccountRolePanel(
                             runAction("musicflow_pending_creators") {
                                 pending = JSONArray(it).rows()
                             }
-                        }, enabled = !busy
+                        }, enabled = !busy,
+                        modifier = Modifier.testTag("creator-review-load-pending")
                     ) { Text("Tải yêu cầu đang chờ") }
                     pending.forEach { application ->
-                        Text("${application.optString("email")} — ${application.optString("requested_name")}")
+                        Text(
+                            "${application.optString("email")} — ${application.optString("requested_name")} " +
+                                "(${CreatorApplicationUiRules.roleLabel(application.optString("requested_role"))})"
+                        )
+                        if (application.optString("note").isNotBlank()) {
+                            Text("Giới thiệu: ${application.optString("note")}")
+                        }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             listOf(true to "Duyệt", false to "Từ chối").forEach { (approved, label) ->
                                 OutlinedButton(
-                                    enabled = !busy && reason.trim().length >= 5,
-                                    onClick = {
-                                        runAction(
-                                            "musicflow_review_creator",
-                                            JSONObject().put("p_application", application.optString("id"))
-                                                .put("p_approve", approved)
-                                                .put("p_reason", reason.trim())
-                                        ) {
-                                            pending = pending.filterNot {
-                                                it.optString("id") == application.optString("id")
-                                            }
-                                            info = "Đã xử lý xét duyệt."
-                                        }
-                                    }
+                                    enabled = CreatorApplicationUiRules.canReview(busy, reason),
+                                    onClick = { reviewConfirm = application to approved },
+                                    modifier = Modifier.testTag(if (approved) "creator-review-approve" else "creator-review-reject")
                                 ) { Text(label) }
                             }
                         }
@@ -404,7 +447,7 @@ internal fun AccountRolePanel(
                     OutlinedTextField(
                         value = reason, onValueChange = { reason = it.take(300) },
                         label = { Text("Lý do xét duyệt (ít nhất 5 ký tự)") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().testTag("creator-review-reason")
                     )
                 }
             }
@@ -437,6 +480,48 @@ internal fun AccountRolePanel(
             },
             dismissButton = {
                 TextButton(onClick = { confirm = null }) { Text("Hủy") }
+            }
+        )
+    }
+
+    reviewConfirm?.let { (application, approved) ->
+        AlertDialog(
+            onDismissRequest = { reviewConfirm = null },
+            title = { Text(if (approved) "Xác nhận duyệt Creator?" else "Xác nhận từ chối Creator?") },
+            text = {
+                Text(
+                    "${application.optString("requested_name")} — " +
+                        CreatorApplicationUiRules.roleLabel(application.optString("requested_role")) +
+                        "\nTài khoản: ${application.optString("email")}" +
+                        "\nLý do ghi vào nhật ký: ${reason.trim()}" +
+                        "\nQuyết định này được ghi lại trên Supabase."
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = CreatorApplicationUiRules.canReview(busy, reason),
+                    onClick = {
+                        reviewConfirm = null
+                        val id = application.optString("id")
+                        runAction(
+                            "musicflow_review_creator",
+                            JSONObject().put("p_application", id)
+                                .put("p_approve", approved)
+                                .put("p_reason", reason.trim())
+                        ) { raw ->
+                            check(raw.trim() == "true") { "Máy chủ chưa xác nhận quyết định." }
+                            pending = pending.filterNot { it.optString("id") == id }
+                            info = "Đã xử lý xét duyệt trên Supabase."
+                        }
+                    },
+                    modifier = Modifier.testTag("creator-review-confirm")
+                ) { Text("Xác nhận") }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { reviewConfirm = null },
+                    modifier = Modifier.testTag("creator-review-cancel")
+                ) { Text("Hủy") }
             }
         )
     }
