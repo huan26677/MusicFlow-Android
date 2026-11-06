@@ -1,5 +1,7 @@
 # BÁO CÁO BÀN GIAO — MUSICFLOW ANDROID DEMO APK
 
+> **BẢN DEMO MỚI NHẤT — THANH TOÁN PREMIUM GIẢ LẬP v1 (2026-11-07):** `dist/MusicFlow-1.0-Demo-SimulatedBillingV1-Android.apk`, **31.278.781 bytes**, SHA256 `302E6415A56B1A0801BF92AA65C2A92A89D2446A7D31D45C22FAE02A9A3484C7`. **186/186 JVM + 61/61 Android regression + 1/1 SAF thật + 4/4 Web Admin PASS**; chính APK ký QA đã cài/cold launch, Guest mua thử và biên nhận được khôi phục sau restart PASS. Mọi thanh toán/giá/biên nhận đều **giả lập trên thiết bị**, không thu tiền hoặc cấp Premium thật. Xem [Thanh_Toan_Premium_Gia_Lap_v1.md](Thanh_Toan_Premium_Gia_Lap_v1.md). Các phiên bản APK được liệt kê phía dưới chỉ là hồ sơ lịch sử.
+
 > **CẬP NHẬT NGHIỆM THU MỚI NHẤT — 2026-11-07:** bản APK demo ưu tiên hiện tại là **`dist/MusicFlow-1.0-Demo-AcceptanceV1-Android.apk`** (31.213.245 bytes; SHA256 `7D7E1D0131DC078CAA6394F1FC14F43BBB8820895FFF260C2BEF4C399CC95889`). **180/180 JVM + 55/55 Android regression + 1/1 DocumentsUI SAF thật + 4/4 Web Admin PASS**. Bản APK mới đã ký QA, cài và cold launch API30 PASS. Xem **[Nghiem_Thu_Demo_2026_11_07.md](Nghiem_Thu_Demo_2026_11_07.md)** và **[Checklist_Acceptance_Demo_MusicFlow_v1.md](Checklist_Acceptance_Demo_MusicFlow_v1.md)**. Bảng thông số `MusicFlow-1.0-Demo-Android.apk` ở các mục phía dưới là **hồ sơ lịch sử ngày 2026-11-01**, không phải checksum của bản demo mới.
 
 **Ngày:** 2026-11-01  

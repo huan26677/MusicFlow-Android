@@ -1,5 +1,7 @@
 # MusicFlow — Mục tiêu hoàn thành dự án báo cáo và điểm dừng tạm thời
 
+> **CẬP NHẬT 2026-11-07 — BỔ SUNG THANH TOÁN PREMIUM GIẢ LẬP:** `dist/MusicFlow-1.0-Demo-SimulatedBillingV1-Android.apk` là bản APK sideload hiện hành (31.278.781 bytes, SHA256 `302E6415A56B1A0801BF92AA65C2A92A89D2446A7D31D45C22FAE02A9A3484C7`). **186/186 JVM, 61/61 Android regression, 1/1 DocumentsUI thật, 4/4 Web Admin PASS**. Luồng mô phỏng chọn gói, biên nhận, lỗi, gia hạn, hủy và khôi phục sau restart đã kiểm thử. **Vẫn giữ nguyên điểm dừng APK báo cáo**: không tiền thật, không billing/Play, không tự đổi quyền Supabase, không yêu cầu E2E tài khoản hoặc thiết bị vật lý. Xem `docs/Thanh_Toan_Premium_Gia_Lap_v1.md`.
+
 > **CẬP NHẬT 2026-11-07 — ĐẠT NGHIỆM THU BẢN DEMO MỚI:** APK được ưu tiên bàn giao đã chuyển sang `dist/MusicFlow-1.0-Demo-AcceptanceV1-Android.apk` (31.213.245 bytes, SHA256 `7D7E1D0131DC078CAA6394F1FC14F43BBB8820895FFF260C2BEF4C399CC95889`). **180 JVM + 55 Android regression + 1 Android DocumentsUI SAF thật + 4 Web Admin PASS**, ký/cài/cold launch chính APK API30 PASS. Xem `docs/Nghiem_Thu_Demo_2026_11_07.md` và `docs/Checklist_Acceptance_Demo_MusicFlow_v1.md`. **Vẫn giữ nguyên điểm dừng dự án báo cáo**, không chuyển sang production, không yêu cầu JWT live 8 persona, không Play/billing/streaming thiếu giấy phép. Các kiểm thử và APK cũ ngày 2026-11-01 bên dưới là hồ sơ lịch sử.
 
 **Quyết định của chủ dự án: 2026-11-01.** Tài liệu này được ưu tiên hơn các kế hoạch phát hành/Google Play/kiểm thử tài khoản thật nêu trong các mốc cũ.

@@ -38,6 +38,8 @@ import androidx.compose.material3.DropdownMenuItem
 import com.example.musicflow.core.account.CloudPendingMatch
 import com.example.musicflow.core.account.AccountHomePlan
 import com.example.musicflow.core.account.AccountWorkspacePlan
+import com.example.musicflow.core.account.DemoBillingStore
+import com.example.musicflow.core.account.DemoBillingResult
 import com.example.musicflow.BuildConfig
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -67,6 +69,8 @@ fun AccountRoute(
     val model: AccountViewModel = viewModel(factory = factory)
     val state by model.state.collectAsStateWithLifecycle()
     var rolesOpen by rememberSaveable { mutableStateOf(false) }
+    var billingOpen by rememberSaveable { mutableStateOf(false) }
+    val billingStore = remember(context) { DemoBillingStore(context.applicationContext) }
 
     AccountScreen(
         state, themeMode, onThemeModeChange,
@@ -99,9 +103,53 @@ fun AccountRoute(
         onDeleteCloudFavorite = model::deleteRemoteFavorite,
         onDemoModeChange = model::demoModeChanged,
         onRefreshAccount = model::refreshAccount,
-        onRoleTools = { rolesOpen = true }
+        onRoleTools = { rolesOpen = true },
+        onOpenDemoBilling = { billingOpen = true }
     )
     val account = state.account
+    if (billingOpen) {
+        // A guest/demo/online account has its own LOCAL simulation scope.
+        // These records never enter Supabase or AccountIdentity.tier.
+        val scope = account?.userId ?: "guest-offline-demo"
+        var receipt by remember(scope) { mutableStateOf(billingStore.receipt(scope)) }
+        var feedback by remember(scope) { mutableStateOf<String?>(null) }
+        Dialog(onDismissRequest = { billingOpen = false }) {
+            DemoBillingScreen(
+                receipt = receipt,
+                feedback = feedback,
+                onPurchase = { plan, method, decline ->
+                    runCatching {
+                        billingStore.simulatePayment(scope, plan, method, decline)
+                    }.onSuccess { result ->
+                        receipt = billingStore.receipt(scope)
+                        feedback = when (result) {
+                            is DemoBillingResult.Success ->
+                                "THÀNH CÔNG (giả lập). Đã lưu biên nhận ${result.receipt.id} trên thiết bị."
+                            DemoBillingResult.Declined ->
+                                "THẤT BẠI (giả lập): giao dịch bị từ chối; gói hiện tại giữ nguyên."
+                        }
+                    }.onFailure { error ->
+                        feedback = error.message ?: "Không lưu được giao dịch mô phỏng."
+                    }
+                },
+                onCancel = {
+                    runCatching { billingStore.cancel(scope) }
+                        .onSuccess {
+                            receipt = billingStore.receipt(scope)
+                            feedback = "Đã hủy gói Premium mô phỏng. Gói thật không thay đổi."
+                        }.onFailure { feedback = it.message }
+                },
+                onReset = {
+                    runCatching { billingStore.reset(scope) }
+                        .onSuccess {
+                            receipt = null
+                            feedback = "Đã xóa biên nhận mô phỏng trên thiết bị."
+                        }.onFailure { feedback = it.message }
+                },
+                onClose = { billingOpen = false }
+            )
+        }
+    }
     if (rolesOpen && account != null && !state.demoSession) {
         val closeRoleTools = {
             rolesOpen = false
@@ -142,7 +190,8 @@ fun AccountScreen(
     onDeleteCloudFavorite: (String) -> Unit,
     onDemoModeChange: (Boolean) -> Unit = {},
     onRefreshAccount: () -> Unit = {},
-    onRoleTools: () -> Unit = {}
+    onRoleTools: () -> Unit = {},
+    onOpenDemoBilling: () -> Unit = {}
 ) {
     var confirming by remember { mutableStateOf<Pair<String, String>?>(null) }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
@@ -164,6 +213,13 @@ fun AccountScreen(
             },
             style = MaterialTheme.typography.bodyMedium
         )
+        OutlinedButton(
+            onClick = onOpenDemoBilling,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                .testTag("account-demo-billing-open")
+        ) { Text("Trải nghiệm thanh toán Premium (giả lập)") }
+        Text("Chỉ mô phỏng trên máy, không thu tiền hoặc nâng cấp quyền Premium thật.",
+            style = MaterialTheme.typography.bodySmall)
         if (state.loading) {
             MusicFlowStatusPanel(
                 kind = MusicFlowStatusKind.LOADING,
@@ -448,8 +504,8 @@ fun AccountScreen(
             }
             Text("Bài nhạc ở điện thoại khác chỉ được liên kết lại nếu có " +
                 "một bài trùng duy nhất trên máy này. Không xóa Playlist local.")
-            Text("Premium do máy chủ xác nhận. Chưa có thanh toán, giới hạn " +
-                "thiết bị hoặc đồng bộ tự động.")
+            Text("Premium thật do máy chủ xác nhận; thanh toán demo chỉ là " +
+                "mô phỏng cục bộ, không mở quyền cloud hay đồng bộ tự động.")
             }
             }
         }
