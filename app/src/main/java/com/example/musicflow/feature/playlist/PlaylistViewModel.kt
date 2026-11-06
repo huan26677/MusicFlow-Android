@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.playlist.LocalPlaylist
 import com.example.musicflow.core.playlist.PlaylistRules
+import com.example.musicflow.core.playlist.PlaylistQuickAddRules
 import com.example.musicflow.core.playlist.PlaylistTrack
 import com.example.musicflow.core.playlist.RoomPlaylistRepository
 
@@ -120,7 +121,7 @@ class PlaylistViewModel(
         viewModelScope.launch {
             try {
                 val track = PlaylistTrack(
-                    mediaId = song.mediaId ?: "device-${song.id}",
+                    mediaId = PlaylistQuickAddRules.mediaId(song.mediaId, song.id),
                     audioUri = song.uri.toString(),
                     title = song.title,
                     artist = song.artist,

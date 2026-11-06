@@ -55,6 +55,7 @@ import com.example.musicflow.feature.online.OnlineCatalogRoute
 import com.example.musicflow.core.online.OnlineTrack
 import com.example.musicflow.feature.playlist.PlaylistListRoute
 import com.example.musicflow.feature.playlist.PlaylistDetailRoute
+import com.example.musicflow.feature.playlist.PlaylistQuickAddRoute
 import com.example.musicflow.feature.player.MiniPlayer
 import com.example.musicflow.feature.player.NowPlayingScreen
 import com.example.musicflow.feature.player.QueueManagerScreen
@@ -92,6 +93,11 @@ data object OnlineCatalogPage : NavKey
 
 @Serializable
 data class PlaylistDetail(
+    val playlistId: String
+) : NavKey
+
+@Serializable
+data class PlaylistAddSongs(
     val playlistId: String
 ) : NavKey
 
@@ -416,7 +422,11 @@ fun MusicFlowApp(
                     PlaylistDetailRoute(
                         playlistId = route.playlistId,
 
-                        onFindSongs = { switchTab(LibraryTab) },
+                        onFindSongs = {
+                            if (backStack.lastOrNull() != PlaylistAddSongs(route.playlistId)) {
+                                backStack.add(PlaylistAddSongs(route.playlistId))
+                            }
+                        },
 
                         onBack = {
                             if (backStack.size > 1) {
@@ -431,6 +441,17 @@ fun MusicFlowApp(
                                 if (backStack.lastOrNull() != NowPlaying) {
                                     backStack.add(NowPlaying)
                                 }
+                            }
+                        }
+                    )
+                }
+
+                entry<PlaylistAddSongs> { route ->
+                    PlaylistQuickAddRoute(
+                        playlistId = route.playlistId,
+                        onDone = {
+                            if (backStack.size > 1) {
+                                backStack.removeAt(backStack.lastIndex)
                             }
                         }
                     )

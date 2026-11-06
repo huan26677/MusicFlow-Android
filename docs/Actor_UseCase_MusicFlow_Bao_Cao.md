@@ -1,6 +1,6 @@
 # MusicFlow — Actor & Use Case dành cho báo cáo dự án (2026-11-05)
 
-> **Nguồn tham chiếu chính thức cho các lượt phát triển tiếp theo.** Đọc tài liệu này cùng [Ke_Hoach_Du_An.md](Ke_Hoach_Du_An.md), [Pham_Vi_MusicFlow_1_0.md](Pham_Vi_MusicFlow_1_0.md) và QA logs. Đây là **APK sideload + báo cáo môn học**, không phải phát hành thương mại. **Không được coi use case đang có mã nhưng chưa E2E là đã nghiệm thu hoàn chỉnh**.
+> **Nguồn tham chiếu chính thức cho các lượt phát triển tiếp theo.** Đọc tài liệu này cùng [Ke_Hoach_Du_An.md](Ke_Hoach_Du_An.md), [Pham_Vi_MusicFlow_1_0.md](Pham_Vi_MusicFlow_1_0.md) và QA logs. Đây là **APK sideload + báo cáo môn học**, không phải phát hành thương mại. **Không được coi use case đang có mã nhưng chưa E2E là đã nghiệm thu hoàn chỉnh**. **Cập nhật 2026-11-07:** xem cuối mục 3 về UC-G13 — Quick Add Playlist, và `Playlist_Quick_Add_v1.md`.
 
 ## 1. Phân loại actor và gói dịch vụ
 
@@ -48,6 +48,8 @@ Trạng thái quy ước: **Đã có** = mã nguồn có và đã có QA phù h�
 2. Tìm bài hát → phát → điều khiển queue/shuffle/speed.
 3. Tạo playlist, thêm bài, đổi thứ tự; thử Lyrics/EQ/Sleep Timer.
 4. Tắt mạng hoặc khởi động lại ứng dụng → nhạc local vẫn phát; đây là luồng ổn định, phù hợp nhất cho **demo báo cáo**.
+
+**UC-G13 — Quick Add Playlist v1 (cập nhật 2026-11-07):** Guest/Free/Premium đều có thể mở playlist trống hoặc có bài → thêm trực tiếp một hoặc nhiều bài quét bởi MediaStore vào **đúng playlist đã chọn**, tìm bài không dấu và ngăn thêm trùng. Có lựa chọn `OpenDocument(audio/*)` riêng khi chưa cấp quyền quét; cần quyền SAF tồn tại sau restart trước khi lưu mục. **Đã có mã + 4 JVM và 5 Android UI cases (bao gồm Room integration) PASS** trong lượt QA tổng hợp **180 JVM + 30 Android PASS**; **chưa** tự động test thao tác picker DocumentsUI thực ở route mới. Không phát bài hoặc đồng bộ cloud chỉ vì thêm vào playlist. Xem [Playlist_Quick_Add_v1.md](Playlist_Quick_Add_v1.md).
 
 ### Luồng đăng nhập và đồng bộ
 

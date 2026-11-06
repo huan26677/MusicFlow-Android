@@ -500,6 +500,13 @@ fun PlaylistDetailRoute(
                                         MaterialTheme.typography.bodySmall
                                 )
 
+                                OutlinedButton(
+                                    onClick = onFindSongs,
+                                    modifier = Modifier.fillMaxWidth()
+                                        .heightIn(min = 48.dp)
+                                        .testTag("playlist-detail-add-songs")
+                                ) { Text("Thêm bài hát vào playlist") }
+
                                 Button(
                                     onClick = {
                                         onPlayTracks(
@@ -638,8 +645,8 @@ internal fun PlaylistEmptyState(onFindSongs: () -> Unit) {
     MusicFlowStatusPanel(
         kind = MusicFlowStatusKind.EMPTY,
         title = "Playlist chưa có bài hát",
-        description = "Mở Thư viện, chọn bài hát rồi dùng Thêm vào playlist. " +
-            "Các file nhạc không bị di chuyển và bạn không cần đăng nhập.",
+        description = "Thêm ngay bài hát từ thư viện hoặc chọn tệp âm thanh riêng. " +
+            "Không cần chọn lại playlist, không cần đăng nhập và không di chuyển tệp.",
         actionLabel = "Tìm bài hát để thêm",
         onAction = onFindSongs
     )
