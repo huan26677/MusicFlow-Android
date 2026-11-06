@@ -127,24 +127,34 @@ fun PlaylistQuickAddRoute(playlistId: String, onDone: () -> Unit) {
                 if (!persisted) {
                     fileError = "Không lưu được quyền đọc tệp. Hãy chọn lại từ bộ chọn tệp."
                 } else {
-                    val filename = runCatching {
-                        resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME),
-                            null, null, null)?.use { cursor ->
-                            if (cursor.moveToFirst()) cursor.getString(0) else null
-                        }
-                    }.getOrNull().orEmpty().ifBlank { "Tệp âm thanh đã chọn" }
-                    fileError = null
-                    playlistModel.addDeviceSong(
-                        playlistId, name,
-                        DeviceSong(
-                            id = -(uri.toString().hashCode().toLong() and 0xffffffffL) - 1L,
-                            uri = uri,
-                            title = filename.take(180),
-                            artist = "Tệp âm thanh của bạn",
-                            durationMs = 0L,
-                            mediaId = uri.toString()
+                    // A persisted grant alone does not prove the document is still
+                    // readable. Reject deleted/revoked provider entries before
+                    // storing an unplayable track in Room.
+                    val readable = runCatching {
+                        resolver.openFileDescriptor(uri, "r")?.use { true } == true
+                    }.getOrDefault(false)
+                    if (!readable) {
+                        fileError = "Không đọc được tệp vừa chọn. Hãy thử một tệp âm thanh khác."
+                    } else {
+                        val filename = runCatching {
+                            resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME),
+                                null, null, null)?.use { cursor ->
+                                if (cursor.moveToFirst()) cursor.getString(0) else null
+                            }
+                        }.getOrNull().orEmpty().ifBlank { "Tệp âm thanh đã chọn" }
+                        fileError = null
+                        playlistModel.addDeviceSong(
+                            playlistId, name,
+                            DeviceSong(
+                                id = -(uri.toString().hashCode().toLong() and 0xffffffffL) - 1L,
+                                uri = uri,
+                                title = filename.take(180),
+                                artist = "Tệp âm thanh của bạn",
+                                durationMs = 0L,
+                                mediaId = uri.toString()
+                            )
                         )
-                    )
+                    }
                 }
             }
         }

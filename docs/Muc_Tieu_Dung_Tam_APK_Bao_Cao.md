@@ -1,5 +1,7 @@
 # MusicFlow — Mục tiêu hoàn thành dự án báo cáo và điểm dừng tạm thời
 
+> **CẬP NHẬT 2026-11-07 — ĐẠT NGHIỆM THU BẢN DEMO MỚI:** APK được ưu tiên bàn giao đã chuyển sang `dist/MusicFlow-1.0-Demo-AcceptanceV1-Android.apk` (31.213.245 bytes, SHA256 `7D7E1D0131DC078CAA6394F1FC14F43BBB8820895FFF260C2BEF4C399CC95889`). **180 JVM + 55 Android regression + 1 Android DocumentsUI SAF thật + 4 Web Admin PASS**, ký/cài/cold launch chính APK API30 PASS. Xem `docs/Nghiem_Thu_Demo_2026_11_07.md` và `docs/Checklist_Acceptance_Demo_MusicFlow_v1.md`. **Vẫn giữ nguyên điểm dừng dự án báo cáo**, không chuyển sang production, không yêu cầu JWT live 8 persona, không Play/billing/streaming thiếu giấy phép. Các kiểm thử và APK cũ ngày 2026-11-01 bên dưới là hồ sơ lịch sử.
+
 **Quyết định của chủ dự án: 2026-11-01.** Tài liệu này được ưu tiên hơn các kế hoạch phát hành/Google Play/kiểm thử tài khoản thật nêu trong các mốc cũ.
 
 ## Mục tiêu

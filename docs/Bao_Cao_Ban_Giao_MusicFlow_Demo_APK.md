@@ -1,5 +1,7 @@
 # BÁO CÁO BÀN GIAO — MUSICFLOW ANDROID DEMO APK
 
+> **CẬP NHẬT NGHIỆM THU MỚI NHẤT — 2026-11-07:** bản APK demo ưu tiên hiện tại là **`dist/MusicFlow-1.0-Demo-AcceptanceV1-Android.apk`** (31.213.245 bytes; SHA256 `7D7E1D0131DC078CAA6394F1FC14F43BBB8820895FFF260C2BEF4C399CC95889`). **180/180 JVM + 55/55 Android regression + 1/1 DocumentsUI SAF thật + 4/4 Web Admin PASS**. Bản APK mới đã ký QA, cài và cold launch API30 PASS. Xem **[Nghiem_Thu_Demo_2026_11_07.md](Nghiem_Thu_Demo_2026_11_07.md)** và **[Checklist_Acceptance_Demo_MusicFlow_v1.md](Checklist_Acceptance_Demo_MusicFlow_v1.md)**. Bảng thông số `MusicFlow-1.0-Demo-Android.apk` ở các mục phía dưới là **hồ sơ lịch sử ngày 2026-11-01**, không phải checksum của bản demo mới.
+
 **Ngày:** 2026-11-01  
 **Loại dự án:** dự án báo cáo/trình diễn, không phát hành thương mại  
 **Tình trạng:** **HOÀN THÀNH BẢN DEMO/BÁO CÁO — TẠM DỪNG** trong phạm vi đã được chủ dự án chốt  

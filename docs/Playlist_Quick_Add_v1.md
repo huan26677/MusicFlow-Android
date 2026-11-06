@@ -1,5 +1,7 @@
 # MusicFlow — Playlist Quick Add v1 (bản demo báo cáo)
 
+> **BỔ SUNG NGHIỆM THU 2026-11-07:** Phần DocumentsUI thực từng ghi "chưa kiểm thử" bên dưới đã được bổ sung bài `PlaylistQuickAddRealSafUiTest` và **PASS trên emulator API30** (OpenDocument → persisted READ grant → Room lưu bài + mở được WAV). Ứng dụng cũng kiểm tra tệp thực sự đọc được trước khi lưu. Xem `docs/Nghiem_Thu_Demo_2026_11_07.md`, log `qa-logs/musicflow-demo-acceptance-v1-qa.log`. Các giới hạn từng nêu bên dưới là trạng thái tại thời điểm phát hành Quick Add v1 ban đầu, không phải trạng thái nghiệm thu hiện hành.
+
 **Ngày:** 2026-11-07 (Asia/Ho_Chi_Minh). **HEAD nền:** `a92866a` (Listening Journeys UX v1), local main sạch khi bắt đầu. **Phạm vi:** hoàn thiện trực tiếp hành trình thêm nhạc offline vào playlist, sau đó mới chạy bộ QA tổng hợp. Không sửa schema, Supabase/Auth/Owner/Creator, không phát hành công khai hay làm thay đổi hàng đợi phát đang chạy.
 
 ## 1. Hành trình người dùng

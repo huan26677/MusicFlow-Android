@@ -1,5 +1,7 @@
 # Hướng dẫn cài đặt MusicFlow Demo APK — dự án báo cáo
 
+> **Phiên bản demo nên cài hiện tại (2026-11-07):** `E:\Du_An\MusicFlow\dist\MusicFlow-1.0-Demo-AcceptanceV1-Android.apk`, **31.213.245 bytes**, SHA256 **`7D7E1D0131DC078CAA6394F1FC14F43BBB8820895FFF260C2BEF4C399CC95889`**. Đã cài/cold launch API30 thành công và có nghiệm thu DocumentsUI SAF thật. Các đường dẫn/tệp `MusicFlow-1.0-Demo-Android.apk` bên dưới là **bản bàn giao lịch sử 2026-11-01**. Khi cài bản mới, chỉ cần thay tên file trong lệnh `adb install`; không gỡ bản cũ nếu cần giữ playlist/dữ liệu cục bộ. Xem [Nghiem_Thu_Demo_2026_11_07.md](Nghiem_Thu_Demo_2026_11_07.md).
+
 **Ngày đóng gói:** 2026-11-01. **Mục đích:** cài trực tiếp bản demo MusicFlow, không cần Google Play hoặc tài khoản thật.
 
 ## Tệp APK bàn giao
