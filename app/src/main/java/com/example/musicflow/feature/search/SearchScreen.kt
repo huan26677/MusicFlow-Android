@@ -41,6 +41,7 @@ import com.example.musicflow.core.favorites.LocalFavoritesStore
 import com.example.musicflow.feature.playlist.rememberPlaylistViewModel
 import com.example.musicflow.ui.components.MusicFlowStatusKind
 import com.example.musicflow.ui.components.MusicFlowStatusPanel
+import com.example.musicflow.core.ux.ListeningJourneyRules
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 
@@ -296,8 +297,27 @@ fun SearchScreen(
                         label = {
                             Text(if (state.isFiltering) label else "$label ($count)")
                         },
-                        modifier = Modifier.testTag("search-category-$category")
+                        modifier = Modifier.heightIn(min = 48.dp)
+                            .testTag("search-category-$category")
                     )
+                }
+            }
+        }
+
+        if (state.isLoaded && !state.isLoading && !state.isFiltering &&
+            state.error == null && state.query.isNotBlank()
+        ) {
+            val alternative = ListeningJourneyRules.suggestedSearchCategory(
+                selectedCategory, state.results.size, state.albumResults.size,
+                state.artistResults.size, state.genreResults.size
+            )
+            if (alternative != null) {
+                OutlinedButton(
+                    onClick = { selectedCategory = alternative },
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                        .testTag("search-related-suggestion")
+                ) {
+                    Text("Có kết quả ở ${ListeningJourneyRules.searchCategoryLabel(alternative)} — xem ngay")
                 }
             }
         }

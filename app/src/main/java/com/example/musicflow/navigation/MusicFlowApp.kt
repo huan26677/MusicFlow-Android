@@ -416,6 +416,8 @@ fun MusicFlowApp(
                     PlaylistDetailRoute(
                         playlistId = route.playlistId,
 
+                        onFindSongs = { switchTab(LibraryTab) },
+
                         onBack = {
                             if (backStack.size > 1) {
                                 backStack.removeAt(backStack.lastIndex)

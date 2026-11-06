@@ -7,6 +7,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithTag
@@ -466,8 +467,8 @@ class PlaylistPlaybackOrderTest {
             // Room's playlist Flow loads asynchronously; a full-suite run
             // can be slower than a standalone test. Wait for the actual UI
             // before trying to interact with the last LazyColumn row.
-            composeRule.waitUntil(10_000L) {
-                composeRule.onAllNodesWithText("QA UI Track 1")
+            composeRule.waitUntil(25_000L) {
+                composeRule.onAllNodesWithTag("playlist-detail-tracks")
                     .fetchSemanticsNodes().isNotEmpty()
             }
             composeRule.onNodeWithTag("playlist-detail-tracks")

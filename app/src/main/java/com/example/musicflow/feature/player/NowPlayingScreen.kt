@@ -29,6 +29,7 @@ import com.example.musicflow.core.lyrics.LyricsTimeline
 import com.example.musicflow.core.playback.PlayerUiState
 import androidx.compose.ui.text.font.FontWeight
 import com.example.musicflow.ui.components.SongArtwork
+import com.example.musicflow.core.ux.ListeningJourneyRules
 
 @Composable
 fun NowPlayingScreen(
@@ -150,6 +151,23 @@ fun NowPlayingScreen(
             )
         }
 
+        if (!state.hasMedia) {
+            OutlinedCard(modifier = Modifier.fillMaxWidth().testTag("player-empty-guide")) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Chưa chọn bài hát", style = MaterialTheme.typography.titleMedium)
+                    Text("Mở thư viện hoặc chọn tệp âm thanh để bắt đầu nghe offline. " +
+                        "Bạn không cần đăng nhập.", style = MaterialTheme.typography.bodySmall)
+                    Button(onClick = onOpenLibrary, modifier = Modifier.fillMaxWidth()
+                        .testTag("player-empty-library")) { Text("Mở thư viện") }
+                    OutlinedButton(onClick = onPickFiles, modifier = Modifier.fillMaxWidth()
+                        .testTag("player-empty-files")) { Text("Chọn tệp âm thanh") }
+                }
+            }
+        }
+
         Spacer(Modifier.height(24.dp))
 
         SongArtwork(
@@ -205,14 +223,16 @@ fun NowPlayingScreen(
         Spacer(Modifier.height(8.dp))
 
         Text(
-            text = "Bài ${state.currentIndex} / " +
-                    "${state.queueCount}",
+            text = ListeningJourneyRules.queuePosition(
+                state.currentIndex, state.queueCount, state.hasMedia
+            ),
             style = MaterialTheme.typography.bodySmall
         )
 
         TextButton(
             onClick = onOpenQueue,
-            enabled = state.connected
+            enabled = state.connected && state.queueCount > 0,
+            modifier = Modifier.testTag("player-queue-action")
         ) {
             Text("☷ Xem và quản lý hàng đợi")
         }
@@ -278,37 +298,30 @@ fun NowPlayingScreen(
 
         Spacer(Modifier.height(22.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement =
-                Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedButton(
-                onClick = onToggleShuffle,
-                enabled = state.hasMedia,
-                modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(
-                    horizontal = 8.dp
-                )
-            ) {
-                Text(
-                    if (state.shuffleEnabled) {
-                        "Trộn: Bật"
-                    } else {
-                        "Trộn: Tắt"
-                    }
-                )
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val compact = maxWidth < 360.dp || LocalDensity.current.fontScale >= 1.35f
+            val options: @Composable (Modifier) -> Unit = { optionModifier ->
+                OutlinedButton(
+                    onClick = onToggleShuffle,
+                    enabled = state.hasMedia,
+                    modifier = optionModifier.heightIn(min = 48.dp)
+                        .testTag("player-shuffle-action")
+                ) { Text(if (state.shuffleEnabled) "Trộn: Bật" else "Trộn: Tắt") }
+                OutlinedButton(
+                    onClick = onCycleRepeat,
+                    enabled = state.hasMedia,
+                    modifier = optionModifier.heightIn(min = 48.dp)
+                        .testTag("player-repeat-action")
+                ) { Text(repeatLabel) }
             }
-
-            OutlinedButton(
-                onClick = onCycleRepeat,
-                enabled = state.hasMedia,
-                modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(
-                    horizontal = 8.dp
-                )
-            ) {
-                Text(repeatLabel)
+            if (compact) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    options(Modifier.fillMaxWidth())
+                }
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    options(Modifier.weight(1f))
+                }
             }
         }
 
@@ -558,12 +571,13 @@ fun NowPlayingScreen(
 
         Spacer(Modifier.height(24.dp))
 
-        TextButton(onClick = onOpenLibrary) {
-            Text("Mở thư viện nhạc")
-        }
-
-        TextButton(onClick = onPickFiles) {
+        if (state.hasMedia) {
+            TextButton(onClick = onOpenLibrary) {
+                Text("Mở thư viện nhạc")
+            }
+            TextButton(onClick = onPickFiles) {
                 Text("Chọn tệp nhạc từ thiết bị")
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.horizontalScroll
@@ -454,18 +455,37 @@ fun AccountScreen(
         }
         HorizontalDivider()
         Text("Giao diện", style = MaterialTheme.typography.titleMedium)
-        Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            listOf("system" to "Hệ thống", "dark" to "Tối", "light" to "Sáng")
-                .forEach { (mode, label) ->
-                    FilterChip(
-                        selected = themeMode == mode,
-                        onClick = { onThemeModeChange(mode) },
-                        label = { Text(label) }
-                    )
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val choices = listOf("system" to "Hệ thống", "dark" to "Tối", "light" to "Sáng")
+            val stacked = maxWidth < 360.dp || LocalDensity.current.fontScale >= 1.35f
+            if (stacked) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    choices.forEach { (mode, label) ->
+                        FilterChip(
+                            selected = themeMode == mode,
+                            onClick = { onThemeModeChange(mode) },
+                            label = { Text(label) },
+                            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                                .testTag("account-theme-$mode")
+                        )
+                    }
                 }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    choices.forEach { (mode, label) ->
+                        FilterChip(
+                            selected = themeMode == mode,
+                            onClick = { onThemeModeChange(mode) },
+                            label = { Text(label) },
+                            modifier = Modifier.heightIn(min = 48.dp)
+                                .testTag("account-theme-$mode")
+                        )
+                    }
+                }
+            }
         }
     }
     confirming?.let { (type, id) ->

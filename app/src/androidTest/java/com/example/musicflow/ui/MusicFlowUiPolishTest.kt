@@ -4,9 +4,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -18,6 +23,7 @@ import com.example.musicflow.core.lyrics.LyricsUiState
 import com.example.musicflow.core.playback.PlayerUiState
 import com.example.musicflow.feature.account.AccountScreen
 import com.example.musicflow.feature.account.AccountUiState
+import com.example.musicflow.feature.account.AccountAuthMode
 import com.example.musicflow.feature.player.NowPlayingScreen
 import com.example.musicflow.ui.theme.MusicFlowTheme
 import org.junit.Assert.assertEquals
@@ -104,8 +110,8 @@ class MusicFlowUiPolishTest {
                 }
             }
         }
-        compose.onNodeWithText("Khách — Miễn phí").assertExists()
-        compose.onNodeWithText("Tối").performScrollTo().performClick()
+        compose.onNodeWithText("Tài khoản MusicFlow").assertExists()
+        compose.onNodeWithTag("account-theme-dark").performScrollTo().performClick()
         compose.runOnIdle { assertEquals("dark", selected) }
     }
 
@@ -113,6 +119,7 @@ class MusicFlowUiPolishTest {
         var signIn = 0
         var signUp = 0
         compose.setContent {
+            var mode by remember { mutableStateOf(AccountAuthMode.SIGN_IN) }
             val density = LocalDensity.current
             CompositionLocalProvider(
                 LocalDensity provides Density(density.density, 1.8f)
@@ -123,18 +130,21 @@ class MusicFlowUiPolishTest {
                             state = AccountUiState(
                                 loading = false,
                                 configured = true,
-                                googleAvailable = false
+                                googleAvailable = false,
+                                authMode = mode
                             ),
                             onThemeModeChange = {},
                             onSignIn = { signIn++ },
-                            onSignUp = { signUp++ }
+                            onSignUp = { signUp++ },
+                            onAuthModeChange = { mode = it }
                         )
                     }
                 }
             }
         }
-        compose.onNodeWithText("Đăng nhập").performScrollTo().performClick()
-        compose.onNodeWithText("Đăng ký Free").performScrollTo().performClick()
+        compose.onNodeWithTag("account-submit").performScrollTo().performClick()
+        compose.onNodeWithTag("account-signup-tab").performScrollTo().performClick()
+        compose.onNodeWithTag("account-submit").performScrollTo().performClick()
         compose.runOnIdle {
             assertEquals(1, signIn)
             assertEquals(1, signUp)
@@ -147,7 +157,8 @@ private fun accountScreen(
     state: AccountUiState,
     onThemeModeChange: (String) -> Unit,
     onSignIn: () -> Unit = {},
-    onSignUp: () -> Unit = {}
+    onSignUp: () -> Unit = {},
+    onAuthModeChange: (AccountAuthMode) -> Unit = {}
 ) {
     AccountScreen(
         state = state,
@@ -158,6 +169,7 @@ private fun accountScreen(
         onDisplayNameChange = {},
         onSignIn = onSignIn,
         onSignUp = onSignUp,
+        onAuthModeChange = onAuthModeChange,
         onGoogleSignIn = {},
         onSaveProfile = {},
         onSignOut = {},

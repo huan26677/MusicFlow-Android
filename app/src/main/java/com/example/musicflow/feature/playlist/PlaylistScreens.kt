@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
@@ -267,8 +268,17 @@ fun PlaylistListRoute(
 
     val editing = renameTarget
     if (showCreateDialog || editing != null) {
-        val validName =
-            PlaylistRules.normalizedNameOrNull(nameInput) != null
+        val normalized = PlaylistRules.normalizedNameOrNull(nameInput)
+        val validName = normalized != null &&
+            (editing == null || normalized != editing.name.trim())
+
+        fun saveName() {
+            if (!validName) return
+            if (editing == null) vm.create(nameInput)
+            else vm.rename(editing.id, nameInput)
+            showCreateDialog = false
+            renameTarget = null
+        }
 
         AlertDialog(
             onDismissRequest = {
@@ -296,7 +306,9 @@ fun PlaylistListRoute(
                         },
                         label = { Text("Tên playlist") },
                         singleLine = true,
-                        isError = !validName,
+                        isError = normalized == null,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { saveName() }),
                         modifier = Modifier.fillMaxWidth().testTag("playlist-name-input")
                     )
 
@@ -305,21 +317,16 @@ fun PlaylistListRoute(
                                 "${PlaylistRules.MAX_NAME_LENGTH} ký tự.",
                         style = MaterialTheme.typography.bodySmall
                     )
+                    if (editing != null && normalized == editing.name.trim()) {
+                        Text("Tên chưa thay đổi.", style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             },
             confirmButton = {
                 TextButton(
                     enabled = validName,
-                    onClick = {
-                        if (editing == null) {
-                            vm.create(nameInput)
-                        } else {
-                            vm.rename(editing.id, nameInput)
-                        }
-
-                        showCreateDialog = false
-                        renameTarget = null
-                    }
+                    onClick = { saveName() },
+                    modifier = Modifier.testTag("playlist-name-save")
                 ) {
                     Text(
                         if (editing == null) "Tạo"
@@ -383,7 +390,8 @@ fun PlaylistListRoute(
 fun PlaylistDetailRoute(
     playlistId: String,
     onBack: () -> Unit,
-    onPlayTracks: (List<PlaylistTrack>, Int) -> Unit
+    onPlayTracks: (List<PlaylistTrack>, Int) -> Unit,
+    onFindSongs: () -> Unit = {}
 ) {
     val vm = rememberPlaylistViewModel()
 
@@ -484,12 +492,7 @@ fun PlaylistDetailRoute(
 
                         is PlaylistTracksUiState.Ready -> {
                             if (tracks.tracks.isEmpty()) {
-                                MusicFlowStatusPanel(
-                                    kind = MusicFlowStatusKind.EMPTY,
-                                    title = "Playlist chưa có bài hát",
-                                    description = "Hãy thêm bài từ Thư viện hoặc Tìm kiếm. " +
-                                        "Tệp nhạc trên thiết bị sẽ không bị di chuyển."
-                                )
+                                PlaylistEmptyState(onFindSongs = onFindSongs)
                             } else {
                                 Text(
                                     "${tracks.tracks.size} bài hát",
@@ -627,4 +630,17 @@ fun PlaylistDetailRoute(
             }
         )
     }
+}
+
+/** A clear next action without creating a fake song or opening an extra dialog. */
+@Composable
+internal fun PlaylistEmptyState(onFindSongs: () -> Unit) {
+    MusicFlowStatusPanel(
+        kind = MusicFlowStatusKind.EMPTY,
+        title = "Playlist chưa có bài hát",
+        description = "Mở Thư viện, chọn bài hát rồi dùng Thêm vào playlist. " +
+            "Các file nhạc không bị di chuyển và bạn không cần đăng nhập.",
+        actionLabel = "Tìm bài hát để thêm",
+        onAction = onFindSongs
+    )
 }

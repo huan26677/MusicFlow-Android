@@ -27,6 +27,7 @@ import com.example.musicflow.core.history.RoomRecentHistoryRepository
 import com.example.musicflow.core.history.local.RecentHistoryDatabase
 import com.example.musicflow.core.playback.PlayerUiState
 import com.example.musicflow.core.favorites.LocalFavoritesStore
+import com.example.musicflow.core.ux.ListeningJourneyRules
 import com.example.musicflow.ui.components.MusicFlowStatusKind
 import com.example.musicflow.ui.components.MusicFlowStatusPanel
 
@@ -131,6 +132,7 @@ fun HomeScreen(
     var showClearDialog by rememberSaveable {
         mutableStateOf(false)
     }
+    var recentExpanded by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -307,7 +309,10 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column {
-                        history.songs.forEachIndexed { index, song ->
+                        val visibleCount = ListeningJourneyRules.recentVisibleCount(
+                            history.songs.size, recentExpanded
+                        )
+                        history.songs.take(visibleCount).forEachIndexed { index, song ->
                             ListItem(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -346,8 +351,19 @@ fun HomeScreen(
                                 }
                             )
 
-                            if (index < history.songs.lastIndex) {
+                            if (index < visibleCount - 1) {
                                 HorizontalDivider()
+                            }
+                        }
+                        if (history.songs.size > ListeningJourneyRules.RECENT_PREVIEW_LIMIT) {
+                            TextButton(
+                                onClick = { recentExpanded = !recentExpanded },
+                                modifier = Modifier.fillMaxWidth()
+                                    .heightIn(min = 48.dp)
+                                    .testTag("home-recent-toggle")
+                            ) {
+                                Text(if (recentExpanded) "Thu gọn lịch sử"
+                                    else "Xem tất cả ${history.songs.size} bài đã nghe")
                             }
                         }
                     }
