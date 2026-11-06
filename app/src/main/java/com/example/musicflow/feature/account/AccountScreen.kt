@@ -34,6 +34,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import com.example.musicflow.core.account.CloudPendingMatch
+import com.example.musicflow.core.account.AccountWorkspacePlan
 import com.example.musicflow.BuildConfig
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -325,7 +326,9 @@ fun AccountScreen(
                 )
                 if (identity.access.roles.isNotEmpty()) {
                     Text(
-                        "Vai trò: ${identity.access.roles.joinToString(", ")}",
+                        "Vai trò: ${identity.access.roles.sorted().joinToString(", ") {
+                            AccountWorkspacePlan.roleLabel(it)
+                        }}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -334,15 +337,7 @@ fun AccountScreen(
                     enabled = !state.loading,
                     modifier = Modifier.fillMaxWidth().testTag("account-role-tools")
                 ) {
-                    Text(
-                        if (identity.access.isOwner || identity.access.isPlatformAdmin) {
-                            "Quản trị nền tảng và vai trò"
-                        } else if (identity.access.isModerator) {
-                            "Kiểm duyệt hồ sơ tác phẩm"
-                        } else if (identity.access.isCreator) {
-                            "Hồ sơ nghệ sĩ / tác giả"
-                        } else "Đăng ký nghệ sĩ / tác giả và xem quyền"
-                    )
+                    Text(AccountWorkspacePlan.primaryAction(identity.access, BuildConfig.DEBUG))
                 }
                 if (BuildConfig.DEBUG && identity.access.isDeveloper) {
                     OutlinedButton(

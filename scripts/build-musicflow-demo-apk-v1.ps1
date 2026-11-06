@@ -20,7 +20,8 @@ param(
         "MusicFlow-1.0-Demo-OwnerDashboardV1-Android.apk",
         "MusicFlow-1.0-Demo-OwnerReadinessV2-Android.apk",
         "MusicFlow-1.0-Demo-RoleRefreshV1-Android.apk",
-        "MusicFlow-1.0-Demo-CreatorReviewV2-Android.apk"
+        "MusicFlow-1.0-Demo-CreatorReviewV2-Android.apk",
+        "MusicFlow-1.0-Demo-AccountWorkspacesV1-Android.apk"
     )]
     [string]$OutputName = "MusicFlow-1.0-Demo-Android.apk"
 )
@@ -77,6 +78,9 @@ $logName = switch ($OutputName) {
     }
     "MusicFlow-1.0-Demo-CreatorReviewV2-Android.apk" {
         "demo-apk-creator-review-v2-package.log"
+    }
+    "MusicFlow-1.0-Demo-AccountWorkspacesV1-Android.apk" {
+        "demo-apk-account-workspaces-v1-package.log"
     }
 }
 $log = Join-Path $root ("qa-logs\" + $logName)

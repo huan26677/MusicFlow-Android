@@ -85,7 +85,10 @@ class CreatorApplicationReviewUiTest {
         compose.onNodeWithTag("creator-review-reason")
             .performScrollTo().performTextInput("Hồ sơ thử nghiệm đầy đủ")
         compose.onNodeWithTag("creator-review-approve").assertDoesNotExist()
+        // Creator and moderation now have distinct workspaces; verify both routes.
+        compose.onNodeWithTag("role-workspace-creator").performScrollTo().performClick()
         compose.onNodeWithTag("creator-load-requests").assertExists()
+        compose.onNodeWithTag("role-workspace-moderation").performScrollTo().performClick()
         // The reviewer list is loaded only through a dedicated admin RPC.
         compose.onNodeWithTag("creator-review-load-pending").performScrollTo().performClick()
         compose.waitUntil(10_000) {

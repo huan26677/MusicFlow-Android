@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import android.net.Uri
 import com.example.musicflow.BuildConfig
 import com.example.musicflow.core.account.AccountIdentity
+import com.example.musicflow.core.account.AccountWorkspace
+import com.example.musicflow.core.account.AccountWorkspacePlan
 import com.example.musicflow.core.account.CreatorApplicationUiRules
 import com.example.musicflow.core.account.MusicFlowAccess
 import kotlinx.coroutines.CancellationException
@@ -54,6 +56,9 @@ internal fun AccountRolePanel(
     var info by remember { mutableStateOf<String?>(null) }
     var access by remember(identity.userId) { mutableStateOf(MusicFlowAccess.NONE) }
     var checked by remember(identity.userId) { mutableStateOf(false) }
+    var selectedWorkspace by remember(identity.userId) {
+        mutableStateOf<AccountWorkspace?>(null)
+    }
 
     var search by remember { mutableStateOf("") }
     var users by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
@@ -120,6 +125,9 @@ internal fun AccountRolePanel(
     val hasPendingSelectedRole = CreatorApplicationUiRules.hasPendingRole(
         myRequests.map { it.optString("requested_role") to it.optString("status") }, creatorType
     )
+    val workspaces = AccountWorkspacePlan.available(access, BuildConfig.DEBUG)
+    val currentWorkspace = selectedWorkspace?.takeIf { it in workspaces }
+        ?: AccountWorkspacePlan.initial(access, BuildConfig.DEBUG)
 
     Surface(
         modifier = Modifier.fillMaxWidth().heightIn(max = 600.dp),
@@ -152,6 +160,7 @@ internal fun AccountRolePanel(
                         confirm = null
                         reviewConfirm = null
                         developerOpen = false
+                        selectedWorkspace = null
                         runAction("musicflow_my_access") { raw ->
                             access = MusicFlowAccess.fromResponse(JSONObject(raw))
                             info = "Đã kiểm tra lại vai trò trực tiếp từ Supabase."
@@ -162,6 +171,26 @@ internal fun AccountRolePanel(
             }
 
             if (checked) {
+                Text("Khu vực làm việc", style = MaterialTheme.typography.titleMedium)
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    workspaces.forEach { workspace ->
+                        FilterChip(
+                            selected = currentWorkspace == workspace,
+                            onClick = {
+                                selectedWorkspace = workspace
+                                confirm = null
+                                reviewConfirm = null
+                            },
+                            label = { Text(workspace.title) },
+                            modifier = Modifier.testTag("role-workspace-${workspace.name.lowercase()}")
+                        )
+                    }
+                }
+                Text(currentWorkspace.description, style = MaterialTheme.typography.bodySmall)
+                if (currentWorkspace == AccountWorkspace.CREATOR) {
                 HorizontalDivider()
                 Text("Tài khoản tác giả / nghệ sĩ", style = MaterialTheme.typography.titleMedium)
                 if (!access.isCreator) {
@@ -263,7 +292,9 @@ internal fun AccountRolePanel(
                 if (access.isCreator) {
                     CreatorDraftStudio(rpc = rpc, upload = upload, download = download)
                 }
-                if (BuildConfig.DEBUG && access.isDeveloper) {
+                }
+                if (currentWorkspace == AccountWorkspace.DEVELOPER &&
+                    BuildConfig.DEBUG && access.isDeveloper) {
                     HorizontalDivider()
                     Text("Developer — Lối tắt QA", style = MaterialTheme.typography.titleMedium)
                     Text("MusicFlow ${BuildConfig.VERSION_NAME} • Debug")
@@ -297,6 +328,7 @@ internal fun AccountRolePanel(
                         qaConnection?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
                     }
                 }
+                if (currentWorkspace == AccountWorkspace.MANAGEMENT) {
                 if (access.isOwner) {
                     OwnerDemoDashboard(rpc = rpc)
                 }
@@ -383,6 +415,8 @@ internal fun AccountRolePanel(
                         Text("${it.optString("created_at")} — ${it.optString("action")}")
                     }
                 }
+                }
+                if (currentWorkspace == AccountWorkspace.MODERATION) {
                 if (access.canReviewCreators) {
                     HorizontalDivider()
                     Text("Duyệt yêu cầu sáng tạo", style = MaterialTheme.typography.titleMedium)
@@ -442,13 +476,13 @@ internal fun AccountRolePanel(
                         }
                     }
                 }
-                if (!access.isOwner &&
-                    (access.canReviewCreators || access.canModerateCatalog)) {
+                if (access.canReviewCreators || access.canModerateCatalog) {
                     OutlinedTextField(
                         value = reason, onValueChange = { reason = it.take(300) },
                         label = { Text("Lý do xét duyệt (ít nhất 5 ký tự)") },
                         modifier = Modifier.fillMaxWidth().testTag("creator-review-reason")
                     )
+                }
                 }
             }
             HorizontalDivider()
