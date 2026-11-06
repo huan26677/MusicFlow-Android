@@ -4,6 +4,8 @@
 > Đường dẫn trong repository: `docs/Ke_Hoach_Du_An.md`  
 > Mỗi lần bắt đầu công việc, **đọc file này trước**, sau đó đối chiếu `main` / commit mới nhất / source code / log trên GitHub. Không tiếp tục dựa trên trạng thái nhớ từ chat nếu đã có bằng chứng mới hơn.
 
+> **CẬP NHẬT MỚI 2026-11-06 (Role Access Refresh v1):** Android và Web Admin đã có nút kiểm tra lại vai trò từ Supabase với cơ chế ẩn quyền cũ khi RPC lỗi/thu hồi. **8 JVM + 7 Android UI + 4 web JS PASS**, DB role matrix 8/8 PASS, HTTP anon 3/3 DENIED, APK QA mới cài/cold launch PASS. **JWT password-login E2E 8 tài khoản chưa chạy**; xem `docs/Account_Role_Refresh_Demo_v1.md`. Phạm vi vẫn là demo/báo cáo, không tự production.
+
 ## QUYẾT ĐỊNH ƯU TIÊN 2026-11-01 — ĐIỂM DỪNG: APK DEMO / DỰ ÁN BÁO CÁO
 
 **Mục tiêu mới được chủ dự án xác nhận:** MusicFlow là **dự án báo cáo**. Hoàn thiện ứng dụng để **tải tệp APK và cài đặt trực tiếp phục vụ demo**, hoàn tất bàn giao/báo cáo rồi **tạm dừng**. **Không phát hành thật, không Google Play, không dùng email thật, không kiểm thử điện thoại thật, không bắt buộc đăng nhập Google thật hoặc đồng bộ cloud qua hai thiết bị thật.**
@@ -1524,6 +1526,17 @@ Bước tiếp theo: Hoàn thiện nghiệm thu SAF và background/system contro
 - **APK mới:** `dist/MusicFlow-1.0-Demo-OwnerReadinessV2-Android.apk`, **31.049.405 bytes**, SHA256 `495BF4C7A3F45F205A66EF0A98C458B2799110A3E05890A711F5E27847AB9C63`. `assembleRelease`/zipalign/apksigner/aapt PASS; QA-signed, release-mode, không debuggable. Cài nâng cấp + cold launch chính APK trên AVD QA PASS và app process tồn tại. Đã tắt/xóa AVD QA mới; giữ nguyên emulator đang chạy trước đó `emulator-5554`.
 - **Bằng chứng:** `docs/Owner_Demo_Readiness_v2.md`, `docs/sql/musicflow_owner_demo_readiness_v2.sql`, `qa-logs/musicflow-owner-demo-readiness-v2-gradle.log`, `qa-logs/musicflow-owner-demo-readiness-v2-qa.log`, `qa-logs/demo-apk-owner-readiness-v2-package.log`.
 - **Tiếp theo (nếu tiếp tục):** Owner và account QA đăng nhập thực trên Android/web để nghiệm thu RPC/JWT E2E, luồng duyệt Creator pending, kiểm tra audit, và sau đó cập nhật báo cáo. Không tự đọc mật khẩu Owner, không mở phát nhạc online thiếu bản quyền, không triển khai Play/production. Điểm dừng vẫn là **APK demo/báo cáo**.
+
+### 2026-11-06 — ROLE ACCESS REFRESH v1 / AUTH PERSONA DEMO SUPPORT — TARGETED QA PASS
+
+- **HEAD nền:** `6061fba` trên `main`, worktree sạch lúc bắt đầu. Không ghi đè mã trước, không tự commit/push, không thay đổi chế độ riêng tư repo.
+- **Android:** `AccountRolePanel.kt` thêm nút **Kiểm tra lại quyền từ Supabase** gọi `musicflow_my_access` với phiên có sẵn. Xóa quyền UI cũ **trước** khi kiểm tra; nếu server từ chối/lỗi thì Developer/Admin/Owner tools không còn được hiển thị. Không sử dụng email/Premium/metadata người dùng để nâng quyền.
+- **Web:** `admin-web/index.html` thêm nút kiểm tra lại, tái hiển thị đúng các panel quản trị; xóa danh sách người dùng, hồ sơ Creator, audit và bản ghi cũ khi đổi quyền/logout; nếu mất vai trò quản trị hoặc API lỗi thì xóa phiên web (memory-only). Thêm `scripts/test-admin-web-role-refresh-v1.js` dùng Node VM giả lập DOM/fetch để test bốn đường đi.
+- **Backend giữ nguyên, read-only QA:** Supabase project `vzvxpbwrftlnyvuhfoqn`, 8/8 tài khoản QA có roles/permissions đúng theo thiết kế khi giả lập `auth.uid()` trong SQL. Free/Premium/Developer/Moderator/Artist/Author/CreatorPending bị từ chối `musicflow_admin_users`; PlatformAdmin đủ ba quyền đọc được danh sách nhưng không gán role và không đọc Owner summary; các non-Owner không đọc Owner summary. **HTTP thật từ anon** gọi ba RPC `musicflow_my_access`, `musicflow_owner_demo_summary`, `musicflow_admin_users` đều bị **401**. Các chứng cứ này **không phải đăng nhập JWT E2E với 8 account**.
+- **Kiểm thử:** **8/8 JVM `MusicFlowAccessTest` PASS**, Gradle debug/AndroidTest build PASS; **7/7 Android Roles UI PASS** (2 bài mới: mất Developer, lỗi làm mới Admin) trên AVD API30 riêng; **4/4 Web Node VM PASS**. Tập QA lặp lại: `scripts/run-account-role-refresh-v1-tests.ps1` (có `-Serial`, không mở/đụng emulator sẵn có). Script Owner Readiness v2 cũng được điều chỉnh để nhận số test mở rộng mà không báo fail sai.
+- **APK demo:** `dist/MusicFlow-1.0-Demo-RoleRefreshV1-Android.apk`, 31.065.789 byte, SHA256 `5CBD72907E1553E860FBE354664804853472B32395AC7C45081788CE86BBBF60`; build release-mode, ký QA, `zipalign`/`apksigner`/`aapt` PASS, **cài nâng cấp và cold launch chính APK** `Status: ok`, `LaunchState: COLD`, process chạy PASS. AVD `MusicFlow_RoleRefreshV1_QA_API30` đã dừng/xóa; giữ nguyên các AVD cũ.
+- **Bằng chứng:** `docs/Account_Role_Refresh_Demo_v1.md`, `qa-logs/account-role-refresh-v1-build.log`, `qa-logs/account-role-refresh-v1-qa.log`, `qa-logs/demo-apk-role-refresh-v1-package.log`. Không đụng service key, tài khoản Owner, chuyển repo public hay nội dung online chưa đủ bản quyền.
+- **Bước tiếp:** nghiệm thu tương tác đăng nhập bằng **JWT thật** từ mật khẩu QA do chủ dự án tự nhập vào Android/Web (không cần đưa mật khẩu cho assistant), kiểm tra badge và quyền live theo từng persona, test workflow Creator pending sau khi đã sao lưu cách khôi phục trạng thái, ghi log và làm báo cáo. Không tuyên bố phần E2E này PASS trước khi có bằng chứng.
 
 ## 9. Câu lệnh khởi động cuộc trò chuyện mới
 

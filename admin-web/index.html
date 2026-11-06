@@ -44,6 +44,7 @@ button:disabled{cursor:not-allowed;opacity:.5}button:focus-visible,input:focus-v
 <p id="roles-label"></p>
 <label>Lý do hành động quản trị (bắt buộc, 5–300 ký tự)
 <textarea id="reason" maxlength="300" rows="2"></textarea></label>
+<button class="secondary" id="refresh-role" type="button">Kiểm tra lại vai trò và quyền</button>
 <button class="secondary" id="logout">Đăng xuất</button>
 </section>
 <section class="panel" id="owner-summary-panel" hidden>
@@ -133,6 +134,45 @@ async function authFetch(path,body){
   return raw?JSON.parse(raw):null;
 }
 const rpc=(name,body)=>authFetch("/rest/v1/rpc/"+name,body);
+async function refreshCurrentAccess(){
+  if(!session)throw Error("Chưa đăng nhập.");
+  // Clear stale privileges before asking the server. A failed refresh signs out.
+  access={roles:[],permissions:[]};selected=null;
+  ["owner-summary-panel","users-panel","owner-panel","creators-panel","drafts-panel","tracks-panel"]
+    .forEach(id=>setVisible(id,false));
+  $("owner-summary-metrics").replaceChildren();
+  $("owner-summary-next").textContent="";
+  ["user-list","creator-list","draft-list","track-list","audit-list"]
+    .forEach(id=>$(id).replaceChildren());
+  $("selected-user").textContent="Chưa chọn tài khoản.";
+  try{
+    const verified=await rpc("musicflow_my_access",{});
+    if(!verified||!Array.isArray(verified.roles)||!Array.isArray(verified.permissions)){
+      throw Error("Phản hồi xác minh quyền không hợp lệ.");
+    }
+    access=verified;
+    if(!hasRole("owner")&&!hasRole("platform_admin")&&!hasRole("moderator")){
+      throw Error("Tài khoản không còn quyền vào trang quản trị.");
+    }
+    setVisible("session-panel",true);
+    setVisible("login-panel",false);
+    setVisible("owner-summary-panel",hasRole("owner"));
+    setVisible("users-panel",allowed("manage_users"));
+    setVisible("owner-panel",hasRole("owner"));
+    setVisible("creators-panel",allowed("review_creators"));
+    setVisible("drafts-panel",canReviewMetadata());
+    setVisible("tracks-panel",allowed("moderate_catalog"));
+    $("roles-label").textContent="Vai trò: "+access.roles.join(", ")+
+      " · Quyền: "+access.permissions.join(", ");
+    if(hasRole("owner")){
+      try{await refreshOwnerSummary();}
+      catch(_){$("owner-summary-next").textContent="Không tải được tổng quan, hãy nhấn Làm mới.";}
+    }
+  }catch(error){
+    reset();
+    throw error;
+  }
+}
 async function refreshOwnerSummary(){
   if(!session||!hasRole("owner"))throw Error("Chỉ Owner được xem tổng quan.");
   const stats=await rpc("musicflow_owner_demo_summary",{});
@@ -212,8 +252,13 @@ async function perform(task){
 function reset(){
   session=null;selected=null;access={roles:[],permissions:[]};
   $("password").value="";
+  $("reason").value="";
+  $("roles-label").textContent="";
+  $("selected-user").textContent="Chưa chọn tài khoản.";
   $("owner-summary-metrics").replaceChildren();
   $("owner-summary-next").textContent="";
+  ["user-list","creator-list","draft-list","track-list","audit-list"]
+    .forEach(id=>$(id).replaceChildren());
   ["session-panel","owner-summary-panel","users-panel","owner-panel","creators-panel","drafts-panel","tracks-panel"]
     .forEach(id=>setVisible(id,false));
   setVisible("login-panel",true);
@@ -237,28 +282,12 @@ $("login-form").addEventListener("submit",async e=>{
     const json=await response.json();
     if(!json.access_token)throw Error("Không có phiên hợp lệ.");
     session={url,key,token:json.access_token};
-    access=await rpc("musicflow_my_access",{});
-    if(!hasRole("owner")&&!hasRole("platform_admin")&&!hasRole("moderator")){
-      reset();throw Error("Tài khoản này không có quyền quản trị hoặc kiểm duyệt.");
-    }
-    setVisible("login-panel",false);
-    setVisible("session-panel",true);
-    setVisible("owner-summary-panel",hasRole("owner"));
-    setVisible("users-panel",allowed("manage_users"));
-    setVisible("owner-panel",hasRole("owner"));
-    setVisible("creators-panel",allowed("review_creators"));
-    setVisible("drafts-panel",canReviewMetadata());
-    setVisible("tracks-panel",allowed("moderate_catalog"));
-    $("roles-label").textContent="Vai trò: "+access.roles.join(", ") +
-      " · Quyền: "+access.permissions.join(", ");
+    await refreshCurrentAccess();
     message("Đã đăng nhập và xác minh quyền.");
-    if(hasRole("owner")){
-      try{await refreshOwnerSummary();}
-      catch(_){$("owner-summary-next").textContent="Chưa tải được tổng quan, thử nhấn Làm mới.";}
-    }
   }catch(error){reset();message(error.message||"Không thể đăng nhập.",true);}
 });
 $("logout").addEventListener("click",()=>{reset();message("Đã xóa phiên trong bộ nhớ trang.");});
+$("refresh-role").addEventListener("click",()=>perform(refreshCurrentAccess));
 $("owner-summary-refresh").addEventListener("click",()=>perform(refreshOwnerSummary));
 $("load-users").addEventListener("click",()=>perform(async()=>{
   const rows=await rpc("musicflow_admin_users",{p_search:$("user-search").value.trim(),p_limit:20});

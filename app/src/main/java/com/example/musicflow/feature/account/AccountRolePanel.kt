@@ -121,6 +121,23 @@ internal fun AccountRolePanel(
             info?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
 
             if (checked) {
+                OutlinedButton(
+                    enabled = !busy,
+                    onClick = {
+                        // Hide previously granted actions before fetching fresh server access.
+                        // When the network/RPC fails, the panel stays fail-closed.
+                        access = MusicFlowAccess.NONE
+                        qaConnection = null
+                        runAction("musicflow_my_access") { raw ->
+                            access = MusicFlowAccess.fromResponse(JSONObject(raw))
+                            info = "Đã kiểm tra lại vai trò trực tiếp từ Supabase."
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().testTag("role-access-refresh")
+                ) { Text("Kiểm tra lại quyền từ Supabase") }
+            }
+
+            if (checked) {
                 HorizontalDivider()
                 Text("Tài khoản tác giả / nghệ sĩ", style = MaterialTheme.typography.titleMedium)
                 if (!access.isCreator) {

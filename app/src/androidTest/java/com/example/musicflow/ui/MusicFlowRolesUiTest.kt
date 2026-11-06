@@ -89,6 +89,61 @@ class MusicFlowRolesUiTest {
         compose.onNodeWithTag("admin-search-user").assertDoesNotExist()
     }
 
+    @Test fun refreshingAccessRemovesRevokedDeveloperShortcut() {
+        var checks = 0
+        compose.setContent {
+            MusicFlowTheme {
+                AccountRolePanel(listener, onClose = {}) { name, _ ->
+                    when (name) {
+                        "musicflow_my_access" -> {
+                            checks++
+                            if (checks == 1) """{"roles":["developer"],"permissions":[]}"""
+                            else """{"roles":[],"permissions":[]}"""
+                        }
+                        else -> "[]"
+                    }
+                }
+            }
+        }
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("developer-quick-access")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("role-access-refresh").performScrollTo().performClick()
+        compose.waitUntil(10_000) { checks >= 2 }
+        compose.waitForIdle()
+        compose.onNodeWithTag("developer-quick-access").assertDoesNotExist()
+        compose.onNodeWithTag("admin-search-user").assertDoesNotExist()
+    }
+
+    @Test fun failedAccessRefreshHidesPreviousAdminTools() {
+        var checks = 0
+        compose.setContent {
+            MusicFlowTheme {
+                AccountRolePanel(listener, onClose = {}) { name, _ ->
+                    when (name) {
+                        "musicflow_my_access" -> {
+                            checks++
+                            if (checks == 1) {
+                                """{"roles":["platform_admin"],"permissions":["manage_users"]}"""
+                            } else error("Test RPC temporarily unavailable")
+                        }
+                        else -> "[]"
+                    }
+                }
+            }
+        }
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("admin-search-user")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("role-access-refresh").performScrollTo().performClick()
+        compose.waitUntil(10_000) { checks >= 2 }
+        compose.waitForIdle()
+        compose.onNodeWithTag("admin-search-user").assertDoesNotExist()
+        compose.onNodeWithTag("admin-reason").assertDoesNotExist()
+    }
+
     @Test fun moderatorCanReviewDraftMetadataButNotRolesUsersOrCatalog() {
         compose.setContent {
             MusicFlowTheme {

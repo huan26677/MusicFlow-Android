@@ -46,10 +46,14 @@ try {
         $result = @(& $adb -s $Serial shell am instrument -w -r -e class $classes `
             'com.example.musicflow.test/androidx.test.runner.AndroidJUnitRunner')
         $result | Select-Object -Last 30
-        if ($LASTEXITCODE -ne 0 -or !($result -match 'OK \(8 tests\)')) {
+        # New targeted role tests may be added later: keep the v2 baseline (8)
+        # as the minimum rather than making this script fail on a larger suite.
+        $completed = [regex]::Match(($result -join "`n"), 'OK \((\d+) tests\)')
+        if ($LASTEXITCODE -ne 0 -or !$completed.Success -or
+            [int]$completed.Groups[1].Value -lt 8) {
             throw 'QA_OWNER_AND_ROLE_UI_FAILED'
         }
-        Write-Output 'QA_OWNER_AND_ROLE_UI=8_PASS'
+        Write-Output ('QA_OWNER_AND_ROLE_UI=' + $completed.Groups[1].Value + '_PASS')
     } else {
         Write-Output 'QA_OWNER_AND_ROLE_UI=NOT_RUN_NO_SERIAL'
     }
