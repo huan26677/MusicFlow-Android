@@ -306,16 +306,11 @@ class AccountViewModel(
         }
         viewModelScope.launch {
             try {
-                val latest = api.currentAccount()
+                val latest = api.currentAccount(requireFreshRoles = true)
                 check(latest.userId == previous.userId) { "Phiên tài khoản đã thay đổi." }
-                // currentAccount is deliberately fail-closed when its role lookup fails;
-                // this extra explicit verification lets us communicate that failure.
-                val verified = MusicFlowAccess.fromResponse(
-                    JSONObject(api.roleRpc("musicflow_my_access"))
-                )
                 _state.update {
                     it.copy(
-                        loading = false, account = latest.copy(access = verified),
+                        loading = false, account = latest,
                         displayName = latest.displayName,
                         message = "Đã cập nhật gói và quyền từ Supabase."
                     )

@@ -73,6 +73,18 @@ class AccountHomeV2UiTest {
         assertEquals(1, count)
         compose.onNodeWithTag("account-signin-tab").assertExists()
         compose.onNodeWithTag("account-home-tier").assertDoesNotExist()
+        compose.onNodeWithTag("account-google-disabled").assertDoesNotExist()
+    }
+
+    @Test fun signupShowsEmailConfirmationInstructionsWithoutAdminSettings() {
+        render(AccountUiState(
+            loading = false,
+            authMode = com.example.musicflow.feature.account.AccountAuthMode.SIGN_UP,
+            emailConfirmationRequired = true
+        ))
+        compose.onNodeWithText("Sau khi đăng ký, hãy kiểm tra hộp thư", substring = true)
+            .assertExists()
+        compose.onNodeWithText("Confirm email", substring = true).assertDoesNotExist()
     }
 
     @Test fun freeListenerSeesCompactActionsAndOpensDetailsOnDemand() {

@@ -363,7 +363,7 @@ class AccountApi(context: Context) {
         }
     }
 
-    suspend fun currentAccount(): AccountIdentity =
+    suspend fun currentAccount(requireFreshRoles: Boolean = false): AccountIdentity =
         withContext(Dispatchers.IO) {
             val user = JSONObject(request("GET", "/auth/v1/user", authenticated = true))
             val id = UUID.fromString(user.getString("id")).toString()
@@ -388,11 +388,16 @@ class AccountApi(context: Context) {
             val expiry = entitlement?.optString("expires_at").orEmpty()
             // Fail closed on missing role API / transient outages: NEVER infer
             // privileged roles from email, Premium tier or local metadata.
-            val access = runCatching {
-                MusicFlowAccess.fromResponse(
-                    JSONObject(roleRpc("musicflow_my_access"))
-                )
-            }.getOrDefault(MusicFlowAccess.NONE)
+            val access = if (requireFreshRoles) {
+                // Explicit user-triggered refresh must report authorization errors.
+                // Only one roles RPC is needed; do not re-query the same endpoint.
+                MusicFlowAccess.fromResponse(JSONObject(roleRpc("musicflow_my_access")))
+            } else {
+                // Sign-in/restore can still show listening tools if roles service is down.
+                runCatching {
+                    MusicFlowAccess.fromResponse(JSONObject(roleRpc("musicflow_my_access")))
+                }.getOrDefault(MusicFlowAccess.NONE)
+            }
             AccountIdentity(
                 userId = id,
                 email = email,

@@ -1,6 +1,7 @@
 package com.example.musicflow.feature.account
 
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -41,6 +42,25 @@ private val contributions = listOf(
     "master_owner" to "Chủ master"
 )
 
+private data class DraftFormSnapshot(
+    val title: String,
+    val artist: String,
+    val album: String,
+    val rightsHolder: String,
+    val license: String,
+    val rightsReference: String,
+    val streamingClaimed: Boolean,
+    val nextCreditName: String,
+    val nextCreditRole: String,
+    val credits: List<CreatorCredit>
+)
+
+private data class DraftReviewDecision(
+    val item: JSONObject,
+    val approved: Boolean,
+    val reason: String
+)
+
 private fun draftStatus(value: String): String = when (value) {
     "draft" -> "Bản nháp"
     "submitted" -> "Đang xét duyệt"
@@ -62,6 +82,7 @@ internal fun CreatorDraftStudio(
     var drafts by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
     var hasLoaded by remember { mutableStateOf(false) }
     var showEditor by remember { mutableStateOf(false) }
+    var showOptionalAlbum by remember { mutableStateOf(false) }
     var editingId by remember { mutableStateOf<String?>(null) }
     var title by remember { mutableStateOf("") }
     var artist by remember { mutableStateOf("") }
@@ -75,6 +96,20 @@ internal fun CreatorDraftStudio(
     var credits by remember { mutableStateOf<List<CreatorCredit>>(emptyList()) }
     var confirmSubmit by remember { mutableStateOf(false) }
     var attachmentsReady by remember { mutableStateOf(false) }
+    var exitEditorConfirm by remember { mutableStateOf(false) }
+    var savedSnapshot by remember { mutableStateOf<DraftFormSnapshot?>(null) }
+    var editorDirty by remember { mutableStateOf(false) }
+
+    fun snapshot() = DraftFormSnapshot(
+        title, artist, album, holder, license, evidence, streaming,
+        creditName, creditRole, credits
+    )
+
+    fun requestCloseEditor() {
+        if (busy) return
+        if (editorDirty || snapshot() != savedSnapshot) exitEditorConfirm = true
+        else showEditor = false
+    }
 
     fun reload() {
         if (busy) return
@@ -99,6 +134,10 @@ internal fun CreatorDraftStudio(
         license = "UNVERIFIED"; evidence = ""; streaming = false
         credits = emptyList(); creditName = ""; creditRole = "performer"
         error = null; info = null; showEditor = true
+        showOptionalAlbum = false
+        savedSnapshot = snapshot()
+        editorDirty = false
+        exitEditorConfirm = false
     }
 
     fun editDraft(row: JSONObject) {
@@ -107,6 +146,7 @@ internal fun CreatorDraftStudio(
         title = row.optString("title")
         artist = row.optString("artist")
         album = row.optString("album")
+        showOptionalAlbum = album.isNotBlank()
         holder = row.optString("rights_holder")
         license = row.optString("license_code")
         evidence = row.optString("rights_reference")
@@ -118,6 +158,9 @@ internal fun CreatorDraftStudio(
             }
         }
         error = null; info = null; showEditor = true
+        savedSnapshot = snapshot()
+        editorDirty = false
+        exitEditorConfirm = false
     }
 
     fun saveDraft() {
@@ -152,6 +195,8 @@ internal fun CreatorDraftStudio(
                 val fetched = JSONArray(rpc("musicflow_creator_my_drafts", JSONObject()))
                 drafts = (0 until fetched.length()).mapNotNull(fetched::optJSONObject)
                 hasLoaded = true
+                savedSnapshot = snapshot()
+                editorDirty = false
                 info = "Đã lưu nháp riêng trên Supabase; chưa xuất bản."
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -159,6 +204,10 @@ internal fun CreatorDraftStudio(
                 error = failure.message ?: "Không lưu được bản nháp."
             } finally { busy = false }
         }
+    }
+
+    BackHandler(enabled = showEditor && !busy && !confirmSubmit && !exitEditorConfirm) {
+        requestCloseEditor()
     }
 
     fun submitDraft() {
@@ -230,49 +279,60 @@ internal fun CreatorDraftStudio(
             HorizontalDivider()
             Text(if (editingId == null) "Nháp mới" else "Chỉnh sửa nháp",
                 style = MaterialTheme.typography.titleMedium)
+            Text("1. Thông tin cơ bản", style = MaterialTheme.typography.titleSmall)
             OutlinedTextField(
-                value = title, onValueChange = { title = it.take(240) },
+                value = title, onValueChange = { title = it.take(240); editorDirty = true },
                 label = { Text("Tên bài / tác phẩm") },
                 modifier = Modifier.fillMaxWidth().testTag("draft-title")
             )
             OutlinedTextField(
-                value = artist, onValueChange = { artist = it.take(180) },
+                value = artist, onValueChange = { artist = it.take(180); editorDirty = true },
                 label = { Text("Nghệ sĩ chính") }, modifier = Modifier.fillMaxWidth()
             )
+            TextButton(
+                onClick = { showOptionalAlbum = !showOptionalAlbum },
+                modifier = Modifier.testTag("draft-album-toggle")
+            ) { Text(if (showOptionalAlbum) "Ẩn thông tin album"
+                else "Thêm album (không bắt buộc)") }
+            if (showOptionalAlbum) {
+                OutlinedTextField(
+                    value = album, onValueChange = { album = it.take(180); editorDirty = true },
+                    label = { Text("Tên album") },
+                    modifier = Modifier.fillMaxWidth().testTag("draft-album")
+                )
+            }
             OutlinedTextField(
-                value = album, onValueChange = { album = it.take(180) },
-                label = { Text("Album (không bắt buộc)") }, modifier = Modifier.fillMaxWidth()
-            )
-            OutlinedTextField(
-                value = holder, onValueChange = { holder = it.take(180) },
+                value = holder, onValueChange = { holder = it.take(180); editorDirty = true },
                 label = { Text("Người / tổ chức nắm quyền bản ghi âm") },
                 modifier = Modifier.fillMaxWidth()
             )
+            Text("2. Chủ sở hữu và giấy phép", style = MaterialTheme.typography.titleSmall)
             Text("Giấy phép dự kiến", style = MaterialTheme.typography.bodyMedium)
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 CreatorDraftRules.licenseCodes.sorted().forEach { code ->
-                    FilterChip(selected = license == code, onClick = { license = code },
+                    FilterChip(selected = license == code,
+                        onClick = { license = code; editorDirty = true },
                         label = { Text(code) })
                 }
             }
             OutlinedTextField(
-                value = evidence, onValueChange = { evidence = it.take(1000) },
+                value = evidence, onValueChange = { evidence = it.take(1000); editorDirty = true },
                 label = { Text("Mã hợp đồng / mô tả bằng chứng quyền phát") },
                 supportingText = { Text("Không tải tệp bằng chứng lên ở giai đoạn này.") },
                 modifier = Modifier.fillMaxWidth()
             )
             Row {
-                Checkbox(checked = streaming, onCheckedChange = { streaming = it },
+                Checkbox(checked = streaming, onCheckedChange = { streaming = it; editorDirty = true },
                     modifier = Modifier.testTag("draft-streaming-claim"))
                 Text("Tôi xác nhận có quyền cho phép MusicFlow phát online. " +
                     "Quản trị viên vẫn phải kiểm duyệt.")
             }
-            Text("Người tham gia • tối đa 12", style = MaterialTheme.typography.titleSmall)
+            Text("3. Người tham gia • tối đa 12", style = MaterialTheme.typography.titleSmall)
             OutlinedTextField(
-                value = creditName, onValueChange = { creditName = it.take(100) },
+                value = creditName, onValueChange = { creditName = it.take(100); editorDirty = true },
                 label = { Text("Tên người tham gia") },
                 modifier = Modifier.fillMaxWidth().testTag("draft-credit-name")
             )
@@ -281,7 +341,8 @@ internal fun CreatorDraftStudio(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 contributions.forEach { (key, label) ->
-                    FilterChip(selected = creditRole == key, onClick = { creditRole = key },
+                    FilterChip(selected = creditRole == key,
+                        onClick = { creditRole = key; editorDirty = true },
                         label = { Text(label) })
                 }
             }
@@ -289,6 +350,7 @@ internal fun CreatorDraftStudio(
                 onClick = {
                     credits = credits + CreatorCredit(creditName.trim(), creditRole)
                     creditName = ""
+                    editorDirty = true
                 },
                 enabled = creditName.trim().length in 2..100 && credits.size < 12,
                 modifier = Modifier.testTag("draft-add-credit")
@@ -299,6 +361,7 @@ internal fun CreatorDraftStudio(
                         modifier = Modifier.weight(1f))
                     TextButton(onClick = {
                         credits = credits.filterIndexed { i, _ -> i != index }
+                        editorDirty = true
                     }) { Text("Xóa") }
                 }
             }
@@ -344,10 +407,30 @@ internal fun CreatorDraftStudio(
                     modifier = Modifier.fillMaxWidth().testTag("draft-submit")
                 ) { Text("Gửi bản nháp đã lưu để xét duyệt") }
             }
-            TextButton(onClick = { showEditor = false }, enabled = !busy) {
+            TextButton(onClick = { requestCloseEditor() }, enabled = !busy,
+                modifier = Modifier.testTag("creator-editor-close")) {
                 Text("Đóng trình sửa nháp")
             }
         }
+    }
+    if (exitEditorConfirm) {
+        AlertDialog(
+            onDismissRequest = { exitEditorConfirm = false },
+            title = { Text("Đóng khi chưa lưu?") },
+            text = { Text("Những thay đổi chưa lưu vào Supabase sẽ bị bỏ. Bạn có thể tiếp tục sửa hoặc đóng.") },
+            confirmButton = {
+                TextButton(onClick = { exitEditorConfirm = false; showEditor = false },
+                    modifier = Modifier.testTag("creator-editor-discard")) {
+                    Text("Bỏ thay đổi")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { exitEditorConfirm = false },
+                    modifier = Modifier.testTag("creator-editor-keep")) {
+                    Text("Tiếp tục sửa")
+                }
+            }
+        )
     }
     if (confirmSubmit) {
         AlertDialog(
@@ -379,10 +462,14 @@ internal fun CreatorDraftReviewPanel(
     var pending by remember { mutableStateOf<List<JSONObject>>(emptyList()) }
     var loaded by remember { mutableStateOf(false) }
     var reason by remember { mutableStateOf("") }
-    var confirm by remember { mutableStateOf<Pair<JSONObject,Boolean>?>(null) }
+    var confirm by remember { mutableStateOf<DraftReviewDecision?>(null) }
+    var expandedReviewId by remember { mutableStateOf<String?>(null) }
 
     fun refresh() {
         if (busy) return
+        pending = emptyList()
+        loaded = false
+        expandedReviewId = null
         scope.launch {
             busy = true; error = null; info = null
             try {
@@ -391,10 +478,14 @@ internal fun CreatorDraftReviewPanel(
                 loaded = true
             } catch (cancelled: CancellationException) {
                 throw cancelled
-            } catch (failure: Exception) {
-                error = failure.message ?: "Không tải được danh sách chờ duyệt."
+            } catch (_: Exception) {
+                error = "Chưa tải được danh sách chờ duyệt. Hãy kiểm tra kết nối và thử lại."
             } finally { busy = false }
         }
+    }
+
+    BackHandler(enabled = expandedReviewId != null && !busy && confirm == null) {
+        expandedReviewId = null
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -407,10 +498,27 @@ internal fun CreatorDraftReviewPanel(
         ) { Text("Tải bản nháp chờ duyệt") }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         info?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
-        if (loaded && pending.isEmpty()) Text("Không có bản nháp chờ duyệt.")
+        if (loaded && pending.isEmpty()) Text("Hiện không có tác phẩm đang chờ duyệt.",
+            modifier = Modifier.testTag("draft-review-empty"))
+        if (pending.isNotEmpty()) {
+            OutlinedTextField(
+                value = reason, onValueChange = { reason = it.take(300) },
+                label = { Text("Lý do xét duyệt / yêu cầu bổ sung (5–300 ký tự)") },
+                modifier = Modifier.fillMaxWidth().testTag("draft-review-reason")
+            )
+        }
         pending.forEach { row ->
             Text("${row.optString("title")} — ${row.optString("artist")}",
                 style = MaterialTheme.typography.titleSmall)
+            OutlinedButton(
+                onClick = {
+                    expandedReviewId = if (expandedReviewId == row.optString("id")) null
+                        else row.optString("id")
+                },
+                modifier = Modifier.fillMaxWidth().testTag("draft-review-open-item")
+            ) { Text(if (expandedReviewId == row.optString("id")) "Thu gọn hồ sơ"
+                else "Xem hồ sơ và chứng cứ") }
+            if (expandedReviewId == row.optString("id")) {
             Text("Người gửi: ${row.optString("creator_email")}")
             Text("Chủ master: ${row.optString("rights_holder")} • ${row.optString("license_code")}")
             Text("Chứng cứ khai báo: ${row.optString("rights_reference")}")
@@ -429,28 +537,24 @@ internal fun CreatorDraftReviewPanel(
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(
-                    onClick = { confirm = row to true },
-                    enabled = !busy && reason.trim().length in 5..300
+                    onClick = { confirm = DraftReviewDecision(row, true, reason.trim()) },
+                    enabled = !busy && reason.trim().length in 5..300,
+                    modifier = Modifier.testTag("draft-review-approve")
                 ) { Text("Duyệt hồ sơ") }
                 OutlinedButton(
-                    onClick = { confirm = row to false },
-                    enabled = !busy && reason.trim().length in 5..300
+                    onClick = { confirm = DraftReviewDecision(row, false, reason.trim()) },
+                    enabled = !busy && reason.trim().length in 5..300,
+                    modifier = Modifier.testTag("draft-review-needs-changes")
                 ) { Text("Yêu cầu bổ sung") }
             }
-        }
-        if (pending.isNotEmpty()) {
-            OutlinedTextField(
-                value = reason, onValueChange = { reason = it.take(300) },
-                label = { Text("Lý do xét duyệt / yêu cầu bổ sung") },
-                modifier = Modifier.fillMaxWidth().testTag("draft-review-reason")
-            )
+            }
         }
     }
-    confirm?.let { (item, approve) ->
+    confirm?.let { decision ->
         AlertDialog(
             onDismissRequest = { confirm = null },
-            title = { Text(if (approve) "Xác nhận duyệt metadata?" else "Yêu cầu chỉnh sửa?") },
-            text = { Text("${item.optString("title")}\nLý do: $reason\n" +
+            title = { Text(if (decision.approved) "Xác nhận duyệt metadata?" else "Yêu cầu chỉnh sửa?") },
+            text = { Text("${decision.item.optString("title")}\nLý do: ${decision.reason}\n" +
                 "Không thay đổi catalog nhạc đã phát hành.") },
             confirmButton = {
                 TextButton(onClick = {
@@ -458,14 +562,20 @@ internal fun CreatorDraftReviewPanel(
                     scope.launch {
                         busy = true; error = null; info = null
                         try {
-                            rpc(
+                            val accepted = rpc(
                                 "musicflow_review_draft",
-                                JSONObject().put("p_id", item.optString("id"))
-                                    .put("p_approve", approve).put("p_reason", reason.trim())
+                                JSONObject().put("p_id", decision.item.optString("id"))
+                                    .put("p_approve", decision.approved)
+                                    .put("p_reason", decision.reason)
                             )
-                            pending = pending.filterNot {
-                                it.optString("id") == item.optString("id")
+                            check(accepted.trim() == "true") {
+                                "Máy chủ chưa xác nhận xét duyệt."
                             }
+                            pending = pending.filterNot {
+                                it.optString("id") == decision.item.optString("id")
+                            }
+                            expandedReviewId = null
+                            reason = ""
                             info = "Đã ghi quyết định xét duyệt trên Supabase."
                         } catch (cancelled: CancellationException) {
                             throw cancelled
@@ -473,7 +583,7 @@ internal fun CreatorDraftReviewPanel(
                             error = failure.message ?: "Không thể duyệt bản nháp."
                         } finally { busy = false }
                     }
-                }) { Text("Xác nhận") }
+                }, modifier = Modifier.testTag("draft-review-confirm")) { Text("Xác nhận") }
             },
             dismissButton = { TextButton(onClick = { confirm = null }) { Text("Hủy") } }
         )

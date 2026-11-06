@@ -1,5 +1,6 @@
 package com.example.musicflow.feature.account
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,12 +38,30 @@ import com.example.musicflow.core.account.AccountIdentity
 import com.example.musicflow.core.account.AccountWorkspace
 import com.example.musicflow.core.account.AccountWorkspacePlan
 import com.example.musicflow.core.account.AccountTaskGuide
+import com.example.musicflow.core.account.AccountReviewArea
+import com.example.musicflow.core.account.AccountReviewPlan
 import com.example.musicflow.core.account.CreatorApplicationUiRules
 import com.example.musicflow.core.account.MusicFlowAccess
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
+
+private data class AccountRoleDecision(
+    val userId: String,
+    val email: String,
+    val kind: String,
+    val name: String,
+    val granting: Boolean,
+    val reason: String
+)
+
+private data class AccountCatalogDecision(
+    val trackId: String,
+    val title: String,
+    val publishing: Boolean,
+    val reason: String
+)
 
 /** Role UI uses an existing authenticated session; all authorization lives in Supabase RPCs. */
 @Composable
@@ -69,8 +88,10 @@ internal fun AccountRolePanel(
     var role by remember { mutableStateOf("platform_admin") }
     var permission by remember { mutableStateOf("manage_users") }
     var reason by remember { mutableStateOf("") }
-    var confirm by remember { mutableStateOf<Pair<String, Boolean>?>(null) }
+    var confirm by remember { mutableStateOf<AccountRoleDecision?>(null) }
     var reviewConfirm by remember { mutableStateOf<Pair<JSONObject, Boolean>?>(null) }
+    var catalogConfirm by remember { mutableStateOf<AccountCatalogDecision?>(null) }
+    var reviewArea by remember(identity.userId) { mutableStateOf<AccountReviewArea?>(null) }
 
     var creatorType by remember { mutableStateOf("artist") }
     var creatorName by remember { mutableStateOf("") }
@@ -83,6 +104,7 @@ internal fun AccountRolePanel(
     var developerOpen by remember { mutableStateOf(false) }
     var qaConnection by remember { mutableStateOf<String?>(null) }
     var studioExpanded by remember(identity.userId) { mutableStateOf(false) }
+    var creatorProfileExpanded by remember(identity.userId) { mutableStateOf(false) }
     var ownerOverviewExpanded by remember(identity.userId) { mutableStateOf(false) }
     var usersLoaded by remember(identity.userId) { mutableStateOf(false) }
     var pendingLoaded by remember(identity.userId) { mutableStateOf(false) }
@@ -105,6 +127,17 @@ internal fun AccountRolePanel(
                 busy = false
             }
         }
+    }
+
+    fun prepareRoleDecision(kind: String, granting: Boolean) {
+        val target = selected ?: return
+        val why = reason.trim()
+        if (busy || why.length !in 5..300) return
+        confirm = AccountRoleDecision(
+            userId = target.optString("id"), email = target.optString("email"),
+            kind = kind, name = if (kind == "role") role else permission,
+            granting = granting, reason = why
+        )
     }
 
     LaunchedEffect(identity.userId) {
@@ -137,15 +170,64 @@ internal fun AccountRolePanel(
     val workspaces = AccountWorkspacePlan.available(access, BuildConfig.DEBUG)
     val currentWorkspace = selectedWorkspace?.takeIf { it in workspaces }
         ?: AccountWorkspacePlan.initial(access, BuildConfig.DEBUG)
+    val reviewAreas = AccountReviewPlan.available(access)
+    val activeReviewArea = AccountReviewPlan.active(access, reviewArea)
+    val contentScroll = rememberScrollState()
+    LaunchedEffect(currentWorkspace, activeReviewArea) { contentScroll.scrollTo(0) }
+
+    // Back first exits a subordinate task; the enclosing Dialog closes when
+    // no nested task remains. The child editor owns its Back handler too.
+    BackHandler(
+        enabled = !busy && (studioExpanded || creatorProfileExpanded ||
+            ownerOverviewExpanded || developerOpen || selected != null ||
+            reviewArea != null || selectedWorkspace != null)
+    ) {
+        when {
+            studioExpanded -> studioExpanded = false
+            creatorProfileExpanded -> creatorProfileExpanded = false
+            ownerOverviewExpanded -> ownerOverviewExpanded = false
+            developerOpen -> developerOpen = false
+            selected != null -> selected = null
+            reviewArea != null -> reviewArea = null
+            selectedWorkspace != null -> selectedWorkspace = null
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxWidth().heightIn(max = 600.dp),
         shape = MaterialTheme.shapes.large
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            // Keep actor navigation visible even when editing a long form.
+            if (checked) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
+                        .testTag("role-workspace-tabs"),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    workspaces.forEach { workspace ->
+                        FilterChip(
+                            selected = currentWorkspace == workspace,
+                            onClick = {
+                                selectedWorkspace = workspace
+                                confirm = null
+                                reviewConfirm = null
+                                catalogConfirm = null
+                            },
+                            label = { Text(workspace.title) },
+                            modifier = Modifier.heightIn(min = 48.dp)
+                                .testTag("role-workspace-${workspace.name.lowercase()}")
+                        )
+                    }
+                }
+            }
+            Column(
+                modifier = Modifier.fillMaxWidth().weight(1f).verticalScroll(contentScroll),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
             Text("Vai trò và quản trị MusicFlow", style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.semantics { heading() })
             Text(identity.email, style = MaterialTheme.typography.bodySmall)
@@ -171,10 +253,13 @@ internal fun AccountRolePanel(
                         audits = emptyList()
                         confirm = null
                         reviewConfirm = null
+                        catalogConfirm = null
                         developerOpen = false
                         selectedWorkspace = null
+                        reviewArea = null
                         ownerOverviewExpanded = false
                         studioExpanded = false
+                        creatorProfileExpanded = false
                         usersLoaded = false
                         pendingLoaded = false
                         tracksLoaded = false
@@ -191,24 +276,6 @@ internal fun AccountRolePanel(
             if (checked) {
                 Text("Khu vực làm việc", style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.semantics { heading() })
-                Row(
-                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    workspaces.forEach { workspace ->
-                        FilterChip(
-                            selected = currentWorkspace == workspace,
-                            onClick = {
-                                selectedWorkspace = workspace
-                                confirm = null
-                                reviewConfirm = null
-                            },
-                            label = { Text(workspace.title) },
-                            modifier = Modifier.heightIn(min = 48.dp)
-                                .testTag("role-workspace-${workspace.name.lowercase()}")
-                        )
-                    }
-                }
                 Text(currentWorkspace.description, style = MaterialTheme.typography.bodySmall)
                 Text(AccountTaskGuide.nextStep(currentWorkspace, access),
                     style = MaterialTheme.typography.bodyMedium,
@@ -222,7 +289,9 @@ internal fun AccountRolePanel(
                             FilterChip(
                                 selected = creatorType == key,
                                 onClick = { creatorType = key },
-                                label = { Text(label) }
+                                label = { Text(label) },
+                                modifier = Modifier.heightIn(min = 48.dp)
+                                    .testTag("creator-type-$key")
                             )
                         }
                     }
@@ -233,74 +302,24 @@ internal fun AccountRolePanel(
                             modifier = Modifier.testTag("creator-pending-hint"))
                     }
                 } else {
-                    Text("Bạn đã có vai trò sáng tạo được phê duyệt.")
-                }
-                OutlinedTextField(
-                    value = creatorName, onValueChange = { creatorName = it.take(80) },
-                    label = { Text("Nghệ danh / bút danh") },
-                    modifier = Modifier.fillMaxWidth().testTag("creator-stage-name")
-                )
-                OutlinedTextField(
-                    value = creatorBio, onValueChange = { creatorBio = it.take(1000) },
-                    label = { Text("Giới thiệu / thông tin tác phẩm") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if (!access.isCreator) {
-                    Button(
-                        onClick = {
-                            runAction(
-                                "musicflow_apply_creator",
-                                JSONObject().put("p_role", creatorType)
-                                    .put("p_name", creatorName.trim())
-                                    .put("p_note", creatorBio.trim())
-                            ) {
-                                // Only mark pending after the server has accepted the request.
-                                myRequests = listOf(JSONObject()
-                                    .put("requested_role", creatorType)
-                                    .put("requested_name", creatorName.trim())
-                                    .put("status", "pending")) + myRequests
-                                requestsLoaded = true
-                                info = "Đã gửi yêu cầu. Vai trò chỉ có sau khi được duyệt."
-                            }
-                        },
-                        enabled = CreatorApplicationUiRules.canSubmit(
-                            access.isCreator, requestsLoaded, busy, creatorName, hasPendingSelectedRole
-                        ),
-                        modifier = Modifier.fillMaxWidth().testTag("creator-request")
-                    ) { Text("Đề nghị xét duyệt") }
-                } else {
-                    OutlinedButton(
-                        enabled = !busy,
-                        onClick = {
-                            runAction("musicflow_my_creator_profile") {
-                                val profile = JSONObject(it)
-                                creatorName = profile.optString("stage_name")
-                                creatorBio = profile.optString("bio")
-                            }
-                        }
-                    ) { Text("Tải hồ sơ sáng tạo") }
-                    Button(
-                        enabled = !busy && creatorName.trim().length in 2..80,
-                        onClick = {
-                            runAction(
-                                "musicflow_save_creator_profile",
-                                JSONObject().put("p_name", creatorName.trim())
-                                    .put("p_bio", creatorBio.trim())
-                            ) { info = "Đã lưu hồ sơ trên Supabase." }
-                        }
-                    ) { Text("Lưu hồ sơ sáng tạo") }
+                    Text("Bạn đã được duyệt. Mở kho tác phẩm để bắt đầu, hoặc sửa hồ sơ khi cần.")
                 }
                 OutlinedButton(
                     enabled = !busy,
                     onClick = {
+                        myRequests = emptyList()
                         requestsLoaded = false
                         runAction("musicflow_my_creator_requests") {
                             myRequests = JSONArray(it).rows()
                             requestsLoaded = true
                         }
                     },
-                    modifier = Modifier.testTag("creator-load-requests")
-                ) { Text("Xem tình trạng xét duyệt") }
+                    modifier = Modifier.fillMaxWidth().testTag("creator-load-requests")
+                ) { Text("Cập nhật trạng thái xét duyệt") }
+                if (requestsLoaded && myRequests.isEmpty()) {
+                    Text("Bạn chưa có yêu cầu Creator nào.",
+                        modifier = Modifier.testTag("creator-requests-empty"))
+                }
                 myRequests.forEach {
                     Text(
                         "${CreatorApplicationUiRules.roleLabel(it.optString("requested_role"))}: " +
@@ -312,6 +331,41 @@ internal fun AccountRolePanel(
                     if (note.isNotBlank()) Text("Phản hồi xét duyệt: $note")
                 }
 
+                if (!access.isCreator && requestsLoaded && !hasPendingSelectedRole) {
+                    Text("Đăng ký vai trò sáng tạo", style = MaterialTheme.typography.titleSmall)
+                    OutlinedTextField(
+                        value = creatorName, onValueChange = { creatorName = it.take(80) },
+                        label = { Text("Nghệ danh / bút danh") },
+                        modifier = Modifier.fillMaxWidth().testTag("creator-stage-name")
+                    )
+                    OutlinedTextField(
+                        value = creatorBio, onValueChange = { creatorBio = it.take(1000) },
+                        label = { Text("Giới thiệu ngắn (không bắt buộc)") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Button(
+                        onClick = {
+                            runAction(
+                                "musicflow_apply_creator",
+                                JSONObject().put("p_role", creatorType)
+                                    .put("p_name", creatorName.trim())
+                                    .put("p_note", creatorBio.trim())
+                            ) {
+                                // Server accepted the request; display pending immediately.
+                                myRequests = listOf(JSONObject()
+                                    .put("requested_role", creatorType)
+                                    .put("requested_name", creatorName.trim())
+                                    .put("status", "pending")) + myRequests
+                                requestsLoaded = true
+                                info = "Đã gửi yêu cầu. Quyền sáng tạo chỉ có sau khi được duyệt."
+                            }
+                        },
+                        enabled = CreatorApplicationUiRules.canSubmit(
+                            access.isCreator, requestsLoaded, busy, creatorName, hasPendingSelectedRole
+                        ),
+                        modifier = Modifier.fillMaxWidth().testTag("creator-request")
+                    ) { Text("Gửi đăng ký xét duyệt") }
+                }
                 if (access.isCreator) {
                     OutlinedButton(
                         onClick = { studioExpanded = !studioExpanded },
@@ -321,6 +375,49 @@ internal fun AccountRolePanel(
                         else "Mở kho tác phẩm và bản nháp") }
                     if (studioExpanded) {
                         CreatorDraftStudio(rpc = rpc, upload = upload, download = download)
+                    }
+                    OutlinedButton(
+                        enabled = !busy,
+                        onClick = {
+                            if (creatorProfileExpanded) {
+                                creatorProfileExpanded = false
+                            } else {
+                                runAction("musicflow_my_creator_profile") {
+                                    val profile = JSONObject(it)
+                                    creatorName = profile.optString("stage_name")
+                                    creatorBio = profile.optString("bio")
+                                    creatorProfileExpanded = true
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth().testTag("creator-profile-toggle")
+                    ) { Text(if (creatorProfileExpanded) "Thu gọn hồ sơ sáng tạo"
+                        else "Chỉnh sửa hồ sơ Nghệ sĩ / Tác giả") }
+                    if (creatorProfileExpanded) {
+                        OutlinedTextField(
+                            value = creatorName, onValueChange = { creatorName = it.take(80) },
+                            label = { Text("Nghệ danh / bút danh") },
+                            modifier = Modifier.fillMaxWidth().testTag("creator-stage-name")
+                        )
+                        OutlinedTextField(
+                            value = creatorBio, onValueChange = { creatorBio = it.take(1000) },
+                            label = { Text("Giới thiệu") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Button(
+                            enabled = !busy && creatorName.trim().length in 2..80,
+                            onClick = {
+                                runAction(
+                                    "musicflow_save_creator_profile",
+                                    JSONObject().put("p_name", creatorName.trim())
+                                        .put("p_bio", creatorBio.trim())
+                                ) {
+                                    creatorProfileExpanded = false
+                                    info = "Đã lưu hồ sơ sáng tạo trên Supabase."
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth().testTag("creator-profile-save")
+                        ) { Text("Lưu hồ sơ sáng tạo") }
                     }
                 }
                 }
@@ -401,7 +498,11 @@ internal fun AccountRolePanel(
                     }
                     users.forEach { user ->
                         OutlinedButton(
-                            onClick = { selected = user },
+                            onClick = {
+                                selected = user
+                                reason = ""
+                                confirm = null
+                            },
                             modifier = Modifier.fillMaxWidth().testTag("admin-user-item")
                         ) { Text("${user.optString("email")} • ${user.optString("tier")}") }
                     }
@@ -409,53 +510,66 @@ internal fun AccountRolePanel(
                 if (access.isOwner) {
                     HorizontalDivider()
                     Text("Owner — phân quyền", style = MaterialTheme.typography.titleMedium)
-                    Text("Chỉ chọn tài khoản từ danh sách; không thể cấp hay thay Owner.")
+                    Text("Chọn tài khoản ở danh sách phía trên để mở các thao tác cấp/thu hồi. Không thể thay Owner.")
                     selected?.let {
-                        Text("Đã chọn: ${it.optString("email")}")
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        listOf("platform_admin","developer","moderator","artist","author")
-                            .forEach { item ->
-                                FilterChip(selected = role == item, onClick = { role = item },
-                                    label = { Text(item) })
-                            }
-                    }
-                    OutlinedTextField(
-                        value = reason, onValueChange = { reason = it.take(300) },
-                        label = { Text("Lý do cấp/thu hồi quyền") },
-                        modifier = Modifier.fillMaxWidth().testTag("admin-reason")
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(
-                            onClick = { confirm = "role" to true },
-                            enabled = !busy && selected != null && reason.trim().length >= 5
-                        ) { Text("Cấp vai trò") }
-                        OutlinedButton(
-                            onClick = { confirm = "role" to false },
-                            enabled = !busy && selected != null && reason.trim().length >= 5
-                        ) { Text("Thu hồi") }
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        listOf("manage_users","review_creators","moderate_catalog").forEach { item ->
-                            FilterChip(selected = permission == item,
-                                onClick = { permission = item }, label = { Text(item) })
+                        Text("Đang quản lý: ${it.optString("email")}",
+                            modifier = Modifier.testTag("owner-selected-user"))
+                        TextButton(
+                            onClick = { selected = null; reason = "" },
+                            modifier = Modifier.testTag("owner-clear-selection")
+                        ) { Text("Bỏ chọn tài khoản") }
+                        Text("Vai trò", style = MaterialTheme.typography.titleSmall)
+                        Row(
+                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            listOf("platform_admin","developer","moderator","artist","author")
+                                .forEach { item ->
+                                    FilterChip(
+                                        selected = role == item, onClick = { role = item },
+                                        label = { Text(AccountWorkspacePlan.roleLabel(item)) }
+                                    )
+                                }
                         }
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(
-                            onClick = { confirm = "permission" to true },
-                            enabled = !busy && selected != null && reason.trim().length >= 5
-                        ) { Text("Cấp quyền cộng tác") }
-                        OutlinedButton(
-                            onClick = { confirm = "permission" to false },
-                            enabled = !busy && selected != null && reason.trim().length >= 5
-                        ) { Text("Thu hồi quyền") }
+                        OutlinedTextField(
+                            value = reason, onValueChange = { reason = it.take(300) },
+                            label = { Text("Lý do cấp/thu hồi quyền (5–300 ký tự)") },
+                            modifier = Modifier.fillMaxWidth().testTag("admin-reason")
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(
+                                onClick = { prepareRoleDecision("role", true) },
+                                enabled = !busy && reason.trim().length in 5..300
+                            ) { Text("Cấp vai trò") }
+                            OutlinedButton(
+                                onClick = { prepareRoleDecision("role", false) },
+                                enabled = !busy && reason.trim().length in 5..300
+                            ) { Text("Thu hồi") }
+                        }
+                        Text("Quyền cộng tác quản trị", style = MaterialTheme.typography.titleSmall)
+                        Row(
+                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            listOf("manage_users","review_creators","moderate_catalog")
+                                .forEach { item ->
+                                    FilterChip(
+                                        selected = permission == item,
+                                        onClick = { permission = item },
+                                        label = { Text(AccountReviewPlan.permissionLabel(item)) }
+                                    )
+                                }
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(
+                                onClick = { prepareRoleDecision("permission", true) },
+                                enabled = !busy && reason.trim().length in 5..300
+                            ) { Text("Cấp quyền") }
+                            OutlinedButton(
+                                onClick = { prepareRoleDecision("permission", false) },
+                                enabled = !busy && reason.trim().length in 5..300
+                            ) { Text("Thu hồi quyền") }
+                        }
                     }
                     OutlinedButton(
                         onClick = {
@@ -478,7 +592,39 @@ internal fun AccountRolePanel(
                 }
                 }
                 if (currentWorkspace == AccountWorkspace.MODERATION) {
-                if (access.canReviewCreators) {
+                if (reviewAreas.size > 1) {
+                    Text("Chọn công việc kiểm duyệt", style = MaterialTheme.typography.titleSmall)
+                    Row(
+                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        reviewAreas.forEach { area ->
+                            FilterChip(
+                                selected = area == activeReviewArea,
+                                onClick = {
+                                    reviewArea = area
+                                    reviewConfirm = null
+                                    catalogConfirm = null
+                                },
+                                label = { Text(area.label) },
+                                modifier = Modifier.heightIn(min = 48.dp)
+                                    .testTag("review-area-${area.name.lowercase()}")
+                            )
+                        }
+                    }
+                }
+                activeReviewArea?.let {
+                    Text(it.guidance, style = MaterialTheme.typography.bodySmall)
+                }
+                if (activeReviewArea == AccountReviewArea.APPLICATIONS ||
+                    activeReviewArea == AccountReviewArea.CATALOG) {
+                    OutlinedTextField(
+                        value = reason, onValueChange = { reason = it.take(300) },
+                        label = { Text("Lý do xét duyệt (5–300 ký tự)") },
+                        modifier = Modifier.fillMaxWidth().testTag("creator-review-reason")
+                    )
+                }
+                if (activeReviewArea == AccountReviewArea.APPLICATIONS && access.canReviewCreators) {
                     HorizontalDivider()
                     Text("Duyệt yêu cầu sáng tạo", style = MaterialTheme.typography.titleMedium)
                     OutlinedButton(
@@ -515,10 +661,10 @@ internal fun AccountRolePanel(
                         }
                     }
                 }
-                if (access.canReviewMetadata) {
+                if (activeReviewArea == AccountReviewArea.DRAFTS && access.canReviewMetadata) {
                     CreatorDraftReviewPanel(rpc = rpc, download = download)
                 }
-                if (access.canModerateCatalog) {
+                if (activeReviewArea == AccountReviewArea.CATALOG && access.canModerateCatalog) {
                     HorizontalDivider()
                     Text("Quản lý phát nhạc online", style = MaterialTheme.typography.titleMedium)
                     OutlinedButton(
@@ -541,56 +687,77 @@ internal fun AccountRolePanel(
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             listOf(true to "Xuất bản", false to "Gỡ phát").forEach { (published, label) ->
                                 OutlinedButton(
-                                    enabled = !busy && reason.trim().length >= 5,
+                                    enabled = !busy && reason.trim().length in 5..300,
                                     onClick = {
-                                        runAction(
-                                            "musicflow_review_track",
-                                            JSONObject().put("p_track", track.optString("id"))
-                                                .put("p_publish", published)
-                                                .put("p_reason", reason.trim())
-                                        ) { info = "Máy chủ đã xử lý quyền xuất bản." }
-                                    }
+                                        catalogConfirm = AccountCatalogDecision(
+                                            trackId = track.optString("id"),
+                                            title = track.optString("title"),
+                                            publishing = published,
+                                            reason = reason.trim()
+                                        )
+                                    },
+                                    modifier = Modifier.testTag(
+                                        if (published) "catalog-confirm-publish" else "catalog-confirm-unpublish"
+                                    )
                                 ) { Text(label) }
                             }
                         }
                     }
-                }
-                if (access.canReviewCreators || access.canModerateCatalog) {
-                    OutlinedTextField(
-                        value = reason, onValueChange = { reason = it.take(300) },
-                        label = { Text("Lý do xét duyệt (ít nhất 5 ký tự)") },
-                        modifier = Modifier.fillMaxWidth().testTag("creator-review-reason")
-                    )
                 }
                 }
             }
             HorizontalDivider()
             TextButton(onClick = onClose,
                 modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Đóng") }
+            }
         }
     }
 
-    confirm?.let { (kind, granting) ->
+    confirm?.let { decision ->
         AlertDialog(
             onDismissRequest = { confirm = null },
-            title = { Text(if (granting) "Xác nhận cấp quyền?" else "Xác nhận thu hồi?") },
-            text = { Text("${selected?.optString("email")} — " +
-                "${if (kind == "role") role else permission}\nLý do: $reason") },
+            title = {
+                Text(if (decision.granting) "Xác nhận cấp quyền?" else "Xác nhận thu hồi?")
+            },
+            text = {
+                Text("Tài khoản: ${decision.email}\n" +
+                    "${if (decision.kind == "role") "Vai trò" else "Quyền"}: " +
+                    "${if (decision.kind == "role") AccountWorkspacePlan.roleLabel(decision.name)
+                    else AccountReviewPlan.permissionLabel(decision.name)}\n" +
+                    "Lý do: ${decision.reason}\nQuyết định sẽ được ghi trên Supabase.")
+            },
             confirmButton = {
-                TextButton(onClick = {
-                    confirm = null
-                    val target = selected?.optString("id").orEmpty()
-                    val payload = JSONObject().put("p_user_id", target)
-                        .put("p_grant", granting).put("p_reason", reason.trim())
-                    val rpcName = if (kind == "role") {
-                        payload.put("p_role", role)
-                        "musicflow_manage_role"
-                    } else {
-                        payload.put("p_permission", permission)
-                        "musicflow_set_admin_permission"
-                    }
-                    runAction(rpcName, payload) { info = "Đã cập nhật quyền trên Supabase." }
-                }) { Text("Xác nhận") }
+                TextButton(
+                    onClick = {
+                        confirm = null
+                        val payload = JSONObject()
+                            .put("p_user_id", decision.userId)
+                            .put("p_grant", decision.granting)
+                            .put("p_reason", decision.reason)
+                        val rpcName = if (decision.kind == "role") {
+                            payload.put("p_role", decision.name)
+                            "musicflow_manage_role"
+                        } else {
+                            payload.put("p_permission", decision.name)
+                            "musicflow_set_admin_permission"
+                        }
+                        runAction(rpcName, payload) { raw ->
+                            if (decision.kind == "role") {
+                                check(JSONObject(raw).has("roles")) {
+                                    "Máy chủ chưa xác nhận thay đổi vai trò."
+                                }
+                            } else check(raw.trim() == "true") {
+                                "Máy chủ chưa xác nhận thay đổi quyền."
+                            }
+                            selected = null
+                            users = emptyList()
+                            usersLoaded = false
+                            reason = ""
+                            info = "Đã cập nhật quyền. Tải lại danh sách để kiểm tra kết quả."
+                        }
+                    },
+                    modifier = Modifier.testTag("owner-role-confirm")
+                ) { Text("Xác nhận") }
             },
             dismissButton = {
                 TextButton(onClick = { confirm = null }) { Text("Hủy") }
@@ -635,6 +802,47 @@ internal fun AccountRolePanel(
                 TextButton(
                     onClick = { reviewConfirm = null },
                     modifier = Modifier.testTag("creator-review-cancel")
+                ) { Text("Hủy") }
+            }
+        )
+    }
+
+    catalogConfirm?.let { decision ->
+        AlertDialog(
+            onDismissRequest = { catalogConfirm = null },
+            title = {
+                Text(if (decision.publishing) "Xác nhận xuất bản nhạc online?"
+                    else "Xác nhận gỡ phát nhạc online?")
+            },
+            text = {
+                Text("Tác phẩm: ${decision.title}\nLý do: ${decision.reason}\n" +
+                    "Máy chủ sẽ kiểm tra giấy phép và quyền phát trước khi thực hiện.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        catalogConfirm = null
+                        runAction(
+                            "musicflow_review_track",
+                            JSONObject().put("p_track", decision.trackId)
+                                .put("p_publish", decision.publishing)
+                                .put("p_reason", decision.reason)
+                        ) { raw ->
+                            check(raw.trim() == "true") {
+                                "Máy chủ chưa xác nhận thay đổi nhạc online."
+                            }
+                            tracks = emptyList()
+                            tracksLoaded = false
+                            info = "Đã xử lý. Tải lại danh mục để xem trạng thái mới."
+                        }
+                    },
+                    modifier = Modifier.testTag("catalog-action-confirm")
+                ) { Text("Xác nhận") }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { catalogConfirm = null },
+                    modifier = Modifier.testTag("catalog-action-cancel")
                 ) { Text("Hủy") }
             }
         )

@@ -1,6 +1,5 @@
 package com.example.musicflow.ui
 
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -48,10 +47,15 @@ class CreatorApplicationReviewUiTest {
         compose.waitUntil(10_000) {
             compose.onAllNodesWithTag("creator-pending-hint").fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithTag("creator-stage-name").performTextInput("Another Artist")
-        compose.onNodeWithTag("creator-request").assertIsNotEnabled()
+        // A pending application no longer repeats the now-useless submission form.
+        compose.onNodeWithTag("creator-stage-name").assertDoesNotExist()
+        compose.onNodeWithTag("creator-request").assertDoesNotExist()
         compose.onNodeWithTag("creator-request-status").assertExists()
         compose.onNodeWithTag("creator-review-approve").assertDoesNotExist()
+        // A different role remains available (server will still enforce eligibility).
+        compose.onNodeWithTag("creator-type-author").performClick()
+        compose.onNodeWithTag("creator-stage-name").assertExists()
+        compose.onNodeWithTag("creator-request").assertExists()
     }
 
     @Test fun adminDecisionWaitsForExplicitConfirmationAndCanBeCancelled() {

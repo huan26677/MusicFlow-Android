@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -208,9 +209,8 @@ fun AccountScreen(
             if (state.authMode == AccountAuthMode.SIGN_UP) {
                 val confirmationNote = when (state.emailConfirmationRequired) {
                     false -> "Không cần xác nhận email. Tài khoản được lưu trên Supabase."
-                    true -> "Supabase đang yêu cầu xác nhận email. Bạn cần tắt " +
-                        "Confirm email trong Supabase trước khi đăng ký không cần thư."
-                    null -> "Đăng ký bằng Supabase. Vui lòng kiểm tra kết nối mạng."
+                    true -> "Sau khi đăng ký, hãy kiểm tra hộp thư để xác nhận email trước khi đăng nhập."
+                    null -> "Tài khoản được tạo trên Supabase. Có thể cần xác nhận email."
                 }
                 Text(
                     confirmationNote,
@@ -256,6 +256,10 @@ fun AccountScreen(
                             ImeAction.Next
                         } else ImeAction.Done
                     ),
+                    keyboardActions = KeyboardActions(onDone = {
+                        if (state.authMode == AccountAuthMode.SIGN_IN &&
+                            !state.loading && state.configured) onSignIn()
+                    }),
                     isError = state.passwordError != null,
                     supportingText = {
                         Text(state.passwordError ?: "Bắt buộc — tối thiểu 6 ký tự")
@@ -279,6 +283,9 @@ fun AccountScreen(
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password, imeAction = ImeAction.Done
                         ),
+                        keyboardActions = KeyboardActions(onDone = {
+                            if (!state.loading && state.configured) onSignUp()
+                        }),
                         isError = state.confirmPasswordError != null,
                         supportingText = state.confirmPasswordError?.let { message ->
                             { Text(message) }
@@ -304,17 +311,8 @@ fun AccountScreen(
                 )
             }
             state.message?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
-            HorizontalDivider()
-            Text("Hoặc", style = MaterialTheme.typography.bodySmall)
-            OutlinedButton(
-                onClick = onGoogleSignIn,
-                enabled = false,  // Reserved for a later release; never start OAuth here.
-                modifier = Modifier.fillMaxWidth().testTag("account-google-disabled")
-            ) { Text("Tiếp tục với Google") }
-            Text(
-                "Đăng nhập Google chưa hoạt động trong phiên bản này.",
-                style = MaterialTheme.typography.bodySmall
-            )
+            // Do not advertise a disabled Google sign-in: it has no usable workflow
+            // in this demo. OAuth implementation stays dormant until officially enabled.
         } else {
             val identity = state.account
             val overview = AccountHomePlan.overview(identity, state.demoSession, BuildConfig.DEBUG)
@@ -372,9 +370,13 @@ fun AccountScreen(
                 )
                 Button(
                     onClick = onSaveProfile,
-                    enabled = !state.loading,
+                    enabled = !state.loading &&
+                        state.displayName.trim().length in 2..80 &&
+                        state.displayName.trim() != identity.displayName.trim(),
                     modifier = Modifier.testTag("account-profile-save")
                 ) { Text("Lưu hồ sơ") }
+                Text("Tên cần từ 2 đến 80 ký tự. Nút Lưu chỉ bật khi có thay đổi.",
+                    style = MaterialTheme.typography.bodySmall)
             }
             if (state.demoSession) {
                 Text(
