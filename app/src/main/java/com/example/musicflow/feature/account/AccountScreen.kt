@@ -34,6 +34,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import com.example.musicflow.core.account.CloudPendingMatch
+import com.example.musicflow.core.account.AccountHomePlan
 import com.example.musicflow.core.account.AccountWorkspacePlan
 import com.example.musicflow.BuildConfig
 import androidx.compose.ui.Modifier
@@ -95,14 +96,19 @@ fun AccountRoute(
         onDeleteCloudPlaylist = model::deleteRemotePlaylist,
         onDeleteCloudFavorite = model::deleteRemoteFavorite,
         onDemoModeChange = model::demoModeChanged,
+        onRefreshAccount = model::refreshAccount,
         onRoleTools = { rolesOpen = true }
     )
     val account = state.account
     if (rolesOpen && account != null && !state.demoSession) {
-        Dialog(onDismissRequest = { rolesOpen = false }) {
+        val closeRoleTools = {
+            rolesOpen = false
+            model.refreshAccount()
+        }
+        Dialog(onDismissRequest = closeRoleTools) {
             AccountRolePanel(
                 identity = account,
-                onClose = { rolesOpen = false },
+                onClose = closeRoleTools,
                 rpc = model::roleRpc,
                 upload = model::uploadCreatorFile,
                 download = model::downloadCreatorFile
@@ -133,6 +139,7 @@ fun AccountScreen(
     onDeleteCloudPlaylist: (String) -> Unit,
     onDeleteCloudFavorite: (String) -> Unit,
     onDemoModeChange: (Boolean) -> Unit = {},
+    onRefreshAccount: () -> Unit = {},
     onRoleTools: () -> Unit = {}
 ) {
     var confirming by remember { mutableStateOf<Pair<String, String>?>(null) }
@@ -146,8 +153,13 @@ fun AccountScreen(
     ) {
         Text("Tài khoản MusicFlow", style = MaterialTheme.typography.headlineMedium)
         Text(
-            "Đăng nhập để lưu hồ sơ và đồng bộ dữ liệu với Supabase. " +
-                "Bạn vẫn nghe nhạc offline bình thường khi chưa có tài khoản.",
+            if (state.account == null) {
+                "Đăng nhập để lưu hồ sơ và đồng bộ dữ liệu với Supabase. " +
+                    "Bạn vẫn nghe nhạc offline bình thường khi chưa có tài khoản."
+            } else {
+                "Xem gói, vai trò và những thao tác phù hợp với tài khoản của bạn. " +
+                    "Các phần ít dùng có thể mở khi cần."
+            },
             style = MaterialTheme.typography.bodyMedium
         )
         if (state.loading) {
@@ -159,6 +171,14 @@ fun AccountScreen(
         }
         if (state.account == null) {
             Text("Chào mừng bạn!", style = MaterialTheme.typography.titleLarge)
+            OutlinedButton(
+                onClick = onContinueAsGuest,
+                modifier = Modifier.fillMaxWidth().testTag("account-guest")
+            ) { Text("Nghe nhạc ngay, không cần đăng nhập") }
+            Text(
+                "Thư viện và các tệp nhạc offline của bạn vẫn dùng được khi chưa có tài khoản.",
+                style = MaterialTheme.typography.bodySmall
+            )
             PrimaryTabRow(
                 selectedTabIndex = if (state.authMode == AccountAuthMode.SIGN_IN) 0 else 1
             ) {
@@ -295,56 +315,66 @@ fun AccountScreen(
                 "Đăng nhập Google chưa hoạt động trong phiên bản này.",
                 style = MaterialTheme.typography.bodySmall
             )
-            TextButton(
-                onClick = onContinueAsGuest,
-                modifier = Modifier.fillMaxWidth().testTag("account-guest")
-            ) { Text("Tiếp tục nghe nhạc không đăng nhập") }
         } else {
             val identity = state.account
+            val overview = AccountHomePlan.overview(identity, state.demoSession, BuildConfig.DEBUG)
+            var profileExpanded by rememberSaveable(identity.userId) { mutableStateOf(false) }
+            var cloudExpanded by rememberSaveable(identity.userId) { mutableStateOf(false) }
             Text(
-                if (state.demoSession) "Tài khoản Demo — Free"
-                else if (identity.tier == "premium") "Premium" else "Free",
-                style = MaterialTheme.typography.titleLarge
+                overview.greeting,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.testTag("account-home-greeting")
             )
-            Text(identity.email)
-            OutlinedTextField(
-                value = state.displayName,
-                onValueChange = onDisplayNameChange,
-                label = { Text("Tên hiển thị") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Button(onClick = onSaveProfile, enabled = !state.loading) {
-                Text("Lưu hồ sơ")
-            }
+            Text(identity.email, style = MaterialTheme.typography.bodySmall)
+            Text("Gói tài khoản: ${overview.tierLabel}",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.testTag("account-home-tier"))
+            Text(overview.tierExplanation, style = MaterialTheme.typography.bodySmall)
+            Text("Vai trò: ${overview.rolesLabel}",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.testTag("account-home-roles"))
             if (!state.demoSession) {
-                HorizontalDivider()
-                Text("Vai trò và quyền truy cập", style = MaterialTheme.typography.titleMedium)
-                Text(
-                    "Gói ${identity.tier.uppercase()} — quyền quản trị là quyền riêng " +
-                        "do Supabase cấp, không đi kèm Premium.",
-                    style = MaterialTheme.typography.bodySmall
-                )
-                if (identity.access.roles.isNotEmpty()) {
-                    Text(
-                        "Vai trò: ${identity.access.roles.sorted().joinToString(", ") {
-                            AccountWorkspacePlan.roleLabel(it)
-                        }}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-                OutlinedButton(
+                Button(
                     onClick = onRoleTools,
                     enabled = !state.loading,
                     modifier = Modifier.fillMaxWidth().testTag("account-role-tools")
-                ) {
-                    Text(AccountWorkspacePlan.primaryAction(identity.access, BuildConfig.DEBUG))
-                }
-                if (BuildConfig.DEBUG && identity.access.isDeveloper) {
-                    OutlinedButton(
-                        onClick = onRoleTools,
-                        modifier = Modifier.fillMaxWidth().testTag("account-developer-shortcut")
-                    ) { Text("Công cụ nhà phát triển (QA)") }
-                }
+                ) { Text(overview.primaryAction ?: "Xem vai trò") }
+                OutlinedButton(
+                    onClick = onRefreshAccount,
+                    enabled = !state.loading && !state.syncing,
+                    modifier = Modifier.fillMaxWidth().testTag("account-home-refresh")
+                ) { Text("Cập nhật gói và quyền") }
+            }
+            TextButton(
+                onClick = onSignOut,
+                enabled = !state.loading && !state.syncing,
+                modifier = Modifier.testTag("account-home-signout")
+            ) { Text("Đăng xuất") }
+            state.error?.let {
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.ERROR,
+                    title = "Không thể cập nhật tài khoản",
+                    description = it
+                )
+            }
+            state.message?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+            HorizontalDivider()
+            OutlinedButton(
+                onClick = { profileExpanded = !profileExpanded },
+                modifier = Modifier.fillMaxWidth().testTag("account-profile-toggle")
+            ) { Text(if (profileExpanded) "Thu gọn hồ sơ cá nhân" else "Chỉnh sửa hồ sơ cá nhân") }
+            if (profileExpanded) {
+                OutlinedTextField(
+                    value = state.displayName,
+                    onValueChange = onDisplayNameChange,
+                    label = { Text("Tên hiển thị") },
+                    modifier = Modifier.fillMaxWidth().testTag("account-profile-name")
+                )
+                Button(
+                    onClick = onSaveProfile,
+                    enabled = !state.loading,
+                    modifier = Modifier.testTag("account-profile-save")
+                ) { Text("Lưu hồ sơ") }
             }
             if (state.demoSession) {
                 Text(
@@ -353,6 +383,12 @@ fun AccountScreen(
                     style = MaterialTheme.typography.bodySmall
                 )
             } else {
+            HorizontalDivider()
+            OutlinedButton(
+                onClick = { cloudExpanded = !cloudExpanded },
+                modifier = Modifier.fillMaxWidth().testTag("account-cloud-toggle")
+            ) { Text(if (cloudExpanded) "Thu gọn đồng bộ đám mây" else "Đồng bộ và bản sao đám mây") }
+            if (cloudExpanded) {
             Text("Đồng bộ Playlist và Favorites (thủ công). Chỉ gửi tên bài, " +
                 "nghệ sĩ và danh sách phát; không tải file nhạc lên cloud.")
             Button(
@@ -412,22 +448,7 @@ fun AccountScreen(
             Text("Premium do máy chủ xác nhận. Chưa có thanh toán, giới hạn " +
                 "thiết bị hoặc đồng bộ tự động.")
             }
-            TextButton(
-                onClick = onSignOut,
-                enabled = !state.loading && !state.syncing
-            ) {
-                Text("Đăng xuất")
             }
-        }
-        if (state.account != null) {
-            state.error?.let {
-                MusicFlowStatusPanel(
-                    kind = MusicFlowStatusKind.ERROR,
-                    title = "Thao tác tài khoản không thành công",
-                    description = it
-                )
-            }
-            state.message?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
         }
         HorizontalDivider()
         Text("Giao diện", style = MaterialTheme.typography.titleMedium)

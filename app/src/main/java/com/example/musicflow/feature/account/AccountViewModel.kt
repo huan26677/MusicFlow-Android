@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.musicflow.core.account.AccountApi
 import com.example.musicflow.core.account.AccountIdentity
+import com.example.musicflow.core.account.MusicFlowAccess
 import com.example.musicflow.core.account.DemoAccountStore
 import com.example.musicflow.core.account.AccountOAuthRedirects
 import com.example.musicflow.core.account.CloudLibrarySync
@@ -288,6 +289,46 @@ class AccountViewModel(
                 _state.update { it.copy(
                     loading = false, error = error.message ?: "Không lưu được hồ sơ."
                 ) }
+            }
+        }
+    }
+
+    /** Recheck tier and roles against Supabase, never trust cached privilege badges. */
+    fun refreshAccount() {
+        val previous = _state.value.account ?: return
+        if (_state.value.loading || _state.value.syncing || _state.value.demoSession) return
+        // Hide stale privileges/entitlement immediately while awaiting a fresh response.
+        _state.update {
+            it.copy(
+                loading = true, error = null, message = null,
+                account = previous.copy(tier = "free", expiresAt = null, access = MusicFlowAccess.NONE)
+            )
+        }
+        viewModelScope.launch {
+            try {
+                val latest = api.currentAccount()
+                check(latest.userId == previous.userId) { "Phiên tài khoản đã thay đổi." }
+                // currentAccount is deliberately fail-closed when its role lookup fails;
+                // this extra explicit verification lets us communicate that failure.
+                val verified = MusicFlowAccess.fromResponse(
+                    JSONObject(api.roleRpc("musicflow_my_access"))
+                )
+                _state.update {
+                    it.copy(
+                        loading = false, account = latest.copy(access = verified),
+                        displayName = latest.displayName,
+                        message = "Đã cập nhật gói và quyền từ Supabase."
+                    )
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        error = "Chưa xác minh được gói và quyền. Kiểm tra kết nối hoặc đăng nhập lại; các công cụ đặc quyền đã được ẩn."
+                    )
+                }
             }
         }
     }
