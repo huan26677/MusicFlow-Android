@@ -146,6 +146,9 @@ async function refreshOwnerSummary(){
     ["artist_count","Nghệ sĩ"],
     ["author_count","Tác giả"],
     ["developer_count","Developer"],
+    ["active_premium_count","Premium còn hạn"],
+    ["non_premium_count","Không có Premium còn hạn"],
+    ["delegated_admin_count","PlatformAdmin đủ 3 quyền"],
     ["creator_requests_pending","Đơn Creator chờ duyệt"],
     ["drafts_pending","Nháp tác phẩm chờ duyệt"],
     ["drafts_metadata_approved","Metadata đã duyệt"],
@@ -160,8 +163,13 @@ async function refreshOwnerSummary(){
   });
   const missing=[];
   if(stats.platform_admin_count===0)missing.push("PlatformAdmin");
+  if(stats.delegated_admin_count===0)missing.push("PlatformAdmin đủ 3 quyền");
   if(stats.moderator_count===0)missing.push("Moderator");
-  if(stats.artist_count===0&&stats.author_count===0)missing.push("Artist/Author");
+  if(stats.artist_count===0)missing.push("Artist");
+  if(stats.author_count===0)missing.push("Author");
+  if(stats.developer_count===0)missing.push("Developer");
+  if(stats.active_premium_count===0)missing.push("Premium còn hạn");
+  if(stats.non_premium_count===0)missing.push("Free / không Premium");
   $("owner-summary-next").textContent=stats.owner_count!==1
     ?"Cảnh báo: cần kiểm tra số Owner trong Supabase."
     :missing.length

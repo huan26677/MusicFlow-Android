@@ -9,19 +9,28 @@ class OwnerDemoSnapshotTest {
         owners: Int = 1,
         admins: Int = 0,
         mods: Int = 0,
-        artists: Int = 0
+        artists: Int = 0,
+        authors: Int = 0,
+        developers: Int = 0,
+        delegatedAdmins: Int = 0,
+        activePremium: Int = 0,
+        nonPremium: Int = 3,
+        pendingCreators: Int = 0
     ) = OwnerDemoSnapshot(
         ownerCount = owners,
         userCount = 3,
         platformAdmins = admins,
         moderators = mods,
         artists = artists,
-        authors = 0,
-        developers = 0,
-        pendingCreatorRequests = 0,
+        authors = authors,
+        developers = developers,
+        pendingCreatorRequests = pendingCreators,
         pendingDrafts = 0,
         approvedMetadata = 0,
-        uploadedPrivateFiles = 0
+        uploadedPrivateFiles = 0,
+        activePremiumUsers = activePremium,
+        nonPremiumUsers = nonPremium,
+        fullyDelegatedAdmins = delegatedAdmins
     )
 
     @Test fun oneVerifiedOwnerAndNoTestActorsMeansGuidanceNeeded() {
@@ -31,9 +40,25 @@ class OwnerDemoSnapshotTest {
     }
 
     @Test fun rolesReadyForDemoDoNotImplyPublishingOrProduction() {
-        val snapshot = summary(admins = 1, mods = 1, artists = 1)
+        val snapshot = summary(admins = 1, mods = 1, artists = 1, authors = 1,
+            developers = 1, delegatedAdmins = 1, activePremium = 1, pendingCreators = 1)
         assertTrue(snapshot.hasExactlyOneOwner)
         assertFalse(snapshot.needsTestActors)
+        assertTrue(snapshot.hasDemoSubscriptionExamples)
+        assertTrue(snapshot.hasPendingCreatorExample)
+    }
+
+    @Test fun platformAdminWithoutThreePermissionsIsNotReady() {
+        assertTrue(summary(admins = 1, mods = 1, artists = 1, authors = 1,
+            developers = 1, delegatedAdmins = 0).needsTestActors)
+    }
+
+    @Test fun missingTierAndPendingExamplesAreReportedIndependently() {
+        val snapshot = summary(admins = 1, mods = 1, artists = 1, authors = 1,
+            developers = 1, delegatedAdmins = 1)
+        assertFalse(snapshot.needsTestActors)
+        assertFalse(snapshot.hasDemoSubscriptionExamples)
+        assertFalse(snapshot.hasPendingCreatorExample)
     }
 
     @Test fun missingOrDuplicateOwnerIsNotHealthy() {

@@ -14,11 +14,19 @@ data class OwnerDemoSnapshot(
     val pendingCreatorRequests: Int,
     val pendingDrafts: Int,
     val approvedMetadata: Int,
-    val uploadedPrivateFiles: Int
+    val uploadedPrivateFiles: Int,
+    val activePremiumUsers: Int,
+    val nonPremiumUsers: Int,
+    val fullyDelegatedAdmins: Int
 ) {
     val hasExactlyOneOwner get() = ownerCount == 1
-    val needsTestActors get() = platformAdmins == 0 || moderators == 0 ||
-        (artists == 0 && authors == 0)
+    /** Counts describe demo prerequisites, not proof of login or role E2E success. */
+    val hasCoreDemoActors get() = hasExactlyOneOwner && platformAdmins > 0 &&
+        fullyDelegatedAdmins > 0 && moderators > 0 && artists > 0 && authors > 0 &&
+        developers > 0
+    val needsTestActors get() = !hasCoreDemoActors
+    val hasDemoSubscriptionExamples get() = activePremiumUsers > 0 && nonPremiumUsers > 0
+    val hasPendingCreatorExample get() = pendingCreatorRequests > 0
 
     companion object {
         fun fromResponse(raw: String): OwnerDemoSnapshot {
@@ -36,7 +44,10 @@ data class OwnerDemoSnapshot(
                 pendingCreatorRequests = count("creator_requests_pending"),
                 pendingDrafts = count("drafts_pending"),
                 approvedMetadata = count("drafts_metadata_approved"),
-                uploadedPrivateFiles = count("creator_files_uploaded")
+                uploadedPrivateFiles = count("creator_files_uploaded"),
+                activePremiumUsers = count("active_premium_count"),
+                nonPremiumUsers = count("non_premium_count"),
+                fullyDelegatedAdmins = count("delegated_admin_count")
             )
         }
     }

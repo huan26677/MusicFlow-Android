@@ -23,7 +23,8 @@ class OwnerDemoDashboardUiTest {
                        "moderator_count":0,"artist_count":0,"author_count":0,
                        "developer_count":0,"creator_requests_pending":0,
                        "drafts_pending":0,"drafts_metadata_approved":0,
-                       "creator_files_uploaded":0}"""
+                       "creator_files_uploaded":0,"active_premium_count":1,
+                       "non_premium_count":2,"delegated_admin_count":0}"""
                 }
             }
         }
@@ -32,6 +33,9 @@ class OwnerDemoDashboardUiTest {
         }
         rule.onNodeWithTag("owner-demo-owner-count").assertExists()
         rule.onNodeWithTag("owner-demo-staff").assertExists()
+        rule.onNodeWithTag("owner-demo-tiers").assertExists()
+        rule.onNodeWithTag("owner-demo-delegations").assertExists()
+        rule.onNodeWithTag("owner-demo-role-readiness").assertExists()
         rule.onNodeWithTag("owner-demo-refresh").assertExists()
     }
 
@@ -46,6 +50,25 @@ class OwnerDemoDashboardUiTest {
         }
         rule.waitForIdle()
         rule.onNodeWithTag("owner-demo-users").assertDoesNotExist()
+        rule.onNodeWithTag("owner-demo-refresh").assertExists()
+    }
+
+    @Test fun incompleteOrInvalidV2CountersNeverShowOwnerCounts() {
+        rule.setContent {
+            MusicFlowTheme {
+                OwnerDemoDashboard { _, _ ->
+                    """{"owner_count":1,"user_count":11,"platform_admin_count":1,
+                       "moderator_count":1,"artist_count":1,"author_count":1,
+                       "developer_count":1,"creator_requests_pending":1,
+                       "drafts_pending":0,"drafts_metadata_approved":0,
+                       "creator_files_uploaded":0,"active_premium_count":-1,
+                       "non_premium_count":10,"delegated_admin_count":1}"""
+                }
+            }
+        }
+        rule.waitForIdle()
+        rule.onNodeWithTag("owner-demo-users").assertDoesNotExist()
+        rule.onNodeWithTag("owner-demo-tiers").assertDoesNotExist()
         rule.onNodeWithTag("owner-demo-refresh").assertExists()
     }
 }

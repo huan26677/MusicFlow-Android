@@ -65,6 +65,32 @@ internal fun OwnerDemoDashboard(rpc: suspend (String, JSONObject) -> String) {
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         data?.let { report ->
             Text(
+                "Premium còn hạn: ${report.activePremiumUsers} · Tài khoản không có Premium còn hạn: ${report.nonPremiumUsers}",
+                modifier = Modifier.testTag("owner-demo-tiers")
+            )
+            Text(
+                "PlatformAdmin đủ ba quyền ủy nhiệm: ${report.fullyDelegatedAdmins}",
+                modifier = Modifier.testTag("owner-demo-delegations")
+            )
+            Text(
+                if (report.hasCoreDemoActors) {
+                    "Đã có các vai trò Owner, PlatformAdmin đủ quyền, Moderator, Developer, Nghệ sĩ và Tác giả."
+                } else {
+                    "Chưa đủ vai trò demo: cần Owner, PlatformAdmin đủ ba quyền, Moderator, Developer, Nghệ sĩ và Tác giả."
+                },
+                modifier = Modifier.testTag("owner-demo-role-readiness")
+            )
+            Text(
+                if (report.hasDemoSubscriptionExamples) {
+                    "Đã có ví dụ tài khoản Premium và không Premium để so sánh."
+                } else "Cần tài khoản Premium còn hạn và tài khoản không Premium để demo quyền gói."
+            )
+            Text(
+                if (report.hasPendingCreatorExample) {
+                    "Đã có yêu cầu Creator đang chờ để demo duyệt."
+                } else "Không còn yêu cầu Creator đang chờ; cần tạo yêu cầu QA mới nếu muốn demo xét duyệt."
+            )
+            Text(
                 "Chủ sở hữu: " + report.ownerCount +
                     if (report.hasExactlyOneOwner) " (hợp lệ)" else " (cần kiểm tra)",
                 modifier = Modifier.testTag("owner-demo-owner-count")
