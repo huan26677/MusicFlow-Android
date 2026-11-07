@@ -1,12 +1,15 @@
 package com.example.musicflow.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -43,9 +46,11 @@ fun MusicFlowStatusPanel(
             .fillMaxWidth()
             .testTag("musicflow-status-${kind.name.lowercase()}")
             .semantics { liveRegion = LiveRegionMode.Polite },
-        shape = MaterialTheme.shapes.large,
+        shape = RoundedCornerShape(24.dp),
         color = if (error) MaterialTheme.colorScheme.errorContainer
             else MaterialTheme.colorScheme.surfaceContainerLow,
+        border = BorderStroke(1.dp, if (error) MaterialTheme.colorScheme.error.copy(alpha = 0.35f)
+            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.68f)),
         contentColor = if (error) MaterialTheme.colorScheme.onErrorContainer
             else MaterialTheme.colorScheme.onSurface
     ) {
@@ -54,6 +59,15 @@ fun MusicFlowStatusPanel(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            if (kind != MusicFlowStatusKind.LOADING) {
+                OceanFlowWaveMark(
+                    modifier = Modifier.fillMaxWidth(0.32f)
+                        .height(30.dp)
+                        .padding(bottom = 2.dp),
+                    tint = if (error) MaterialTheme.colorScheme.error
+                        else MaterialTheme.colorScheme.primary
+                )
+            }
             if (kind == MusicFlowStatusKind.LOADING) {
                 CircularProgressIndicator(
                     modifier = Modifier.padding(bottom = 4.dp),

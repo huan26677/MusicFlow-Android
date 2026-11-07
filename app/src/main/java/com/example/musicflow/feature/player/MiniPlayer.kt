@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,8 +35,11 @@ fun MiniPlayer(
     }
 
     Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh
+        modifier = modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(22.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.30f)),
+        shadowElevation = 5.dp
     ) {
         Column {
             Row(
@@ -47,7 +51,7 @@ fun MiniPlayer(
                     }
                     .padding(
                         horizontal = 12.dp,
-                        vertical = 8.dp
+                        vertical = 9.dp
                     ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -55,7 +59,7 @@ fun MiniPlayer(
                     uri = state.artworkUri,
                     modifier = Modifier
                         .size(48.dp)
-                        .clip(RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(14.dp))
                 )
 
                 Spacer(Modifier.width(12.dp))
@@ -94,11 +98,17 @@ fun MiniPlayer(
                         }
                     }
                 ) {
-                    Text(
-                        text = if (state.isPlaying) "Ⅱ" else "▶",
-                        fontSize = 24.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    ) {
+                        Text(
+                            text = if (state.isPlaying) "Ⅱ" else "▶",
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            fontSize = 22.sp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
 

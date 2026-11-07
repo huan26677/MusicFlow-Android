@@ -55,6 +55,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.musicflow.ui.components.MusicFlowStatusKind
 import com.example.musicflow.ui.components.MusicFlowStatusPanel
+import com.example.musicflow.ui.components.OceanFlowHeader
+import com.example.musicflow.ui.components.OceanFlowCard
 
 @Composable
 fun AccountRoute(
@@ -70,6 +72,7 @@ fun AccountRoute(
     val state by model.state.collectAsStateWithLifecycle()
     var rolesOpen by rememberSaveable { mutableStateOf(false) }
     var billingOpen by rememberSaveable { mutableStateOf(false) }
+    var demoCenterOpen by rememberSaveable { mutableStateOf(false) }
     val billingStore = remember(context) { DemoBillingStore(context.applicationContext) }
 
     AccountScreen(
@@ -104,9 +107,21 @@ fun AccountRoute(
         onDemoModeChange = model::demoModeChanged,
         onRefreshAccount = model::refreshAccount,
         onRoleTools = { rolesOpen = true },
-        onOpenDemoBilling = { billingOpen = true }
+        onOpenDemoBilling = { billingOpen = true },
+        onOpenDemoCenter = { demoCenterOpen = true }
     )
     val account = state.account
+    if (demoCenterOpen) {
+        Dialog(onDismissRequest = { demoCenterOpen = false }) {
+            DemoCenterRoute(
+                onClose = { demoCenterOpen = false },
+                onOpenBilling = {
+                    demoCenterOpen = false
+                    billingOpen = true
+                }
+            )
+        }
+    }
     if (billingOpen) {
         // A guest/demo/online account has its own LOCAL simulation scope.
         // These records never enter Supabase or AccountIdentity.tier.
@@ -191,7 +206,8 @@ fun AccountScreen(
     onDemoModeChange: (Boolean) -> Unit = {},
     onRefreshAccount: () -> Unit = {},
     onRoleTools: () -> Unit = {},
-    onOpenDemoBilling: () -> Unit = {}
+    onOpenDemoBilling: () -> Unit = {},
+    onOpenDemoCenter: () -> Unit = {}
 ) {
     var confirming by remember { mutableStateOf<Pair<String, String>?>(null) }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
@@ -202,24 +218,33 @@ fun AccountScreen(
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Tài khoản MusicFlow", style = MaterialTheme.typography.headlineMedium)
-        Text(
-            if (state.account == null) {
-                "Đăng nhập để lưu hồ sơ và đồng bộ dữ liệu với Supabase. " +
-                    "Bạn vẫn nghe nhạc offline bình thường khi chưa có tài khoản."
+        OceanFlowHeader(
+            eyebrow = "Ocean Flow · Không gian của bạn",
+            title = "Tài khoản MusicFlow",
+            subtitle = if (state.account == null) {
+                "Nghe offline không cần đăng nhập. Khi cần, hãy lưu hồ sơ và đồng bộ."
             } else {
-                "Xem gói, vai trò và những thao tác phù hợp với tài khoản của bạn. " +
-                    "Các phần ít dùng có thể mở khi cần."
-            },
-            style = MaterialTheme.typography.bodyMedium
+                "Gói thành viên, hồ sơ và công cụ theo vai trò của bạn."
+            }
         )
-        OutlinedButton(
-            onClick = onOpenDemoBilling,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                .testTag("account-demo-billing-open")
-        ) { Text("Trải nghiệm thanh toán Premium (giả lập)") }
-        Text("Chỉ mô phỏng trên máy, không thu tiền hoặc nâng cấp quyền Premium thật.",
-            style = MaterialTheme.typography.bodySmall)
+        OceanFlowCard {
+            Text("GÓC TRÌNH DIỄN", style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary)
+            OutlinedButton(
+                onClick = onOpenDemoCenter,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                    .testTag("account-demo-center-open")
+            ) { Text("Trình diễn 9 loại tài khoản (giả lập)") }
+            Text("Xem nghiệp vụ Owner, quản trị, nghệ sĩ và các vai trò khác — không cần Internet.",
+                style = MaterialTheme.typography.bodySmall)
+            OutlinedButton(
+                onClick = onOpenDemoBilling,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                    .testTag("account-demo-billing-open")
+            ) { Text("Trải nghiệm thanh toán Premium (giả lập)") }
+            Text("Chỉ mô phỏng, không thu tiền hoặc cấp Premium thật.",
+                style = MaterialTheme.typography.bodySmall)
+        }
         if (state.loading) {
             MusicFlowStatusPanel(
                 kind = MusicFlowStatusKind.LOADING,
@@ -237,6 +262,30 @@ fun AccountScreen(
                 "Thư viện và các tệp nhạc offline của bạn vẫn dùng được khi chưa có tài khoản.",
                 style = MaterialTheme.typography.bodySmall
             )
+            Text("Đăng nhập và tạo tài khoản", style = MaterialTheme.typography.titleMedium)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(
+                    selected = !state.demoMode,
+                    onClick = { onDemoModeChange(false) },
+                    enabled = !state.loading,
+                    label = { Text("Supabase") },
+                    modifier = Modifier.heightIn(min = 48.dp)
+                        .testTag("account-auth-online-mode")
+                )
+                FilterChip(
+                    selected = state.demoMode,
+                    onClick = { onDemoModeChange(true) },
+                    enabled = !state.loading,
+                    label = { Text("Demo offline") },
+                    modifier = Modifier.heightIn(min = 48.dp)
+                        .testTag("account-auth-demo-mode")
+                )
+            }
+            if (state.demoMode) {
+                Text("Chế độ Demo chỉ lưu tài khoản trên thiết bị. Không gửi email, " +
+                    "không tạo phiên Supabase và không cấp quyền Premium/quản trị thật.",
+                    modifier = Modifier.testTag("account-auth-demo-explanation"))
+            }
             PrimaryTabRow(
                 selectedTabIndex = if (state.authMode == AccountAuthMode.SIGN_IN) 0 else 1
             ) {
@@ -264,7 +313,9 @@ fun AccountScreen(
                 )
             }
             if (state.authMode == AccountAuthMode.SIGN_UP) {
-                val confirmationNote = when (state.emailConfirmationRequired) {
+                val confirmationNote = if (state.demoMode) {
+                    "Tài khoản Demo được tạo ngay trên máy, không cần xác nhận email."
+                } else when (state.emailConfirmationRequired) {
                     false -> "Không cần xác nhận email. Tài khoản được lưu trên Supabase."
                     true -> "Sau khi đăng ký, hãy kiểm tra hộp thư để xác nhận email trước khi đăng nhập."
                     null -> "Tài khoản được tạo trên Supabase. Có thể cần xác nhận email."
@@ -315,7 +366,7 @@ fun AccountScreen(
                     ),
                     keyboardActions = KeyboardActions(onDone = {
                         if (state.authMode == AccountAuthMode.SIGN_IN &&
-                            !state.loading && state.configured) onSignIn()
+                            !state.loading && (state.configured || state.demoMode)) onSignIn()
                     }),
                     isError = state.passwordError != null,
                     supportingText = {
@@ -341,7 +392,7 @@ fun AccountScreen(
                             keyboardType = KeyboardType.Password, imeAction = ImeAction.Done
                         ),
                         keyboardActions = KeyboardActions(onDone = {
-                            if (!state.loading && state.configured) onSignUp()
+                            if (!state.loading && (state.configured || state.demoMode)) onSignUp()
                         }),
                         isError = state.confirmPasswordError != null,
                         supportingText = state.confirmPasswordError?.let { message ->
@@ -352,7 +403,7 @@ fun AccountScreen(
                 }
                 Button(
                     onClick = if (state.authMode == AccountAuthMode.SIGN_UP) onSignUp else onSignIn,
-                    enabled = !state.loading && state.configured,
+                    enabled = !state.loading && (state.configured || state.demoMode),
                     modifier = Modifier.fillMaxWidth().testTag("account-submit")
                 ) {
                     Text(if (state.authMode == AccountAuthMode.SIGN_UP) {

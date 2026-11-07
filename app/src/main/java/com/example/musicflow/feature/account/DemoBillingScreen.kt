@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.example.musicflow.core.account.DemoBillingMethod
 import com.example.musicflow.core.account.DemoBillingPlan
 import com.example.musicflow.core.account.DemoBillingReceipt
+import com.example.musicflow.ui.components.OceanFlowHeader
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -65,8 +66,11 @@ fun DemoBillingScreen(
                 .testTag("demo-billing-scroll"),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("Thanh toán Premium — MÔ PHỎNG",
-                style = MaterialTheme.typography.titleLarge)
+            OceanFlowHeader(
+                eyebrow = "Premium · Trình diễn",
+                title = "Thanh toán Premium — MÔ PHỎNG",
+                subtitle = "Trải nghiệm hành trình mua gói, không thực hiện thanh toán thật."
+            )
             Text("Chỉ dùng trong dự án báo cáo. KHÔNG thu tiền, KHÔNG kết nối ngân hàng, " +
                 "KHÔNG cấp Premium thật trên Supabase hoặc quyền quản trị.",
                 color = MaterialTheme.colorScheme.error,

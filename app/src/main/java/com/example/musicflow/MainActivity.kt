@@ -35,8 +35,10 @@ import kotlinx.coroutines.flow.map
 import kotlin.jvm.Volatile
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.core.view.WindowInsetsControllerCompat
 
 class MainActivity : ComponentActivity() {
 
@@ -258,7 +260,9 @@ private val pickLyrics = registerForActivityResult(
 
             var themeMode by remember {
                 mutableStateOf(
-                    preferences.getString("theme_mode", "system")
+                    // Ocean Flow favors a calm dark canvas on first launch.
+                    // Existing user preference (including "system") is respected.
+                    preferences.getString("theme_mode", "dark")
                         ?.takeIf { it in setOf("system", "dark", "light") }
                         ?: "system"
                 )
@@ -270,6 +274,24 @@ private val pickLyrics = registerForActivityResult(
                 "dark" -> true
                 "light" -> false
                 else -> systemDark
+            }
+
+            // Match Android system bars to Ocean Flow's Dark/Light palette.
+            // Icon contrast follows the selected theme, including live changes
+            // from the Account screen; no saved user setting is overwritten.
+            SideEffect {
+                @Suppress("DEPRECATION")
+                window.statusBarColor = android.graphics.Color.parseColor(
+                    if (useDarkTheme) "#101827" else "#F5FAF9"
+                )
+                @Suppress("DEPRECATION")
+                window.navigationBarColor = android.graphics.Color.parseColor(
+                    if (useDarkTheme) "#101827" else "#F5FAF9"
+                )
+                WindowInsetsControllerCompat(window, window.decorView).apply {
+                    isAppearanceLightStatusBars = !useDarkTheme
+                    isAppearanceLightNavigationBars = !useDarkTheme
+                }
             }
 
             val playerState by playerViewModel.uiState

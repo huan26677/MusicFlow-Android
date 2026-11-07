@@ -2,6 +2,7 @@
 package com.example.musicflow.feature.playlist
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -34,6 +36,7 @@ import com.example.musicflow.core.playlist.PlaylistTrack
 import com.example.musicflow.core.playlist.RoomPlaylistRepository
 import com.example.musicflow.ui.components.MusicFlowStatusKind
 import com.example.musicflow.ui.components.MusicFlowStatusPanel
+import com.example.musicflow.ui.components.OceanFlowHeader
 
 @Composable
 internal fun rememberPlaylistViewModel(): PlaylistViewModel {
@@ -90,23 +93,14 @@ fun PlaylistListRoute(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val compact = maxWidth < 360.dp || LocalDensity.current.fontScale >= 1.35f
-            if (compact) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    TextButton(onClick = onBack) { Text("‹ Trở về") }
-                    Text("Danh sách phát", style = MaterialTheme.typography.headlineSmall)
-                }
-            } else {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    TextButton(onClick = onBack) { Text("‹ Trở về") }
-                    Text("Danh sách phát", style = MaterialTheme.typography.headlineSmall)
-                }
-            }
+        TextButton(onClick = onBack, modifier = Modifier.heightIn(min = 48.dp)) {
+            Text("‹ Trở về")
         }
+        OceanFlowHeader(
+            eyebrow = "Thư viện của riêng bạn",
+            title = "Danh sách phát",
+            subtitle = "Sắp xếp những giai điệu yêu thích theo tâm trạng."
+        )
 
         Button(
             onClick = {
@@ -201,10 +195,14 @@ fun PlaylistListRoute(
                             ListItem(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .clip(RoundedCornerShape(18.dp))
                                     .testTag("playlist-${playlist.id}")
                                     .clickable {
                                         onOpenPlaylist(playlist.id)
                                     },
+                                colors = ListItemDefaults.colors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                                ),
                                 headlineContent = {
                                     Text(
                                         playlist.name,
@@ -467,9 +465,10 @@ fun PlaylistDetailRoute(
                         onAction = onBack
                     )
                 } else {
-                    Text(
-                        text = playlist.name,
-                        style = MaterialTheme.typography.headlineSmall
+                    OceanFlowHeader(
+                        eyebrow = "Playlist cá nhân",
+                        title = playlist.name,
+                        subtitle = "Lưu và phát nhạc offline theo thứ tự bạn yêu thích."
                     )
 
                     when (val tracks = tracksState) {

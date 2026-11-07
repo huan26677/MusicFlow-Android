@@ -69,23 +69,35 @@ class AccountViewModel(
     init {
         viewModelScope.launch {
             try {
-                // Supabase is the account source of truth for this demo.
-                // Keep any previously saved local-only demo records intact,
-                // but never auto-log into them or present them as cloud accounts.
-                val account = api.restore()
+                // Real server sessions take precedence. A previously explicitly
+                // signed-in LOCAL demo account may resume offline, but its tier
+                // and roles can never be interpreted as Supabase privileges.
+                val remote = api.restore()
+                val localDemo = if (remote == null) demoStore.restore() else null
+                val account = remote ?: localDemo
                 _state.update {
                     it.copy(
                         loading = false, account = account,
-                        demoSession = false,
+                        demoSession = localDemo != null,
+                        demoMode = localDemo != null,
                         displayName = account?.displayName.orEmpty()
                     )
                 }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
+                // An offline demo login is still usable when Supabase cannot
+                // be reached; no fabricated JWT or elevated access is supplied.
+                val localDemo = runCatching { demoStore.restore() }.getOrNull()
                 _state.update {
-                    it.copy(loading = false, account = null,
-                        message = "Chưa thể khôi phục phiên. Kiểm tra Internet để đăng nhập.")
+                    it.copy(loading = false, account = localDemo,
+                        demoMode = localDemo != null,
+                        demoSession = localDemo != null,
+                        displayName = localDemo?.displayName.orEmpty(),
+                        message = if (localDemo == null) {
+                            "Chưa thể khôi phục phiên. Kiểm tra Internet để đăng nhập."
+                        } else "Đã mở tài khoản Demo lưu trên thiết bị. Không có quyền cloud."
+                    )
                 }
             }
             AccountOAuthRedirects.latest.filterNotNull().collect { callback ->

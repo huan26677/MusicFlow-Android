@@ -41,6 +41,7 @@ import com.example.musicflow.core.favorites.LocalFavoritesStore
 import com.example.musicflow.feature.playlist.rememberPlaylistViewModel
 import com.example.musicflow.ui.components.MusicFlowStatusKind
 import com.example.musicflow.ui.components.MusicFlowStatusPanel
+import com.example.musicflow.ui.components.OceanFlowHeader
 import com.example.musicflow.core.ux.ListeningJourneyRules
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -195,13 +196,17 @@ fun SearchScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        OceanFlowHeader(
+            eyebrow = "Khám phá · Ocean Flow",
+            title = "Tìm kiếm",
+            subtitle = "Bài hát, nghệ sĩ, album và thể loại — nhập không dấu cũng được."
+        )
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val compact = maxWidth < 360.dp || LocalDensity.current.fontScale >= 1.35f
             if (compact) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text("Tìm kiếm", style = MaterialTheme.typography.headlineSmall)
                     if (hasPermission && state.isLoaded && state.songs.isNotEmpty()) {
                         TextButton(
                             onClick = onRefresh,
@@ -215,7 +220,6 @@ fun SearchScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Tìm kiếm", style = MaterialTheme.typography.headlineSmall)
                     if (hasPermission && state.isLoaded && state.songs.isNotEmpty()) {
                         TextButton(
                             onClick = onRefresh,

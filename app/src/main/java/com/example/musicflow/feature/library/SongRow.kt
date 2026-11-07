@@ -1,6 +1,7 @@
 
 package com.example.musicflow.feature.library
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -32,7 +33,10 @@ fun SongRow(
     onQueueEnd: (() -> Unit)? = null
 ) {
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().padding(vertical = 3.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .heightIn(min = 72.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Vùng chính vẫn dùng để phát bài hát.

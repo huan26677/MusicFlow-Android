@@ -30,6 +30,12 @@ import com.example.musicflow.core.favorites.LocalFavoritesStore
 import com.example.musicflow.core.ux.ListeningJourneyRules
 import com.example.musicflow.ui.components.MusicFlowStatusKind
 import com.example.musicflow.ui.components.MusicFlowStatusPanel
+import com.example.musicflow.ui.components.OceanFlowCard
+import com.example.musicflow.ui.components.OceanFlowHeader
+import com.example.musicflow.ui.components.OceanFlowSectionTitle
+import com.example.musicflow.ui.components.SongArtwork
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 
 @Composable
 fun HomeRoute(
@@ -141,84 +147,75 @@ fun HomeScreen(
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = "MusicFlow",
-            style = MaterialTheme.typography.headlineLarge
-        )
-
-        Text(
-            text = "Chọn nhạc yêu thích và nghe theo cách của bạn.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+        OceanFlowHeader(
+            eyebrow = "Ocean Flow · Âm nhạc của bạn",
+            title = "MusicFlow",
+            subtitle = "Một giai điệu, một cảm xúc. Chọn nhạc yêu thích và nghe theo cách của bạn."
         )
 
         if (state.hasMedia) {
-            OutlinedCard(modifier = Modifier.fillMaxWidth()) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text("Tiếp tục nghe", style = MaterialTheme.typography.titleMedium)
-                    Text(
-                        state.title, style = MaterialTheme.typography.titleLarge,
-                        maxLines = 1, overflow = TextOverflow.Ellipsis
+            OceanFlowCard {
+                Text("TIẾP TỤC THƯỞNG THỨC",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary)
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SongArtwork(
+                        uri = state.artworkUri,
+                        modifier = Modifier.size(72.dp).clip(RoundedCornerShape(16.dp))
                     )
-                    Text(
-                        state.artist, style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1, overflow = TextOverflow.Ellipsis
-                    )
-                    Button(
-                        onClick = onOpenPlayer,
-                        modifier = Modifier.fillMaxWidth().testTag("home-continue-listening")
-                    ) { Text("Mở trình phát nhạc") }
+                    Column(modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                        Text(state.title, style = MaterialTheme.typography.titleLarge,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(state.artist, style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                }
+                Button(onClick = onOpenPlayer,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                        .testTag("home-continue-listening")) {
+                    Text("Mở trình phát nhạc")
                 }
             }
         }
 
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = "Bắt đầu nghe",
-                    style = MaterialTheme.typography.titleLarge
-                )
+        OceanFlowCard {
+                OceanFlowSectionTitle("Bắt đầu nghe")
+                Text("Thư viện riêng luôn sẵn sàng, kể cả khi không có Internet.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
 
                 Button(
                     onClick = onOpenLibrary,
-                    modifier = Modifier.fillMaxWidth().testTag("home-library-action")
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                        .testTag("home-library-action")
                 ) {
                     Text("Mở thư viện thiết bị")
                 }
 
                 OutlinedButton(
                     onClick = onOpenSearch,
-                    modifier = Modifier.fillMaxWidth().testTag("home-search-action")
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                        .testTag("home-search-action")
                 ) {
                     Text("Tìm kiếm bài hát")
                 }
 
                 OutlinedButton(
                     onClick = onOpenPlaylists,
-                    modifier = Modifier.fillMaxWidth().testTag("home-playlist-action")
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                        .testTag("home-playlist-action")
                 ) {
                     Text("Danh sách phát của tôi")
                 }
-            }
         }
 
         if (showFirstUseGuide) {
-            OutlinedCard(
-                modifier = Modifier.fillMaxWidth().testTag("home-first-use-guide")
+            OceanFlowCard(
+                modifier = Modifier.testTag("home-first-use-guide")
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
                     Text(
                         text = "Mới dùng MusicFlow?",
                         style = MaterialTheme.typography.titleMedium
@@ -235,7 +232,6 @@ fun HomeScreen(
                     ) {
                         Text("Đã hiểu")
                     }
-                }
             }
         }
 
@@ -244,10 +240,7 @@ fun HomeScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Nghe gần đây",
-                style = MaterialTheme.typography.titleLarge
-            )
+            OceanFlowSectionTitle("Nghe gần đây")
 
             if (historyState is HomeHistoryUiState.Success) {
                 TextButton(
@@ -371,12 +364,8 @@ fun HomeScreen(
             }
         }
 
-        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text("Khám phá thêm", style = MaterialTheme.typography.titleMedium)
+        OceanFlowCard {
+                OceanFlowSectionTitle("Khám phá thêm")
                 OutlinedButton(
                     onClick = onOpenFavoriteSongs,
                     modifier = Modifier.fillMaxWidth()
@@ -389,7 +378,6 @@ fun HomeScreen(
                     onClick = onOpenOnlineCatalog,
                     modifier = Modifier.fillMaxWidth()
                 ) { Text("Khám phá nhạc online") }
-            }
         }
     }
 

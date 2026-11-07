@@ -39,6 +39,7 @@ import com.example.musicflow.feature.playlist.PlaylistPickerDialog
 import com.example.musicflow.feature.playlist.rememberPlaylistViewModel
 import com.example.musicflow.ui.components.MusicFlowStatusKind
 import com.example.musicflow.ui.components.MusicFlowStatusPanel
+import com.example.musicflow.ui.components.OceanFlowHeader
 
 @Composable
 fun LibraryRoute(
@@ -267,29 +268,24 @@ fun LibraryScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Nhạc thiết bị",
-                    style = MaterialTheme.typography.headlineSmall
-                )
-
-                TextButton(onClick = onBack) {
-                    Text("Quay lại")
-                }
-            }
+            OceanFlowHeader(
+                eyebrow = "Thư viện riêng · Offline",
+                title = "Nhạc thiết bị",
+                subtitle = "Mọi giai điệu từ thiết bị, theo cách của bạn."
+            )
+            TextButton(onClick = onBack,
+                modifier = Modifier.heightIn(min = 48.dp)) { Text("Quay lại") }
 
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                OutlinedButton(onClick = onRefresh) {
+                OutlinedButton(onClick = onRefresh,
+                    modifier = Modifier.heightIn(min = 48.dp)) {
                     Text("Quét lại")
                 }
 
-                Button(onClick = onPickManual) {
+                Button(onClick = onPickManual,
+                    modifier = Modifier.heightIn(min = 48.dp)) {
                     Text("Chọn tệp nhạc")
                 }
             }

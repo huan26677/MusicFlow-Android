@@ -1,6 +1,7 @@
 package com.example.musicflow.feature.player
 
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,6 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalContext
@@ -29,6 +31,8 @@ import com.example.musicflow.core.lyrics.LyricsTimeline
 import com.example.musicflow.core.playback.PlayerUiState
 import androidx.compose.ui.text.font.FontWeight
 import com.example.musicflow.ui.components.SongArtwork
+import com.example.musicflow.ui.components.OceanFlowArtworkStage
+import com.example.musicflow.ui.components.OceanFlowCard
 import com.example.musicflow.core.ux.ListeningJourneyRules
 
 @Composable
@@ -129,6 +133,11 @@ fun NowPlayingScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Brush.verticalGradient(listOf(
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.30f),
+                MaterialTheme.colorScheme.background,
+                MaterialTheme.colorScheme.background
+            )))
             .safeDrawingPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp, vertical = 12.dp),
@@ -170,14 +179,7 @@ fun NowPlayingScreen(
 
         Spacer(Modifier.height(24.dp))
 
-        SongArtwork(
-            uri = state.artworkUri,
-            modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = 300.dp)
-                .aspectRatio(1f)
-                .clip(RoundedCornerShape(28.dp))
-        )
+        OceanFlowArtworkStage(artworkUri = state.artworkUri)
 
         Spacer(Modifier.height(28.dp))
 
@@ -326,11 +328,7 @@ fun NowPlayingScreen(
         }
 
         Spacer(Modifier.height(16.dp))
-        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
+        OceanFlowCard {
                 TextButton(
                     onClick = { advancedExpanded = !advancedExpanded },
                     modifier = Modifier
@@ -349,7 +347,6 @@ fun NowPlayingScreen(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
         }
 
         if (advancedExpanded) {
