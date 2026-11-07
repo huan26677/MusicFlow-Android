@@ -1,3 +1,8 @@
+MusicFlow — Cross-session AI handoff
+AI entrypoint: docs/Cross_Session_Project_Brain.json (see AGENTS.md).
+This JSON is the canonical compact project brain; read it first, then inspect source/Git/QA for verification.
+
+Legacy QA patch notes below (historical; not the current project state):
 MusicFlow - Real Picker SAF accessibility fix v1
 
 GitHub HEAD reviewed: 9231b73aaa02754d24ffb8a5aecb004d856fcff9

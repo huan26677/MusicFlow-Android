@@ -1,5 +1,7 @@
 ﻿# Kế hoạch, tiến độ và tiêu chí hoàn thành — MusicFlow Android
 
+> **ĐIỂM BẮT ĐẦU CHÍNH CHO AI PHIÊN MỚI:** `docs/Cross_Session_Project_Brain.json` là bộ não dự án duy nhất cần đọc để biết mục tiêu, việc ưu tiên, quy tắc và bài học. `AGENTS.md` chỉ dẫn cách khởi động/cập nhật. Tài liệu này là nhật ký chi tiết dùng để kiểm chứng khi cần; nếu thông tin khác nhau, hãy đối chiếu mã nguồn, Git và log QA. Sau mỗi mốc, cập nhật lại JSON để AI phiên sau không cần đọc toàn bộ lịch sử.
+
 > **TÀI LIỆU BÀN GIAO CHÍNH THỨC GIỮA CÁC CUỘC TRÒ CHUYỆN**  
 > Đường dẫn trong repository: `docs/Ke_Hoach_Du_An.md`  
 > Mỗi lần bắt đầu công việc, **đọc file này trước**, sau đó đối chiếu `main` / commit mới nhất / source code / log trên GitHub. Không tiếp tục dựa trên trạng thái nhớ từ chat nếu đã có bằng chứng mới hơn.
