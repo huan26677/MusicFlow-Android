@@ -1,67 +1,64 @@
 {
   "meta": {
     "project_id": "MusicFlow-Android",
-    "evolution_version": "v4.2",
-    "compression_status": "MAXIMUM_DENSITY"
+    "evolution_version": "v5.0-Absolute",
+    "compression_status": "MAXIMUM_DENSITY",
+    "self_performance_score": "8.5/10: v4 có build, QA và APK ký kiểm chứng; bộ não v4.2 đã đồng bộ Git. Chưa kiểm thử đầy đủ API33/36, TalkBack, máy thật hoặc hiệu năng đo thực."
   },
   "core_essence": {
-    "ultimate_goal": "APK Android nghe nhạc offline+online có bản quyền, thư viện cá nhân và trải nghiệm 9 actor dễ dùng; ưu tiên bản demo cài trực tiếp phục vụ báo cáo, không đánh đồng mô phỏng với production.",
+    "ultimate_goal": "MusicFlow Android thân thiện cho báo cáo môn học: nghe offline MediaStore+SAF, thư viện/playlist/queue ổn định, trải nghiệm các vai trò demo; online/cloud chỉ dùng nguồn và quyền hợp lệ, không trình bày mô phỏng thành production.",
     "priority_index": {
-      "P1_CRITICAL": [
-        "Giữ ổn định bản Library UX v4; sau mọi thay đổi phải nghiệm thu tổng hợp và kiểm tra chính APK đã ký, không suy diễn từ build debug.",
-        "Chốt QA API33/36, quyền READ_MEDIA_AUDIO/SAF và quy trình nâng cấp APK giữ dữ liệu trước khi công bố khả năng tương thích rộng."
-      ],
+      "P1_CRITICAL": [],
       "P2_HIGH": [
-        "Accessibility & Polish v5: TalkBack cho các điều khiển, cỡ chữ lớn, độ tương phản, vùng chạm, thông báo lỗi và hướng dẫn dễ hiểu cho Guest/Free/Premium.",
-        "Nghiệm thu UX với nhạc MP3/FLAC/WAV thực và playlist/Smart Library có dữ liệu trên APK ký QA."
+        "Accessibility & Polish v5: kiểm tra TalkBack thực, nhãn semantic, tương phản, cỡ chữ lớn và vùng chạm; bảo đảm Guest/Free/Premium dễ thao tác.",
+        "Nghiệm thu trên emulator API33/36: READ_MEDIA_AUDIO, SAF persisted READ, chuyển màn, playback và nâng cấp APK không làm mất dữ liệu."
       ],
       "P3_MEDIUM": [
-        "Đo thời gian quét/RAM/cuộn trên thư viện lớn và provider thực; tối ưu dựa trên số đo, tránh coi 1.502 bản ghi mô phỏng là benchmark.",
-        "Rà soát vòng đời quyền SAF, metadata Genres chỉ tải khi cần, hủy coroutine, tình huống tệp bị di chuyển/thu hồi quyền."
+        "Thử APK ký QA với playlist/Smart Library và MP3/FLAC/WAV thực; phân biệt lỗi provider, codec và permission.",
+        "Đo thời gian scan/RAM/scroll với thư viện thực; xác minh lợi ích trì hoãn truy vấn Genres, không coi 1.502 bản ghi mẫu là benchmark."
       ],
       "P4_LOW": [
-        "Đồng bộ tài liệu/changelog/checklist với commit và SHA APK; giảm mô tả phiên bản cũ gây nhầm lẫn.",
-        "Refactor thành phần LibraryScreen sau khi QA, giữ nguyên queue/index, Room và dữ liệu cục bộ."
+        "Chuẩn hóa tài liệu tiến độ với HEAD, QA logs và SHA APK; refactor LibraryScreen chỉ khi bảo toàn queue/index, Room và lối tắt SAF."
       ],
       "P5_BACKLOG": [
-        "Streaming chỉ từ nguồn được cấp phép; cloud sync và vai trò Supabase E2E bằng tài khoản thử có quyền thật.",
-        "Thanh toán/entitlement thật, Google Play, QA thiết bị vật lý đa hãng chỉ khi chủ dự án mở rộng ngoài phạm vi báo cáo."
+        "Online có giấy phép, đồng bộ Supabase/RBAC kiểm chứng E2E, thanh toán thật và phát hành Play Store: ngoài phạm vi demo hiện tại."
       ]
     }
   },
   "evolved_rules": [
-    "Điểm vào duy nhất cho phiên AI mới: đọc docs/Cross_Session_Project_Brain.json trước (AGENTS.md chỉ là con trỏ). Xác thực bằng git status/log, mã nguồn, qa-logs và docs/Ke_Hoach_Du_An.md khi cần; bằng chứng thực tế mới hơn luôn thắng bản tóm tắt.",
-    "Sau MỖI phiên phát triển hoặc cập nhật: sửa chính JSON này, giữ đúng 5 khóa gốc, tính lại P1–P5, chỉ giữ trạng thái/sự cố/bài học đã kiểm chứng, nâng meta.evolution_version; không tạo nhiều bản não, không lưu bí mật hay log thô.",
-    "Tiếp tục phát triển bằng thay đổi mã nguồn thực; hoàn thiện trọn mốc rồi mới chạy build/JVM/Android/SAF/Web Admin và ký APK, không kiểm thử nhỏ giọt.",
-    "Không xóa/ghi đè file nhạc, playlist hoặc quyền SAF còn dùng nơi khác; chỉ ghi nhớ URI content:// có persisted READ, báo thiếu quyền/tệp và cho chọn lại.",
-    "Giả lập thanh toán, 9 actor và giao diện quyền không được cấp Premium/Owner/Admin thật hay phát nhạc online chưa có quyền.",
-    "Công bố PASS chỉ khi có log xác nhận; APK dist/ bị Git-ignore, giao APK riêng; không coi ký QA bằng debug certificate là production.",
-    "Chỉ sử dụng emulator QA tách biệt; không can thiệp emulator hoặc dữ liệu đang dùng của chủ dự án. Nếu cần lệnh Git, chỉ xuất git add ., git commit -m, git push."
+    "Điểm vào phiên mới: AGENTS.md -> docs/Cross_Session_Project_Brain.json; đối chiếu git status/log, source, qa-logs rồi mới hành động. Bằng chứng chạy thật quan trọng hơn bản tóm tắt.",
+    "Cuối MỖI mốc cập nhật cùng file JSON, tính lại P1–P5 (để P1 rỗng nếu không có blocker), nâng evolution_version và chỉ ghi nhận kết quả có chứng cứ; không nhân bản não hoặc lưu bí mật/log thô.",
+    "Triển khai chức năng thành một đợt theo phạm vi báo cáo; sau đó chạy JVM + Android hồi quy + SAF thật + Web Admin và cài/cold-launch chính APK đã ký trước khi tuyên bố PASS.",
+    "Không xóa dữ liệu người dùng: SAF chỉ ghi shortcut content:// có persisted READ; mất quyền/tệp phải hướng dẫn chọn lại, bỏ shortcut không xóa tệp; không gỡ ứng dụng cũ tùy tiện.",
+    "Giả lập billing/roles được phép để demo nhưng không cấp đặc quyền backend; không phát streaming chưa có bản quyền; APK ký QA không phải production.",
+    "Chỉ chạy test trên emulator QA riêng, không thao tác máy/AVD của chủ dự án; Git/GitHub và dist APK là hai đường bàn giao riêng."
   ],
   "experience_learned": {
     "success_heuristics": [
-      "Thư viện nhiều bài -> LazyColumn một vùng cuộn + LibrarySongSearchIndex chuẩn hóa một lần -> tìm không dấu, chữ 165% và queue sau lọc đạt Android UI QA.",
-      "MediaStore quét chậm -> hoãn truy vấn Genres N+1 đến tab Thể loại; duyệt cursor có ensureActive -> giữ cả hai chế độ quét trên WAV thực.",
-      "Nhạc ngoài MediaStore -> DocumentsUI OpenMultipleDocuments + persisted READ + LocalPickedMusicStore -> phát lại/Smart Library được; tệp hỏng chỉ bỏ lối tắt.",
-      "QA v4 API30: 199/199 JVM, 98/98 hồi quy + 7/7 UI v4, 2/2 MediaStore WAV, 1/1 MainActivity SAF, 1/1 Quick Add SAF, 1/1 JSON picker, 4/4 Web Admin; signed APK cold launch PASS.",
-      "Baseline v4 đã commit tại dbf534c; luôn kiểm tra Git mới nhất. APK v4 dist/MusicFlow-1.0-Demo-LibraryUXV4-Android.apk, SHA256 5D1F9D6A5A8CE3CD50BA4C253A3F83B8D5459A23949A1F629ECB1671562977EA."
+      "Tìm không dấu trên danh sách lớn -> LibrarySongSearchIndex chuẩn hóa metadata một lần + LazyColumn ảo hóa; danh sách phát dùng đúng kết quả lọc và index.",
+      "MediaStore -> getSongs() không tải Genres N+1; mở tab Thể loại mới getSongsWithGenres(); cursor có ensureActive để hủy quét an toàn.",
+      "Nhạc ngoài quét Android -> DocumentsUI + persisted READ + LocalPickedMusicStore; Smart Library hợp và loại URI trùng, tệp mất quyền được báo rõ.",
+      "Bằng chứng v4 API30: 199 JVM + 98 Android regression + 7 UI v4 + 2 MediaStore WAV + 1 MainActivity SAF + 1 SAF Quick Add + 1 JSON picker + 4 Web Admin PASS; APK ký QA cài và cold-launch PASS.",
+      "Bản demo: dist/MusicFlow-1.0-Demo-LibraryUXV4-Android.apk; SHA256 5D1F9D6A5A8CE3CD50BA4C253A3F83B8D5459A23949A1F629ECB1671562977EA; baseline Git main 0d9f3f4 trước cập nhật não v5."
     ],
     "failure_modes_prevented": [
-      "Không suy đoán thay đổi chưa push: phiên trước v3/v4 từng còn ở working tree, nhưng đã được commit dbf534c; luôn chạy git status trước.",
-      "Không khẳng định Android API33/36, TalkBack thủ công, máy thật hoặc benchmark lớn đã PASS khi mới thử API30 và dữ liệu mô phỏng.",
-      "Không nuốt CancellationException, không quét genre cho mọi màn, không chuẩn hóa lại toàn bộ bài ở mỗi ký tự, không cho phát bài đã bị lọc.",
-      "PowerShell 5.1: không dùng &&/||; $PID là biến chỉ đọc; test Kotlin cần đầy đủ import JUnit trước build tổng hợp.",
-      "Không tự gỡ APK cũ nếu còn dữ liệu local, không xóa file gốc khi người dùng bỏ shortcut, không công khai bí mật/tệp APK QA như bản production."
+      "Không suy diễn API33/36, TalkBack, máy thật hoặc tối ưu RAM từ bài test API30 và 1.502 bản ghi tổng hợp.",
+      "Không nuốt CancellationException, không truy vấn Genres mỗi lần quét, không chuẩn hóa lại toàn bộ catalog trên mỗi phím gõ hoặc phát bài bị lọc.",
+      "Không báo đã push khi chỉ sửa working tree; luôn kiểm tra trạng thái Git sau commit/push; dist/ bị Git-ignore.",
+      "PowerShell 5.1 không hỗ trợ &&/||; tránh $PID chỉ đọc; kiểm tra import JUnit khi thêm bài test Kotlin.",
+      "Không tự xóa nhạc gốc, thu hồi grant SAF đang dùng nơi khác, cấp quyền Owner/Admin thật qua demo hoặc gọi APK QA là release production."
     ]
   },
-  "knowledge_graph": [
-    "Kho mã E:\\Du_An\\MusicFlow -> GitHub huan26677/MusicFlow-Android -> baseline v4 dbf534c; kiểm tra git log/status để lấy HEAD hiện hành.",
-    "AGENTS.md/README.txt -> docs/Cross_Session_Project_Brain.json (nguồn khởi đầu) -> docs/Ke_Hoach_Du_An.md + source/Git/qa-logs (bằng chứng khi cần).",
-    "docs/Ke_Hoach_Du_An.md -> mốc nghiệm thu; docs/Library_Performance_UX_v4.md + qa-logs/musicflow-library-ux-v4-regression.log -> chứng cứ v4.",
-    "MainActivity DocumentsUI -> persisted URI -> LocalPickedMusicStore -> Thư viện Nhạc đã chọn -> SmartLibraryRules -> playback queue.",
-    "MediaStore -> DeviceMusicScanner(includeGenres=false) -> LocalMusicRepository -> LibraryViewModel -> LibraryScreen; tab Thể loại -> includeGenres=true.",
-    "LibrarySongSearchIndex -> kết quả lọc/sắp xếp -> cùng danh sách cho LazyColumn và onSongSelected(queue,index).",
-    "Guest/Free/Premium -> trải nghiệm nghe offline; Artist/Author/Moderator/PlatformAdmin/Owner/Developer -> demo hoặc quyền backend riêng, không đồng nhất quyền thật.",
-    "dist/*.apk -> tệp cài trực tiếp, không thuộc Git; signed APK QA API30 đã nghiệm thu, API33/36 và máy thật chưa xác nhận."
-  ]
+  "assumptions_to_validate": [
+    "Chưa có bằng chứng nghiệm thu API33/36 hay thiết bị Android vật lý; cần xác minh quyền âm thanh và SAF trên từng phiên bản.",
+    "Kịch bản giữ dữ liệu khi cập nhật APK chỉ chắc chắn khi dùng cùng package và khóa ký phù hợp; cần kiểm thử trên môi trường có dữ liệu mẫu.",
+    "Hiệu suất quét thư viện lớn mới dựa trên logic/fixture; chưa đo benchmark trên nhạc thật và nhiều hãng provider.",
+    "Quyền Owner/PlatformAdmin/Developer, Premium và dịch vụ online/cloud hiện có phần mô phỏng; không tự coi là RBAC/thanh toán/bản quyền production."
+  ],
+  "entropy_pruned_nodes": [
+    "Rút khỏi bộ não: log Gradle/ADB dòng lẻ, PID emulator, cảnh báo CRLF và lỗi thiếu import JUnit đã khắc phục; chứng cứ gốc còn trong qa-logs/Git.",
+    "Gộp các mốc Smart v1/v2, Offline Discovery v3 và Library v4 thành quy tắc kỹ thuật hiện hành; lịch sử chi tiết vẫn nằm ở docs/Ke_Hoach_Du_An.md.",
+    "Bỏ snapshot SHA/commit lỗi thời khỏi vai trò 'trạng thái hiện tại'; luôn lấy HEAD và hash APK mới nhất từ môi trường thực."
+  ],
+  "meta_cognition_and_cross_model_prompt": "CRITICAL DIRECTION FOR ALL LLMs: Kích hoạt chế độ suy luận chuỗi tư duy (Chain-of-Thought) chuyên sâu. Đối chiếu nghiêm ngặt mọi hành động với 'failure_modes_prevented' và 'evolved_rules'. Tự phản biện giải pháp 2 lần trước khi xuất kết quả. Duy trì tính nhất quán logic bất kể cấu trúc nền tảng của mô hình bạn đang chạy."
 }
