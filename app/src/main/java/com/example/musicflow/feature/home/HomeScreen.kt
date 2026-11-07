@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.clip
 fun HomeRoute(
     state: PlayerUiState,
     onOpenLibrary: () -> Unit,
+    onOpenSmartLibrary: () -> Unit = onOpenLibrary,
     onOpenSearch: () -> Unit,
     onOpenPlaylists: () -> Unit,
     onOpenPlayer: () -> Unit,
@@ -93,6 +94,7 @@ fun HomeRoute(
         state = state,
         historyState = historyState,
         onOpenLibrary = onOpenLibrary,
+        onOpenSmartLibrary = onOpenSmartLibrary,
         onOpenSearch = onOpenSearch,
         onOpenPlaylists = onOpenPlaylists,
         onOpenPlayer = onOpenPlayer,
@@ -133,7 +135,8 @@ fun HomeScreen(
     onClearHistory: () -> Unit,
     onOpenOnlineCatalog: () -> Unit = {},
     showFirstUseGuide: Boolean = false,
-    onDismissFirstUseGuide: () -> Unit = {}
+    onDismissFirstUseGuide: () -> Unit = {},
+    onOpenSmartLibrary: () -> Unit = onOpenLibrary
 ) {
     var showClearDialog by rememberSaveable {
         mutableStateOf(false)
@@ -210,6 +213,12 @@ fun HomeScreen(
                 ) {
                     Text("Danh sách phát của tôi")
                 }
+
+                OutlinedButton(
+                    onClick = onOpenSmartLibrary,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                        .testTag("home-smart-library-action")
+                ) { Text("Playlist thông minh · Tự cập nhật") }
         }
 
         if (showFirstUseGuide) {

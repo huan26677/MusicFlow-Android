@@ -73,6 +73,9 @@ data object SearchTab : NavKey
 data object LibraryTab : NavKey
 
 @Serializable
+data object SmartLibraryPage : NavKey
+
+@Serializable
 data class FavoritesRoute(
     val showAlbums: Boolean
 ) : NavKey
@@ -204,7 +207,8 @@ fun MusicFlowApp(
 
                             NavigationBarItem(
                                 selected = currentRoute == tab ||
-                                    (tab == LibraryTab && currentRoute is FavoritesRoute),
+                                    (tab == LibraryTab &&
+                                        (currentRoute is FavoritesRoute || currentRoute == SmartLibraryPage)),
                                 onClick = { switchTab(tab) },
                                 icon = { Icon(tabIcon, contentDescription = null) },
                                 label = { Text(label) },
@@ -257,6 +261,12 @@ fun MusicFlowApp(
 
                         onOpenLibrary = {
                             switchTab(LibraryTab)
+                        },
+
+                        onOpenSmartLibrary = {
+                            if (backStack.lastOrNull() != SmartLibraryPage) {
+                                backStack.add(SmartLibraryPage)
+                            }
                         },
 
                         onOpenFavoriteSongs = {
@@ -349,6 +359,31 @@ fun MusicFlowApp(
                                 if (backStack.lastOrNull() != NowPlaying) {
                                     backStack.add(NowPlaying)
                                 }
+                            }
+                        }
+                    )
+                }
+
+                entry<SmartLibraryPage> {
+                    LibraryRoute(
+                        initialShowSmart = true,
+                        onBack = {
+                            if (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
+                            else switchTab(HomeTab)
+                        },
+                        onPickManual = onPickFiles,
+                        onQueueNext = if (state.connected && state.hasMedia &&
+                            state.canEditQueue && !state.shuffleEnabled &&
+                            state.repeatMode != Player.REPEAT_MODE_ONE) {
+                            { song -> onQueueDeviceSong(song, QueuePlacement.NEXT) }
+                        } else null,
+                        onQueueEnd = if (state.connected && state.hasMedia && state.canEditQueue) {
+                            { song -> onQueueDeviceSong(song, QueuePlacement.END) }
+                        } else null,
+                        onSongSelected = { songs, index ->
+                            if (index in songs.indices) {
+                                onPlayDeviceSongs(songs, index)
+                                if (backStack.lastOrNull() != NowPlaying) backStack.add(NowPlaying)
                             }
                         }
                     )

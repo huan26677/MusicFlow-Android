@@ -35,6 +35,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.media.MediaStoreLocalMusicRepository
+import com.example.musicflow.core.history.RecentSong
+import com.example.musicflow.core.history.RoomRecentHistoryRepository
+import com.example.musicflow.core.history.local.RecentHistoryDatabase
 import com.example.musicflow.feature.playlist.PlaylistPickerDialog
 import com.example.musicflow.feature.playlist.rememberPlaylistViewModel
 import com.example.musicflow.ui.components.MusicFlowStatusKind
@@ -48,6 +51,7 @@ fun LibraryRoute(
     onSongSelected: (List<DeviceSong>, Int) -> Unit,
     initialFavoritesOnly: Boolean = false,
     initialShowAlbums: Boolean = false,
+    initialShowSmart: Boolean = false,
     onQueueNext: ((DeviceSong) -> Unit)? = null,
     onQueueEnd: ((DeviceSong) -> Unit)? = null
 ) {
@@ -69,6 +73,11 @@ fun LibraryRoute(
     val repository = remember {
         MediaStoreLocalMusicRepository(context.applicationContext)
     }
+    val historyRepository = remember(context) {
+        RoomRecentHistoryRepository(RecentHistoryDatabase.getInstance(context.applicationContext))
+    }
+    val recentSongs by remember(historyRepository) { historyRepository.observeRecent() }
+        .collectAsStateWithLifecycle(initialValue = emptyList())
 
     val factory = remember(repository) {
         LibraryViewModel.factory(repository)
@@ -136,6 +145,7 @@ fun LibraryRoute(
         onPickManual = onPickManual,
         initialFavoritesOnly = initialFavoritesOnly,
         initialShowAlbums = initialShowAlbums,
+        initialShowSmart = initialShowSmart,
         onRefresh = {
             if (hasPermission) {
                 libraryViewModel.refresh()
@@ -151,6 +161,7 @@ fun LibraryRoute(
         },
         favoriteSongUris = favoriteSongUris,
         favoriteSongDetails = favoriteSongDetails,
+        recentSongs = recentSongs,
         onToggleFavorite = { song ->
             favoritesStore.toggleSong(
                 uri = song.uri,
@@ -192,14 +203,20 @@ fun LibraryScreen(
     favoriteAlbumIds: Set<String> = emptySet(),
     onToggleAlbum: (Long) -> Unit = {},
     initialFavoritesOnly: Boolean = false,
-    initialShowAlbums: Boolean = false
+    initialShowAlbums: Boolean = false,
+    recentSongs: List<RecentSong> = emptyList(),
+    initialShowSmart: Boolean = false
 ) {
     var favoritesOnly by rememberSaveable(initialFavoritesOnly) {
         mutableStateOf(initialFavoritesOnly)
     }
 
-    var selectedCategory by rememberSaveable(initialShowAlbums) {
-        mutableStateOf(if (initialShowAlbums) "albums" else "songs")
+    var selectedCategory by rememberSaveable(initialShowAlbums, initialShowSmart) {
+        mutableStateOf(when {
+            initialShowSmart -> "smart"
+            initialShowAlbums -> "albums"
+            else -> "songs"
+        })
     }
     var songSort by rememberSaveable {
         mutableStateOf(LibrarySongSort.TITLE)
@@ -310,6 +327,7 @@ fun LibraryScreen(
                 ) {
                     listOf(
                         "songs" to "Bài hát",
+                        "smart" to "Thông minh",
                         "albums" to "Album",
                         "artists" to "Nghệ sĩ",
                         "genres" to "Thể loại"
@@ -343,12 +361,25 @@ fun LibraryScreen(
                     }
 
                     LibraryUiState.Empty -> {
-                        MusicFlowStatusPanel(
-                            kind = MusicFlowStatusKind.EMPTY,
-                            title = "Thư viện chưa có nhạc",
-                            description = "Không tìm thấy bài hát nào được Android phân loại " +
-                                "là nhạc. Hãy chọn tệp nhạc thủ công (MP3, FLAC, WAV...)."
-                        )
+                        if (selectedCategory == "smart") {
+                            SmartLibraryContent(
+                                songs = emptyList(),
+                                favoriteSongUris = favoriteSongUris,
+                                recentSongUris = recentSongs.map { it.audioUri },
+                                onSongSelected = onSongSelected,
+                                onAddToPlaylist = onAddToPlaylist,
+                                onToggleFavorite = onToggleFavorite,
+                                onQueueNext = onQueueNext,
+                                onQueueEnd = onQueueEnd
+                            )
+                        } else {
+                            MusicFlowStatusPanel(
+                                kind = MusicFlowStatusKind.EMPTY,
+                                title = "Thư viện chưa có nhạc",
+                                description = "Không tìm thấy bài hát nào được Android phân loại " +
+                                    "là nhạc. Hãy chọn tệp nhạc thủ công (MP3, FLAC, WAV...)."
+                            )
+                        }
                     }
 
                     is LibraryUiState.Error -> {
@@ -362,7 +393,18 @@ fun LibraryScreen(
                     }
 
                     is LibraryUiState.Success -> {
-                        if (selectedCategory == "albums") {
+                        if (selectedCategory == "smart") {
+                            SmartLibraryContent(
+                                songs = current.songs,
+                                favoriteSongUris = favoriteSongUris,
+                                recentSongUris = recentSongs.map { it.audioUri },
+                                onSongSelected = onSongSelected,
+                                onAddToPlaylist = onAddToPlaylist,
+                                onToggleFavorite = onToggleFavorite,
+                                onQueueNext = onQueueNext,
+                                onQueueEnd = onQueueEnd
+                            )
+                        } else if (selectedCategory == "albums") {
                             AlbumFavoritesContent(
                                 songs = current.songs,
                                 favoriteAlbumIds = favoriteAlbumIds,
