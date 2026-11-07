@@ -61,6 +61,8 @@ Trạng thái quy ước: **Đã có** = mã nguồn có và đã có QA phù h�
 
 **UC-G17 — Thư viện và Playlist thông minh offline (2026-11-07):** Guest/Free/Premium → Trang chủ → Playlist thông minh hoặc Thư viện → Thông minh → chọn Mix của bạn/Yêu thích/Nghe gần đây/Mới thêm/Nghe thật lâu → phát cả danh sách hoặc một bài, tim yêu thích/thêm vào playlist thủ công/queue. Smart collections được tính từ **MediaStore offline + favorite local + RecentHistory Room**, tối đa 30 bài không trùng và chỉ chứa các file đang được thư viện quét; không tự lưu playlist mới hoặc truy xuất dịch vụ streaming. **6 JVM + 5 Android UI mới PASS**, nghiệm thu tích hợp **199/199 JVM + 90/90 Android regression + 1/1 real WAV SAF + 1/1 real JSON picker + 4/4 Web Admin PASS**. APK Final QA ký/cài/cold launch, Home → Smart khi rỗng PASS; **chưa có ảnh release Smart với bài nhạc thực**. Xem [Smart_Library_Playlists_v1.md](Smart_Library_Playlists_v1.md).
 
+**UC-G18 — Tìm và phát trong Smart Playlist (2026-11-07):** Guest/Free/Premium → Thư viện → Thông minh → chọn một trong 5 bộ sưu tập → lọc theo tên bài hoặc nghệ sĩ (có/không dấu) → xem số bài đang hiển thị → phát danh sách **đã lọc** hoặc một bài với đúng queue/index. Có thể xóa từ khóa hoặc chuyển bộ sưu tập để đặt lại bộ lọc; khi bộ sưu tập trống, quay về **Bài hát**. **4 Android UI tests mới, tổng 199 JVM + 94 Android regression + 1 SAF + 1 JSON picker + 4 Web Admin PASS**. APK SmartLibraryV2 QA ký/cài/cold launch API30 PASS. Không thêm quyền mới, không phát từ nguồn online không có quyền, chưa thử thủ công Smart đầy bài trên release APK. Xem [Smart_Library_Experience_v2.md](Smart_Library_Experience_v2.md).
+
 ### Luồng đăng nhập và đồng bộ
 
 1. Free đăng ký email thử nghiệm trong Supabase demo → đăng nhập.

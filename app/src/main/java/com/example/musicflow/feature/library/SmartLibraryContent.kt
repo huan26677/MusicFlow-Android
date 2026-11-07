@@ -13,7 +13,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,6 +30,7 @@ import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.smart.SmartLibraryRules
 import com.example.musicflow.core.smart.SmartPlaylistKind
 import com.example.musicflow.core.smart.SmartSong
+import com.example.musicflow.feature.search.SongSearch
 import com.example.musicflow.ui.components.MusicFlowStatusKind
 import com.example.musicflow.ui.components.MusicFlowStatusPanel
 import com.example.musicflow.ui.components.OceanFlowCard
@@ -43,9 +46,11 @@ fun SmartLibraryContent(
     onAddToPlaylist: (DeviceSong) -> Unit,
     onToggleFavorite: (DeviceSong) -> Unit,
     onQueueNext: ((DeviceSong) -> Unit)? = null,
-    onQueueEnd: ((DeviceSong) -> Unit)? = null
+    onQueueEnd: ((DeviceSong) -> Unit)? = null,
+    onBrowseSongs: (() -> Unit)? = null
 ) {
     var selectedKindName by rememberSaveable { mutableStateOf(SmartPlaylistKind.MIX.name) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
     val snapshots = remember(songs, favoriteSongUris, recentSongUris) {
         SmartLibraryRules.build(
             scanned = songs.map {
@@ -58,7 +63,11 @@ fun SmartLibraryContent(
     val byKey = remember(songs) { songs.associateBy { it.uri.toString() } }
     val selected = snapshots.firstOrNull { it.kind.name == selectedKindName }
         ?: snapshots.first()
-    val visible = selected.songKeys.mapNotNull(byKey::get)
+    // Playback must use the same filtered order that the listener can see.
+    // Keep the original Smart ordering (recent/favorites/newest) unchanged.
+    val visible = selected.songKeys.mapNotNull(byKey::get).filter { song ->
+        searchQuery.isBlank() || SongSearch.matches(song.title, song.artist, searchQuery)
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().testTag("smart-library-content"),
@@ -87,7 +96,12 @@ fun SmartLibraryContent(
                 snapshots.forEach { playlist ->
                     FilterChip(
                         selected = playlist.kind.name == selectedKindName,
-                        onClick = { selectedKindName = playlist.kind.name },
+                        onClick = {
+                            if (selectedKindName != playlist.kind.name) {
+                                selectedKindName = playlist.kind.name
+                                searchQuery = ""
+                            }
+                        },
                         label = { Text("${playlist.kind.title} · ${playlist.songKeys.size}") },
                         modifier = Modifier.testTag(
                             "smart-playlist-${playlist.kind.name.lowercase()}"
@@ -102,6 +116,27 @@ fun SmartLibraryContent(
                 Text(selected.kind.description,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it.take(80) },
+                    label = { Text("Tìm trong ${selected.kind.title}") },
+                    placeholder = { Text("Tên bài hoặc nghệ sĩ, có thể không dấu") },
+                    singleLine = true,
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" },
+                                modifier = Modifier.testTag("smart-search-clear")) {
+                                Text("✕")
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().testTag("smart-search-field")
+                )
+                Text(
+                    "Hiển thị ${visible.size} / ${selected.songKeys.size} bài",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 if (visible.isNotEmpty()) {
                     Button(
                         onClick = { onSongSelected(visible, 0) },
@@ -115,8 +150,11 @@ fun SmartLibraryContent(
             item {
                 MusicFlowStatusPanel(
                     kind = MusicFlowStatusKind.EMPTY,
-                    title = "Chưa có bài phù hợp",
-                    description = when (selected.kind) {
+                    title = if (searchQuery.isNotBlank()) "Không tìm thấy bài trong bộ sưu tập"
+                        else "Chưa có bài phù hợp",
+                    description = if (searchQuery.isNotBlank()) {
+                        "Thử từ khóa ngắn hơn hoặc xóa bộ lọc. Danh sách gốc vẫn được giữ nguyên."
+                    } else when (selected.kind) {
                         SmartPlaylistKind.FAVORITES ->
                             "Hãy yêu thích một bài trong Thư viện để danh sách tự cập nhật."
                         SmartPlaylistKind.RECENT ->
@@ -124,7 +162,14 @@ fun SmartLibraryContent(
                         SmartPlaylistKind.NEWEST ->
                             "Thiết bị chưa có bài với thời điểm thêm hợp lệ."
                         else -> "Quét thêm nhạc offline hoặc chọn bộ sưu tập khác."
-                    }
+                    },
+                    actionLabel = when {
+                        searchQuery.isNotBlank() -> "Xóa bộ lọc"
+                        onBrowseSongs != null -> "Xem mục Bài hát"
+                        else -> null
+                    },
+                    onAction = if (searchQuery.isNotBlank()) ({ searchQuery = "" })
+                        else onBrowseSongs
                 )
             }
         } else {

@@ -17,6 +17,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -148,5 +150,76 @@ class SmartLibraryUiTest {
         }
         compose.onNodeWithTag("smart-library-content").assertExists()
         compose.onNodeWithTag("smart-playlist-mix").assertExists()
+    }
+
+    @Test fun smartSearchIgnoresVietnameseAccentsAndPlaysOnlyVisibleQueue() {
+        val songs = listOf(song(1, "Đường về"), song(2, "Nhớ em"),
+            song(3, "Bình yên").copy(artist = "Sơn Tùng"))
+        var queue = emptyList<DeviceSong>()
+        var index = -1
+        compose.setContent {
+            MusicFlowTheme {
+                SmartLibraryContent(songs, emptySet(), emptyList(),
+                    onSongSelected = { items, selected -> queue = items; index = selected },
+                    onAddToPlaylist = {}, onToggleFavorite = {})
+            }
+        }
+        compose.onNodeWithTag("smart-search-field").performTextInput("duong")
+        compose.onNodeWithText("Hiển thị 1 / 3 bài").assertExists()
+        compose.onNodeWithTag("smart-play-all").performClick()
+        compose.runOnIdle {
+            assertEquals(listOf("Đường về"), queue.map { it.title })
+            assertEquals(0, index)
+        }
+        compose.onNodeWithTag("smart-search-clear").performClick()
+        compose.onNodeWithTag("smart-search-field").performTextInput("son tung")
+        compose.onNodeWithTag("smart-play-all").performClick()
+        compose.runOnIdle { assertEquals(listOf("Bình yên"), queue.map { it.title }) }
+    }
+
+    @Test fun smartSearchNoResultsCanClearFilterWithoutLosingCollection() {
+        val songs = listOf(song(1, "Một"), song(2, "Hai"))
+        compose.setContent {
+            MusicFlowTheme {
+                SmartLibraryContent(songs, emptySet(), emptyList(),
+                    onSongSelected = { _, _ -> }, onAddToPlaylist = {},
+                    onToggleFavorite = {})
+            }
+        }
+        compose.onNodeWithTag("smart-search-field").performTextInput("khongtontai")
+        compose.onNodeWithText("Không tìm thấy bài trong bộ sưu tập").assertExists()
+        compose.onNodeWithTag("smart-play-all").assertDoesNotExist()
+        compose.onNodeWithText("Xóa bộ lọc").performClick()
+        compose.onNodeWithText("Hiển thị 2 / 2 bài").assertExists()
+        compose.onNodeWithTag("smart-play-all").assertExists()
+    }
+
+    @Test fun changingSmartCollectionClearsOldSearch() {
+        val songs = listOf(song(1, "Một"), song(2, "Hai"))
+        compose.setContent {
+            MusicFlowTheme {
+                SmartLibraryContent(songs, emptySet(), emptyList(),
+                    onSongSelected = { _, _ -> }, onAddToPlaylist = {},
+                    onToggleFavorite = {})
+            }
+        }
+        compose.onNodeWithTag("smart-search-field").performTextInput("mot")
+        // NEWEST uses the same two songs, but a previous MIX query must not hide them.
+        compose.onNodeWithTag("smart-playlist-newest").performScrollTo().performClick()
+        compose.onNodeWithText("Hiển thị 2 / 2 bài").assertExists()
+    }
+
+    @Test fun emptySmartCollectionCanOpenOrdinaryLibrary() {
+        compose.setContent {
+            MusicFlowTheme {
+                LibraryScreen(uiState = LibraryUiState.Empty, hasPermission = true,
+                    initialShowSmart = true, onBack = {}, onPickManual = {}, onRefresh = {},
+                    onSongSelected = { _, _ -> }, onAddToPlaylist = {})
+            }
+        }
+        // On smaller devices the empty-state action is below the fold.
+        compose.onNodeWithTag("smart-library-content").performScrollToIndex(3)
+        compose.onNodeWithText("Xem mục Bài hát").performClick()
+        compose.onNodeWithText("Thư viện chưa có nhạc").assertExists()
     }
 }

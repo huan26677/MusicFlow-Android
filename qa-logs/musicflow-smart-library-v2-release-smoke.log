@@ -1,0 +1,12 @@
+﻿Performing Streamed Install
+Success
+Starting: Intent { cmp=com.example.musicflow/.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: com.example.musicflow/.MainActivity
+TotalTime: 1990
+WaitTime: 1994
+Complete
+APP_PID=8770
+APK_SHA256=1D1D907855A15119C17D454F567ED80C71BA9C11F32A05C8EB0C142717475C4E
+SMART_LIBRARY_V2_RELEASE_SMOKE=PASS

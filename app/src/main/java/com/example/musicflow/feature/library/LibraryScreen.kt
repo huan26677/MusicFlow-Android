@@ -370,7 +370,8 @@ fun LibraryScreen(
                                 onAddToPlaylist = onAddToPlaylist,
                                 onToggleFavorite = onToggleFavorite,
                                 onQueueNext = onQueueNext,
-                                onQueueEnd = onQueueEnd
+                                onQueueEnd = onQueueEnd,
+                                onBrowseSongs = { selectedCategory = "songs" }
                             )
                         } else {
                             MusicFlowStatusPanel(
@@ -402,7 +403,8 @@ fun LibraryScreen(
                                 onAddToPlaylist = onAddToPlaylist,
                                 onToggleFavorite = onToggleFavorite,
                                 onQueueNext = onQueueNext,
-                                onQueueEnd = onQueueEnd
+                                onQueueEnd = onQueueEnd,
+                                onBrowseSongs = { selectedCategory = "songs" }
                             )
                         } else if (selectedCategory == "albums") {
                             AlbumFavoritesContent(
