@@ -1,7 +1,7 @@
 {
   "meta": {
     "project_id": "MusicFlow-Android",
-    "evolution_version": "v5.0-Absolute",
+    "evolution_version": "v5.1-Audit",
     "compression_status": "MAXIMUM_DENSITY",
     "self_performance_score": "8.5/10: v4 có build, QA và APK ký kiểm chứng; bộ não v4.2 đã đồng bộ Git. Chưa kiểm thử đầy đủ API33/36, TalkBack, máy thật hoặc hiệu năng đo thực."
   },
@@ -10,15 +10,19 @@
     "priority_index": {
       "P1_CRITICAL": [],
       "P2_HIGH": [
-        "Accessibility & Polish v5: kiểm tra TalkBack thực, nhãn semantic, tương phản, cỡ chữ lớn và vùng chạm; bảo đảm Guest/Free/Premium dễ thao tác.",
-        "Nghiệm thu trên emulator API33/36: READ_MEDIA_AUDIO, SAF persisted READ, chuyển màn, playback và nâng cấp APK không làm mất dữ liệu."
+        "Accessibility & Offline Search UX v5: kiểm tra TalkBack, nhãn semantic, focus, độ tương phản, chữ lớn và vùng chạm; giữ trải nghiệm Guest/Free/Premium dễ thao tác.",
+        "Hợp nhất SearchViewModel (đang chỉ gọi LocalMusicRepository.getSongs/MediaStore) với file SAF còn quyền từ LocalPickedMusicStore; loại URI trùng, giữ thứ tự queue và làm việc không cần quyền quét khi chỉ có file đã chọn.",
+        "LibraryRoute hiện tự RequestPermission ở lần vào thường; chuyển sang lựa chọn rõ ràng Quét toàn thiết bị/Chọn tệp, giữ onboarding/UX không cưỡng ép quyền.",
+        "Nghiệm thu chính bản v4/v5 trên emulator API33/36: READ_MEDIA_AUDIO, SAF persisted READ, playback và nâng cấp cùng chữ ký để xác nhận giữ dữ liệu."
       ],
       "P3_MEDIUM": [
-        "Thử APK ký QA với playlist/Smart Library và MP3/FLAC/WAV thực; phân biệt lỗi provider, codec và permission.",
-        "Đo thời gian scan/RAM/scroll với thư viện thực; xác minh lợi ích trì hoãn truy vấn Genres, không coi 1.502 bản ghi mẫu là benchmark."
+        "LocalPickedMusicStore.inspect() đang mở file descriptor cho tối đa 250 URI theo thứ tự mỗi lần ON_RESUME; đo thời gian, chọn chiến lược cache/recheck an toàn và giữ nhận diện mất quyền/tệp.",
+        "Thử APK ký QA với playlist/Smart Library, MP3/FLAC/WAV thực; đo thời gian scan/RAM/scroll, không coi 1.502 bản ghi mẫu là benchmark.",
+        "Rà soát thanh thao tác Thư viện có Row chứa Quét lại/Chọn tệp ở màn hẹp hoặc font lớn; cải thiện responsive và test."
       ],
       "P4_LOW": [
-        "Chuẩn hóa tài liệu tiến độ với HEAD, QA logs và SHA APK; refactor LibraryScreen chỉ khi bảo toàn queue/index, Room và lối tắt SAF."
+        "Chuẩn hóa bảng APK bàn giao hiện hành: nhiều tài liệu lịch sử còn gắn nhãn bản mới nhất cho APK cũ; đối chiếu HEAD/QA/SHA, không xóa log cũ.",
+        "Refactor LibraryScreen chỉ khi bảo toàn queue/index, Room và lối tắt SAF."
       ],
       "P5_BACKLOG": [
         "Online có giấy phép, đồng bộ Supabase/RBAC kiểm chứng E2E, thanh toán thật và phát hành Play Store: ngoài phạm vi demo hiện tại."
@@ -39,7 +43,7 @@
       "MediaStore -> getSongs() không tải Genres N+1; mở tab Thể loại mới getSongsWithGenres(); cursor có ensureActive để hủy quét an toàn.",
       "Nhạc ngoài quét Android -> DocumentsUI + persisted READ + LocalPickedMusicStore; Smart Library hợp và loại URI trùng, tệp mất quyền được báo rõ.",
       "Bằng chứng v4 API30: 199 JVM + 98 Android regression + 7 UI v4 + 2 MediaStore WAV + 1 MainActivity SAF + 1 SAF Quick Add + 1 JSON picker + 4 Web Admin PASS; APK ký QA cài và cold-launch PASS.",
-      "Bản demo: dist/MusicFlow-1.0-Demo-LibraryUXV4-Android.apk; SHA256 5D1F9D6A5A8CE3CD50BA4C253A3F83B8D5459A23949A1F629ECB1671562977EA; baseline Git main 0d9f3f4 trước cập nhật não v5."
+      "Bản demo v4: dist/MusicFlow-1.0-Demo-LibraryUXV4-Android.apk; SHA256 5D1F9D6A5A8CE3CD50BA4C253A3F83B8D5459A23949A1F629ECB1671562977EA; luôn đọc git log/status để biết HEAD."
     ],
     "failure_modes_prevented": [
       "Không suy diễn API33/36, TalkBack, máy thật hoặc tối ưu RAM từ bài test API30 và 1.502 bản ghi tổng hợp.",
@@ -53,7 +57,8 @@
     "Chưa có bằng chứng nghiệm thu API33/36 hay thiết bị Android vật lý; cần xác minh quyền âm thanh và SAF trên từng phiên bản.",
     "Kịch bản giữ dữ liệu khi cập nhật APK chỉ chắc chắn khi dùng cùng package và khóa ký phù hợp; cần kiểm thử trên môi trường có dữ liệu mẫu.",
     "Hiệu suất quét thư viện lớn mới dựa trên logic/fixture; chưa đo benchmark trên nhạc thật và nhiều hãng provider.",
-    "Quyền Owner/PlatformAdmin/Developer, Premium và dịch vụ online/cloud hiện có phần mô phỏng; không tự coi là RBAC/thanh toán/bản quyền production."
+    "Quyền Owner/PlatformAdmin/Developer, Premium và dịch vụ online/cloud hiện có phần mô phỏng; không tự coi là RBAC/thanh toán/bản quyền production.",
+    "Audit v5.1 đọc mã nguồn, chưa chạy lại Android runtime: mức độ phiền của permission tự bật, thời gian kiểm tra 250 URI và bố cục font lớn cần đo/test trước khi gọi là bug."
   ],
   "entropy_pruned_nodes": [
     "Rút khỏi bộ não: log Gradle/ADB dòng lẻ, PID emulator, cảnh báo CRLF và lỗi thiếu import JUnit đã khắc phục; chứng cứ gốc còn trong qa-logs/Git.",
