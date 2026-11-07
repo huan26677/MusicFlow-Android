@@ -19,6 +19,9 @@ interface PlaylistDao {
     )
     fun observePlaylists(): Flow<List<PlaylistEntity>>
 
+    @Query("SELECT * FROM playlists ORDER BY updatedAtMs DESC, id ASC")
+    suspend fun getAllPlaylists(): List<PlaylistEntity>
+
     @Query("SELECT * FROM playlists WHERE id = :id")
     suspend fun getPlaylist(id: String): PlaylistEntity?
 
@@ -82,6 +85,9 @@ interface PlaylistDao {
         playlistId: String,
         mediaId: String
     ): Int
+
+    @Query("SELECT * FROM playlist_tracks WHERE playlistId = :playlistId AND mediaId = :mediaId")
+    suspend fun getTrack(playlistId: String, mediaId: String): PlaylistTrackEntity?
 
     @Query(
         "UPDATE playlist_tracks SET position = :position " +

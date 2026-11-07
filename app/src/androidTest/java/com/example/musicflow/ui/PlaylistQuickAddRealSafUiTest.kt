@@ -90,28 +90,35 @@ class PlaylistQuickAddRealSafUiTest {
         val deadline = SystemClock.uptimeMillis() + 45_000L
         var openedDownloads = false
 
-        fun clickDocumentRow(selector: androidx.test.uiautomator.BySelector): Boolean {
+        fun clickDocumentRow(
+            selector: androidx.test.uiautomator.BySelector,
+            isFile: Boolean = false
+        ): Boolean {
             val child = device.findObject(selector) ?: return false
-            var row = child
-            repeat(6) {
-                if (!row.isClickable && row.parent != null) row = row.parent
-            }
             return runCatching {
-                // DocumentsUI grid cards may not expose clickable semantics;
-                // a real tap on their visible center still activates the row.
-                if (row.isClickable) row.click()
-                else {
-                    val rect = row.visibleBounds
-                    if (rect.isEmpty) return@runCatching false
-                    device.click(rect.centerX(), rect.centerY())
+                // A document's ancestors can be a *RecyclerView*, which is
+                // not clickable and has bounds covering many files. Tapping
+                // that ancestor's center falsely reports "selected" while
+                // DocumentsUI remains open. Tap the *named child* and verify
+                // the picker actually returns to our production Compose route.
+                val rect = child.visibleBounds
+                if (rect.isEmpty) return@runCatching false
+                device.click(rect.centerX(), rect.centerY())
+                if (isFile) {
+                    val end = SystemClock.uptimeMillis() + 2_500L
+                    while (SystemClock.uptimeMillis() < end) {
+                        if (device.currentPackageName == context.packageName) return@runCatching true
+                        SystemClock.sleep(120)
+                    }
+                    return@runCatching false
                 }
                 true
             }.getOrDefault(false)
         }
 
         while (SystemClock.uptimeMillis() < deadline) {
-            if (clickDocumentRow(By.text(filename)) ||
-                clickDocumentRow(By.desc(filename))) {
+            if (clickDocumentRow(By.text(filename), isFile = true) ||
+                clickDocumentRow(By.desc(filename), isFile = true)) {
                     Log.i("MusicFlowQuickAddSafQA", "DOCUMENT_SELECTED=$filename")
                     return true
             }

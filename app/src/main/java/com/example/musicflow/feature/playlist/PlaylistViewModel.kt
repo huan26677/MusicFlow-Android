@@ -248,6 +248,20 @@ class PlaylistViewModel(
         }
     }
 
+    fun relinkTrack(playlistId: String, oldMediaId: String, newUri: String) {
+        viewModelScope.launch {
+            try {
+                val changed = repository.relinkTrack(playlistId, oldMediaId, newUri)
+                _actionError.value = if (changed) null else
+                    "Không liên kết được tệp (có thể đã có trong playlist)."
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                _actionError.value = "Không thể cập nhật tệp trong playlist."
+            }
+        }
+    }
+
     fun moveTrack(
         playlistId: String,
         mediaId: String,

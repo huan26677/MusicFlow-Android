@@ -27,7 +27,8 @@ internal fun PlaylistTrackOptions(
     canMoveDown: Boolean,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
-    onRequestRemove: () -> Unit
+    onRequestRemove: () -> Unit,
+    onRelink: () -> Unit = {}
 ) {
     var expanded by remember(mediaId) { mutableStateOf(false) }
     Box {
@@ -64,6 +65,14 @@ internal fun PlaylistTrackOptions(
                 modifier = Modifier
                     .testTag("playlist-track-move-down")
                     .semantics { contentDescription = "Đưa $title xuống" }
+            )
+            DropdownMenuItem(
+                text = { Text("Chọn lại tệp nhạc") },
+                onClick = {
+                    expanded = false
+                    onRelink()
+                },
+                modifier = Modifier.testTag("playlist-track-relink")
             )
             DropdownMenuItem(
                 text = { Text("Xóa khỏi playlist") },

@@ -1,6 +1,10 @@
 
 package com.example.musicflow.feature.playlist
 
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.*
@@ -34,9 +38,13 @@ import com.example.musicflow.core.playlist.LocalPlaylist
 import com.example.musicflow.core.playlist.PlaylistRules
 import com.example.musicflow.core.playlist.PlaylistTrack
 import com.example.musicflow.core.playlist.RoomPlaylistRepository
+import com.example.musicflow.core.playlist.PlaylistLocalAccess
 import com.example.musicflow.ui.components.MusicFlowStatusKind
 import com.example.musicflow.ui.components.MusicFlowStatusPanel
 import com.example.musicflow.ui.components.OceanFlowHeader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 internal fun rememberPlaylistViewModel(): PlaylistViewModel {
@@ -111,6 +119,8 @@ fun PlaylistListRoute(
         ) {
             Text("Tạo playlist mới")
         }
+
+        PlaylistBackupControls()
 
         if (actionError != null) {
             Text(
@@ -413,6 +423,59 @@ fun PlaylistDetailRoute(
         mutableStateOf<PlaylistTrack?>(null)
     }
 
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var missingIds by remember(playlistId) { mutableStateOf<Set<String>?>(null) }
+    var checkingFiles by remember(playlistId) { mutableStateOf(false) }
+    var fileMessage by remember(playlistId) { mutableStateOf<String?>(null) }
+    var relinkTarget by remember { mutableStateOf<PlaylistTrack?>(null) }
+    val relinkPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        val target = relinkTarget
+        relinkTarget = null
+        if (uri != null && target != null) {
+            if (uri.scheme != "content") {
+                fileMessage = "Hãy chọn tệp bằng bộ chọn Android."
+            } else {
+                val persisted = runCatching {
+                    context.contentResolver.takePersistableUriPermission(
+                        uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                    true
+                }.getOrDefault(false) ||
+                    context.contentResolver.persistedUriPermissions.any {
+                        it.uri == uri && it.isReadPermission
+                    }
+                if (!persisted || !PlaylistLocalAccess.readable(
+                        context.contentResolver, uri.toString()
+                    )) {
+                    fileMessage = "Không thể đọc hoặc lưu quyền truy cập tệp đã chọn."
+                } else {
+                    vm.relinkTrack(playlistId, target.mediaId, uri.toString())
+                    missingIds = null
+                    fileMessage = "Đang cập nhật liên kết. Kiểm tra tệp lần nữa để xác nhận."
+                }
+            }
+        }
+    }
+
+    fun playChecked(tracks: List<PlaylistTrack>, selectedIndex: Int) {
+        val blocked = missingIds
+        if (blocked == null) {
+            onPlayTracks(tracks, selectedIndex)
+            return
+        }
+        val selected = tracks.getOrNull(selectedIndex) ?: return
+        if (selected.mediaId in blocked) {
+            fileMessage = "Tệp không còn đọc được. Dùng Tùy chọn bài hát → Chọn lại tệp nhạc."
+            return
+        }
+        val playable = tracks.filterNot { it.mediaId in blocked }
+        val newIndex = playable.indexOfFirst { it.mediaId == selected.mediaId }
+        if (newIndex >= 0) onPlayTracks(playable, newIndex)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -506,14 +569,46 @@ fun PlaylistDetailRoute(
                                         .testTag("playlist-detail-add-songs")
                                 ) { Text("Thêm bài hát vào playlist") }
 
+                                OutlinedButton(
+                                    onClick = {
+                                        checkingFiles = true
+                                        scope.launch {
+                                            try {
+                                                missingIds = PlaylistLocalAccess.check(
+                                                    context.contentResolver, tracks.tracks
+                                                )
+                                                fileMessage = if (missingIds!!.isEmpty()) {
+                                                    "Tất cả ${tracks.tracks.size} tệp đang đọc được."
+                                                } else {
+                                                    "Có ${missingIds!!.size} tệp không còn đọc được. " +
+                                                        "Dùng Tùy chọn bài hát để chọn lại tệp."
+                                                }
+                                            } catch (error: Exception) {
+                                                fileMessage = "Không kiểm tra được tệp: ${error.message.orEmpty()}"
+                                            } finally { checkingFiles = false }
+                                        }
+                                    },
+                                    enabled = !checkingFiles,
+                                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                                        .testTag("playlist-check-files")
+                                ) { Text(if (checkingFiles) "Đang kiểm tra tệp…" else "Kiểm tra tệp còn đọc được") }
+                                fileMessage?.let {
+                                    Text(it, style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.testTag("playlist-file-status"))
+                                }
+
                                 Button(
                                     onClick = {
-                                        onPlayTracks(
-                                            tracks.tracks,
-                                            0
-                                        )
+                                        val available = missingIds?.let { blocked ->
+                                            tracks.tracks.filterNot { it.mediaId in blocked }
+                                        } ?: tracks.tracks
+                                        if (available.isNotEmpty()) {
+                                            onPlayTracks(available, 0)
+                                        } else {
+                                            fileMessage = "Không có tệp nào đọc được để phát."
+                                        }
                                     },
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
                                 ) {
                                     Text("▶ Phát toàn bộ")
                                 }
@@ -539,7 +634,7 @@ fun PlaylistDetailRoute(
                                             // menu to prevent overflow at large font scales.
                                             ListItem(
                                                 modifier = Modifier.fillMaxWidth().clickable {
-                                                    onPlayTracks(tracks.tracks, index)
+                                                    playChecked(tracks.tracks, index)
                                                 },
                                                 headlineContent = {
                                                     Text(
@@ -550,9 +645,14 @@ fun PlaylistDetailRoute(
                                                 },
                                                 supportingContent = {
                                                     Text(
-                                                        text = track.artist,
+                                                        text = if (missingIds?.contains(track.mediaId) == true)
+                                                            "⚠ Tệp không đọc được · Chọn lại tệp"
+                                                        else track.artist,
                                                         maxLines = 2,
-                                                        overflow = TextOverflow.Ellipsis
+                                                        overflow = TextOverflow.Ellipsis,
+                                                        color = if (missingIds?.contains(track.mediaId) == true)
+                                                            MaterialTheme.colorScheme.error
+                                                        else MaterialTheme.colorScheme.onSurfaceVariant
                                                     )
                                                 }
                                             )
@@ -580,7 +680,11 @@ fun PlaylistDetailRoute(
                                                             offset = 1
                                                         )
                                                     },
-                                                    onRequestRemove = { removeTarget = track }
+                                                    onRequestRemove = { removeTarget = track },
+                                                    onRelink = {
+                                                        relinkTarget = track
+                                                        relinkPicker.launch(arrayOf("audio/*"))
+                                                    }
                                                 )
                                             }
                                             HorizontalDivider()

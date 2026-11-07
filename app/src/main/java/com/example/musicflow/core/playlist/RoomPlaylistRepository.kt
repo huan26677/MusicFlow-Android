@@ -17,6 +17,60 @@ class RoomPlaylistRepository(
 ) {
     private val dao = database.playlistDao()
 
+    /** Consistent metadata snapshot; does not include audio bytes or access permissions. */
+    suspend fun backupEntries(): List<PlaylistBackupEntry> = database.withTransaction {
+        dao.getAllPlaylists().map { playlist ->
+            PlaylistBackupEntry(
+                name = playlist.name,
+                tracks = dao.getTracks(playlist.id).map { it.toModel() }
+            )
+        }
+    }
+
+    /** Import creates NEW playlists atomically; no existing rows or history are overwritten. */
+    suspend fun importBackup(entries: List<PlaylistBackupEntry>): Int {
+        PlaylistLocalBackup.validate(entries)
+        return database.withTransaction {
+            entries.forEach { item ->
+                val now = System.currentTimeMillis()
+                val name = if (item.name.length <= PlaylistRules.MAX_NAME_LENGTH - 7) {
+                    "${item.name} (nhập)"
+                } else {
+                    item.name.take(PlaylistRules.MAX_NAME_LENGTH - 7) + " (nhập)"
+                }
+                val id = UUID.randomUUID().toString()
+                dao.insertPlaylist(LocalPlaylist(id, name, now, now).toEntity())
+                item.tracks.forEachIndexed { index, track ->
+                    dao.insertTrack(track.toEntity(id, index))
+                }
+            }
+            entries.size
+        }
+    }
+
+    /** Relink only the selected row, retaining its title, artist, age and position. */
+    suspend fun relinkTrack(
+        playlistId: String,
+        previousMediaId: String,
+        newDocumentUri: String
+    ): Boolean = database.withTransaction {
+        if (!newDocumentUri.startsWith("content://") || newDocumentUri.length > 2048) {
+            return@withTransaction false
+        }
+        val original = dao.getTrack(playlistId, previousMediaId)
+            ?: return@withTransaction false
+        if (original.mediaId == newDocumentUri) {
+            return@withTransaction false
+        }
+        if (dao.getTrack(playlistId, newDocumentUri) != null) {
+            return@withTransaction false
+        }
+        check(dao.deleteTrack(playlistId, previousMediaId) == 1)
+        dao.insertTrack(original.copy(mediaId = newDocumentUri, audioUri = newDocumentUri))
+        check(dao.touchPlaylist(playlistId, System.currentTimeMillis()) == 1)
+        true
+    }
+
     /** Adds cloud metadata without replacing any existing local playlist/track. */
     suspend fun mergeCloudPlaylist(
         playlist: LocalPlaylist,
