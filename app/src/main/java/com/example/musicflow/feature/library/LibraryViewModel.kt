@@ -42,14 +42,15 @@ class LibraryViewModel(
 
     private var scanJob: Job? = null
 
-    fun refresh() {
+    fun refresh(includeGenres: Boolean = false) {
         scanJob?.cancel()
 
         scanJob = viewModelScope.launch {
             _uiState.value = LibraryUiState.Loading
 
             try {
-                val songs = repository.getSongs()
+                val songs = if (includeGenres) repository.getSongsWithGenres()
+                    else repository.getSongs()
 
                 _uiState.value = if (songs.isEmpty()) {
                     LibraryUiState.Empty

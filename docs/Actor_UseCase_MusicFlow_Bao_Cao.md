@@ -84,6 +84,10 @@ Trạng thái quy ước: **Đã có** = mã nguồn có và đã có QA phù h�
 3. PlatformAdmin không được tác động Owner hay tự nâng quyền; mọi thay đổi nghiệp vụ quan trọng được audit.
 4. Developer có menu kỹ thuật ở bản debug, không có quyền quản trị mặc định.
 
+**UC-G19 — Offline Discovery và Nhạc đã chọn v3 (2026-11-07):** Guest/Free/Premium → Thư viện → Chọn tệp nhạc bằng DocumentsUI → ứng dụng lưu URI/metadata nếu có persisted READ và tệp còn đọc được → Thư viện → Nhạc đã chọn → phát lại, yêu thích, thêm playlist và queue. Các file hợp lệ được đưa vào Smart Library, không tính trùng URI; khi mất quyền đọc, hiện thông báo **Chọn lại** hoặc **Bỏ lối tắt, không xóa file gốc**. Không cần quyền quét toàn thiết bị để sử dụng tab này, không sao chép âm thanh, không chạm quyền backend. **QA: 199 JVM + 98 Android hồi quy + 2 Android nhạc thật + SAF WAV + JSON DocumentsUI + 4 Web Admin PASS**, ký QA/cài/cold launch APK v3 API30 PASS. Chưa test tất cả provider/thiết bị thật hoặc tự đưa tệp trước v3 vào catalog; xem [Offline_Discovery_v3.md](Offline_Discovery_v3.md).
+
+**UC-G20 — Tìm nhanh và duyệt thư viện lớn (Library Performance & UX v4, 2026-11-07):** Guest/Free/Premium → Thư viện → Bài hát hoặc Nhạc đã chọn → tìm theo bài/nghệ sĩ có/không dấu → xóa từ khóa, sắp xếp, chỉ hiện yêu thích → phát bài hoặc toàn bộ danh sách đã lọc đúng thứ tự/index; nếu chưa cấp quyền quét, dùng lối **Tiếp tục với nhạc đã chọn**. Tab Thể loại chỉ tải truy vấn genre khi người nghe mở tab, không sửa cloud/playlist/Room. **QA 199 JVM + 98 Android regression + 7 Android mới + 2 MediaStore WAV + 1 real SAF MainActivity + 1 real SAF Quick Add + 1 JSON + 4 Web Admin PASS**; APK v4 ký QA/cài/cold launch API30. Không suy diễn thành benchmark thiết bị thật; xem [Library_Performance_UX_v4.md](Library_Performance_UX_v4.md).
+
 ## 4. Sơ đồ Use Case giản lược (Mermaid)
 
 ### Người nghe

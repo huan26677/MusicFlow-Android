@@ -16,6 +16,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.musicflow.feature.player.PickedAudioFile
+import com.example.musicflow.core.media.LocalPickedMusicStore
+import com.example.musicflow.core.media.PickedMusicRecord
 import com.example.musicflow.feature.player.PlayerViewModel
 import com.example.musicflow.core.lyrics.LocalLyricsRepository
 import com.example.musicflow.core.lyrics.LyricsUiState
@@ -140,6 +142,27 @@ private val pickLyrics = registerForActivityResult(
                     }
                 }
 
+                // Document picker permissions remain local to this app. A shortcut is
+                // remembered only if a permanent READ grant was actually obtained.
+                withContext(Dispatchers.IO) {
+                    // Saving shortcuts is best-effort; the original picker must
+                    // still play a file if preferences cannot be written.
+                    runCatching {
+                        val now = System.currentTimeMillis() / 1000L
+                        LocalPickedMusicStore.getInstance(applicationContext).remember(
+                            files.map { file ->
+                                PickedMusicRecord(
+                                    uri = file.uri.toString(),
+                                    title = file.title,
+                                    artist = file.artist ?: "Không rõ nghệ sĩ",
+                                    addedSeconds = now,
+                                    durationMs = getEmbeddedDuration(file.uri)
+                                )
+                            }
+                        )
+                    }
+                }
+
                 // Chỉ tác vụ chưa bị hủy mới được dùng
                 // để cập nhật hàng đợi phát nhạc.
                 playerViewModel.playPickedFiles(files)
@@ -194,6 +217,19 @@ private val pickLyrics = registerForActivityResult(
             runCatching {
                 retriever.release()
             }
+        }
+    }
+
+    private fun getEmbeddedDuration(uri: Uri): Long {
+        val retriever = MediaMetadataRetriever()
+        return try {
+            retriever.setDataSource(this, uri)
+            retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                ?.toLongOrNull()?.coerceAtLeast(0L) ?: 0L
+        } catch (_: Exception) {
+            0L
+        } finally {
+            runCatching { retriever.release() }
         }
     }
 

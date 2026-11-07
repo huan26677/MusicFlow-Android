@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.musicflow.core.media.DeviceSong
+import com.example.musicflow.core.media.PickedMusicRecord
 import com.example.musicflow.core.playback.PlayerUiState
 import com.example.musicflow.feature.home.HomeHistoryUiState
 import com.example.musicflow.feature.home.HomeScreen
@@ -221,5 +222,88 @@ class SmartLibraryUiTest {
         compose.onNodeWithTag("smart-library-content").performScrollToIndex(3)
         compose.onNodeWithText("Xem mục Bài hát").performClick()
         compose.onNodeWithText("Thư viện chưa có nhạc").assertExists()
+    }
+
+    @Test fun pickedTabNeedsNoMediaStorePermissionAndOnlyPlaysReadableTracks() {
+        val chosen = song(91, "Đã chọn: Bài hát QA").copy(
+            uri = Uri.parse("content://com.example.qa/doc/91"),
+            mediaId = "content://com.example.qa/doc/91"
+        )
+        val missing = PickedMusicRecord("content://com.example.qa/doc/lost",
+            "Nhạc đã thất lạc", "QA", 1L)
+        var played = emptyList<DeviceSong>()
+        var forgotten = ""
+        compose.setContent {
+            MusicFlowTheme {
+                LibraryScreen(
+                    uiState = LibraryUiState.Idle, hasPermission = false,
+                    onBack = {}, onPickManual = {}, onRefresh = {},
+                    onSongSelected = { items, _ -> played = items }, onAddToPlaylist = {},
+                    pickedSongs = listOf(chosen), unavailablePicked = listOf(missing),
+                    onForgetPicked = { forgotten = it }
+                )
+            }
+        }
+        compose.onNodeWithTag("library-category-picked").performClick()
+        compose.onNodeWithText("1 bài sẵn sàng · 1 bài cần chọn lại").assertExists()
+        compose.onNodeWithText(chosen.title).performClick()
+        compose.runOnIdle { assertEquals(listOf(chosen.uri), played.map { it.uri }) }
+        compose.onNodeWithTag("picked-music-list").performScrollToIndex(2)
+        compose.onNodeWithTag("picked-forget-${missing.uri.hashCode()}").performClick()
+        compose.runOnIdle { assertEquals(missing.uri, forgotten) }
+    }
+
+    @Test fun pickedTrackIsIncludedInSmartMixEvenWithEmptyMediaStore() {
+        val chosen = song(77, "Nhạc WAV đã chọn").copy(
+            uri = Uri.parse("content://com.example.qa/doc/77"),
+            mediaId = "content://com.example.qa/doc/77"
+        )
+        var selected = emptyList<DeviceSong>()
+        compose.setContent {
+            MusicFlowTheme {
+                LibraryScreen(
+                    uiState = LibraryUiState.Empty, hasPermission = true,
+                    initialShowSmart = true, pickedSongs = listOf(chosen),
+                    onBack = {}, onPickManual = {}, onRefresh = {},
+                    onSongSelected = { items, _ -> selected = items },
+                    onAddToPlaylist = {}
+                )
+            }
+        }
+        compose.onNodeWithText("Hiển thị 1 / 1 bài").assertExists()
+        compose.onNodeWithTag("smart-play-all").performClick()
+        compose.runOnIdle { assertEquals(chosen.uri, selected.single().uri) }
+    }
+
+    @Test fun pickedTrackAndMediaStoreDuplicateAppearOnlyOnceInSmartMix() {
+        val track = song(86, "Nhạc trùng nguồn")
+        compose.setContent {
+            MusicFlowTheme {
+                LibraryScreen(
+                    uiState = LibraryUiState.Success(listOf(track)),
+                    hasPermission = true, initialShowSmart = true,
+                    pickedSongs = listOf(track),
+                    onBack = {}, onPickManual = {}, onRefresh = {},
+                    onSongSelected = { _, _ -> }, onAddToPlaylist = {}
+                )
+            }
+        }
+        compose.onNodeWithText("Hiển thị 1 / 1 bài").assertExists()
+    }
+
+    @Test fun pickedEmptyStateExplainsHowToAddFiles() {
+        var opened = 0
+        compose.setContent {
+            MusicFlowTheme {
+                LibraryScreen(
+                    uiState = LibraryUiState.Empty, hasPermission = false,
+                    onBack = {}, onPickManual = { opened++ }, onRefresh = {},
+                    onSongSelected = { _, _ -> }, onAddToPlaylist = {}
+                )
+            }
+        }
+        compose.onNodeWithTag("library-category-picked").performClick()
+        compose.onNodeWithText("Chưa có nhạc đã chọn").assertExists()
+        compose.onNodeWithText("0 bài sẵn sàng · 0 bài cần chọn lại").assertExists()
     }
 }

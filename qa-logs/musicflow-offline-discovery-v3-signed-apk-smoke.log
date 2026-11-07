@@ -1,0 +1,13 @@
+﻿SIGNING_CHECK=PASS
+APK_EXISTS=
+True
+package:/data/app/~~inS9NCZ0Tl4Bm8Ga4h1nSg==/com.example.musicflow-J0iWwD6J02gfA8h1SZ7hDQ==/base.apk
+Starting: Intent { cmp=com.example.musicflow/.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: com.example.musicflow/.MainActivity
+TotalTime: 1757
+WaitTime: 1774
+Complete
+APP_PID=9334
+OFFLINE_DISCOVERY_V3_SIGNED_APK_SMOKE=PASS

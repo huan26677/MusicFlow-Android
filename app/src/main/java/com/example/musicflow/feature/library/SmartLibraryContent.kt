@@ -25,6 +25,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.smart.SmartLibraryRules
@@ -36,7 +38,7 @@ import com.example.musicflow.ui.components.MusicFlowStatusPanel
 import com.example.musicflow.ui.components.OceanFlowCard
 import com.example.musicflow.ui.components.OceanFlowSectionTitle
 
-/** Dynamic collections from currently visible offline MediaStore tracks only. */
+/** Dynamic collections from readable MediaStore and explicitly picked local documents. */
 @Composable
 fun SmartLibraryContent(
     songs: List<DeviceSong>,
@@ -47,7 +49,8 @@ fun SmartLibraryContent(
     onToggleFavorite: (DeviceSong) -> Unit,
     onQueueNext: ((DeviceSong) -> Unit)? = null,
     onQueueEnd: ((DeviceSong) -> Unit)? = null,
-    onBrowseSongs: (() -> Unit)? = null
+    onBrowseSongs: (() -> Unit)? = null,
+    browseActionLabel: String = "Xem mục Bài hát"
 ) {
     var selectedKindName by rememberSaveable { mutableStateOf(SmartPlaylistKind.MIX.name) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
@@ -77,12 +80,12 @@ fun SmartLibraryContent(
             OceanFlowCard {
                 OceanFlowSectionTitle("Playlist thông minh")
                 Text(
-                    "Tự cập nhật theo nhạc offline đã quét, yêu thích và lịch sử nghe. " +
+                    "Tự cập nhật theo nhạc đã quét, tệp đã chọn, yêu thích và lịch sử nghe. " +
                         "Không tạo bản sao playlist hay thay đổi tệp nhạc.",
                     style = MaterialTheme.typography.bodySmall
                 )
-                Text("Chỉ tính những bài còn có trong thư viện đang quét; " +
-                    "các tệp SAF ngoài MediaStore có thể không xuất hiện.",
+                Text("Chỉ tính bài offline còn truy cập được; " +
+                    "tệp chọn thủ công cần quyền đọc đã lưu.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.labelSmall)
             }
@@ -125,7 +128,8 @@ fun SmartLibraryContent(
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
                             IconButton(onClick = { searchQuery = "" },
-                                modifier = Modifier.testTag("smart-search-clear")) {
+                                modifier = Modifier.testTag("smart-search-clear")
+                                    .semantics { contentDescription = "Xóa từ khóa tìm kiếm" }) {
                                 Text("✕")
                             }
                         }
@@ -165,7 +169,7 @@ fun SmartLibraryContent(
                     },
                     actionLabel = when {
                         searchQuery.isNotBlank() -> "Xóa bộ lọc"
-                        onBrowseSongs != null -> "Xem mục Bài hát"
+                        onBrowseSongs != null -> browseActionLabel
                         else -> null
                     },
                     onAction = if (searchQuery.isNotBlank()) ({ searchQuery = "" })

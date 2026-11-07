@@ -27,9 +27,9 @@ object SongSearch {
      * already used by the original song search.
      */
     fun matchesText(text: String, query: String): Boolean {
-        val normalizedQuery = normalize(query)
+        val normalizedQuery = normalizeForSearch(query)
         if (normalizedQuery.isEmpty()) return false
-        val searchableText = normalize(text)
+        val searchableText = normalizeForSearch(text)
         return normalizedQuery.split(' ').all { keyword ->
             searchableText.contains(keyword)
         }
@@ -63,7 +63,7 @@ object SongSearch {
      * - Chuyển đ thành d
      * - Gộp khoảng trắng liên tiếp
      */
-    private fun normalize(text: String): String {
+    fun normalizeForSearch(text: String): String {
         val decomposed = Normalizer.normalize(
             text,
             Normalizer.Form.NFD

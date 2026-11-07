@@ -35,6 +35,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.media.MediaStoreLocalMusicRepository
+import com.example.musicflow.core.media.LocalPickedMusicStore
+import com.example.musicflow.core.media.PickedMusicInspection
+import com.example.musicflow.core.media.PickedMusicRecord
 import com.example.musicflow.core.history.RecentSong
 import com.example.musicflow.core.history.RoomRecentHistoryRepository
 import com.example.musicflow.core.history.local.RecentHistoryDatabase
@@ -78,6 +81,14 @@ fun LibraryRoute(
     }
     val recentSongs by remember(historyRepository) { historyRepository.observeRecent() }
         .collectAsStateWithLifecycle(initialValue = emptyList())
+    val pickedStore = remember(context) { LocalPickedMusicStore.getInstance(context) }
+    val savedPicked by pickedStore.records.collectAsStateWithLifecycle()
+    var pickedInspection by remember { mutableStateOf(PickedMusicInspection()) }
+    var pickedRefresh by remember { mutableIntStateOf(0) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { pickedRefresh++ }
+    LaunchedEffect(savedPicked, pickedRefresh) {
+        pickedInspection = pickedStore.inspect()
+    }
 
     val factory = remember(repository) {
         LibraryViewModel.factory(repository)
@@ -85,6 +96,7 @@ fun LibraryRoute(
 
     val libraryViewModel: LibraryViewModel =
         viewModel(factory = factory)
+    var genresEnabled by rememberSaveable { mutableStateOf(false) }
 
     val playlistViewModel = rememberPlaylistViewModel()
 
@@ -127,14 +139,14 @@ fun LibraryRoute(
     }
 
     LaunchedEffect(Unit) {
-        if (!hasPermission && !initialFavoritesOnly) {
+        if (!hasPermission && !initialFavoritesOnly && !initialShowSmart) {
             permissionLauncher.launch(permission)
         }
     }
 
     LaunchedEffect(hasPermission) {
         if (hasPermission) {
-            libraryViewModel.refresh()
+            libraryViewModel.refresh(includeGenres = genresEnabled)
         }
     }
 
@@ -148,7 +160,7 @@ fun LibraryRoute(
         initialShowSmart = initialShowSmart,
         onRefresh = {
             if (hasPermission) {
-                libraryViewModel.refresh()
+                libraryViewModel.refresh(includeGenres = genresEnabled)
             } else {
                 permissionLauncher.launch(permission)
             }
@@ -162,6 +174,15 @@ fun LibraryRoute(
         favoriteSongUris = favoriteSongUris,
         favoriteSongDetails = favoriteSongDetails,
         recentSongs = recentSongs,
+        pickedSongs = pickedInspection.available,
+        unavailablePicked = pickedInspection.unavailable,
+        onGenresSelected = {
+            if (hasPermission && !genresEnabled) {
+                genresEnabled = true
+                libraryViewModel.refresh(includeGenres = true)
+            }
+        },
+        onForgetPicked = pickedStore::forget,
         onToggleFavorite = { song ->
             favoritesStore.toggleSong(
                 uri = song.uri,
@@ -205,7 +226,11 @@ fun LibraryScreen(
     initialFavoritesOnly: Boolean = false,
     initialShowAlbums: Boolean = false,
     recentSongs: List<RecentSong> = emptyList(),
-    initialShowSmart: Boolean = false
+    initialShowSmart: Boolean = false,
+    pickedSongs: List<DeviceSong> = emptyList(),
+    unavailablePicked: List<PickedMusicRecord> = emptyList(),
+    onForgetPicked: (String) -> Unit = {},
+    onGenresSelected: () -> Unit = {}
 ) {
     var favoritesOnly by rememberSaveable(initialFavoritesOnly) {
         mutableStateOf(initialFavoritesOnly)
@@ -222,9 +247,19 @@ fun LibraryScreen(
         mutableStateOf(LibrarySongSort.TITLE)
     }
     var sortMenuExpanded by remember { mutableStateOf(false) }
+    var songSearchQuery by rememberSaveable { mutableStateOf("") }
+
+    // A saved category can be restored after process restart; load metadata
+    // even when the user did not tap Thể loại again.
+    LaunchedEffect(selectedCategory, hasPermission) {
+        if (selectedCategory == "genres" && hasPermission) onGenresSelected()
+    }
 
     val scannedSongs = (uiState as? LibraryUiState.Success)
         ?.songs.orEmpty()
+    val smartSongs = remember(scannedSongs, pickedSongs) {
+        (scannedSongs + pickedSongs).distinctBy { it.uri.toString() }
+    }
 
     val pickedFavorites = remember(
         favoriteSongUris,
@@ -307,39 +342,68 @@ fun LibraryScreen(
                 }
             }
 
-            if (!hasPermission && (!favoritesOnly || selectedCategory != "songs")) {
+            Row(
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(
+                    "songs" to "Bài hát", "picked" to "Nhạc đã chọn",
+                    "smart" to "Thông minh", "albums" to "Album",
+                    "artists" to "Nghệ sĩ", "genres" to "Thể loại"
+                ).forEach { (category, label) ->
+                    FilterChip(
+                        selected = selectedCategory == category,
+                        onClick = { selectedCategory = category },
+                        label = { Text(label) },
+                        modifier = Modifier.testTag("library-category-$category")
+                    )
+                }
+            }
+
+            if (selectedCategory == "picked") {
+                PickedMusicContent(
+                    songs = pickedSongs,
+                    missing = unavailablePicked,
+                    favoriteSongUris = favoriteSongUris,
+                    onSongSelected = onSongSelected,
+                    onAddToPlaylist = onAddToPlaylist,
+                    onToggleFavorite = onToggleFavorite,
+                    onQueueNext = onQueueNext,
+                    onQueueEnd = onQueueEnd,
+                    onForget = onForgetPicked,
+                    onPickManual = onPickManual
+                )
+            } else if (selectedCategory == "smart" && !hasPermission) {
+                Text(
+                    "Bạn vẫn có thể nghe nhạc đã chọn mà không cần cấp quyền quét thiết bị.",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                SmartLibraryContent(
+                    songs = pickedSongs, favoriteSongUris = favoriteSongUris,
+                    recentSongUris = recentSongs.map { it.audioUri },
+                    onSongSelected = onSongSelected, onAddToPlaylist = onAddToPlaylist,
+                    onToggleFavorite = onToggleFavorite,
+                    onQueueNext = onQueueNext, onQueueEnd = onQueueEnd,
+                    onBrowseSongs = { selectedCategory = "picked" },
+                    browseActionLabel = "Xem nhạc đã chọn"
+                )
+            } else if (!hasPermission && (!favoritesOnly || selectedCategory != "songs")) {
                 MusicFlowStatusPanel(
                     kind = MusicFlowStatusKind.PERMISSION,
-                    title = "Cần quyền truy cập nhạc",
-                    description = "Cho phép đọc âm thanh để quét thư viện Android. " +
-                        "Bạn vẫn có thể chọn tệp âm thanh riêng bằng nút Chọn tệp nhạc. " +
-                        "Nếu đã từ chối nhiều lần, hãy kiểm tra quyền trong Cài đặt.",
-                    actionLabel = "Cấp quyền",
+                    title = "Chỉ cần cấp quyền nếu muốn quét cả máy",
+                    description = "Cấp quyền Âm thanh để hiển thị toàn bộ nhạc Android. " +
+                        "Hoặc dùng Nhạc đã chọn để nghe file riêng mà không cần cấp quyền. " +
+                        "Nếu đã từ chối nhiều lần, mở Cài đặt ứng dụng để cho phép.",
+                    actionLabel = "Cấp quyền đọc âm thanh",
                     onAction = onRefresh
                 )
+                OutlinedButton(
+                    onClick = { selectedCategory = "picked" },
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                        .testTag("library-permission-open-picked")
+                ) { Text("Tiếp tục với nhạc đã chọn") }
 
             } else {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    listOf(
-                        "songs" to "Bài hát",
-                        "smart" to "Thông minh",
-                        "albums" to "Album",
-                        "artists" to "Nghệ sĩ",
-                        "genres" to "Thể loại"
-                    ).forEach { (category, label) ->
-                        FilterChip(
-                            selected = selectedCategory == category,
-                            onClick = { selectedCategory = category },
-                            label = { Text(label) }
-                        )
-                    }
-                }
-
                 when (val current = displayUiState) {
 
                     LibraryUiState.Idle -> {
@@ -363,7 +427,7 @@ fun LibraryScreen(
                     LibraryUiState.Empty -> {
                         if (selectedCategory == "smart") {
                             SmartLibraryContent(
-                                songs = emptyList(),
+                                songs = pickedSongs,
                                 favoriteSongUris = favoriteSongUris,
                                 recentSongUris = recentSongs.map { it.audioUri },
                                 onSongSelected = onSongSelected,
@@ -391,12 +455,26 @@ fun LibraryScreen(
                             actionLabel = "Thử lại",
                             onAction = onRefresh
                         )
+                        if (selectedCategory == "smart" && pickedSongs.isNotEmpty()) {
+                            SmartLibraryContent(
+                                songs = pickedSongs,
+                                favoriteSongUris = favoriteSongUris,
+                                recentSongUris = recentSongs.map { it.audioUri },
+                                onSongSelected = onSongSelected,
+                                onAddToPlaylist = onAddToPlaylist,
+                                onToggleFavorite = onToggleFavorite,
+                                onQueueNext = onQueueNext,
+                                onQueueEnd = onQueueEnd,
+                                onBrowseSongs = { selectedCategory = "picked" },
+                                browseActionLabel = "Xem nhạc đã chọn"
+                            )
+                        }
                     }
 
                     is LibraryUiState.Success -> {
                         if (selectedCategory == "smart") {
                             SmartLibraryContent(
-                                songs = current.songs,
+                                songs = smartSongs,
                                 favoriteSongUris = favoriteSongUris,
                                 recentSongUris = recentSongs.map { it.audioUri },
                                 onSongSelected = onSongSelected,
@@ -448,17 +526,29 @@ fun LibraryScreen(
                                 onQueueEnd = onQueueEnd
                             )
                         } else {
-                            val unsortedSongs = if (favoritesOnly) {
-                            current.songs.filter {
-                                it.uri.toString() in favoriteSongUris
-                            } + pickedFavorites
-                        } else {
-                            current.songs
-                        }
-                        val visibleSongs = remember(unsortedSongs, songSort) {
+                            val unsortedSongs = remember(current.songs, favoritesOnly,
+                                favoriteSongUris, pickedFavorites) {
+                                if (favoritesOnly) current.songs.filter {
+                                    it.uri.toString() in favoriteSongUris
+                                } + pickedFavorites else current.songs
+                            }
+                        val sortedSongs = remember(unsortedSongs, songSort) {
                             sortLibrarySongs(unsortedSongs, songSort)
                         }
+                        val searchIndex = remember(sortedSongs) {
+                            LibrarySongSearchIndex(sortedSongs)
+                        }
+                        val visibleSongs = remember(searchIndex, songSearchQuery) {
+                            searchIndex.filter(songSearchQuery)
+                        }
 
+                        // One virtualized scrolling surface. On large text sizes the
+                        // filters and sort controls scroll instead of squeezing song rows.
+                        LazyColumn(
+                            modifier = Modifier.weight(1f).testTag("library-songs-list"),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                        item {
                         FilterChip(
                             selected = favoritesOnly,
                             onClick = { favoritesOnly = !favoritesOnly },
@@ -469,24 +559,70 @@ fun LibraryScreen(
                                 )
                             }
                         )
+                        }
+
+                        item {
+                        OutlinedTextField(
+                            value = songSearchQuery,
+                            onValueChange = { songSearchQuery = it.take(80) },
+                            label = { Text("Tìm trong Bài hát") },
+                            placeholder = { Text("Tên bài hoặc nghệ sĩ, có thể không dấu") },
+                            singleLine = true,
+                            trailingIcon = {
+                                if (songSearchQuery.isNotEmpty()) {
+                                    IconButton(
+                                        onClick = { songSearchQuery = "" },
+                                        modifier = Modifier.testTag("library-search-clear")
+                                            .semantics {
+                                                contentDescription = "Xóa tìm kiếm bài hát"
+                                            }
+                                    ) { Text("✕") }
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth().testTag("library-search-field")
+                        )
+                        }
+
+                        item {
+                        Text(
+                            "Hiển thị ${visibleSongs.size} / ${sortedSongs.size} bài",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.testTag("library-search-count")
+                        )
+                        }
 
                         if (visibleSongs.isEmpty()) {
+                            item {
                             MusicFlowStatusPanel(
                                 kind = MusicFlowStatusKind.EMPTY,
-                                title = if (favoritesOnly) "Chưa có bài hát yêu thích"
+                                title = if (songSearchQuery.isNotBlank())
+                                    "Không tìm thấy bài phù hợp"
+                                    else if (favoritesOnly) "Chưa có bài hát yêu thích"
                                     else "Chưa có bài hát trong thư viện",
-                                description = if (favoritesOnly) {
+                                description = if (songSearchQuery.isNotBlank()) {
+                                    "Thử tên bài hoặc nghệ sĩ ngắn hơn, hoặc xóa từ khóa tìm kiếm."
+                                } else if (favoritesOnly) {
                                     "Chạm vào hình trái tim trên bài hát để lưu vào mục yêu thích."
                                 } else {
                                     "Hãy quét lại thư viện hoặc chọn tệp âm thanh từ thiết bị."
                                 },
-                                actionLabel = if (favoritesOnly) null else "Quét lại",
-                                onAction = if (favoritesOnly) null else onRefresh
+                                actionLabel = when {
+                                    songSearchQuery.isNotBlank() -> "Xóa tìm kiếm"
+                                    favoritesOnly -> null
+                                    else -> "Quét lại"
+                                },
+                                onAction = if (songSearchQuery.isNotBlank())
+                                    ({ songSearchQuery = "" })
+                                    else if (favoritesOnly) null else onRefresh
                             )
+                            }
                         }
 
+                        item {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -517,12 +653,8 @@ fun LibraryScreen(
                                 }
                             }
                         }
+                        }
 
-                        LazyColumn(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement =
-                                Arrangement.spacedBy(4.dp)
-                        ) {
                             itemsIndexed(
                                 items = visibleSongs,
                                 key = { _, song -> song.uri.toString() }

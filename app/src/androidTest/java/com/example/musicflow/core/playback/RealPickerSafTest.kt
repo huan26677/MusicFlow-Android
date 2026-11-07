@@ -26,6 +26,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import com.example.musicflow.MainActivity
+import com.example.musicflow.core.media.LocalPickedMusicStore
 import com.example.musicflow.core.history.RoomRecentHistoryRepository
 import com.example.musicflow.core.history.local.RecentHistoryDatabase
 import com.google.common.util.concurrent.ListenableFuture
@@ -735,6 +736,16 @@ Log.i(
                 "MusicFlowRealPickerQA",
                 "PASS realPickerPersistedRead"
             )
+            val pickedStore = LocalPickedMusicStore.getInstance(context)
+            composeRule.waitUntil(15_000) {
+                pickedStore.records.value.any { it.uri == selectedUri.toString() }
+            }
+            val saved = pickedStore.records.value.first { it.uri == selectedUri.toString() }
+            assertTrue("Saved shortcut has no title", saved.title.isNotBlank())
+            val visible = runBlocking { pickedStore.inspect() }.available
+            assertTrue("Persisted WAV is missing from offline discovery",
+                visible.any { it.uri == selectedUri })
+            Log.i("MusicFlowRealPickerQA", "PASS pickedCatalogSavedAndReadable")
         } finally {
             controller?.let { media ->
                 instrumentation.runOnMainSync {
@@ -750,6 +761,9 @@ Log.i(
             }
 
             created.get()?.let { uri ->
+                // The QA document is about to be deleted: don't leave an
+                // intentionally broken user-facing shortcut on the emulator.
+                LocalPickedMusicStore.getInstance(context).forget(uri.toString())
                 runBlocking {
                     runCatching {
                         RoomRecentHistoryRepository(

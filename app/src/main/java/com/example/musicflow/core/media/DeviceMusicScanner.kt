@@ -5,7 +5,10 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
 data class DeviceSong(
@@ -25,11 +28,13 @@ data class DeviceSong(
 
 object DeviceMusicScanner {
 
-    suspend fun scan(context: Context): List<DeviceSong> =
+    suspend fun scan(
+        context: Context,
+        includeGenres: Boolean = true
+    ): List<DeviceSong> =
         withContext(Dispatchers.IO) {
 
             val songs = mutableListOf<DeviceSong>()
-            val genresBySongId = loadGenres(context)
 
             val collection =
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
@@ -46,9 +51,20 @@ object DeviceMusicScanner {
                 MediaStore.Audio.Media.DATE_ADDED
             )
 
-            // Chỉ lấy file Android phân loại là nhạc.
-            val selection =
-                "${MediaStore.Audio.Media.IS_MUSIC} != 0"
+            // Some providers mark actual songs as IS_MUSIC=0. Permit long,
+            // recognized audio from Music/ while excluding short notifications,
+            // calls and recordings in unrelated folders. Other files remain
+            // accessible explicitly through the document picker.
+            val recognizedAudioTypes = listOf(
+                "audio/mpeg", "audio/mp4", "audio/flac", "audio/x-flac",
+                "audio/wav", "audio/x-wav", "audio/ogg", "audio/opus",
+                "audio/aac", "audio/x-m4a"
+            )
+            val fallbackTypes = recognizedAudioTypes.joinToString(",") { "'$it'" }
+            val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0 OR (" +
+                "${MediaStore.Audio.Media.RELATIVE_PATH} LIKE 'Music/%' AND " +
+                "${MediaStore.Audio.Media.DURATION} >= 30000 AND " +
+                "${MediaStore.Audio.Media.MIME_TYPE} IN ($fallbackTypes))"
 
             val sortOrder =
                 "${MediaStore.Audio.Media.TITLE} ASC"
@@ -100,6 +116,7 @@ object DeviceMusicScanner {
 
                 while (cursor.moveToNext()) {
 
+                    if (songs.size % 64 == 0) currentCoroutineContext().ensureActive()
                     val id = cursor.getLong(idColumn)
 
                     val filename =
@@ -163,7 +180,6 @@ object DeviceMusicScanner {
                             albumId = albumId,
                             album = albumName,
                             artistId = artistId,
-                            genres = genresBySongId[id].orEmpty(),
                             dateAddedSeconds = if (
                                 dateAddedColumn < 0 || cursor.isNull(dateAddedColumn)
                             ) 0L else cursor.getLong(dateAddedColumn).coerceAtLeast(0L)
@@ -172,14 +188,24 @@ object DeviceMusicScanner {
                 }
             }
 
-            songs
+            // Genre providers need one additional query per genre.
+            // Defer these expensive queries until the listener opens Thể loại.
+            if (!includeGenres || songs.isEmpty()) {
+                songs
+            } else {
+                val bySong = loadGenres(context, songs.map { it.id }.toHashSet())
+                songs.map { song -> song.copy(genres = bySong[song.id].orEmpty()) }
+            }
         }
 
     /**
      * Genre metadata is optional on some Android MediaStore providers.
      * An unavailable genre table must never prevent loading the song library.
      */
-    private fun loadGenres(context: Context): Map<Long, List<String>> {
+    private suspend fun loadGenres(
+        context: Context,
+        scannedSongIds: Set<Long>
+    ): Map<Long, List<String>> {
         return try {
             val result = mutableMapOf<Long, MutableSet<String>>()
             context.contentResolver.query(
@@ -200,6 +226,7 @@ object DeviceMusicScanner {
                 )
 
                 while (genres.moveToNext()) {
+                    currentCoroutineContext().ensureActive()
                     val genreId = genres.getLong(idIndex)
                     val name = genres.getString(nameIndex)
                         ?.trim()
@@ -222,11 +249,14 @@ object DeviceMusicScanner {
                                 MediaStore.Audio.Genres.Members.AUDIO_ID
                             )
                             while (members.moveToNext()) {
-                                result.getOrPut(
-                                    members.getLong(songIdIndex)
-                                ) { linkedSetOf() }.add(name)
+                                val songId = members.getLong(songIdIndex)
+                                if (songId in scannedSongIds) {
+                                    result.getOrPut(songId) { linkedSetOf() }.add(name)
+                                }
                             }
                         }
+                    } catch (cancel: CancellationException) {
+                        throw cancel
                     } catch (error: Exception) {
                         Log.w(
                             "MusicFlowLibrary",
@@ -237,6 +267,8 @@ object DeviceMusicScanner {
                 }
             }
             result.mapValues { (_, names) -> names.toList() }
+        } catch (cancel: CancellationException) {
+            throw cancel
         } catch (error: Exception) {
             Log.w("MusicFlowLibrary", "Genres unavailable", error)
             emptyMap()
