@@ -79,6 +79,7 @@ __pycache__/
 !/qa-logs/musicflow-clear-journeys-v10-targeted-api33.log
 !/qa-logs/musicflow-clear-journeys-v10-baseline-api33.log
 !/qa-logs/musicflow-clear-journeys-v10-targeted-api36.log
+!/qa-logs/musicflow-clear-journeys-v10-targeted-api36-single-avd.log
 !/qa-logs/musicflow-clear-journeys-v10-signed-upgrade-api33.log
 
 # Operating system
