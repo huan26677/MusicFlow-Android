@@ -155,9 +155,15 @@ class ImpactDrivenRegressionTest(unittest.TestCase):
         self.assertEqual("full_required", result["mode"])
         self.assertIn("RELEASE_BACKUP", result["direct_modules"])
         command_list = qa.commands(result)
-        self.assertTrue(any("run-signed-upgrade-v9-qa.ps1" in c for c in command_list))
+        self.assertTrue(any("run-signed-upgrade-v10-qa.ps1" in c for c in command_list))
         self.assertFalse(any("am instrument" in c and "SignedApkUpgradeV6Test" in c
                              for c in command_list))
+
+    def test_online_rights_extra_test_uses_repo_root_compatible_invocation(self):
+        module = next(m for m in self.conf["modules"] if m["id"] == "ONLINE_RIGHTS")
+        self.assertIn("py -3 scripts/test_musicflow_licensed_upload.py", module["extra"])
+        self.assertNotIn("py -3 -m unittest scripts/test_musicflow_licensed_upload.py",
+                         module["extra"])
 
 
 if __name__ == "__main__":

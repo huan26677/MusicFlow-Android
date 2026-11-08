@@ -5,6 +5,13 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.musicflow.core.account.AccountIdentity
 import com.example.musicflow.core.account.MusicFlowAccess
@@ -80,14 +87,42 @@ class AccountHomeV2UiTest {
         render(AccountUiState(loading = false))
         compose.onNodeWithTag("account-guest").assertExists()
         compose.onNodeWithTag("account-demo-tools-toggle").assertExists()
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Đã thu gọn"))
         compose.onNodeWithTag("account-demo-center-open").assertDoesNotExist()
         compose.onNodeWithTag("account-demo-billing-open").assertDoesNotExist()
         compose.onNodeWithTag("account-demo-tools-toggle").performScrollTo().performClick()
+        compose.onNodeWithTag("account-demo-tools-toggle")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Đã mở"))
         compose.onNodeWithTag("account-demo-center-open").assertExists()
         compose.onNodeWithTag("account-demo-billing-open").assertExists()
         compose.onNodeWithTag("account-demo-tools-toggle").performScrollTo().performClick()
         compose.onNodeWithTag("account-demo-center-open").assertDoesNotExist()
         compose.onNodeWithTag("account-demo-billing-open").assertDoesNotExist()
+    }
+
+    @Test fun unconfiguredOnlineAccountExplainsOfflineAlternativeAndOpensLocalDemoForm() {
+        compose.setContent {
+            var mode by remember { mutableStateOf(false) }
+            MusicFlowTheme {
+                AccountScreen(
+                    state = AccountUiState(loading = false, configured = false, demoMode = mode),
+                    themeMode = "system", onThemeModeChange = {},
+                    onEmailChange = {}, onPasswordChange = {}, onDisplayNameChange = {},
+                    onSignIn = {}, onSignUp = {}, onGoogleSignIn = {},
+                    onSaveProfile = {}, onSignOut = {}, onSyncLibrary = {},
+                    onSyncHistory = {}, onRelink = { _, _ -> },
+                    onDeleteCloudPlaylist = {}, onDeleteCloudFavorite = {},
+                    onDemoModeChange = { mode = it }
+                )
+            }
+        }
+        compose.onNodeWithTag("account-guest").assertExists()
+        compose.onNodeWithText("Đăng nhập trực tuyến chưa sẵn sàng").assertExists()
+        compose.onNodeWithTag("account-email").assertDoesNotExist()
+        compose.onNodeWithTag("account-online-unavailable-demo").performScrollTo().performClick()
+        compose.onNodeWithTag("account-email").assertExists()
+        compose.onNodeWithTag("account-online-unavailable-demo").assertDoesNotExist()
+        compose.onNodeWithTag("account-auth-demo-explanation").assertExists()
     }
 
     @Test fun signupShowsEmailConfirmationInstructionsWithoutAdminSettings() {

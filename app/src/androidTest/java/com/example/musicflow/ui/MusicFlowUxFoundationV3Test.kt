@@ -9,6 +9,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.musicflow.core.playback.PlayerUiState
 import com.example.musicflow.feature.home.HomeHistoryUiState
@@ -40,7 +43,11 @@ class MusicFlowUxFoundationV3Test {
         compose.onNodeWithTag("home-search-action").assertExists()
         compose.onNodeWithTag("home-playlist-action").assertDoesNotExist()
         compose.onNodeWithTag("home-smart-library-action").assertDoesNotExist()
+        compose.onNodeWithTag("home-more-actions-toggle")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Đã thu gọn"))
         compose.onNodeWithTag("home-more-actions-toggle").performScrollTo().performClick()
+        compose.onNodeWithTag("home-more-actions-toggle")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Đã mở"))
         compose.onNodeWithTag("home-playlist-action").assertExists()
         compose.onNodeWithTag("home-smart-library-action").assertExists()
     }

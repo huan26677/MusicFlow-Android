@@ -15,6 +15,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -211,6 +213,10 @@ fun HomeScreen(
                 TextButton(
                     onClick = { moreListeningActions = !moreListeningActions },
                     modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                        .semantics {
+                            stateDescription = if (moreListeningActions) "Đã mở"
+                                else "Đã thu gọn"
+                        }
                         .testTag("home-more-actions-toggle")
                 ) { Text(if (moreListeningActions) "Ẩn tùy chọn khác"
                     else "Playlist và tùy chọn khác") }

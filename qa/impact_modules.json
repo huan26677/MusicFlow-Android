@@ -169,7 +169,7 @@
       "requires": ["AUTH", "UI_ACCESS"],
       "tests": ["**/core/online/*Test.kt"],
       "smoke": ["OnlineRightsPolicyTest#missingRightsDefaultToDenied", "OnlineRightsPolicyTest#missingAttributionOrSourceBlocksPlayback"],
-      "extra": ["py -3 -m unittest scripts/test_musicflow_licensed_upload.py"]
+      "extra": ["py -3 scripts/test_musicflow_licensed_upload.py"]
     },
     {
       "id": "HOME_NAV", "name": "Trang chủ, mini-player, điều hướng",

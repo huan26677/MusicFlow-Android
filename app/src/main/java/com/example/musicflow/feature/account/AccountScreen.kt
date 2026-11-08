@@ -45,6 +45,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.input.KeyboardType
@@ -356,8 +358,19 @@ fun AccountScreen(
                 )
             }
             if (!state.configured && !state.demoMode) {
-                Text("Chưa cấu hình Supabase Auth cho bản build này.",
-                    color = MaterialTheme.colorScheme.error)
+                MusicFlowStatusPanel(
+                    kind = MusicFlowStatusKind.INFO,
+                    title = "Đăng nhập trực tuyến chưa sẵn sàng",
+                    description = "Bản cài này chưa kết nối tài khoản trực tuyến. " +
+                        "Bạn vẫn có thể nghe nhạc không cần đăng nhập hoặc tạo " +
+                        "tài khoản thử chỉ lưu trên điện thoại."
+                )
+                OutlinedButton(
+                    onClick = { onDemoModeChange(true) },
+                    enabled = !state.loading,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                        .testTag("account-online-unavailable-demo")
+                ) { Text("Dùng tài khoản thử trên máy") }
             } else {
                 OutlinedTextField(
                     value = state.email, onValueChange = onEmailChange,
@@ -591,6 +604,9 @@ fun AccountScreen(
         TextButton(
             onClick = { demoToolsExpanded = !demoToolsExpanded },
             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                .semantics {
+                    stateDescription = if (demoToolsExpanded) "Đã mở" else "Đã thu gọn"
+                }
                 .testTag("account-demo-tools-toggle")
         ) { Text(if (demoToolsExpanded) "Ẩn công cụ trình diễn đồ án"
             else "Khám phá 9 vai trò và Premium (mô phỏng)") }

@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.SystemClock
 import android.provider.MediaStore
+import android.util.Log
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -64,18 +65,46 @@ class PlaylistBackupRealPickerUiTest {
     private fun selectBackupDocument(filename: String): Boolean {
         val deadline = SystemClock.uptimeMillis() + 40_000L
         var openedDownloads = false
+        var tappedFile = false
         while (SystemClock.uptimeMillis() < deadline) {
+            // Android 13+ DocumentsUI sometimes needs more than 450 ms to
+            // deliver ActivityResult. Do not repeatedly tap after selection.
+            if (tappedFile && device.currentPackageName == context.packageName) return true
+            // Android 13 DocumentsUI uses multi-select mode for some providers:
+            // tapping the JSON highlights it and reveals a bottom SELECT
+            // confirmation. Without that click the picker never returns.
+            if (tappedFile) {
+                val select = device.findObject(By.text("SELECT"))
+                    ?: device.findObject(By.text("Select"))
+                    ?: device.findObject(By.desc("Select"))
+                if (select != null && !select.visibleBounds.isEmpty) {
+                    select.click()
+                    SystemClock.sleep(250)
+                }
+            }
             val file = device.findObject(By.text(filename))
-            if (file != null) {
+                ?: device.findObject(By.desc(filename))
+                ?: device.findObject(By.textContains(filename))
+            if (!tappedFile && file != null) {
                 val rect = file.visibleBounds
                 if (!rect.isEmpty) {
                     device.click(rect.centerX(), rect.centerY())
-                    SystemClock.sleep(450)
-                    if (device.currentPackageName == context.packageName) return true
+                    tappedFile = true
+                    val returnDeadline = SystemClock.uptimeMillis() + 6_000L
+                    while (SystemClock.uptimeMillis() < returnDeadline) {
+                        if (device.currentPackageName == context.packageName) return true
+                        val select = device.findObject(By.text("SELECT"))
+                            ?: device.findObject(By.text("Select"))
+                        if (select != null && !select.visibleBounds.isEmpty) {
+                            select.click()
+                        }
+                        SystemClock.sleep(150)
+                    }
                 }
             }
             if (!openedDownloads) {
                 val downloads = device.findObject(By.text("Downloads"))
+                    ?: device.findObject(By.text("Download"))
                 if (downloads != null) {
                     val rect = downloads.visibleBounds
                     if (!rect.isEmpty) {
@@ -95,6 +124,11 @@ class PlaylistBackupRealPickerUiTest {
             }
             SystemClock.sleep(350)
         }
+        val visible = device.findObjects(By.clazz("android.widget.TextView"))
+            .take(25).mapNotNull { it.text }.joinToString(" | ")
+        Log.e("MusicFlowJsonPickerQA",
+            "PICKER_TIMEOUT tapped=$tappedFile root=$openedDownloads " +
+                "package=${device.currentPackageName} visible=$visible")
         return false
     }
 

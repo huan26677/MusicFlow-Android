@@ -235,6 +235,13 @@ internal fun AccountRolePanel(
                                 workspaceButton(workspace, Modifier.fillMaxWidth())
                             }
                         }
+                        if (workspaces.size > 3) {
+                            Text(
+                                "Cuộn danh sách công việc phía trên để xem thêm lựa chọn.",
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.testTag("role-workspaces-scroll-hint")
+                            )
+                        }
                     } else {
                         Row(
                             modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
@@ -299,7 +306,7 @@ internal fun AccountRolePanel(
                         }
                     },
                     modifier = Modifier.fillMaxWidth().testTag("role-access-refresh")
-                ) { Text("Kiểm tra lại quyền từ Supabase") }
+                ) { Text("Làm mới quyền truy cập của tôi") }
             }
 
             if (checked) {

@@ -74,6 +74,13 @@ __pycache__/
 !/qa-logs/musicflow-simple-experience-v9-baseline-api30.log
 !/qa-logs/musicflow-simple-experience-v9-signed-upgrade-api30.log
 
+# v10: deny new transcripts by default; explicitly screen before Git upload.
+/qa-logs/*v10*.log
+!/qa-logs/musicflow-clear-journeys-v10-targeted-api33.log
+!/qa-logs/musicflow-clear-journeys-v10-baseline-api33.log
+!/qa-logs/musicflow-clear-journeys-v10-targeted-api36.log
+!/qa-logs/musicflow-clear-journeys-v10-signed-upgrade-api33.log
+
 # Operating system
 .DS_Store
 Thumbs.db

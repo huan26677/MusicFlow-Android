@@ -261,7 +261,7 @@ def commands(plan: dict[str, Any]) -> list[str]:
             # Both steps require an isolated AVD, APK signatures, seed before
             # verify, and install -r between them. Running either alone is wrong.
             lines.append(
-                ".\\scripts\\run-signed-upgrade-v9-qa.ps1 -Serial emulator-5580"
+                ".\\scripts\\run-signed-upgrade-v10-qa.ps1 -Serial emulator-5580"
                 "  # Dedicated fresh QA AVD; run full two-stage upgrade"
             )
             continue
