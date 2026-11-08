@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "policy": {
+    "direct": "Run every available case owned by the directly changed module.",
+    "dependent": "Run designated smoke/contract cases for every transitive downstream consumer.",
+    "risk": "Permission, Room/SAF persistence, roles/security, billing, manifest/build, or unknown source changes require full/acceptance review; a selective green run alone cannot close them.",
+    "release": "Final school demo APK, shared cross-module contract changes, and repeated failures also require full regression and signed upgrade verification.",
+    "no_claim": "Selection is a plan, not a test run or a PASS claim. Missing/unmapped test cases must be treated as coverage gaps."
+  },
+  "global_full_patterns": [
+    "app/build.gradle.kts", "build.gradle.kts", "settings.gradle.kts",
+    "gradle.properties", "gradle/**", "app/src/main/AndroidManifest.xml",
+    "app/src/main/java/com/example/musicflow/MainActivity.kt",
+    "app/src/main/java/com/example/musicflow/navigation/**",
+    ".github/workflows/**",
+    "app/src/main/java/com/example/musicflow/ui/theme/**"
+  ],
+  "high_risk_patterns": [
+    "app/src/main/java/com/example/musicflow/core/media/LocalPickedMusicStore.kt",
+    "app/src/main/java/com/example/musicflow/core/account/MusicFlowAccess.kt",
+    "app/src/main/java/com/example/musicflow/core/account/AccountApi.kt",
+    "app/src/main/java/com/example/musicflow/core/account/GoogleOAuthFlow.kt",
+    "app/src/main/java/com/example/musicflow/core/account/DemoPasswordHash.kt",
+    "app/src/main/java/com/example/musicflow/core/account/CloudLibrarySync.kt",
+    "app/src/main/java/com/example/musicflow/core/account/CloudHistorySync.kt",
+    "admin-web/**",
+    "app/src/main/java/com/example/musicflow/core/playlist/**Database*",
+    "app/src/main/java/com/example/musicflow/core/history/**Database*",
+    "app/src/main/java/com/example/musicflow/core/account/DemoBillingStore.kt",
+    "scripts/build-musicflow-demo-apk-v1.ps1",
+    "scripts/run-signed-upgrade-*.ps1"
+  ],
+  "non_runtime_patterns": [
+    "docs/**", "qa/**", "scripts/impact_regression.py",
+    "scripts/test_impact_regression.py", "scripts/project_brain_v2.py",
+    "scripts/test_project_brain_v2.py", "README.md", "AGENTS.md",
+    ".gitignore"
+  ],
+  "modules": [
+    {
+      "id": "MEDIA_SAF", "name": "MediaStore, tệp offline và quyền SAF",
+      "source": ["app/src/main/java/com/example/musicflow/core/media/**"],
+      "requires": [],
+      "tests": ["**/core/media/*Test.kt", "**/core/playback/RealPickerSafTest.kt", "**/core/playback/SafPermissionRestartTest.kt", "**/ui/PlaylistQuickAddRealSafUiTest.kt", "**/ui/OfflineReliabilityUiTest.kt"],
+      "smoke": ["OfflineDiscoveryMediaStoreTest#scansLongWavInMusicWhenProviderInitiallyMarksItNonMusic", "RealPickerSafTest#realOpenMultipleDocumentsGrantsPersistedReadAndPlays", "SafPermissionRestartTest#verifySafAfterForceStop"]
+    },
+    {
+      "id": "LIBRARY", "name": "Thư viện, album, nghệ sĩ, thể loại",
+      "source": ["app/src/main/java/com/example/musicflow/feature/library/**", "app/src/main/java/com/example/musicflow/core/catalog/**", "app/src/main/java/com/example/musicflow/feature/catalog/**"],
+      "requires": ["MEDIA_SAF", "FAVORITES"],
+      "tests": ["**/feature/library/LibraryAccessibilityV7Test.kt", "**/ui/LibraryPerformanceV4UiTest.kt", "**/core/playback/AdvancedLibraryRuntimeTest.kt", "**/ui/MusicFlowPlayerLibraryUxV3Test.kt"],
+      "smoke": ["LibraryPerformanceV4UiTest#songSearchPlaysOnlyFilteredQueueAndPreservesIndex", "LibraryAccessibilityV7Test#albumTracksStayVirtualizedInRealLibraryAt200Percent"]
+    },
+    {
+      "id": "SEARCH", "name": "Tìm kiếm không dấu, chỉ mục, lọc nhóm",
+      "source": ["app/src/main/java/com/example/musicflow/feature/search/**"],
+      "requires": ["MEDIA_SAF", "LIBRARY"],
+      "tests": ["**/feature/search/*Test.kt", "**/core/playback/AdvancedSearchRuntimeTest.kt", "**/ui/MusicFlowSearchUxV3Test.kt", "**/ui/AccessibilityOfflineSearchV5Test.kt"],
+      "smoke": ["AdvancedSearchIndexV8Test#refreshRevocationAndQueryChangesDoNotReuseStaleCatalog", "AdvancedSearchRuntimeTest#searchRouteAccentInsensitivePlaybackAndQueueActions"]
+    },
+    {
+      "id": "PLAYBACK", "name": "Player service, hàng đợi, runtime, audio focus",
+      "source": ["app/src/main/java/com/example/musicflow/core/playback/**", "app/src/main/java/com/example/musicflow/feature/player/**"],
+      "requires": ["MEDIA_SAF", "ONLINE_RIGHTS"],
+      "tests": ["**/core/playback/*Test.kt", "**/ui/MusicFlowPlayerLibraryUxV3Test.kt"],
+      "smoke": ["PlaybackQueuePersistenceTest#savedQueueRestoresPausedAndResumesPlayback", "PlaybackRuntimeAutoSkipTest#singleMissingTrackAutoSkips"]
+    },
+    {
+      "id": "PLAYLIST", "name": "Playlist Room, reorder, import/export",
+      "source": ["app/src/main/java/com/example/musicflow/core/playlist/**", "app/src/main/java/com/example/musicflow/feature/playlist/**"],
+      "requires": ["MEDIA_SAF", "PLAYBACK"],
+      "tests": ["**/core/playlist/*Test.kt", "**/feature/playlist/*Test.kt", "**/ui/Playlist*Test.kt", "**/ui/MusicFlowPlaylistPolishV3Test.kt"],
+      "smoke": ["PlaylistReorderDatabaseTest#reorderPersistsAfterDatabaseReopen", "PlaylistLocalBackupIntegrationTest#invalidDocumentCannotPartiallyModifyRoom"]
+    },
+    {
+      "id": "FAVORITES", "name": "Yêu thích bài hát và album",
+      "source": ["app/src/main/java/com/example/musicflow/core/favorites/**"],
+      "requires": ["MEDIA_SAF"],
+      "tests": ["**/FavoritesBatchTest.kt", "**/ui/SmartLibraryUiTest.kt"],
+      "smoke": ["SmartLibraryUiTest#changingFavoriteRecomputesSmartCollectionImmediately"]
+    },
+    {
+      "id": "SMART", "name": "Smart Library và gợi ý thư viện",
+      "source": ["app/src/main/java/com/example/musicflow/core/smart/**", "app/src/main/java/com/example/musicflow/feature/library/Smart*"],
+      "requires": ["LIBRARY", "FAVORITES", "HISTORY"],
+      "tests": ["**/core/smart/*Test.kt", "**/ui/SmartLibraryUiTest.kt"],
+      "smoke": ["SmartLibraryUiTest#pickedTrackAndMediaStoreDuplicateAppearOnlyOnceInSmartMix"]
+    },
+    {
+      "id": "HISTORY", "name": "Lịch sử nghe và Room recent",
+      "source": ["app/src/main/java/com/example/musicflow/core/history/**"],
+      "requires": ["PLAYBACK"],
+      "tests": ["**/core/history/*Test.kt"],
+      "smoke": ["RecentHistoryDatabaseTest#historySurvivesDatabaseReopen"]
+    },
+    {
+      "id": "LYRICS", "name": "Lời bài hát LRC, đồng bộ lời và SAF",
+      "source": ["app/src/main/java/com/example/musicflow/core/lyrics/**"],
+      "requires": ["MEDIA_SAF", "PLAYBACK"],
+      "tests": ["**/core/lyrics/*Test.kt"],
+      "smoke": ["LyricsSafImportTest#realSafDocumentImportAndPersistentAudioAssociation"]
+    },
+    {
+      "id": "AUTH", "name": "Đăng nhập, khách, OAuth, hồ sơ",
+      "source": [
+        "app/src/main/java/com/example/musicflow/core/account/AccountApi.kt",
+        "app/src/main/java/com/example/musicflow/core/account/AccountOAuth*",
+        "app/src/main/java/com/example/musicflow/core/account/GoogleOAuth*",
+        "app/src/main/java/com/example/musicflow/core/account/DemoAccountStore.kt",
+        "app/src/main/java/com/example/musicflow/core/account/DemoPasswordHash.kt",
+        "app/src/main/java/com/example/musicflow/core/account/AccountAuth*",
+        "app/src/main/java/com/example/musicflow/feature/account/AccountScreen.kt",
+        "app/src/main/java/com/example/musicflow/feature/account/AccountViewModel.kt",
+        "app/src/main/java/com/example/musicflow/feature/account/AccountFormValidation.kt"
+      ],
+      "requires": [],
+      "tests": ["**/AccountAuthUiTest.kt", "**/feature/account/AccountFormValidationTest.kt", "**/core/account/*Auth*Test.kt", "**/core/account/GoogleOAuthFlowTest.kt", "**/core/account/DemoPasswordHashTest.kt", "**/ui/AccountJourneysV4UiTest.kt"],
+      "smoke": ["AccountAuthUiTest#signupTabInlineErrorsGoogleDisabledAndGuestNavigation", "AccountAuthErrorLabelsTest#doesNotEchoUnknownServerErrorData"]
+    },
+    {
+      "id": "ROLES_ADMIN", "name": "Owner, quản trị viên, Developer và RBAC",
+      "source": [
+        "app/src/main/java/com/example/musicflow/core/account/MusicFlowAccess.kt",
+        "app/src/main/java/com/example/musicflow/core/account/OwnerDemoSnapshot.kt",
+        "app/src/main/java/com/example/musicflow/core/account/AccountHomePlan.kt",
+        "app/src/main/java/com/example/musicflow/core/account/AccountReviewPlan.kt",
+        "app/src/main/java/com/example/musicflow/core/account/AccountTaskGuide.kt",
+        "app/src/main/java/com/example/musicflow/core/account/AccountWorkspacePlan.kt",
+        "app/src/main/java/com/example/musicflow/feature/account/AccountRolePanel.kt",
+        "app/src/main/java/com/example/musicflow/feature/account/OwnerDemoDashboard.kt",
+        "admin-web/**"
+      ],
+      "requires": ["AUTH"],
+      "tests": [
+        "**/core/account/MusicFlowAccessTest.kt", "**/core/account/OwnerDemoSnapshotTest.kt",
+        "**/core/account/AccountHomePlanTest.kt", "**/core/account/AccountReviewPlanTest.kt",
+        "**/core/account/AccountTaskGuideTest.kt", "**/core/account/AccountWorkspacePlanTest.kt",
+        "**/ui/MusicFlowRolesUiTest.kt", "**/ui/OwnerDemoDashboardUiTest.kt",
+        "**/ui/AccountWorkspacesUiTest.kt", "**/ui/AccountHomeV2UiTest.kt",
+        "**/ui/AccountTaskUxV3UiTest.kt", "**/ui/AccountJourneysV4UiTest.kt"
+      ],
+      "smoke": ["MusicFlowRolesUiTest#scopedPlatformAdminCannotAccessOwnerGrants", "MusicFlowRolesUiTest#failedAccessRefreshHidesPreviousAdminTools"],
+      "extra": ["node scripts/test-admin-web-role-refresh-v1.js"]
+    },
+    {
+      "id": "CREATOR", "name": "Creator, draft, xét duyệt nội dung",
+      "source": ["app/src/main/java/com/example/musicflow/core/account/Creator*", "app/src/main/java/com/example/musicflow/feature/account/Creator*"],
+      "requires": ["AUTH", "ROLES_ADMIN"],
+      "tests": ["**/core/account/Creator*Test.kt", "**/ui/Creator*Test.kt", "**/ui/AccountJourneysV4UiTest.kt"],
+      "smoke": ["CreatorApplicationReviewUiTest#pendingArtistRequestIsShownAndCannotBeResubmitted"]
+    },
+    {
+      "id": "BILLING_DEMO", "name": "Premium và thanh toán giả lập",
+      "source": ["app/src/main/java/com/example/musicflow/core/account/DemoBilling*", "app/src/main/java/com/example/musicflow/core/account/AccountTier.kt", "app/src/main/java/com/example/musicflow/feature/account/DemoBillingScreen.kt"],
+      "requires": ["AUTH", "ROLES_ADMIN"],
+      "tests": ["**/core/account/DemoBilling*Test.kt", "**/core/account/AccountTierTest.kt", "**/ui/DemoBillingUiTest.kt"],
+      "smoke": ["DemoBillingUiTest#failedCheckoutNeverChangesPriorPaidDemoReceipt", "AccountTierTest#expiredPremiumIsFree"]
+    },
+    {
+      "id": "CLOUD_SYNC", "name": "Cloud library/history và đồng bộ Supabase demo",
+      "source": ["app/src/main/java/com/example/musicflow/core/account/Cloud*", "app/src/main/java/com/example/musicflow/core/history/Cloud*"],
+      "requires": ["AUTH", "PLAYLIST", "HISTORY"],
+      "tests": ["**/core/account/CloudSyncRulesTest.kt", "**/core/history/CloudHistoryRulesTest.kt"],
+      "smoke": ["CloudSyncRulesTest#cloudMergeKeepsBothAndNeverDuplicates"]
+    },
+    {
+      "id": "ONLINE_RIGHTS", "name": "Online catalog và quyền phát có giấy phép",
+      "source": ["app/src/main/java/com/example/musicflow/core/online/**", "app/src/main/java/com/example/musicflow/feature/online/**", "scripts/musicflow_licensed_upload.py"],
+      "requires": ["AUTH"],
+      "tests": ["**/core/online/*Test.kt"],
+      "smoke": ["OnlineRightsPolicyTest#missingRightsDefaultToDenied", "OnlineRightsPolicyTest#missingAttributionOrSourceBlocksPlayback"],
+      "extra": ["py -3 -m unittest scripts/test_musicflow_licensed_upload.py"]
+    },
+    {
+      "id": "HOME_NAV", "name": "Trang chủ, mini-player, điều hướng",
+      "source": ["app/src/main/java/com/example/musicflow/feature/home/**", "app/src/main/java/com/example/musicflow/core/ux/**"],
+      "requires": ["LIBRARY", "SEARCH", "PLAYBACK", "HISTORY"],
+      "tests": ["**/core/ux/*Test.kt", "**/ui/ListeningJourneysV1UiTest.kt", "**/ui/MusicFlowUxFoundationV3Test.kt", "**/ui/OceanFlowVisualUiTest.kt"],
+      "smoke": ["ListeningJourneysV1UiTest#homeShowsShortHistoryThenAllSongsWithOriginalPlaybackIndex"]
+    },
+    {
+      "id": "UI_ACCESS", "name": "Thiết kế Ocean Flow, focus, TalkBack semantics",
+      "source": ["app/src/main/java/com/example/musicflow/ui/**"],
+      "requires": [],
+      "tests": [
+        "**/ui/AccessibilityPolishV6UiTest.kt", "**/ui/MusicFlowUiFoundationTest.kt",
+        "**/ui/MusicFlowUiPolishTest.kt", "**/ui/OceanFlowVisualUiTest.kt",
+        "**/ui/MusicFlowUxFoundationV3Test.kt", "**/ThemeBatchTest.kt",
+        "**/feature/library/LibraryAccessibilityV7Test.kt", "**/feature/library/LibraryKeyboardAccessibilityV8Test.kt",
+        "**/ExampleUnitTest.kt", "**/ExampleInstrumentedTest.kt"
+      ],
+      "smoke": ["LibraryKeyboardAccessibilityV8Test#keyboardEnterCanExpandAndCollapseArtistWithoutTouch", "AccessibilityPolishV6UiTest#headingsStayNavigableAndFullTextAt200PercentInLightAndDark"]
+    },
+    {
+      "id": "DEMO_CENTER", "name": "Trung tâm demo và điều hướng theo tài khoản",
+      "source": ["app/src/main/java/com/example/musicflow/core/account/DemoCenter*", "app/src/main/java/com/example/musicflow/feature/account/DemoCenter*"],
+      "requires": ["AUTH", "ROLES_ADMIN", "BILLING_DEMO"],
+      "tests": ["**/core/account/DemoCenterPlanTest.kt", "**/ui/DemoCenterV1UiTest.kt"],
+      "smoke": ["DemoCenterPlanTest#ownerCanIllustrateDelegationButPremiumCannot", "DemoCenterV1UiTest#demoProgressAndActorSelectionPersistButCannotGrantAnyRealAuthority"]
+    },
+    {
+      "id": "RELEASE_BACKUP", "name": "Sao lưu, versioning, APK ký QA và nâng cấp",
+      "source": ["scripts/build-musicflow-demo-apk-v1.ps1", "scripts/run-signed-upgrade-*.ps1", "app/src/main/java/com/example/musicflow/core/playlist/PlaylistBackup*"],
+      "requires": ["MEDIA_SAF", "PLAYLIST", "FAVORITES"],
+      "tests": ["**/ui/SignedApkUpgradeV6Test.kt", "**/core/playlist/PlaylistBackupRulesTest.kt", "**/core/playlist/PlaylistLocalBackupIntegrationTest.kt", "**/ui/PlaylistBackupRealPickerUiTest.kt", "**/ui/OfflineReliabilityUiTest.kt"],
+      "smoke": ["PlaylistLocalBackupIntegrationTest#invalidDocumentCannotPartiallyModifyRoom", "SignedApkUpgradeV6Test#verifySignedV6PreservesAllDataAndCleanUpTestOwnedOnly"]
+    }
+  ]
+}

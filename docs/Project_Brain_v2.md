@@ -1,6 +1,6 @@
 # MusicFlow — Project Brain v2 (Evidence-Driven Learning)
 
-**Tình trạng 2026-11-08:** Brain v2 đã tích hợp vào repository. Dự án Android hiện là bản demo **v7**, phiên bản bộ não **`v7.0-BrainV2-r3`**, engine **`2.0`**. Transcript QA v7 đã commit cho API30/33/36 và signed v6→v7 upgrade API33/36; TalkBack thủ công/full API33/36 regression và benchmark thiết bị thật còn chờ.
+**Tình trạng 2026-11-08:** Brain v2 đã tích hợp vào repository. Bản demo Android mới nhất là **v8 Keyboard & Search Index**; phiên bản bộ não được kiểm tra từ trường `meta.evolution_version` ở JSON gốc, engine **`2.0`**. QA v8: 137 Android UI/regression API30, 40 targeted mỗi API33/36, signed v7→v8 giữ Room/favorites/SAF trên API33 PASS. **TalkBack thủ công, full 98 regression API33/36, signed upgrade v7→v8 API36 và benchmark thiết bị thật vẫn chưa có nghiệm thu.**
 
 ## Một bộ não chính duy nhất
 
@@ -32,6 +32,21 @@ Sau mỗi lần phát triển: đọc JSON → `check` → kiểm tra mã nguồ
 
 ## Kiểm chứng CI và giới hạn
 
+## Modular Testing & Impact-driven Regression (bắt buộc)
+
+Brain v2 giữ **chính sách** trong `brain_v2.test_architecture`. Bản đồ 19 module, quan hệ phụ thuộc, nguồn mã và nhóm smoke nằm ở `qa/impact_modules.json`; **105 lớp / 457 phương thức @Test** được tự đọc từ code và liệt kê ở `docs/Modular_Test_Catalog.md`. Đây là **danh mục QA**, không phải file não thứ hai. Khi thêm test, cập nhật mapping rồi tạo lại catalog.
+
+**Trước sửa:** chọn module đổi trực tiếp và module phụ thuộc gián tiếp với:
+```powershell
+py -3 scripts/impact_regression.py validate
+py -3 scripts/impact_regression.py plan --files app/src/main/java/com/example/musicflow/feature/search/SearchViewModel.kt
+py -3 scripts/impact_regression.py plan --git-diff --json
+```
+
+Chạy toàn bộ test thuộc module sửa và smoke/contract test của downstream, không quét toàn dự án nếu phân tích tác động chứng minh các vùng khác không phụ thuộc. Với quyền truy cập, tài khoản Owner/Admin, Room/SAF, cấu hình Android, file chưa phân loại, APK bàn giao, lỗi lặp hoặc phạm vi lớn, **phải mở rộng full regression, signed upgrade/acceptance khi phù hợp**. Không dùng selective để bỏ qua chốt an toàn. Mỗi báo cáo ghi các test ID được chọn, lệnh/SDK, PASS-FAIL-SKIP, log/chứng cứ và lý do những phần khác không chạy. `SignedApkUpgradeV6Test` cần seed → cài đè APK cùng chữ ký → verify, không chạy hai method riêng lẻ. Xem thêm `docs/Test_Impact_Policy.md`.
+
+CI chạy `scripts/test_impact_regression.py`, `impact_regression.py validate` và đối chiếu catalog mới sinh với bản commit, **không tự khẳng định Android UI đã chạy trên CI**.
+
 GitHub Actions `.github/workflows/brain-v2-check.yml` tự chạy unit tests và `check` khi có push/PR liên quan tới bộ não. CI có mã nguồn Git đầy đủ và transcript QA v7 được commit; nhưng **không có APK và log QA không commit**. CI có thể xác minh nội dung transcript/source, còn kiểm thử Android thật **chỉ thực sự chạy trên AVD QA khi sử dụng các script chuyên biệt**. GitHub Action PASS không phải tái chạy Android tests.
 
-Các mục quan trọng chưa xác minh: TalkBack thủ công, WCAG thực, hiệu năng nhạc thật, full Android regression API33/36, signed upgrade dữ liệu trên API33/36, thiết bị thật và production.
+Các mục quan trọng chưa xác minh: TalkBack thủ công, WCAG trên ảnh phủ thực, hiệu năng nhạc thật, full Android regression API33/36, signed upgrade v7→v8 trên API36, thiết bị thật và production.

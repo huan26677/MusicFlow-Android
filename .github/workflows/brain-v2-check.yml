@@ -1,4 +1,4 @@
-name: MusicFlow Project Brain v2 verification
+name: MusicFlow Brain v2 and modular regression verification
 
 on:
   push:
@@ -7,6 +7,13 @@ on:
       - "scripts/project_brain_v2.py"
       - "scripts/test_project_brain_v2.py"
       - "AGENTS.md"
+      - "qa/impact_modules.json"
+      - "scripts/impact_regression.py"
+      - "scripts/test_impact_regression.py"
+      - "docs/Modular_Test_Catalog.md"
+      - "docs/Test_Impact_Policy.md"
+      - "docs/Project_Brain_v2.md"
+      - "app/src/**/*Test.kt"
       - ".github/workflows/brain-v2-check.yml"
   pull_request:
     paths:
@@ -14,6 +21,13 @@ on:
       - "scripts/project_brain_v2.py"
       - "scripts/test_project_brain_v2.py"
       - "AGENTS.md"
+      - "qa/impact_modules.json"
+      - "scripts/impact_regression.py"
+      - "scripts/test_impact_regression.py"
+      - "docs/Modular_Test_Catalog.md"
+      - "docs/Test_Impact_Policy.md"
+      - "docs/Project_Brain_v2.md"
+      - "app/src/**/*Test.kt"
       - ".github/workflows/brain-v2-check.yml"
   workflow_dispatch:
 
@@ -34,7 +48,15 @@ jobs:
           python-version: "3.11"
       - name: Test evidence engine and tamper detection
         run: python -m unittest discover -s scripts -p test_project_brain_v2.py -v
+      - name: Validate module coverage and selective-regression rules
+        run: |
+          python -m unittest discover -s scripts -p test_impact_regression.py -v
+          python scripts/impact_regression.py validate
+      - name: Ensure enumerated test-case catalog matches actual code
+        run: |
+          python scripts/impact_regression.py catalog
+          git diff --exit-code -- docs/Modular_Test_Catalog.md
       - name: Check canonical brain, proof anchors, priority scoring and secrets
-        # Local APK / qa-logs are gitignored. Their absence is explicitly
-        # reported as unavailable, never misrepresented as QA PASS.
+        # Android UI tests are NOT run by this workflow. Local APK/QA logs
+        # remain unavailable on CI unless committed as portable transcripts.
         run: python scripts/project_brain_v2.py check
