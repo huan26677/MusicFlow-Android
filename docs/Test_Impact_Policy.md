@@ -14,7 +14,7 @@
 1. **Xác định thay đổi trực tiếp**: tên module bị sửa, file nguồn và hành vi thay đổi. Đưa toàn bộ file có khả năng sửa vào planner, hoặc `--module MODULE_ID`.
 2. **Xác định tác động lây lan**: duyệt ngược `requires`. Ví dụ Search là consumer của Library + Media, Home là consumer của Search. Sửa Search → trực tiếp `SEARCH`, gián tiếp `HOME_NAV`; không suy diễn rằng Playlist/Billing bị ảnh hưởng.
 3. **Chốt Selective Regression tối thiểu theo module**: chạy tất cả test đã đăng ký của module sửa và smoke/contract test ở mọi downstream consumer; trình bày **danh sách case ID, nguyên nhân, môi trường** trước khi thực thi.
-4. **Quy tắc mở rộng**: nếu có source không được phân loại, rủi ro quyền truy cập, roles Owner/Admin, security, Room migration, SAF persisted grants, Gradle/Manifest, logic dùng chung, release APK, thay đổi ≥4 module hoặc lỗi không được giải thích, bắt buộc yêu cầu full regression và acceptance/integration liên quan. Không lấy phép lọc làm lý do giảm an toàn.
+4. **Quy tắc mở rộng**: nếu có source không được phân loại, rủi ro quyền truy cập, roles Owner/Admin, security, Room migration, SAF persisted grants, Gradle/Manifest, **hợp đồng lõi dùng chung chưa thể khoanh hết tác động**, release APK, thay đổi ≥4 module hoặc lỗi không được giải thích, bắt buộc yêu cầu full regression và acceptance/integration liên quan. Riêng component UI dùng chung đã có bản đồ consumers có thể chạy selective + smoke màn hình phụ thuộc. Không lấy phép lọc làm lý do giảm an toàn.
 5. **Sau sửa**: chạy `plan --git-diff` theo thay đổi thực; kiểm tra coverage map mới, chạy test, báo pass/fail/skip kèm log. Nếu test FAIL phải sửa hoặc công bố blocker, **không ép test PASS**. Nếu không có AVD/SDK/máy thật thì đánh dấu **NOT RUN**.
 
 ## 3. Lệnh dùng được ngay

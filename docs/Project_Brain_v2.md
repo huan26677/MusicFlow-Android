@@ -30,8 +30,6 @@ py -3 scripts/project_brain_v2.py review --decision accessibility-v7 --outcome p
 
 Sau mỗi lần phát triển: đọc JSON → `check` → kiểm tra mã nguồn → triển khai → QA → cập nhật evidence/decision/giả định → `review` → `sync` → `check` → commit/push. Không bắt buộc gọi `review` khi chưa có chứng cứ; không lấy score thay cho phân tích độc lập.
 
-## Kiểm chứng CI và giới hạn
-
 ## Modular Testing & Impact-driven Regression (bắt buộc)
 
 Brain v2 giữ **chính sách** trong `brain_v2.test_architecture`. Bản đồ 19 module, quan hệ phụ thuộc, nguồn mã và nhóm smoke nằm ở `qa/impact_modules.json`; **105 lớp / 457 phương thức @Test** được tự đọc từ code và liệt kê ở `docs/Modular_Test_Catalog.md`. Đây là **danh mục QA**, không phải file não thứ hai. Khi thêm test, cập nhật mapping rồi tạo lại catalog.
@@ -46,6 +44,8 @@ py -3 scripts/impact_regression.py plan --git-diff --json
 Chạy toàn bộ test thuộc module sửa và smoke/contract test của downstream, không quét toàn dự án nếu phân tích tác động chứng minh các vùng khác không phụ thuộc. Với quyền truy cập, tài khoản Owner/Admin, Room/SAF, cấu hình Android, file chưa phân loại, APK bàn giao, lỗi lặp hoặc phạm vi lớn, **phải mở rộng full regression, signed upgrade/acceptance khi phù hợp**. Không dùng selective để bỏ qua chốt an toàn. Mỗi báo cáo ghi các test ID được chọn, lệnh/SDK, PASS-FAIL-SKIP, log/chứng cứ và lý do những phần khác không chạy. `SignedApkUpgradeV6Test` cần seed → cài đè APK cùng chữ ký → verify, không chạy hai method riêng lẻ. Xem thêm `docs/Test_Impact_Policy.md`.
 
 CI chạy `scripts/test_impact_regression.py`, `impact_regression.py validate` và đối chiếu catalog mới sinh với bản commit, **không tự khẳng định Android UI đã chạy trên CI**.
+
+## Kiểm chứng CI và giới hạn
 
 GitHub Actions `.github/workflows/brain-v2-check.yml` tự chạy unit tests và `check` khi có push/PR liên quan tới bộ não. CI có mã nguồn Git đầy đủ và transcript QA v7 được commit; nhưng **không có APK và log QA không commit**. CI có thể xác minh nội dung transcript/source, còn kiểm thử Android thật **chỉ thực sự chạy trên AVD QA khi sử dụng các script chuyên biệt**. GitHub Action PASS không phải tái chạy Android tests.
 

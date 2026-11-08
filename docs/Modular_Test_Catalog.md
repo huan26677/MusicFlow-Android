@@ -4,7 +4,7 @@
 > Canonical QA map: `qa/impact_modules.json`. The cross-session brain points here; this is not another brain.
 
 **Selection rule:** direct module = all cases; transitive dependent module = smoke/contract cases;
-shared/unknown/high-risk = full review. Tests require their appropriate runner; this catalog
+shared build/core contract/unknown/high-risk = full review; mapped UI component changes select downstream consumers. Tests require their appropriate runner; this catalog
 does not attest that they passed. IDs are `MODULE/Class#method` and do not renumber.
 
 ## Module coverage summary
