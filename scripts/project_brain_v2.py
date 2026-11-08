@@ -102,9 +102,8 @@ def write_brain(brain: dict[str, Any], path: Path = BRAIN_PATH) -> None:
     path.write_text(serialized, encoding="utf-8", newline="\n")
 
 
-def read_evidence_text(path: Path) -> str:
+def decode_evidence_bytes(data: bytes) -> str:
     """Windows PowerShell 5.1 redirected QA logs are UTF-16, not UTF-8."""
-    data = path.read_bytes()
     if data.startswith((b"\xff\xfe", b"\xfe\xff")):
         return data.decode("utf-16")
     if data.startswith(b"\xef\xbb\xbf"):
@@ -116,6 +115,10 @@ def read_evidence_text(path: Path) -> str:
         except UnicodeDecodeError:
             pass
     return data.decode("utf-8", errors="replace")
+
+
+def read_evidence_text(path: Path) -> str:
+    return decode_evidence_bytes(path.read_bytes())
 
 
 def verify_evidence(item: dict[str, Any], root: Path = ROOT) -> Proof:
@@ -131,11 +134,16 @@ def verify_evidence(item: dict[str, Any], root: Path = ROOT) -> Proof:
         commit = item.get("commit", "")
         if not isinstance(commit, str) or not re.fullmatch(r"[a-f0-9]{7,40}", commit):
             return Proof("contradicted", "No valid Git commit anchor")
-        show = git(["show", f"{commit}:{location}"], root)
+        # Git show preserves the original log encoding. A UTF-16 PowerShell
+        # QA log has to be decoded BEFORE checking its PASS marker.
+        show = subprocess.run(
+            ["git", "-C", str(root), "show", f"{commit}:{location}"],
+            capture_output=True, check=False,
+        )
         if show.returncode:
             return Proof("contradicted", "Committed source is missing at this Git revision")
         marker = item.get("contains", "")
-        if not isinstance(marker, str) or not marker or marker not in show.stdout:
+        if not isinstance(marker, str) or not marker or marker not in decode_evidence_bytes(show.stdout):
             return Proof("contradicted", "Claim marker is absent at the Git anchor")
         if not path.is_file() or marker not in read_evidence_text(path):
             return Proof("stale", "Original commit verified, current file changed")
@@ -368,9 +376,20 @@ def review(
     proof = verify_evidence(evidence, root)
     if proof.status not in {"verified_repo", "verified_local"}:
         raise ValueError("Evidence is not independently available and verified")
-    # A checked source proves that a feature exists, not that a runtime test passed.
-    if outcome == "success" and evidence["kind"] == "repo" and evidence.get("claim_type") != "source":
-        raise ValueError("Use a QA log for a runtime PASS; docs alone are not test proof")
+    # A checked source proves that code exists, not that the runtime passed.
+    # A QA log committed under qa-logs/ with its PASS marker is independently
+    # re-checkable across AI sessions, unlike a documentation assertion.
+    if outcome == "success" and evidence["kind"] == "repo":
+        claim_type = evidence.get("claim_type")
+        if claim_type == "test_log":
+            if not (
+                evidence.get("path", "").startswith("qa-logs/")
+                and evidence["path"].endswith(".log")
+                and "PASS" in evidence.get("contains", "")
+            ):
+                raise ValueError("Portable QA evidence must be a committed PASS log")
+        elif claim_type != "source":
+            raise ValueError("Use a QA log for runtime PASS; docs alone are not test proof")
     history = brain["brain_v2"]["learning_history"]
     dedup_key = hashlib.sha256(
         f"{decision_id}|{outcome}|{evidence_id}|{lesson}".encode("utf-8")

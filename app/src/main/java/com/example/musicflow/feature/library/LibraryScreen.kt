@@ -25,6 +25,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -723,11 +725,12 @@ private fun ColumnScope.AlbumFavoritesContent(
         mutableStateOf<Long?>(null)
     }
 
-    val groups = songs
-        .filter { it.albumId != null }
-        .groupBy { it.albumId!! }
-        .toList()
-        .sortedBy { it.second.first().album.lowercase() }
+    val groups = remember(songs) {
+        songs.filter { it.albumId != null }
+            .groupBy { it.albumId!! }
+            .toList()
+            .sortedBy { it.second.first().album.lowercase() }
+    }
 
     val albums = if (favoritesOnly) {
         groups.filter {
@@ -735,6 +738,9 @@ private fun ColumnScope.AlbumFavoritesContent(
         }
     } else {
         groups
+    }
+    val flatRows = remember(albums, expandedAlbumId) {
+        albumRows(albums, expandedAlbumId)
     }
 
     FilterChip(
@@ -764,24 +770,30 @@ private fun ColumnScope.AlbumFavoritesContent(
     }
 
     LazyColumn(
-        modifier = Modifier.weight(1f),
+        modifier = Modifier.weight(1f).testTag("library-albums-list"),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        items(albums, key = { it.first }) { (albumId, tracks) ->
-            val isFavorite =
-                albumId.toString() in favoriteAlbumIds
-
-            Column {
+        items(flatRows, key = { it.key }) { row ->
+            when (row) {
+                is AlbumRow.Header -> {
+                    val albumId = row.albumId
+                    val tracks = row.tracks
+                    val isFavorite = albumId.toString() in favoriteAlbumIds
+                    val expanded = expandedAlbumId == albumId
                 ListItem(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {
+                        .testTag("album-header-$albumId")
+                        .clickable(role = Role.Button) {
                             expandedAlbumId =
-                                if (expandedAlbumId == albumId) {
+                                if (expanded) {
                                     null
                                 } else {
                                     albumId
                                 }
+                        }
+                        .semantics {
+                            stateDescription = if (expanded) "Đang mở" else "Đang thu gọn"
                         },
                     headlineContent = {
                         Text(tracks.first().album)
@@ -816,21 +828,26 @@ private fun ColumnScope.AlbumFavoritesContent(
                         }
                     }
                 )
+                }
 
-                if (expandedAlbumId == albumId) {
+                is AlbumRow.PlayAll -> {
                     TextButton(
                         onClick = {
-                            onSongSelected(tracks, 0)
-                        }
+                            onSongSelected(row.tracks, 0)
+                        },
+                        modifier = Modifier.heightIn(min = 48.dp)
+                            .testTag("album-play-all")
                     ) {
                         Text("Phát toàn bộ album")
                     }
+                }
 
-                    tracks.forEachIndexed { index, song ->
+                is AlbumRow.Track -> {
+                        val song = row.song
                         SongRow(
                             song = song,
                             onClick = {
-                                onSongSelected(tracks, index)
+                                onSongSelected(row.tracks, row.index)
                             },
                             onAddToPlaylist = {
                                 onAddToPlaylist(song)
@@ -843,8 +860,44 @@ private fun ColumnScope.AlbumFavoritesContent(
                             onQueueNext = onQueueNext?.let { action -> { action(song) } },
                             onQueueEnd = onQueueEnd?.let { action -> { action(song) } }
                         )
-                    }
                 }
+            }
+        }
+    }
+}
+
+/** A flat lazy row model prevents eagerly composing all tracks of one album. */
+internal sealed interface AlbumRow {
+    val key: String
+
+    data class Header(val albumId: Long, val tracks: List<DeviceSong>) : AlbumRow {
+        override val key = "header:$albumId"
+    }
+
+    data class PlayAll(val albumId: Long, val tracks: List<DeviceSong>) : AlbumRow {
+        override val key = "play:$albumId"
+    }
+
+    data class Track(
+        val albumId: Long,
+        val tracks: List<DeviceSong>,
+        val index: Int,
+        val song: DeviceSong
+    ) : AlbumRow {
+        override val key = "song:$albumId:$index"
+    }
+}
+
+internal fun albumRows(
+    albums: List<Pair<Long, List<DeviceSong>>>,
+    expandedAlbumId: Long?
+): List<AlbumRow> = buildList {
+    albums.forEach { (id, tracks) ->
+        add(AlbumRow.Header(id, tracks))
+        if (expandedAlbumId == id && tracks.isNotEmpty()) {
+            add(AlbumRow.PlayAll(id, tracks))
+            tracks.forEachIndexed { index, song ->
+                add(AlbumRow.Track(id, tracks, index, song))
             }
         }
     }

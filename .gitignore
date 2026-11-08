@@ -49,6 +49,15 @@ __pycache__/
 !qa-logs/
 !qa-logs/*.log
 
+# v7: local verbose logs remain on the QA machine; only selected verified
+# Android runtime + signed-upgrade transcripts are safe to share in Git.
+/qa-logs/*v7*.log
+!/qa-logs/musicflow-library-accessibility-v7-full-regression-api30.log
+!/qa-logs/musicflow-library-accessibility-v7-targeted-api33.log
+!/qa-logs/musicflow-library-accessibility-v7-targeted-api36.log
+!/qa-logs/musicflow-library-accessibility-v7-signed-upgrade-api33.log
+!/qa-logs/musicflow-library-accessibility-v7-signed-upgrade-api36.log
+
 # Operating system
 .DS_Store
 Thumbs.db

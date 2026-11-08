@@ -1,15 +1,14 @@
 package com.example.musicflow.feature.library
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -19,6 +18,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.ui.components.MusicFlowStatusKind
@@ -81,6 +84,43 @@ internal object MusicCollections {
     }
 }
 
+/**
+ * Each expanded track is an independent lazy item. Before v7 all tracks in a
+ * selected album/artist/genre were composed eagerly inside ONE LazyColumn item.
+ */
+internal sealed interface MusicCollectionRow {
+    val key: String
+
+    data class Header(val group: MusicCollection) : MusicCollectionRow {
+        override val key: String = "header:${group.key}"
+    }
+
+    data class PlayAll(val group: MusicCollection) : MusicCollectionRow {
+        override val key: String = "play:${group.key}"
+    }
+
+    data class Track(val group: MusicCollection, val index: Int, val song: DeviceSong)
+        : MusicCollectionRow {
+        // Keep keys unique even when the same URI occurs in multiple genres.
+        override val key: String = "track:${group.key}:$index"
+    }
+}
+
+internal fun collectionRows(
+    collections: List<MusicCollection>,
+    expandedKey: String?
+): List<MusicCollectionRow> = buildList {
+    collections.forEach { group ->
+        add(MusicCollectionRow.Header(group))
+        if (group.key == expandedKey) {
+            if (group.tracks.isNotEmpty()) add(MusicCollectionRow.PlayAll(group))
+            group.tracks.forEachIndexed { index, song ->
+                add(MusicCollectionRow.Track(group, index, song))
+            }
+        }
+    }
+}
+
 @Composable
 internal fun ColumnScope.MusicCollectionsContent(
     title: String,
@@ -93,6 +133,9 @@ internal fun ColumnScope.MusicCollectionsContent(
     onQueueEnd: ((DeviceSong) -> Unit)? = null
 ) {
     var expandedKey by rememberSaveable { mutableStateOf<String?>(null) }
+    val rows = remember(collections, expandedKey) {
+        collectionRows(collections, expandedKey)
+    }
     Text("${collections.size} $title")
 
     if (collections.isEmpty()) {
@@ -104,46 +147,45 @@ internal fun ColumnScope.MusicCollectionsContent(
         )
     }
 
-    LazyColumn(modifier = Modifier.weight(1f)) {
-        items(collections, key = { it.key }) { group ->
-            Column {
-                ListItem(
-                    modifier = Modifier.fillMaxWidth().clickable {
-                        expandedKey = if (expandedKey == group.key) {
-                            null
-                        } else {
-                            group.key
+    LazyColumn(modifier = Modifier.weight(1f).testTag("music-collections-list")) {
+        items(rows, key = { it.key }) { row ->
+            when (row) {
+                is MusicCollectionRow.Header -> {
+                    val group = row.group
+                    val expanded = expandedKey == group.key
+                    ListItem(
+                        modifier = Modifier.fillMaxWidth()
+                            .testTag("collection-header-${group.key}")
+                            .clickable(role = Role.Button) {
+                                expandedKey = if (expanded) null else group.key
+                            }
+                            .semantics {
+                                stateDescription = if (expanded) "Đang mở" else "Đang thu gọn"
+                            },
+                        headlineContent = { Text(group.name) },
+                        supportingContent = {
+                            Text("${group.tracks.size} bài hát")
                         }
-                    },
-                    headlineContent = { Text(group.name) },
-                    supportingContent = {
-                        Text("${group.tracks.size} bài hát")
-                    }
-                )
-                if (expandedKey == group.key) {
+                    )
+                }
+                is MusicCollectionRow.PlayAll -> {
                     TextButton(
-                        onClick = { onSongSelected(group.tracks, 0) },
-                        enabled = group.tracks.isNotEmpty()
-                    ) {
-                        Text("Phát toàn bộ")
-                    }
-                    group.tracks.forEachIndexed { index, song ->
-                        SongRow(
-                            song = song,
-                            onClick = {
-                                onSongSelected(group.tracks, index)
-                            },
-                            onAddToPlaylist = {
-                                onAddToPlaylist(song)
-                            },
-                            isFavorite = song.uri.toString() in favoriteSongUris,
-                            onToggleFavorite = {
-                                onToggleFavorite(song)
-                            },
-                            onQueueNext = onQueueNext?.let { action -> { action(song) } },
-                            onQueueEnd = onQueueEnd?.let { action -> { action(song) } }
-                        )
-                    }
+                        onClick = { onSongSelected(row.group.tracks, 0) },
+                        modifier = Modifier.heightIn(min = 48.dp)
+                            .testTag("collection-play-all")
+                    ) { Text("Phát toàn bộ") }
+                }
+                is MusicCollectionRow.Track -> {
+                    val song = row.song
+                    SongRow(
+                        song = song,
+                        onClick = { onSongSelected(row.group.tracks, row.index) },
+                        onAddToPlaylist = { onAddToPlaylist(song) },
+                        isFavorite = song.uri.toString() in favoriteSongUris,
+                        onToggleFavorite = { onToggleFavorite(song) },
+                        onQueueNext = onQueueNext?.let { action -> { action(song) } },
+                        onQueueEnd = onQueueEnd?.let { action -> { action(song) } }
+                    )
                 }
             }
         }

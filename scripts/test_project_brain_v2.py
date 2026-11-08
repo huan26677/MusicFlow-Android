@@ -192,6 +192,52 @@ class BrainV2Tests(unittest.TestCase):
             brain.review(payload, "accessibility-v7", "success", "source-proof",
                          "Runtime definitely passed", self.root)
 
+    def test_committed_utf8_qa_log_can_be_portable_runtime_proof(self):
+        payload = self.fixture_brain()
+        qa = self.root / "qa-logs"
+        qa.mkdir()
+        (qa / "v7.log").write_text("LIBRARY_ACCESSIBILITY_V7_FINAL_RESULT=PASS\n",
+                                    encoding="utf-8")
+        subprocess.run(["git", "-C", str(self.root), "add", "qa-logs/v7.log"],
+                       check=True, capture_output=True)
+        subprocess.run(["git", "-C", str(self.root), "commit", "-m", "QA", "-q"],
+                       check=True, capture_output=True)
+        commit = brain.git(["rev-parse", "--short", "HEAD"], self.root).stdout.strip()
+        payload["brain_v2"]["evidence_ledger"].append({
+            "id": "qa-v7-portable", "kind": "repo", "claim_type": "test_log",
+            "path": "qa-logs/v7.log",
+            "contains": "LIBRARY_ACCESSIBILITY_V7_FINAL_RESULT=PASS",
+            "commit": commit
+        })
+        self.assertTrue(brain.review(
+            payload, "accessibility-v7", "success", "qa-v7-portable",
+            "Committed runtime test truly passed", self.root
+        ))
+        self.assertEqual("repo", payload["brain_v2"]["learning_history"][-1]["scope"])
+
+    def test_committed_utf16_powershell_qa_is_portable(self):
+        qa = self.root / "qa-logs"
+        qa.mkdir()
+        (qa / "android.log").write_bytes(
+            "LIBRARY_ACCESSIBILITY_V7_FINAL_RESULT=PASS\r\n".encode("utf-16")
+        )
+        subprocess.run(
+            ["git", "-C", str(self.root), "add", "qa-logs/android.log"],
+            check=True, capture_output=True,
+        )
+        subprocess.run(
+            ["git", "-C", str(self.root), "commit", "-m", "QA utf16", "-q"],
+            check=True, capture_output=True,
+        )
+        commit = brain.git(["rev-parse", "--short", "HEAD"], self.root).stdout.strip()
+        result = brain.verify_evidence({
+            "id": "android-utf16", "kind": "repo", "claim_type": "test_log",
+            "path": "qa-logs/android.log",
+            "contains": "LIBRARY_ACCESSIBILITY_V7_FINAL_RESULT=PASS",
+            "commit": commit,
+        }, self.root)
+        self.assertEqual("verified_repo", result.status)
+
     def test_credential_and_memory_budget_guards(self):
         payload = self.fixture_brain()
         path = self.root / "brain.json"

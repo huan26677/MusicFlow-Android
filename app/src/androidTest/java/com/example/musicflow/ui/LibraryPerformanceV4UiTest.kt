@@ -9,14 +9,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.espresso.Espresso
 import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.feature.library.LibraryScreen
 import com.example.musicflow.feature.library.LibrarySongSearchIndex
@@ -69,8 +72,16 @@ class LibraryPerformanceV4UiTest {
         }
         compose.onNodeWithTag("library-search-field").performTextInput("duong ve")
         compose.onNodeWithText("Hiển thị 2 / 3 bài").assertExists()
-        compose.onNodeWithTag("library-songs-list").performScrollToIndex(5)
-        compose.onNodeWithText("Đường về B").performClick()
+        // Android 16 may keep the IME over result rows and consume the first tap.
+        // Dismiss it before verifying the actual tap-to-play behavior.
+        Espresso.closeSoftKeyboard()
+        compose.waitForIdle()
+        // On API36 a variable-height lazy row may not be laid out immediately
+        // after scrolling by raw index. Scroll by the stable media URI key.
+        compose.onNodeWithTag("library-songs-list")
+            .performScrollToKey("content://media/external/audio/media/3")
+        compose.onNodeWithContentDescription("Phát Đường về B, Nghệ sĩ QA")
+            .performClick()
         compose.runOnIdle {
             assertEquals(listOf("Đường về A", "Đường về B"), playback.map { it.title })
             assertEquals(1, selected)
@@ -110,7 +121,11 @@ class LibraryPerformanceV4UiTest {
         compose.onNodeWithTag("library-category-picked").performClick()
         compose.onNodeWithTag("picked-search-field").performTextInput("duong")
         compose.onNodeWithText("Hiển thị 1 / 2 bài").assertExists()
-        compose.onNodeWithText("Đường xa").performClick()
+        Espresso.closeSoftKeyboard()
+        compose.waitForIdle()
+        compose.onNodeWithTag("picked-music-list")
+            .performScrollToKey("content://media/external/audio/media/3")
+        compose.onNodeWithContentDescription("Phát Đường xa, Nghệ sĩ QA").performClick()
         compose.runOnIdle { assertEquals(listOf("Đường xa"), playback.map { it.title }) }
     }
 

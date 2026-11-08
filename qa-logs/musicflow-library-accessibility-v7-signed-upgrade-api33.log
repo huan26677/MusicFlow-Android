@@ -1,0 +1,55 @@
+Performing Streamed Install
+Success
+Performing Streamed Install
+Success
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.SignedApkUpgradeV6Test
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ui.SignedApkUpgradeV6Test:
+INSTRUMENTATION_STATUS: test=seedSignedV5PlaylistFavoriteAndRealSafGrant
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.SignedApkUpgradeV6Test
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=seedSignedV5PlaylistFavoriteAndRealSafGrant
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 21.534
+
+OK (1 test)
+
+
+INSTRUMENTATION_CODE: -1
+V7_SIGNED_UPGRADE_PHASE_PASS=seedSignedV5PlaylistFavoriteAndRealSafGrant
+Performing Streamed Install
+Success
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.SignedApkUpgradeV6Test
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ui.SignedApkUpgradeV6Test:
+INSTRUMENTATION_STATUS: test=verifySignedV6PreservesAllDataAndCleanUpTestOwnedOnly
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.SignedApkUpgradeV6Test
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=verifySignedV6PreservesAllDataAndCleanUpTestOwnedOnly
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 8.267
+
+OK (1 test)
+
+
+INSTRUMENTATION_CODE: -1
+V7_SIGNED_UPGRADE_PHASE_PASS=verifySignedV6PreservesAllDataAndCleanUpTestOwnedOnly
+V7_SIGNED_UPGRADE_V6_TO_V7_ROOM_FAVORITES_SAF=PASS
