@@ -2,6 +2,8 @@
 
 > **ĐIỂM BẮT ĐẦU CHÍNH CHO AI PHIÊN MỚI:** `docs/Cross_Session_Project_Brain.json` là bộ não dự án duy nhất cần đọc để biết mục tiêu, việc ưu tiên, quy tắc và bài học. `AGENTS.md` chỉ dẫn cách khởi động/cập nhật. Tài liệu này là nhật ký chi tiết dùng để kiểm chứng khi cần; nếu thông tin khác nhau, hãy đối chiếu mã nguồn, Git và log QA. Sau mỗi mốc, cập nhật lại JSON để AI phiên sau không cần đọc toàn bộ lịch sử.
 
+> **2026-11-08 — PROJECT BRAIN v2 (không thay đổi APK v6):** Giữ **một file JSON** tại `docs/Cross_Session_Project_Brain.json`, nâng thành `v6.1-BrainV2` với evidence_ledger (Git source vs log local-only vs SHA APK), decision scores P1–P5, learning history, entropy budget và consistency rules. `scripts/project_brain_v2.py` hỗ trợ `check`, `sync`, `review`; `scripts/test_project_brain_v2.py` kiểm chứng chống làm giả PASS, chống path traversal/secret, đọc log UTF-16. GitHub Actions chỉ xác minh schema/source/logic, không tự test Android. Tài liệu: `docs/Project_Brain_v2.md`. **Brain v2 cải thiện tri thức cho AI phiên sau, KHÔNG phải tự huấn luyện mô hình.**
+
 > **TÀI LIỆU BÀN GIAO CHÍNH THỨC GIỮA CÁC CUỘC TRÒ CHUYỆN**  
 > Đường dẫn trong repository: `docs/Ke_Hoach_Du_An.md`  
 > Mỗi lần bắt đầu công việc, **đọc bộ não JSON trước** rồi chỉ tham khảo tài liệu này khi cần chứng cứ chi tiết. Luôn đối chiếu `main` / commit mới nhất / source code / log trên GitHub; không tiếp tục dựa trên trạng thái nhớ từ chat nếu đã có bằng chứng mới hơn.

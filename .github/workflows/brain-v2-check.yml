@@ -1,0 +1,40 @@
+name: MusicFlow Project Brain v2 verification
+
+on:
+  push:
+    paths:
+      - "docs/Cross_Session_Project_Brain.json"
+      - "scripts/project_brain_v2.py"
+      - "scripts/test_project_brain_v2.py"
+      - "AGENTS.md"
+      - ".github/workflows/brain-v2-check.yml"
+  pull_request:
+    paths:
+      - "docs/Cross_Session_Project_Brain.json"
+      - "scripts/project_brain_v2.py"
+      - "scripts/test_project_brain_v2.py"
+      - "AGENTS.md"
+      - ".github/workflows/brain-v2-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-brain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout all Git history for source evidence
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Python runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Test evidence engine and tamper detection
+        run: python -m unittest discover -s scripts -p test_project_brain_v2.py -v
+      - name: Check canonical brain, proof anchors, priority scoring and secrets
+        # Local APK / qa-logs are gitignored. Their absence is explicitly
+        # reported as unavailable, never misrepresented as QA PASS.
+        run: python scripts/project_brain_v2.py check
