@@ -1,9 +1,9 @@
 {
 "meta": {
 "project_id": "MusicFlow-Android",
-"evolution_version": "v11.0-BrainV2-r9",
+"evolution_version": "v12.0-BrainV2-r10",
 "compression_status": "MAXIMUM_DENSITY",
-"self_performance_score": "v11: sửa D-pad/Enter group, API36.1 keyboard 4/4 PASS (320dp/font 200%), UX v10 43/43 PASS; JSON picker 1/1 PASS solo nhưng 44-batch 1 FAIL. Build/JVM PASS; impact 71 Android 65 PASS 6 FAIL, retest 3/6 PASS, full 461/TalkBack/UAT chưa đạt."
+"self_performance_score": "v12 API36.1: keyboard 4/4, impact 67/67, UX/JSON 45/45; 199 JVM + 18 Impact + 14 Brain + 17 licensed + 4 Web Admin PASS. Mixed 48 run 3 keyboard FAIL do window state; full 461/TalkBack/UAT chưa chạy."
 },
 "core_essence": {
 "ultimate_goal": "MusicFlow Android thân thiện cho báo cáo môn học: nghe offline MediaStore+SAF, thư viện/playlist/queue ổn định, trải nghiệm các vai trò demo; online/cloud chỉ dùng nguồn và quyền hợp lệ, không trình bày mô phỏng thành production.",
@@ -63,25 +63,24 @@
 ]
 },
 "assumptions_to_validate": [
-"V10 chưa thử TalkBack, Bluetooth/D-pad, WCAG ảnh phủ và 6 hành trình khách→Owner với người thật.",
-"V11 chưa chạy full 461 test cases, nhiều SAF provider hay signed upgrade API36.",
+"V12 chưa thử TalkBack, Bluetooth/D-pad vật lý, WCAG ảnh phủ, 6 hành trình khách→Owner với người thật.",
+"V12 chưa chạy full 461 test cases, nhiều SAF provider hay signed upgrade API36.",
 "V8 index 1.502 fixture, chưa benchmark RAM/scan/scroll nhạc thật hoặc inspect 250 SAF URI.",
 "Owner/PlatformAdmin/Developer/Premium và online/cloud có phần demo, không xem là E2E production.",
-"V11 API36.1 43/43 UX targeted PASS; JSON picker chạy riêng PASS nhưng batch 44 còn flake. Manual TalkBack và full UAT chưa chạy.",
-"Impact 71 Android: 65 PASS, 6 FAIL; QA permission/label fix retest 3 PASS, còn Auth, Theme và Album/Artist runtime FAIL cần cô lập.",
-"API36.1 D-pad/Enter 4/4 keyboard PASS cả 12 nhóm chữ 200%; UX v10 43/43 PASS, nhưng impact 71 test còn 6 FAIL, JSON picker batch flaky, TalkBack thực chưa chạy."
+"V12 API36.1: 67 impact + 4 hardware keyboard PASS; UX/JSON 45 PASS. Mixed runner 48 có 3 keyboard FAIL, vì vậy cách ly runner. Full UAT vẫn cần.",
+"API36.1 67/67 impact + 4/4 D-pad và UX/JSON 45/45 PASS khi tách runner; 48 mixed có 3 phím FAIL do host; full 461/TalkBack/UAT vẫn pending."
 ],
 "entropy_pruned_nodes": [
 "Nén log/PID/lỗi cũ; giữ đường dẫn chứng cứ Git/local.",
 "V1–v6 nén thành luật SAF/search/permission; lịch sử Git/docs.",
 "Bỏ lặp/HEAD động, giữ bài học và chứng cứ riêng."
 ],
-"meta_cognition_and_cross_model_prompt": "CRITICAL DIRECTION FOR ALL LLMs: Kích hoạt chế độ suy luận chuỗi tư duy (Chain-of-Thought) chuyên sâu. Đối chiếu nghiêm ngặt mọi hành động với 'failure_modes_prevented' và 'evolved_rules'. Tự phản biện giải pháp 2 lần trước khi xuất kết quả. Duy trì tính nhất quán logic bất kể cấu trúc nền tảng của mô hình bạn đang chạy.",
+"meta_cognition_and_cross_model_prompt": "Đối chiếu Git, mã nguồn và log QA thật; giữ bài học duy nhất, blocker và phạm vi chưa nghiệm thu; không suy diễn PASS từ kế hoạch hoặc mô phỏng.",
 "brain_v2": {
 "engine_version": "2.0",
-"learning_revision": 9,
+"learning_revision": 10,
 "mode": "evidence_driven_assisted_not_self_training",
-"baseline_commit": "b0745ca",
+"baseline_commit": "50db275",
 "entrypoint": "python scripts/project_brain_v2.py check",
 "test_architecture": {
 "mode": "Modular Testing & Impact-driven Regression",
@@ -89,7 +88,7 @@
 "cases": "docs/Modular_Test_Catalog.md",
 "guide": "docs/Test_Impact_Policy.md",
 "plan": "py -3 scripts/impact_regression.py plan --git-diff --json",
-"rule": "Direct all, downstream smoke; unknown/security/SAF/Room/shared-core/release full. Mapped UI consumers dùng smoke; plan != PASS."
+"rule": "Direct all, downstream smoke; unknown/security/SAF/Room/shared-core/release full; isolate UiAutomator hardware keyboard runner; plan != PASS."
 },
 "decision_policy": {
 "weights": {
@@ -234,9 +233,12 @@
 "qa-v10-api36-41of43",
 "qa-v11-keyboard-api36",
 "qa-v11-ux-api36",
-"qa-v11-impact-api36"
+"qa-v11-impact-api36",
+"qa-v12-impact67",
+"qa-v12-ux45",
+"qa-v12-keyboard4"
 ],
-"reason": "UX API33/36.1 43/43 targeted PASS, signed v9→v10 API33 2/2 PASS. JSON picker solo PASS nhưng 44-batch flaky; impact 71 cases 6 FAIL, full 461/TalkBack/UAT chưa đạt.",
+"reason": "V12 API36.1 UX/JSON 45/45, impact 67/67 + hardware keyboard 4/4 PASS runner riêng. Mixed 48 có 3 FAIL phím. Full 461/TalkBack/UAT chưa chạy.",
 "blocker": false,
 "status": "partial",
 "score": 23,
@@ -382,6 +384,30 @@
 }
 ],
 "evidence_ledger": [
+{
+"id": "qa-v12-impact67",
+"kind": "repo",
+"claim_type": "test_log",
+"path": "qa-logs/musicflow-v12-impact67-api36.log",
+"contains": "OK (67 tests)",
+"commit": "50db275"
+},
+{
+"id": "qa-v12-ux45",
+"kind": "repo",
+"claim_type": "test_log",
+"path": "qa-logs/musicflow-v12-ux-json-api36.log",
+"contains": "OK (45 tests)",
+"commit": "50db275"
+},
+{
+"id": "qa-v12-keyboard4",
+"kind": "repo",
+"claim_type": "test_log",
+"path": "qa-logs/musicflow-v12-keyboard-standalone-api36.log",
+"contains": "OK (4 tests)",
+"commit": "50db275"
+},
 {
 "id": "qa-v11-keyboard-api36",
 "kind": "repo",
@@ -641,14 +667,6 @@
 },
 "learning_history": [
 {
-"id": "84fb66ea0010",
-"task": "signed-upgrade-cross-api",
-"outcome": "success",
-"evidence_ref": "qa-v7-upgrade-api36",
-"scope": "repo",
-"lesson": "Nâng cấp APK ký v6→v7 trên API33/36 giữ Room playlist, favorite, persisted SAF READ/WAV."
-},
-{
 "id": "bd08e203ce89",
 "task": "accessibility-v7",
 "outcome": "partial",
@@ -703,6 +721,14 @@
 "evidence_ref": "qa-v11-keyboard-api36",
 "scope": "repo",
 "lesson": "API36.1 D-pad/Enter 4/4 keyboard PASS cả 12 nhóm chữ 200%; UX v10 43/43 PASS, nhưng impact 71 test còn 6 FAIL, JSON picker batch flaky, TalkBack thực chưa chạy."
+},
+{
+"id": "29e2c0f847ee",
+"task": "clear-journeys-v10",
+"outcome": "partial",
+"evidence_ref": "qa-v12-impact67",
+"scope": "repo",
+"lesson": "API36.1 67/67 impact + 4/4 D-pad và UX/JSON 45/45 PASS khi tách runner; 48 mixed có 3 phím FAIL do host; full 461/TalkBack/UAT vẫn pending."
 }
 ],
 "entropy_policy": {
