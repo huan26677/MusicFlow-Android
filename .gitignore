@@ -109,6 +109,9 @@ __pycache__/
 !/qa-logs/musicflow-v13-album-api36.log
 !/qa-logs/musicflow-v13-search-api36.log
 !/qa-logs/musicflow-v13-lyrics-api36.log
+!/qa-logs/musicflow-v13-signed-package-api36.log
+!/qa-logs/musicflow-v13-signed-smoke-api36.log
+/qa-logs/*v13*.json
 
 # Operating system
 .DS_Store

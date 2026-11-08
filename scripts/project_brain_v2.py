@@ -94,9 +94,11 @@ def load_brain(path: Path = BRAIN_PATH) -> dict[str, Any]:
 
 
 def write_brain(brain: dict[str, Any], path: Path = BRAIN_PATH) -> None:
-    # Compact line-separated zero-space indentation preserves all evidence
-    # while keeping the canonical cross-session Brain within its 24 KB budget.
-    serialized = json.dumps(brain, ensure_ascii=False, indent=0) + "\n"
+    # A compact single-line JSON record retains every evidence item within
+    # the 24 KB memory limit. Use a JSON formatter when human review is needed.
+    serialized = json.dumps(
+        brain, ensure_ascii=False, separators=(",", ":")
+    ) + "\n"
     if len(serialized.encode("utf-8")) > MAX_BYTES:
         raise ValueError("Brain exceeded its 24 KB memory budget; compress first")
     if any(pattern.search(serialized) for pattern in SECRET_PATTERNS):
@@ -235,7 +237,10 @@ def audit(brain: dict[str, Any], root: Path = ROOT) -> dict[str, Any]:
     if brain["meta"].get("compression_status") != "MAXIMUM_DENSITY":
         errors.append("Memory compression contract changed")
     raw = json.dumps(brain, ensure_ascii=False).encode("utf-8")
-    if len(json.dumps(brain, ensure_ascii=False, indent=0).encode("utf-8")) > MAX_BYTES:
+    serialized_size = len((json.dumps(
+        brain, ensure_ascii=False, separators=(",", ":")
+    ) + "\n").encode("utf-8"))
+    if serialized_size > MAX_BYTES:
         errors.append("Memory budget exceeded: 24 KB")
     if any(pattern.search(raw.decode("utf-8")) for pattern in SECRET_PATTERNS):
         errors.append("Possible credential detected in memory")

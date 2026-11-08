@@ -142,6 +142,20 @@ class BrainV2Tests(unittest.TestCase):
         self.assertEqual(1, report["metrics"]["unavailable_proofs"])
         self.assertTrue(any("Local evidence" in w for w in report["warnings"]))
 
+    def test_writer_and_audit_agree_on_compact_24kb_memory_budget(self):
+        payload = self.fixture_brain()
+        initial_size = len((json.dumps(
+            payload, ensure_ascii=False, separators=(",", ":")
+        ) + "\n").encode("utf-8"))
+        self.assertLess(initial_size, brain.MAX_BYTES - 200)
+        payload["meta"]["self_performance_score"] = "x" * (
+            brain.MAX_BYTES - 100 - initial_size
+        )
+        target = self.root / "near-budget-brain.json"
+        brain.write_brain(payload, target)
+        self.assertLessEqual(target.stat().st_size, brain.MAX_BYTES)
+        self.assertEqual([], brain.audit(payload, self.root)["errors"])
+
     def test_audit_rejects_priority_divergence(self):
         payload = self.fixture_brain()
         payload["core_essence"]["priority_index"]["P2_HIGH"] = []
