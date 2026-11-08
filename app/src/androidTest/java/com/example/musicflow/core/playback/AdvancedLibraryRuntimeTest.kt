@@ -56,7 +56,11 @@ class AdvancedLibraryRuntimeTest {
     private fun main(action: () -> Unit) = instrumentation.runOnMainSync(action)
 
     private fun grantAudioPermission() {
-        val permission = Manifest.permission.READ_EXTERNAL_STORAGE
+        val permission = if (android.os.Build.VERSION.SDK_INT >= 33) {
+            Manifest.permission.READ_MEDIA_AUDIO
+        } else {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
         if (ContextCompat.checkSelfPermission(
                 context, permission
             ) != PackageManager.PERMISSION_GRANTED) {

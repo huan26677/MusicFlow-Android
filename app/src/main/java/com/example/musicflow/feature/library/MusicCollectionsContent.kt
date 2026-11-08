@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -17,9 +18,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -29,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.ui.components.MusicFlowStatusKind
 import com.example.musicflow.ui.components.MusicFlowStatusPanel
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.withFrameNanos
 import java.util.Locale
 
 data class MusicCollection(
@@ -139,6 +150,14 @@ internal fun ColumnScope.MusicCollectionsContent(
     val rows = remember(collections, expandedKey) {
         collectionRows(collections, expandedKey)
     }
+    val lazyState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    val collectionIndices = remember(collections) {
+        collections.mapIndexed { index, group -> group.key to index }.toMap()
+    }
+    val headerFocus = remember(collections) {
+        collections.associate { group -> group.key to FocusRequester() }
+    }
     Text("${collections.size} $title")
 
     if (collections.isEmpty()) {
@@ -150,17 +169,57 @@ internal fun ColumnScope.MusicCollectionsContent(
         )
     }
 
-    LazyColumn(modifier = Modifier.weight(1f).testTag("music-collections-list")) {
+    LazyColumn(state = lazyState, modifier = Modifier.weight(1f).testTag("music-collections-list")) {
         items(rows, key = { it.key }) { row ->
             when (row) {
                 is MusicCollectionRow.Header -> {
                     val group = row.group
                     val expanded = expandedKey == group.key
                     var keyboardFocused by remember(group.key) { mutableStateOf(false) }
+                    val groupIndex = collectionIndices.getValue(group.key)
+                    val nextGroup = collections.getOrNull(groupIndex + 1)
+                    val previousGroup = collections.getOrNull(groupIndex - 1)
+                    fun focusHeader(target: MusicCollection) {
+                        coroutineScope.launch {
+                            val rowIndex = rows.indexOfFirst {
+                                it is MusicCollectionRow.Header && it.group.key == target.key
+                            }
+                            if (rowIndex < 0) return@launch
+                            val rowKey = "header:${target.key}"
+                            if (lazyState.layoutInfo.visibleItemsInfo.none { it.key == rowKey }) {
+                                lazyState.scrollToItem(rowIndex)
+                                withFrameNanos { }
+                            }
+                            headerFocus.getValue(target.key).requestFocus()
+                        }
+                    }
                     ListItem(
                         modifier = Modifier.fillMaxWidth()
                             .testTag("collection-header-${group.key}")
                             .onFocusChanged { keyboardFocused = it.isFocused }
+                            .focusRequester(headerFocus.getValue(group.key))
+                            .onPreviewKeyEvent { event ->
+                                when (event.key) {
+                                    Key.Enter, Key.NumPadEnter, Key.DirectionCenter, Key.Spacebar -> {
+                                        if (event.type == KeyEventType.KeyDown) {
+                                            expandedKey = if (expanded) null else group.key
+                                        }
+                                        true
+                                    }
+                                    // A collapsed list contains only headers. Move focus to the
+                                    // adjacent header even if LazyColumn needs to compose it.
+                                    Key.DirectionDown -> if (!expanded && nextGroup != null) {
+                                        if (event.type == KeyEventType.KeyDown) focusHeader(nextGroup)
+                                        true
+                                    } else false
+                                    Key.DirectionUp -> if (!expanded && previousGroup != null &&
+                                        expandedKey != previousGroup.key) {
+                                        if (event.type == KeyEventType.KeyDown) focusHeader(previousGroup)
+                                        true
+                                    } else false
+                                    else -> false
+                                }
+                            }
                             .clickable(role = Role.Button) {
                                 expandedKey = if (expanded) null else group.key
                             }

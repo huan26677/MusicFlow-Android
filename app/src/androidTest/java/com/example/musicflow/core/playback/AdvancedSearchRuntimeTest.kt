@@ -61,7 +61,12 @@ class AdvancedSearchRuntimeTest {
     private fun main(action: () -> Unit) = instrumentation.runOnMainSync(action)
 
     private fun grantAudioRead() {
-        val permission = Manifest.permission.READ_EXTERNAL_STORAGE
+        // Match Android's per-media permission introduced in API 33.
+        val permission = if (android.os.Build.VERSION.SDK_INT >= 33) {
+            Manifest.permission.READ_MEDIA_AUDIO
+        } else {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
         if (ContextCompat.checkSelfPermission(context, permission) !=
             PackageManager.PERMISSION_GRANTED) {
             ParcelFileDescriptor.AutoCloseInputStream(

@@ -118,6 +118,36 @@ class LibraryKeyboardAccessibilityV8Test {
         compose.onNodeWithTag("collection-header-second").assertIsFocused()
     }
 
+    @Test fun dpadReachesOffscreenCollectionHeadersAtLargeFont() {
+        val groups = (0..11).map { index ->
+            MusicCollection("row-$index", "Artist $index", listOf(song(index + 1)))
+        }
+        compose.setContent {
+            val density = LocalDensity.current
+            CompositionLocalProvider(LocalDensity provides Density(density.density, 2f)) {
+                MusicFlowTheme {
+                    Column(Modifier.width(320.dp).height(460.dp)) {
+                        MusicCollectionsContent(
+                            title = "nghệ sĩ", collections = groups,
+                            favoriteSongUris = emptySet(),
+                            onToggleFavorite = {}, onAddToPlaylist = {},
+                            onSongSelected = { _, _ -> }
+                        )
+                    }
+                }
+            }
+        }
+        device.pressDPadDown()
+        compose.waitForIdle()
+        compose.onNodeWithTag("collection-header-row-0")
+            .performSemanticsAction(SemanticsActions.RequestFocus)
+        repeat(11) {
+            device.pressDPadDown()
+            compose.waitForIdle()
+        }
+        compose.onNodeWithTag("collection-header-row-11").assertIsFocused()
+    }
+
     @Test fun albumHeaderReceivesKeyboardEnterWithNoUnexpectedPlayback() {
         var played = 0
         compose.setContent {

@@ -1,0 +1,177 @@
+﻿INSTRUMENTATION_STATUS: class=com.example.musicflow.AccountAuthUiTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.AccountAuthUiTest:
+INSTRUMENTATION_STATUS: test=signupTabInlineErrorsGoogleDisabledAndGuestNavigation
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.AccountAuthUiTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Failed: assertExists.
+Reason: Expected exactly '1' node but could not find any node that satisfies: (Text + InputText + EditableText contains 'Bạn chưa nhập email.' (ignoreCase: false))
+
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.assertExists(SemanticsNodeInteraction.kt:125)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.assertExists$default(SemanticsNodeInteraction.kt:124)
+	at com.example.musicflow.AccountAuthUiTest.signupTabInlineErrorsGoogleDisabledAndGuestNavigation(AccountAuthUiTest.kt:28)
+
+INSTRUMENTATION_STATUS: stream=
+Error in signupTabInlineErrorsGoogleDisabledAndGuestNavigation(com.example.musicflow.AccountAuthUiTest):
+java.lang.AssertionError: Failed: assertExists.
+Reason: Expected exactly '1' node but could not find any node that satisfies: (Text + InputText + EditableText contains 'Bạn chưa nhập email.' (ignoreCase: false))
+
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.assertExists(SemanticsNodeInteraction.kt:125)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.assertExists$default(SemanticsNodeInteraction.kt:124)
+	at com.example.musicflow.AccountAuthUiTest.signupTabInlineErrorsGoogleDisabledAndGuestNavigation(AccountAuthUiTest.kt:28)
+
+INSTRUMENTATION_STATUS: test=signupTabInlineErrorsGoogleDisabledAndGuestNavigation
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ThemeBatchTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ThemeBatchTest:
+INSTRUMENTATION_STATUS: test=themePersistsAfterRestart
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ThemeBatchTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: expected:<dark> but was:<null>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.example.musicflow.ThemeBatchTest.themePersistsAfterRestart(ThemeBatchTest.kt:57)
+
+INSTRUMENTATION_STATUS: stream=
+Error in themePersistsAfterRestart(com.example.musicflow.ThemeBatchTest):
+java.lang.AssertionError: expected:<dark> but was:<null>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.example.musicflow.ThemeBatchTest.themePersistsAfterRestart(ThemeBatchTest.kt:57)
+
+INSTRUMENTATION_STATUS: test=themePersistsAfterRestart
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest:
+INSTRUMENTATION_STATUS: test=realMediaStoreLibraryRouteScansAndStartsPlayback
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=realMediaStoreLibraryRouteScansAndStartsPlayback
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=mediaStoreAlbumsArtistsAndGenresOpenGroupsAndPlay
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stack=androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 20000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:887)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:482)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.awaitUi(AdvancedLibraryRuntimeTest.kt:153)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.mediaStoreAlbumsArtistsAndGenresOpenGroupsAndPlay$lambda$41(AdvancedLibraryRuntimeTest.kt:317)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest$$ExternalSyntheticLambda4.invoke(D8$$SyntheticClass:0)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.withLibrary(AdvancedLibraryRuntimeTest.kt:213)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.mediaStoreAlbumsArtistsAndGenresOpenGroupsAndPlay(AdvancedLibraryRuntimeTest.kt:274)
+
+INSTRUMENTATION_STATUS: stream=
+Error in mediaStoreAlbumsArtistsAndGenresOpenGroupsAndPlay(com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest):
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 20000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:887)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:482)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.awaitUi(AdvancedLibraryRuntimeTest.kt:153)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.mediaStoreAlbumsArtistsAndGenresOpenGroupsAndPlay$lambda$41(AdvancedLibraryRuntimeTest.kt:317)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest$$ExternalSyntheticLambda4.invoke(D8$$SyntheticClass:0)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.withLibrary(AdvancedLibraryRuntimeTest.kt:213)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.mediaStoreAlbumsArtistsAndGenresOpenGroupsAndPlay(AdvancedLibraryRuntimeTest.kt:274)
+
+INSTRUMENTATION_STATUS: test=mediaStoreAlbumsArtistsAndGenresOpenGroupsAndPlay
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playback.AdvancedSearchRuntimeTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.core.playback.AdvancedSearchRuntimeTest:
+INSTRUMENTATION_STATUS: test=searchRouteAccentInsensitivePlaybackAndQueueActions
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playback.AdvancedSearchRuntimeTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=searchRouteAccentInsensitivePlaybackAndQueueActions
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ui.MusicFlowUiFoundationTest:
+INSTRUMENTATION_STATUS: test=libraryPermissionStateExplainsManualPicker
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=libraryPermissionStateExplainsManualPicker
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 58.318
+There were 3 failures:
+1) signupTabInlineErrorsGoogleDisabledAndGuestNavigation(com.example.musicflow.AccountAuthUiTest)
+java.lang.AssertionError: Failed: assertExists.
+Reason: Expected exactly '1' node but could not find any node that satisfies: (Text + InputText + EditableText contains 'Bạn chưa nhập email.' (ignoreCase: false))
+
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.assertExists(SemanticsNodeInteraction.kt:125)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.assertExists$default(SemanticsNodeInteraction.kt:124)
+	at com.example.musicflow.AccountAuthUiTest.signupTabInlineErrorsGoogleDisabledAndGuestNavigation(AccountAuthUiTest.kt:28)
+2) themePersistsAfterRestart(com.example.musicflow.ThemeBatchTest)
+java.lang.AssertionError: expected:<dark> but was:<null>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.example.musicflow.ThemeBatchTest.themePersistsAfterRestart(ThemeBatchTest.kt:57)
+3) mediaStoreAlbumsArtistsAndGenresOpenGroupsAndPlay(com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest)
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 20000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:887)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:482)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.awaitUi(AdvancedLibraryRuntimeTest.kt:153)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.mediaStoreAlbumsArtistsAndGenresOpenGroupsAndPlay$lambda$41(AdvancedLibraryRuntimeTest.kt:317)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest$$ExternalSyntheticLambda4.invoke(D8$$SyntheticClass:0)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.withLibrary(AdvancedLibraryRuntimeTest.kt:213)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.mediaStoreAlbumsArtistsAndGenresOpenGroupsAndPlay(AdvancedLibraryRuntimeTest.kt:274)
+
+FAILURES!!!
+Tests run: 6,  Failures: 3
+
+
+INSTRUMENTATION_CODE: -1

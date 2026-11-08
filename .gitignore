@@ -82,6 +82,16 @@ __pycache__/
 !/qa-logs/musicflow-clear-journeys-v10-targeted-api36-single-avd.log
 !/qa-logs/musicflow-clear-journeys-v10-signed-upgrade-api33.log
 
+# v11: only reviewable, selected QA transcripts are committed. Device screenshots
+# and verbose local diagnostic logs stay on the disposable QA workstation.
+/qa-logs/*v11*.log
+!/qa-logs/musicflow-keyboard-v11-targeted-api36.log
+!/qa-logs/musicflow-keyboard-v11-ux-plus-json-api36.log
+!/qa-logs/musicflow-keyboard-v11-json-picker-api36.log
+!/qa-logs/musicflow-keyboard-v11-impact-api36.log
+!/qa-logs/musicflow-keyboard-v11-impact-retest-api36.log
+/qa-logs/v11picker-*.png
+
 # Operating system
 .DS_Store
 Thumbs.db

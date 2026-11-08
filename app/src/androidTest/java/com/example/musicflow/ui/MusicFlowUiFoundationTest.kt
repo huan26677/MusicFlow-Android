@@ -103,7 +103,10 @@ class MusicFlowUiFoundationTest {
             )
         }
         compose.onNodeWithTag("musicflow-status-permission").assertExists()
-        compose.onNodeWithText("Cấp quyền").performClick()
+        // The permission action now names the specific audio access, while
+        // choosing personal files remains available without granting it.
+        compose.onNodeWithTag("library-permission-open-picked").assertExists()
+        compose.onNodeWithText("Cấp quyền đọc âm thanh").performClick()
         compose.runOnIdle { assertEquals(1, permissionRequests) }
     }
 

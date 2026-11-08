@@ -1,0 +1,1199 @@
+﻿INSTRUMENTATION_STATUS: class=com.example.musicflow.AccountAuthUiTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.AccountAuthUiTest:
+INSTRUMENTATION_STATUS: test=signupTabInlineErrorsGoogleDisabledAndGuestNavigation
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.AccountAuthUiTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Failed: assertExists.
+Reason: Expected exactly '1' node but could not find any node that satisfies: (Text + InputText + EditableText contains 'Bạn chưa nhập email.' (ignoreCase: false))
+
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.assertExists(SemanticsNodeInteraction.kt:125)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.assertExists$default(SemanticsNodeInteraction.kt:124)
+	at com.example.musicflow.AccountAuthUiTest.signupTabInlineErrorsGoogleDisabledAndGuestNavigation(AccountAuthUiTest.kt:28)
+
+INSTRUMENTATION_STATUS: stream=
+Error in signupTabInlineErrorsGoogleDisabledAndGuestNavigation(com.example.musicflow.AccountAuthUiTest):
+java.lang.AssertionError: Failed: assertExists.
+Reason: Expected exactly '1' node but could not find any node that satisfies: (Text + InputText + EditableText contains 'Bạn chưa nhập email.' (ignoreCase: false))
+
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.assertExists(SemanticsNodeInteraction.kt:125)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.assertExists$default(SemanticsNodeInteraction.kt:124)
+	at com.example.musicflow.AccountAuthUiTest.signupTabInlineErrorsGoogleDisabledAndGuestNavigation(AccountAuthUiTest.kt:28)
+
+INSTRUMENTATION_STATUS: test=signupTabInlineErrorsGoogleDisabledAndGuestNavigation
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ExampleInstrumentedTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ExampleInstrumentedTest:
+INSTRUMENTATION_STATUS: test=mvpLibrarySearchToRealPlayer
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ExampleInstrumentedTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=mvpLibrarySearchToRealPlayer
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ExampleInstrumentedTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=useAppContext
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ExampleInstrumentedTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=useAppContext
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ExampleInstrumentedTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=mvpRealMediaStoreToPlayer
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ExampleInstrumentedTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=mvpRealMediaStoreToPlayer
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ThemeBatchTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ThemeBatchTest:
+INSTRUMENTATION_STATUS: test=themePersistsAfterRestart
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ThemeBatchTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: expected:<dark> but was:<null>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.example.musicflow.ThemeBatchTest.themePersistsAfterRestart(ThemeBatchTest.kt:57)
+
+INSTRUMENTATION_STATUS: stream=
+Error in themePersistsAfterRestart(com.example.musicflow.ThemeBatchTest):
+java.lang.AssertionError: expected:<dark> but was:<null>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.example.musicflow.ThemeBatchTest.themePersistsAfterRestart(ThemeBatchTest.kt:57)
+
+INSTRUMENTATION_STATUS: test=themePersistsAfterRestart
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.history.RecentHistoryDatabaseTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.core.history.RecentHistoryDatabaseTest:
+INSTRUMENTATION_STATUS: test=historySurvivesDatabaseReopen
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.history.RecentHistoryDatabaseTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=historySurvivesDatabaseReopen
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.lyrics.LyricsSafImportTest
+INSTRUMENTATION_STATUS: current=7
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.core.lyrics.LyricsSafImportTest:
+INSTRUMENTATION_STATUS: test=realSafDocumentImportAndPersistentAudioAssociation
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.lyrics.LyricsSafImportTest
+INSTRUMENTATION_STATUS: current=7
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=realSafDocumentImportAndPersistentAudioAssociation
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest
+INSTRUMENTATION_STATUS: current=8
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest:
+INSTRUMENTATION_STATUS: test=realMediaStoreLibraryRouteScansAndStartsPlayback
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest
+INSTRUMENTATION_STATUS: current=8
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: expected:<0> but was:<-1>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.grantAudioPermission(AdvancedLibraryRuntimeTest.kt:69)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.withLibrary(AdvancedLibraryRuntimeTest.kt:156)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.realMediaStoreLibraryRouteScansAndStartsPlayback(AdvancedLibraryRuntimeTest.kt:240)
+
+INSTRUMENTATION_STATUS: stream=
+Error in realMediaStoreLibraryRouteScansAndStartsPlayback(com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest):
+java.lang.AssertionError: expected:<0> but was:<-1>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.grantAudioPermission(AdvancedLibraryRuntimeTest.kt:69)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.withLibrary(AdvancedLibraryRuntimeTest.kt:156)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.realMediaStoreLibraryRouteScansAndStartsPlayback(AdvancedLibraryRuntimeTest.kt:240)
+
+INSTRUMENTATION_STATUS: test=realMediaStoreLibraryRouteScansAndStartsPlayback
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest
+INSTRUMENTATION_STATUS: current=9
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=mediaStoreAlbumsArtistsAndGenresOpenGroupsAndPlay
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest
+INSTRUMENTATION_STATUS: current=9
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: expected:<0> but was:<-1>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.grantAudioPermission(AdvancedLibraryRuntimeTest.kt:69)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.withLibrary(AdvancedLibraryRuntimeTest.kt:156)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.mediaStoreAlbumsArtistsAndGenresOpenGroupsAndPlay(AdvancedLibraryRuntimeTest.kt:268)
+
+INSTRUMENTATION_STATUS: stream=
+Error in mediaStoreAlbumsArtistsAndGenresOpenGroupsAndPlay(com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest):
+java.lang.AssertionError: expected:<0> but was:<-1>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.grantAudioPermission(AdvancedLibraryRuntimeTest.kt:69)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.withLibrary(AdvancedLibraryRuntimeTest.kt:156)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.mediaStoreAlbumsArtistsAndGenresOpenGroupsAndPlay(AdvancedLibraryRuntimeTest.kt:268)
+
+INSTRUMENTATION_STATUS: test=mediaStoreAlbumsArtistsAndGenresOpenGroupsAndPlay
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playback.AdvancedSearchRuntimeTest
+INSTRUMENTATION_STATUS: current=10
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.core.playback.AdvancedSearchRuntimeTest:
+INSTRUMENTATION_STATUS: test=searchRouteAccentInsensitivePlaybackAndQueueActions
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playback.AdvancedSearchRuntimeTest
+INSTRUMENTATION_STATUS: current=10
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: expected:<0> but was:<-1>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.example.musicflow.core.playback.AdvancedSearchRuntimeTest.grantAudioRead(AdvancedSearchRuntimeTest.kt:73)
+	at com.example.musicflow.core.playback.AdvancedSearchRuntimeTest.withSearch(AdvancedSearchRuntimeTest.kt:159)
+	at com.example.musicflow.core.playback.AdvancedSearchRuntimeTest.searchRouteAccentInsensitivePlaybackAndQueueActions(AdvancedSearchRuntimeTest.kt:261)
+
+INSTRUMENTATION_STATUS: stream=
+Error in searchRouteAccentInsensitivePlaybackAndQueueActions(com.example.musicflow.core.playback.AdvancedSearchRuntimeTest):
+java.lang.AssertionError: expected:<0> but was:<-1>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.example.musicflow.core.playback.AdvancedSearchRuntimeTest.grantAudioRead(AdvancedSearchRuntimeTest.kt:73)
+	at com.example.musicflow.core.playback.AdvancedSearchRuntimeTest.withSearch(AdvancedSearchRuntimeTest.kt:159)
+	at com.example.musicflow.core.playback.AdvancedSearchRuntimeTest.searchRouteAccentInsensitivePlaybackAndQueueActions(AdvancedSearchRuntimeTest.kt:261)
+
+INSTRUMENTATION_STATUS: test=searchRouteAccentInsensitivePlaybackAndQueueActions
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playback.PlaybackQueuePersistenceTest
+INSTRUMENTATION_STATUS: current=11
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.core.playback.PlaybackQueuePersistenceTest:
+INSTRUMENTATION_STATUS: test=savedQueueRestoresPausedAndResumesPlayback
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playback.PlaybackQueuePersistenceTest
+INSTRUMENTATION_STATUS: current=11
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=savedQueueRestoresPausedAndResumesPlayback
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playback.PlaybackRuntimeAutoSkipTest
+INSTRUMENTATION_STATUS: current=12
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.core.playback.PlaybackRuntimeAutoSkipTest:
+INSTRUMENTATION_STATUS: test=singleMissingTrackAutoSkips
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playback.PlaybackRuntimeAutoSkipTest
+INSTRUMENTATION_STATUS: current=12
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=singleMissingTrackAutoSkips
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playlist.PlaylistLocalBackupIntegrationTest
+INSTRUMENTATION_STATUS: current=13
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.core.playlist.PlaylistLocalBackupIntegrationTest:
+INSTRUMENTATION_STATUS: test=invalidDocumentCannotPartiallyModifyRoom
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playlist.PlaylistLocalBackupIntegrationTest
+INSTRUMENTATION_STATUS: current=13
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=invalidDocumentCannotPartiallyModifyRoom
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playlist.PlaylistReorderDatabaseTest
+INSTRUMENTATION_STATUS: current=14
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.core.playlist.PlaylistReorderDatabaseTest:
+INSTRUMENTATION_STATUS: test=reorderPersistsAfterDatabaseReopen
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.core.playlist.PlaylistReorderDatabaseTest
+INSTRUMENTATION_STATUS: current=14
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=reorderPersistsAfterDatabaseReopen
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryAccessibilityV7Test
+INSTRUMENTATION_STATUS: current=15
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.feature.library.LibraryAccessibilityV7Test:
+INSTRUMENTATION_STATUS: test=darkThemePrimaryTextTokensMeetWcagAa
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryAccessibilityV7Test
+INSTRUMENTATION_STATUS: current=15
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=darkThemePrimaryTextTokensMeetWcagAa
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryAccessibilityV7Test
+INSTRUMENTATION_STATUS: current=16
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=lightThemePrimaryTextTokensMeetWcagAa
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryAccessibilityV7Test
+INSTRUMENTATION_STATUS: current=16
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=lightThemePrimaryTextTokensMeetWcagAa
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryAccessibilityV7Test
+INSTRUMENTATION_STATUS: current=17
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=albumRowsPreservePlaybackIndicesAndDoNotCreateDuplicateKeys
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryAccessibilityV7Test
+INSTRUMENTATION_STATUS: current=17
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=albumRowsPreservePlaybackIndicesAndDoNotCreateDuplicateKeys
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryAccessibilityV7Test
+INSTRUMENTATION_STATUS: current=18
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=collapsedCollectionsDoNotCreateHundredsOfSongRows
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryAccessibilityV7Test
+INSTRUMENTATION_STATUS: current=18
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=collapsedCollectionsDoNotCreateHundredsOfSongRows
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryAccessibilityV7Test
+INSTRUMENTATION_STATUS: current=19
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=albumTracksStayVirtualizedInRealLibraryAt200Percent
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryAccessibilityV7Test
+INSTRUMENTATION_STATUS: current=19
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=albumTracksStayVirtualizedInRealLibraryAt200Percent
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryAccessibilityV7Test
+INSTRUMENTATION_STATUS: current=20
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=artistTracksStayVirtualizedAndKeepCorrectPlaybackQueueAt200Percent
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryAccessibilityV7Test
+INSTRUMENTATION_STATUS: current=20
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=artistTracksStayVirtualizedAndKeepCorrectPlaybackQueueAt200Percent
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryKeyboardAccessibilityV8Test
+INSTRUMENTATION_STATUS: current=21
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.feature.library.LibraryKeyboardAccessibilityV8Test:
+INSTRUMENTATION_STATUS: test=dpadReachesOffscreenCollectionHeadersAtLargeFont
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryKeyboardAccessibilityV8Test
+INSTRUMENTATION_STATUS: current=21
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=dpadReachesOffscreenCollectionHeadersAtLargeFont
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryKeyboardAccessibilityV8Test
+INSTRUMENTATION_STATUS: current=22
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=dpadMovesFocusBetweenCollectionHeaders
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryKeyboardAccessibilityV8Test
+INSTRUMENTATION_STATUS: current=22
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=dpadMovesFocusBetweenCollectionHeaders
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryKeyboardAccessibilityV8Test
+INSTRUMENTATION_STATUS: current=23
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=keyboardEnterCanExpandAndCollapseArtistWithoutTouch
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryKeyboardAccessibilityV8Test
+INSTRUMENTATION_STATUS: current=23
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=keyboardEnterCanExpandAndCollapseArtistWithoutTouch
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryKeyboardAccessibilityV8Test
+INSTRUMENTATION_STATUS: current=24
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=albumHeaderReceivesKeyboardEnterWithNoUnexpectedPlayback
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.library.LibraryKeyboardAccessibilityV8Test
+INSTRUMENTATION_STATUS: current=24
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=albumHeaderReceivesKeyboardEnterWithNoUnexpectedPlayback
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.search.AdvancedSearchIndexV8Test
+INSTRUMENTATION_STATUS: current=25
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.feature.search.AdvancedSearchIndexV8Test:
+INSTRUMENTATION_STATUS: test=refreshRevocationAndQueryChangesDoNotReuseStaleCatalog
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.feature.search.AdvancedSearchIndexV8Test
+INSTRUMENTATION_STATUS: current=25
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=refreshRevocationAndQueryChangesDoNotReuseStaleCatalog
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.AccessibilityPolishV6UiTest
+INSTRUMENTATION_STATUS: current=26
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ui.AccessibilityPolishV6UiTest:
+INSTRUMENTATION_STATUS: test=playerTransportAndSeekSemanticsRemainReachableAt200Percent
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.AccessibilityPolishV6UiTest
+INSTRUMENTATION_STATUS: current=26
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=playerTransportAndSeekSemanticsRemainReachableAt200Percent
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.AccessibilityPolishV6UiTest
+INSTRUMENTATION_STATUS: current=27
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=homeActionsAreAvailableAt200PercentWithoutAuth
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.AccessibilityPolishV6UiTest
+INSTRUMENTATION_STATUS: current=27
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=homeActionsAreAvailableAt200PercentWithoutAuth
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.AccessibilityPolishV6UiTest
+INSTRUMENTATION_STATUS: current=28
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=statusPanelAnnouncesHeadingWithNoPermissionOrLoginRequired
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.AccessibilityPolishV6UiTest
+INSTRUMENTATION_STATUS: current=28
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=statusPanelAnnouncesHeadingWithNoPermissionOrLoginRequired
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.AccessibilityPolishV6UiTest
+INSTRUMENTATION_STATUS: current=29
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=songRowPlaybackIsNamedAndFavoriteStateExposedAt200Percent
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.AccessibilityPolishV6UiTest
+INSTRUMENTATION_STATUS: current=29
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=songRowPlaybackIsNamedAndFavoriteStateExposedAt200Percent
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.AccessibilityPolishV6UiTest
+INSTRUMENTATION_STATUS: current=30
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=accountModesRemainAccessibleAsSeparateRowsAt200Percent
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.AccessibilityPolishV6UiTest
+INSTRUMENTATION_STATUS: current=30
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=accountModesRemainAccessibleAsSeparateRowsAt200Percent
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.AccessibilityPolishV6UiTest
+INSTRUMENTATION_STATUS: current=31
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=headingsStayNavigableAndFullTextAt200PercentInLightAndDark
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.AccessibilityPolishV6UiTest
+INSTRUMENTATION_STATUS: current=31
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=headingsStayNavigableAndFullTextAt200PercentInLightAndDark
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.CreatorApplicationReviewUiTest
+INSTRUMENTATION_STATUS: current=32
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ui.CreatorApplicationReviewUiTest:
+INSTRUMENTATION_STATUS: test=pendingArtistRequestIsShownAndCannotBeResubmitted
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.CreatorApplicationReviewUiTest
+INSTRUMENTATION_STATUS: current=32
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=pendingArtistRequestIsShownAndCannotBeResubmitted
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.DemoBillingUiTest
+INSTRUMENTATION_STATUS: current=33
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ui.DemoBillingUiTest:
+INSTRUMENTATION_STATUS: test=failedCheckoutNeverChangesPriorPaidDemoReceipt
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.DemoBillingUiTest
+INSTRUMENTATION_STATUS: current=33
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=failedCheckoutNeverChangesPriorPaidDemoReceipt
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.DemoCenterV1UiTest
+INSTRUMENTATION_STATUS: current=34
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ui.DemoCenterV1UiTest:
+INSTRUMENTATION_STATUS: test=demoProgressAndActorSelectionPersistButCannotGrantAnyRealAuthority
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.DemoCenterV1UiTest
+INSTRUMENTATION_STATUS: current=34
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=demoProgressAndActorSelectionPersistButCannotGrantAnyRealAuthority
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.LibraryPerformanceV4UiTest
+INSTRUMENTATION_STATUS: current=35
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ui.LibraryPerformanceV4UiTest:
+INSTRUMENTATION_STATUS: test=largeFontSearchAndSortRemainReachableInOneScrollableList
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.LibraryPerformanceV4UiTest
+INSTRUMENTATION_STATUS: current=35
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=largeFontSearchAndSortRemainReachableInOneScrollableList
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.LibraryPerformanceV4UiTest
+INSTRUMENTATION_STATUS: current=36
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=songSearchPlaysOnlyFilteredQueueAndPreservesIndex
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.LibraryPerformanceV4UiTest
+INSTRUMENTATION_STATUS: current=36
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=songSearchPlaysOnlyFilteredQueueAndPreservesIndex
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.LibraryPerformanceV4UiTest
+INSTRUMENTATION_STATUS: current=37
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=pickedMusicSearchIsAccentInsensitiveAndQueueMatchesFilter
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.LibraryPerformanceV4UiTest
+INSTRUMENTATION_STATUS: current=37
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=pickedMusicSearchIsAccentInsensitiveAndQueueMatchesFilter
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.LibraryPerformanceV4UiTest
+INSTRUMENTATION_STATUS: current=38
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=preparedIndexMatchesVietnameseAndPreservesLargeCatalogOrder
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.LibraryPerformanceV4UiTest
+INSTRUMENTATION_STATUS: current=38
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=preparedIndexMatchesVietnameseAndPreservesLargeCatalogOrder
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.LibraryPerformanceV4UiTest
+INSTRUMENTATION_STATUS: current=39
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=noResultsHaveClearActionAndSearchDoesNotDeleteMusic
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.LibraryPerformanceV4UiTest
+INSTRUMENTATION_STATUS: current=39
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=noResultsHaveClearActionAndSearchDoesNotDeleteMusic
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.LibraryPerformanceV4UiTest
+INSTRUMENTATION_STATUS: current=40
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=genreTabRequestsMetadataOnlyAfterItIsSelected
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.LibraryPerformanceV4UiTest
+INSTRUMENTATION_STATUS: current=40
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=genreTabRequestsMetadataOnlyAfterItIsSelected
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.LibraryPerformanceV4UiTest
+INSTRUMENTATION_STATUS: current=41
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=deniedLibraryPermissionOffersFriendlyOfflineAlternative
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.LibraryPerformanceV4UiTest
+INSTRUMENTATION_STATUS: current=41
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=deniedLibraryPermissionOffersFriendlyOfflineAlternative
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.ListeningJourneysV1UiTest
+INSTRUMENTATION_STATUS: current=42
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ui.ListeningJourneysV1UiTest:
+INSTRUMENTATION_STATUS: test=homeShowsShortHistoryThenAllSongsWithOriginalPlaybackIndex
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.ListeningJourneysV1UiTest
+INSTRUMENTATION_STATUS: current=42
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=homeShowsShortHistoryThenAllSongsWithOriginalPlaybackIndex
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowPlayerLibraryUxV3Test
+INSTRUMENTATION_STATUS: current=43
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ui.MusicFlowPlayerLibraryUxV3Test:
+INSTRUMENTATION_STATUS: test=advancedPlayerControlsStartCollapsedAndExpandOnDemand
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowPlayerLibraryUxV3Test
+INSTRUMENTATION_STATUS: current=43
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=advancedPlayerControlsStartCollapsedAndExpandOnDemand
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowPlayerLibraryUxV3Test
+INSTRUMENTATION_STATUS: current=44
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=librarySortMenuChangesPlaybackOrderWithoutEditingSongs
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowPlayerLibraryUxV3Test
+INSTRUMENTATION_STATUS: current=44
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=librarySortMenuChangesPlaybackOrderWithoutEditingSongs
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowPlayerLibraryUxV3Test
+INSTRUMENTATION_STATUS: current=45
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=sortingUsesActualMediaStoreDatesAndKeepsDeterministicOrders
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowPlayerLibraryUxV3Test
+INSTRUMENTATION_STATUS: current=45
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=sortingUsesActualMediaStoreDatesAndKeepsDeterministicOrders
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowRolesUiTest
+INSTRUMENTATION_STATUS: current=46
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ui.MusicFlowRolesUiTest:
+INSTRUMENTATION_STATUS: test=failedAccessRefreshHidesPreviousAdminTools
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowRolesUiTest
+INSTRUMENTATION_STATUS: current=46
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=failedAccessRefreshHidesPreviousAdminTools
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowRolesUiTest
+INSTRUMENTATION_STATUS: current=47
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=scopedPlatformAdminCannotAccessOwnerGrants
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowRolesUiTest
+INSTRUMENTATION_STATUS: current=47
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=scopedPlatformAdminCannotAccessOwnerGrants
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=48
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ui.MusicFlowUiFoundationTest:
+INSTRUMENTATION_STATUS: test=libraryPermissionStateExplainsManualPicker
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=48
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Failed to inject touch input.
+Reason: Expected exactly '1' node but could not find any node that satisfies: (Text + InputText + EditableText contains 'Cấp quyền' (ignoreCase: false))
+
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchSemanticsNode(SemanticsNodeInteraction.kt:84)
+	at androidx.compose.ui.test.ActionsKt.performTouchInput(Actions.kt:401)
+	at androidx.compose.ui.test.AndroidActions.performClickImpl(Actions.android.kt:23)
+	at androidx.compose.ui.test.ActionsKt.performClick(Actions.kt:59)
+	at com.example.musicflow.ui.MusicFlowUiFoundationTest.libraryPermissionStateExplainsManualPicker(MusicFlowUiFoundationTest.kt:106)
+
+INSTRUMENTATION_STATUS: stream=
+Error in libraryPermissionStateExplainsManualPicker(com.example.musicflow.ui.MusicFlowUiFoundationTest):
+java.lang.AssertionError: Failed to inject touch input.
+Reason: Expected exactly '1' node but could not find any node that satisfies: (Text + InputText + EditableText contains 'Cấp quyền' (ignoreCase: false))
+
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchSemanticsNode(SemanticsNodeInteraction.kt:84)
+	at androidx.compose.ui.test.ActionsKt.performTouchInput(Actions.kt:401)
+	at androidx.compose.ui.test.AndroidActions.performClickImpl(Actions.android.kt:23)
+	at androidx.compose.ui.test.ActionsKt.performClick(Actions.kt:59)
+	at com.example.musicflow.ui.MusicFlowUiFoundationTest.libraryPermissionStateExplainsManualPicker(MusicFlowUiFoundationTest.kt:106)
+
+INSTRUMENTATION_STATUS: test=libraryPermissionStateExplainsManualPicker
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=49
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=onlineCatalogErrorHasRetryAction
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=49
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=onlineCatalogErrorHasRetryAction
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=50
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=searchErrorRetainsRetryAction
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=50
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=searchErrorRetainsRetryAction
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=51
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=libraryEmptyHasGuidanceAndPickerRemainsAvailable
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=51
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=libraryEmptyHasGuidanceAndPickerRemainsAvailable
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=52
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=onlineCatalogEmptyCanRefreshWithoutAccount
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=52
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=onlineCatalogEmptyCanRefreshWithoutAccount
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=53
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=searchClearButtonHasTalkBackLabel
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=53
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=searchClearButtonHasTalkBackLabel
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=54
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=queueEmptyStateIsClearAndDoesNotStopPlayback
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=54
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=queueEmptyStateIsClearAndDoesNotStopPlayback
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=55
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=errorPanelHasAccessibleRetryAction
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=55
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=errorPanelHasAccessibleRetryAction
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=56
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=miniPlayerAnnouncesTrackAndPlayState
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=56
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=miniPlayerAnnouncesTrackAndPlayState
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=57
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=brandPrimaryColorsHaveReadableTextContrast
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiFoundationTest
+INSTRUMENTATION_STATUS: current=57
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=brandPrimaryColorsHaveReadableTextContrast
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiPolishTest
+INSTRUMENTATION_STATUS: current=58
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ui.MusicFlowUiPolishTest:
+INSTRUMENTATION_STATUS: test=guestThemeSelectorRemainsReachableAtLargeFont
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiPolishTest
+INSTRUMENTATION_STATUS: current=58
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=guestThemeSelectorRemainsReachableAtLargeFont
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiPolishTest
+INSTRUMENTATION_STATUS: current=59
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=playerTransportRemainsClickableAtLargeFontOnNarrowScreen
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiPolishTest
+INSTRUMENTATION_STATUS: current=59
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=playerTransportRemainsClickableAtLargeFontOnNarrowScreen
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiPolishTest
+INSTRUMENTATION_STATUS: current=60
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=authButtonsStayReachableAtLargeFontWithoutCallingAuth
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUiPolishTest
+INSTRUMENTATION_STATUS: current=60
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=authButtonsStayReachableAtLargeFontWithoutCallingAuth
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUxFoundationV3Test
+INSTRUMENTATION_STATUS: current=61
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ui.MusicFlowUxFoundationV3Test:
+INSTRUMENTATION_STATUS: test=libraryPickerUsesGenericAudioLabelAndKeepsAction
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUxFoundationV3Test
+INSTRUMENTATION_STATUS: current=61
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=libraryPickerUsesGenericAudioLabelAndKeepsAction
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUxFoundationV3Test
+INSTRUMENTATION_STATUS: current=62
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=firstUseHomeKeepsListeningAndSearchVisibleWhileAdvancedActionsAreOptional
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUxFoundationV3Test
+INSTRUMENTATION_STATUS: current=62
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=firstUseHomeKeepsListeningAndSearchVisibleWhileAdvancedActionsAreOptional
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUxFoundationV3Test
+INSTRUMENTATION_STATUS: current=63
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=primaryHomeActionsAndOneTimeGuideCanBeDismissed
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.MusicFlowUxFoundationV3Test
+INSTRUMENTATION_STATUS: current=63
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=primaryHomeActionsAndOneTimeGuideCanBeDismissed
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.OceanFlowVisualUiTest
+INSTRUMENTATION_STATUS: current=64
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ui.OceanFlowVisualUiTest:
+INSTRUMENTATION_STATUS: test=homeHeroPreservesLibrarySearchPlaylistActionsAtLargeFont
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.OceanFlowVisualUiTest
+INSTRUMENTATION_STATUS: current=64
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=homeHeroPreservesLibrarySearchPlaylistActionsAtLargeFont
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.OceanFlowVisualUiTest
+INSTRUMENTATION_STATUS: current=65
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=brandHeaderRendersInDarkAndLightWithoutChangingText
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.OceanFlowVisualUiTest
+INSTRUMENTATION_STATUS: current=65
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=brandHeaderRendersInDarkAndLightWithoutChangingText
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.OceanFlowVisualUiTest
+INSTRUMENTATION_STATUS: current=66
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=playerArtworkStageShowsSafeOfflinePlaceholder
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.OceanFlowVisualUiTest
+INSTRUMENTATION_STATUS: current=66
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=playerArtworkStageShowsSafeOfflinePlaceholder
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.OceanFlowVisualUiTest
+INSTRUMENTATION_STATUS: current=67
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=searchStillOffersItsInputWithNewOceanHeader
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.OceanFlowVisualUiTest
+INSTRUMENTATION_STATUS: current=67
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=searchStillOffersItsInputWithNewOceanHeader
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.OceanFlowVisualUiTest
+INSTRUMENTATION_STATUS: current=68
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=floatingMiniPlayerKeepsPlayAndOpenActions
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.OceanFlowVisualUiTest
+INSTRUMENTATION_STATUS: current=68
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=floatingMiniPlayerKeepsPlayAndOpenActions
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.OceanFlowVisualUiTest
+INSTRUMENTATION_STATUS: current=69
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=themedLibrarySongRowStillKeepsActionsSeparate
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.OceanFlowVisualUiTest
+INSTRUMENTATION_STATUS: current=69
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=themedLibrarySongRowStillKeepsActionsSeparate
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.SmartLibraryUiTest
+INSTRUMENTATION_STATUS: current=70
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+com.example.musicflow.ui.SmartLibraryUiTest:
+INSTRUMENTATION_STATUS: test=pickedTrackAndMediaStoreDuplicateAppearOnlyOnceInSmartMix
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.SmartLibraryUiTest
+INSTRUMENTATION_STATUS: current=70
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=pickedTrackAndMediaStoreDuplicateAppearOnlyOnceInSmartMix
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.SmartLibraryUiTest
+INSTRUMENTATION_STATUS: current=71
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=changingFavoriteRecomputesSmartCollectionImmediately
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.example.musicflow.ui.SmartLibraryUiTest
+INSTRUMENTATION_STATUS: current=71
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=71
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=changingFavoriteRecomputesSmartCollectionImmediately
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 248.184
+There were 6 failures:
+1) signupTabInlineErrorsGoogleDisabledAndGuestNavigation(com.example.musicflow.AccountAuthUiTest)
+java.lang.AssertionError: Failed: assertExists.
+Reason: Expected exactly '1' node but could not find any node that satisfies: (Text + InputText + EditableText contains 'Bạn chưa nhập email.' (ignoreCase: false))
+
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.assertExists(SemanticsNodeInteraction.kt:125)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.assertExists$default(SemanticsNodeInteraction.kt:124)
+	at com.example.musicflow.AccountAuthUiTest.signupTabInlineErrorsGoogleDisabledAndGuestNavigation(AccountAuthUiTest.kt:28)
+2) themePersistsAfterRestart(com.example.musicflow.ThemeBatchTest)
+java.lang.AssertionError: expected:<dark> but was:<null>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.example.musicflow.ThemeBatchTest.themePersistsAfterRestart(ThemeBatchTest.kt:57)
+3) realMediaStoreLibraryRouteScansAndStartsPlayback(com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest)
+java.lang.AssertionError: expected:<0> but was:<-1>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.grantAudioPermission(AdvancedLibraryRuntimeTest.kt:69)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.withLibrary(AdvancedLibraryRuntimeTest.kt:156)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.realMediaStoreLibraryRouteScansAndStartsPlayback(AdvancedLibraryRuntimeTest.kt:240)
+4) mediaStoreAlbumsArtistsAndGenresOpenGroupsAndPlay(com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest)
+java.lang.AssertionError: expected:<0> but was:<-1>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.grantAudioPermission(AdvancedLibraryRuntimeTest.kt:69)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.withLibrary(AdvancedLibraryRuntimeTest.kt:156)
+	at com.example.musicflow.core.playback.AdvancedLibraryRuntimeTest.mediaStoreAlbumsArtistsAndGenresOpenGroupsAndPlay(AdvancedLibraryRuntimeTest.kt:268)
+5) searchRouteAccentInsensitivePlaybackAndQueueActions(com.example.musicflow.core.playback.AdvancedSearchRuntimeTest)
+java.lang.AssertionError: expected:<0> but was:<-1>
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.failNotEquals(Assert.java:835)
+	at org.junit.Assert.assertEquals(Assert.java:120)
+	at org.junit.Assert.assertEquals(Assert.java:146)
+	at com.example.musicflow.core.playback.AdvancedSearchRuntimeTest.grantAudioRead(AdvancedSearchRuntimeTest.kt:73)
+	at com.example.musicflow.core.playback.AdvancedSearchRuntimeTest.withSearch(AdvancedSearchRuntimeTest.kt:159)
+	at com.example.musicflow.core.playback.AdvancedSearchRuntimeTest.searchRouteAccentInsensitivePlaybackAndQueueActions(AdvancedSearchRuntimeTest.kt:261)
+6) libraryPermissionStateExplainsManualPicker(com.example.musicflow.ui.MusicFlowUiFoundationTest)
+java.lang.AssertionError: Failed to inject touch input.
+Reason: Expected exactly '1' node but could not find any node that satisfies: (Text + InputText + EditableText contains 'Cấp quyền' (ignoreCase: false))
+
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchSemanticsNode(SemanticsNodeInteraction.kt:84)
+	at androidx.compose.ui.test.ActionsKt.performTouchInput(Actions.kt:401)
+	at androidx.compose.ui.test.AndroidActions.performClickImpl(Actions.android.kt:23)
+	at androidx.compose.ui.test.ActionsKt.performClick(Actions.kt:59)
+	at com.example.musicflow.ui.MusicFlowUiFoundationTest.libraryPermissionStateExplainsManualPicker(MusicFlowUiFoundationTest.kt:106)
+
+FAILURES!!!
+Tests run: 71,  Failures: 6
+
+
+INSTRUMENTATION_CODE: -1
