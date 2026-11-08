@@ -34,7 +34,7 @@
     "Giữ nhạc/Room/playlist/SAF READ; chỉ thử AVD cách ly, không đụng dữ liệu người dùng.",
     "Actor/Premium/billing demo không nâng quyền production; online cần license; signed QA != Play; APK dist local, log Git đã sàng lọc.",
     "Log mất => unavailable, không tự coi PASS; không lưu token/mật khẩu/log nhạy cảm.",
-    "Trước/sau code: plan direct/downstream/case IDs/lý do; all direct + smoke downstream; security/Room/SAF/unknown/release/shared bắt buộc full."
+    "Trước/sau code: plan direct/downstream/case IDs/lý do; all direct + smoke downstream; security/Room/SAF/unknown/release/shared-core-contract bắt buộc full."
   ],
   "experience_learned": {
     "success_heuristics": [
@@ -74,7 +74,7 @@
     "engine_version": "2.0",
     "learning_revision": 4,
     "mode": "evidence_driven_assisted_not_self_training",
-    "baseline_commit": "10f4c09",
+    "baseline_commit": "426d943",
     "entrypoint": "python scripts/project_brain_v2.py check",
     "test_architecture": {
       "mode": "Modular Testing & Impact-driven Regression",
@@ -82,7 +82,7 @@
       "cases": "docs/Modular_Test_Catalog.md",
       "guide": "docs/Test_Impact_Policy.md",
       "plan": "py -3 scripts/impact_regression.py plan --git-diff --json",
-      "rule": "Direct all, downstream smoke; unknown/security/SAF/Room/shared/release full. Sau code chạy test, lưu log; plan != PASS."
+      "rule": "Direct all, downstream smoke; unknown/security/SAF/Room/shared-core/release full. Mapped UI consumers dùng smoke; plan != PASS."
     },
     "decision_policy": {
       "weights": {
