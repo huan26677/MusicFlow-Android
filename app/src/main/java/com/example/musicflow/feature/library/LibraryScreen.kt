@@ -138,12 +138,8 @@ fun LibraryRoute(
         hasPermission = granted
     }
 
-    LaunchedEffect(Unit) {
-        if (!hasPermission && !initialFavoritesOnly && !initialShowSmart) {
-            permissionLauncher.launch(permission)
-        }
-    }
-
+    // Do not show the Android permission dialog merely for opening Library.
+    // Users can choose SAF files first or explicitly request device-wide scan.
     LaunchedEffect(hasPermission) {
         if (hasPermission) {
             libraryViewModel.refresh(includeGenres = genresEnabled)
@@ -328,17 +324,35 @@ fun LibraryScreen(
             TextButton(onClick = onBack,
                 modifier = Modifier.heightIn(min = 48.dp)) { Text("Quay lại") }
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedButton(onClick = onRefresh,
-                    modifier = Modifier.heightIn(min = 48.dp)) {
-                    Text("Quét lại")
-                }
-
-                Button(onClick = onPickManual,
-                    modifier = Modifier.heightIn(min = 48.dp)) {
-                    Text("Chọn tệp nhạc")
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val compact = maxWidth < 360.dp ||
+                    androidx.compose.ui.platform.LocalDensity.current.fontScale >= 1.35f
+                if (compact) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(
+                            onClick = onRefresh,
+                            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                                .testTag("library-scan-action")
+                        ) { Text(if (hasPermission) "Quét lại" else "Quét nhạc trên thiết bị") }
+                        Button(
+                            onClick = onPickManual,
+                            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                                .testTag("library-pick-action")
+                        ) { Text("Chọn tệp nhạc") }
+                    }
+                } else {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(
+                            onClick = onRefresh,
+                            modifier = Modifier.heightIn(min = 48.dp)
+                                .testTag("library-scan-action")
+                        ) { Text(if (hasPermission) "Quét lại" else "Quét nhạc trên thiết bị") }
+                        Button(
+                            onClick = onPickManual,
+                            modifier = Modifier.heightIn(min = 48.dp)
+                                .testTag("library-pick-action")
+                        ) { Text("Chọn tệp nhạc") }
+                    }
                 }
             }
 

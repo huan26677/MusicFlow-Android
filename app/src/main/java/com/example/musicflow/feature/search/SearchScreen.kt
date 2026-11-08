@@ -8,6 +8,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.*
@@ -34,6 +35,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 import com.example.musicflow.core.media.DeviceSong
 import com.example.musicflow.core.media.MediaStoreLocalMusicRepository
+import com.example.musicflow.core.media.LocalPickedMusicStore
 import com.example.musicflow.feature.library.SongRow
 import com.example.musicflow.feature.library.MusicCollectionsContent
 import com.example.musicflow.feature.playlist.PlaylistPickerDialog
@@ -64,31 +66,6 @@ fun SearchRoute(
     val favoriteSongUris by favoritesStore.songUris
         .collectAsStateWithLifecycle()
 
-    val repository = remember(context) {
-        MediaStoreLocalMusicRepository(
-            context.applicationContext
-        )
-    }
-
-    val factory = remember(repository) {
-        SearchViewModel.factory(
-            repository = repository,
-            initialQuery = initialQuery
-        )
-    }
-
-    val searchViewModel: SearchViewModel =
-        viewModel(factory = factory)
-
-    val playlistViewModel = rememberPlaylistViewModel()
-
-    var selectedPlaylistSong by remember {
-        mutableStateOf<DeviceSong?>(null)
-    }
-
-    val state by searchViewModel.uiState
-        .collectAsStateWithLifecycle()
-
     val permission = if (Build.VERSION.SDK_INT >= 33) {
         Manifest.permission.READ_MEDIA_AUDIO
     } else {
@@ -104,6 +81,30 @@ fun SearchRoute(
         )
     }
 
+    val pickedStore = remember(context) {
+        LocalPickedMusicStore.getInstance(context.applicationContext)
+    }
+    val savedPicked by pickedStore.records.collectAsStateWithLifecycle()
+    // Inspect with persisted grants on IO; do not expose unverified shortcuts.
+    val repository = remember(context, permission) {
+        OfflineSearchRepository(
+            mediaStore = MediaStoreLocalMusicRepository(context.applicationContext),
+            mayScanDevice = {
+                ContextCompat.checkSelfPermission(context, permission) ==
+                    PackageManager.PERMISSION_GRANTED
+            },
+            readablePickedSongs = { pickedStore.inspect().available }
+        )
+    }
+    val factory = remember(repository) {
+        SearchViewModel.factory(repository = repository, initialQuery = initialQuery)
+    }
+    val searchViewModel: SearchViewModel = viewModel(factory = factory)
+    val playlistViewModel = rememberPlaylistViewModel()
+    var selectedPlaylistSong by remember { mutableStateOf<DeviceSong?>(null) }
+    val state by searchViewModel.uiState.collectAsStateWithLifecycle()
+    var refreshOnResume by remember { mutableIntStateOf(0) }
+
     val permissionLauncher =
         rememberLauncherForActivityResult(
             ActivityResultContracts.RequestPermission()
@@ -112,18 +113,17 @@ fun SearchRoute(
         }
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        refreshOnResume++
         hasPermission = ContextCompat.checkSelfPermission(
             context,
             permission
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    LaunchedEffect(hasPermission) {
-        if (hasPermission) {
-            searchViewModel.refresh()
-        } else {
-            searchViewModel.clearSongs()
-        }
+    LaunchedEffect(hasPermission, savedPicked, refreshOnResume) {
+        // On permission revoke, clear MediaStore results by reloading from
+        // allowed sources, not by clearing the entire offline catalog.
+        searchViewModel.refresh()
     }
 
     SearchScreen(
@@ -137,11 +137,7 @@ fun SearchRoute(
             permissionLauncher.launch(permission)
         },
         onRefresh = {
-            if (hasPermission) {
-                searchViewModel.refresh()
-            } else {
-                permissionLauncher.launch(permission)
-            }
+            searchViewModel.refresh()
         },
         onSongSelected = onSongSelected,
         onQueueNext = onQueueNext,
@@ -189,74 +185,78 @@ fun SearchScreen(
     var selectedCategory by rememberSaveable {
         mutableStateOf("songs")
     }
+    // The empty/loading/permission states need a full-page scroll at 180% font.
+    // Keep result layouts unbounded only by their own LazyColumn/collection list.
+    val scrollWholePage = !state.isLoaded || state.songs.isEmpty() ||
+        state.query.isBlank() || state.isLoading || state.error != null ||
+        (!state.isFiltering && state.results.isEmpty() &&
+            state.albumResults.isEmpty() && state.artistResults.isEmpty() &&
+            state.genreResults.isEmpty())
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .then(if (scrollWholePage) Modifier.verticalScroll(rememberScrollState())
+                else Modifier)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         OceanFlowHeader(
             eyebrow = "Khám phá · Ocean Flow",
             title = "Tìm kiếm",
-            subtitle = "Bài hát, nghệ sĩ, album và thể loại — nhập không dấu cũng được."
+            subtitle = "Tìm cả nhạc trong máy và tệp đã chọn — nhập không dấu cũng được."
         )
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val compact = maxWidth < 360.dp || LocalDensity.current.fontScale >= 1.35f
-            if (compact) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    if (hasPermission && state.isLoaded && state.songs.isNotEmpty()) {
-                        TextButton(
-                            onClick = onRefresh,
-                            enabled = !state.isLoading
-                        ) { Text("Quét lại") }
-                    }
-                }
-            } else {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    if (hasPermission && state.isLoaded && state.songs.isNotEmpty()) {
-                        TextButton(
-                            onClick = onRefresh,
-                            enabled = !state.isLoading
-                        ) { Text("Quét lại") }
-                    }
-                }
-            }
+        if (hasPermission && (!state.isLoaded || state.songs.isNotEmpty())) {
+            TextButton(
+                onClick = onRefresh,
+                enabled = !state.isLoading,
+                modifier = Modifier.heightIn(min = 48.dp).testTag("search-refresh")
+            ) { Text("Quét lại") }
         }
 
         if (!hasPermission) {
-            MusicFlowStatusPanel(
-                kind = MusicFlowStatusKind.PERMISSION,
-                title = "Cần quyền đọc nhạc",
-                description = "Để tìm kiếm nhạc trên thiết bị, hãy cấp quyền đọc âm thanh. " +
-                    "Bạn vẫn có thể chọn tệp nhạc riêng trong Thư viện mà không cần cấp quyền quét toàn bộ. " +
-                    "Nếu đã từ chối nhiều lần, hãy mở quyền ứng dụng trong Cài đặt.",
-                actionLabel = "Cấp quyền",
-                onAction = onRequestPermission
-            )
-            if (onOpenLibrary != null) {
-                OutlinedButton(
-                    onClick = onOpenLibrary,
-                    modifier = Modifier.fillMaxWidth().testTag("search-open-library")
+            Surface(
+                modifier = Modifier.fillMaxWidth()
+                    .testTag("search-saf-without-permission"),
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text("Mở Thư viện để chọn tệp nhạc")
+                    Text(
+                        "Đang tìm trong nhạc đã chọn",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    Text(
+                        "Không cần cấp quyền quét máy để tìm tệp đã chọn. " +
+                            "Chỉ cấp quyền nếu bạn muốn tìm toàn bộ nhạc thiết bị.",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    OutlinedButton(
+                        onClick = onRequestPermission,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                            .testTag("search-request-device-scan")
+                    ) {
+                        Text("Cho phép quét nhạc trên thiết bị")
+                    }
+                    if (onOpenLibrary != null) {
+                        TextButton(
+                            onClick = onOpenLibrary,
+                            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                                .testTag("search-open-library")
+                        ) { Text("Mở Thư viện để chọn tệp nhạc") }
+                    }
                 }
             }
-
-            return@Column
         }
 
         OutlinedTextField(
             value = state.query,
             onValueChange = onQueryChange,
             modifier = Modifier.fillMaxWidth().testTag("search-query"),
-            label = { Text("Tìm nhạc trên thiết bị") },
+            label = { Text("Tìm bài hát hoặc nghệ sĩ") },
             placeholder = { Text("Ví dụ: duong ve nha") },
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
@@ -350,27 +350,32 @@ fun SearchScreen(
                     kind = MusicFlowStatusKind.INFO,
                     title = "Chưa tải thư viện nhạc",
                     description = "Quét nhạc để bắt đầu tìm kiếm.",
-                    actionLabel = "Quét lại",
-                    onAction = onRefresh
+                    actionLabel = if (hasPermission) null else "Tìm lại nhạc đã chọn",
+                    onAction = if (hasPermission) null else onRefresh
                 )
             }
 
             state.songs.isEmpty() -> {
                 MusicFlowStatusPanel(
                     kind = MusicFlowStatusKind.EMPTY,
-                    title = "Không tìm thấy bài hát nào trên thiết bị",
-                    description = "Tìm kiếm chỉ dùng thư viện âm thanh Android đã quét. " +
-                        "Bạn có thể chọn tệp nhạc thủ công trong Thư viện.",
-                    actionLabel = "Quét lại",
-                    onAction = onRefresh
+                    title = if (hasPermission) "Không tìm thấy bài hát nào trên thiết bị"
+                        else "Chưa có nhạc đã chọn",
+                    description = if (hasPermission) {
+                        "Không tìm thấy nhạc trên máy hoặc tệp đã chọn còn đọc được. " +
+                            "Bạn có thể chọn tệp nhạc thủ công trong Thư viện."
+                    } else {
+                        "Hãy chọn một tệp nhạc trong Thư viện, sau đó quay lại để tìm kiếm " +
+                            "mà không cần cấp quyền quét toàn bộ thiết bị."
+                    },
+                    actionLabel = if (hasPermission) "Quét lại" else null,
+                    onAction = if (hasPermission) onRefresh else null
                 )
-                if (onOpenLibrary != null) {
+                if (hasPermission && onOpenLibrary != null) {
                     OutlinedButton(
                         onClick = onOpenLibrary,
-                        modifier = Modifier.fillMaxWidth().testTag("search-open-library")
-                    ) {
-                        Text("Mở Thư viện để chọn tệp nhạc")
-                    }
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                            .testTag("search-open-library")
+                    ) { Text("Mở Thư viện để chọn tệp nhạc") }
                 }
             }
 
@@ -378,7 +383,7 @@ fun SearchScreen(
                 MusicFlowStatusPanel(
                     kind = MusicFlowStatusKind.INFO,
                     title = "Bạn muốn nghe gì?",
-                    description = "Nhập từ khóa để tìm nhạc đã được quét trên thiết bị. " +
+                    description = "Nhập từ khóa để tìm trong nhạc thiết bị và nhạc đã chọn. " +
                         "Không cần đăng nhập để tìm hoặc phát nhạc offline."
                 )
             }
@@ -462,7 +467,7 @@ fun SearchScreen(
                 ) {
                     itemsIndexed(
                         items = state.results,
-                        key = { _, song -> song.id }
+                        key = { _, song -> song.uri.toString() }
                     ) { index, song ->
                         SongRow(
                             song = song,

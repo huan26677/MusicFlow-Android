@@ -16,6 +16,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.musicflow.core.favorites.LocalFavoritesStore
@@ -109,11 +111,20 @@ fun NowPlayingScreen(
             enabled = state.canPrevious,
             onClick = onPrevious,
             modifier = buttonModifier.heightIn(min = 48.dp)
+                .testTag("player-previous-action")
         ) { Text("Trước") }
         Button(
             enabled = state.hasMedia,
             onClick = onPlayPause,
             modifier = buttonModifier.heightIn(min = 48.dp)
+                .testTag("player-play-pause-action")
+                .semantics {
+                    contentDescription = when {
+                        state.playbackErrorMessage != null -> "Thử phát lại ${state.title}"
+                        state.isPlaying -> "Tạm dừng ${state.title}"
+                        else -> "Phát ${state.title}"
+                    }
+                }
         ) {
             Text(when {
                 state.playbackErrorMessage != null -> "Thử lại"
@@ -125,6 +136,7 @@ fun NowPlayingScreen(
             enabled = state.canNext,
             onClick = onNext,
             modifier = buttonModifier.heightIn(min = 48.dp)
+                .testTag("player-next-action")
         ) {
             Text(if (state.playbackErrorMessage != null) "Bỏ qua" else "Tiếp")
         }
@@ -187,8 +199,9 @@ fun NowPlayingScreen(
             text = state.title,
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
+            maxLines = if (LocalDensity.current.fontScale >= 1.75f) Int.MAX_VALUE else 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.semantics { if (state.hasMedia) heading() }
         )
 
         Spacer(Modifier.height(8.dp))
@@ -211,7 +224,11 @@ fun NowPlayingScreen(
                 )
                 }
             },
-            enabled = state.hasMedia && favoriteUri != null
+            enabled = state.hasMedia && favoriteUri != null,
+            modifier = Modifier.heightIn(min = 48.dp)
+                .semantics {
+                    stateDescription = if (isFavorite) "Đã yêu thích" else "Chưa yêu thích"
+                }
         ) {
             Text(
                 if (isFavorite) {
@@ -245,6 +262,8 @@ fun NowPlayingScreen(
             value = displayedPosition,
             modifier = Modifier.semantics {
                 contentDescription = "Vị trí phát nhạc"
+                stateDescription = "Đã phát ${formatNowPlayingTime(displayedPosition.toLong())} " +
+                    "trên ${formatNowPlayingTime(state.durationMs)}"
             },
             onValueChange = {
                 isDragging = true
@@ -334,6 +353,9 @@ fun NowPlayingScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("player-advanced-toggle")
+                        .semantics {
+                            stateDescription = if (advancedExpanded) "Đang mở" else "Đang thu gọn"
+                        }
                 ) {
                     Text(
                         if (advancedExpanded) "Thu gọn tùy chỉnh"
@@ -491,7 +513,8 @@ fun NowPlayingScreen(
 
         Text(
             text = "Lời bài hát",
-            style = MaterialTheme.typography.titleLarge
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.semantics { heading() }
         )
 
         Spacer(Modifier.height(8.dp))

@@ -47,7 +47,7 @@ class MusicFlowSearchUxV3Test {
                 )
             }
         }
-        compose.onNodeWithText("Cấp quyền").performClick()
+        compose.onNodeWithTag("search-request-device-scan").performClick()
         compose.onNodeWithTag("search-open-library").performClick()
         compose.runOnIdle {
             assertEquals(1, permissionRequests)

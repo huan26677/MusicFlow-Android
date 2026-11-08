@@ -30,6 +30,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlin.math.sin
@@ -67,6 +70,7 @@ fun OceanFlowHeader(
     modifier: Modifier = Modifier
 ) {
     val scheme = MaterialTheme.colorScheme
+    val largeText = LocalDensity.current.fontScale >= 1.75f
     Box(
         modifier = modifier.fillMaxWidth()
             .clip(RoundedCornerShape(28.dp))
@@ -96,14 +100,15 @@ fun OceanFlowHeader(
                 title,
                 style = MaterialTheme.typography.headlineMedium,
                 color = scheme.onSurface,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                maxLines = if (largeText) Int.MAX_VALUE else 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.semantics { heading() }
             )
             Text(
                 subtitle,
                 style = MaterialTheme.typography.bodySmall,
                 color = scheme.onSurfaceVariant,
-                maxLines = 3,
+                maxLines = if (largeText) Int.MAX_VALUE else 3,
                 overflow = TextOverflow.Ellipsis
             )
         }
@@ -122,7 +127,11 @@ fun OceanFlowSectionTitle(title: String, modifier: Modifier = Modifier) {
                 .clip(RoundedCornerShape(8.dp))
                 .background(MaterialTheme.colorScheme.primary)
         )
-        Text(title, style = MaterialTheme.typography.titleLarge)
+        Text(
+            title,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.semantics { heading() }
+        )
     }
 }
 
@@ -155,8 +164,10 @@ fun OceanFlowArtworkStage(
     modifier: Modifier = Modifier
 ) {
     val scheme = MaterialTheme.colorScheme
+    // Album art should not occupy the entire initial viewport at 200% text.
+    val compactHeight = if (LocalDensity.current.fontScale >= 1.75f) 236.dp else 328.dp
     Box(
-        modifier = modifier.fillMaxWidth().height(328.dp)
+        modifier = modifier.fillMaxWidth().height(compactHeight)
             .clip(RoundedCornerShape(32.dp))
             .background(
                 Brush.verticalGradient(

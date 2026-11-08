@@ -263,54 +263,96 @@ fun AccountScreen(
                 style = MaterialTheme.typography.bodySmall
             )
             Text("Đăng nhập và tạo tài khoản", style = MaterialTheme.typography.titleMedium)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(
-                    selected = !state.demoMode,
-                    onClick = { onDemoModeChange(false) },
-                    enabled = !state.loading,
-                    label = { Text("Supabase") },
-                    modifier = Modifier.heightIn(min = 48.dp)
-                        .testTag("account-auth-online-mode")
-                )
-                FilterChip(
-                    selected = state.demoMode,
-                    onClick = { onDemoModeChange(true) },
-                    enabled = !state.loading,
-                    label = { Text("Demo offline") },
-                    modifier = Modifier.heightIn(min = 48.dp)
-                        .testTag("account-auth-demo-mode")
-                )
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val compact = maxWidth < 360.dp ||
+                    LocalDensity.current.fontScale >= 1.75f
+                val choices: @Composable (Modifier) -> Unit = { item ->
+                    FilterChip(
+                        selected = !state.demoMode,
+                        onClick = { onDemoModeChange(false) },
+                        enabled = !state.loading,
+                        label = { Text("Supabase") },
+                        modifier = item.heightIn(min = 48.dp)
+                            .testTag("account-auth-online-mode")
+                    )
+                    FilterChip(
+                        selected = state.demoMode,
+                        onClick = { onDemoModeChange(true) },
+                        enabled = !state.loading,
+                        label = { Text("Demo offline") },
+                        modifier = item.heightIn(min = 48.dp)
+                            .testTag("account-auth-demo-mode")
+                    )
+                }
+                if (compact) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        choices(Modifier.fillMaxWidth())
+                    }
+                } else {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        choices(Modifier)
+                    }
+                }
             }
             if (state.demoMode) {
                 Text("Chế độ Demo chỉ lưu tài khoản trên thiết bị. Không gửi email, " +
                     "không tạo phiên Supabase và không cấp quyền Premium/quản trị thật.",
                     modifier = Modifier.testTag("account-auth-demo-explanation"))
             }
-            PrimaryTabRow(
-                selectedTabIndex = if (state.authMode == AccountAuthMode.SIGN_IN) 0 else 1
-            ) {
-                Tab(
-                    selected = state.authMode == AccountAuthMode.SIGN_IN,
-                    onClick = {
-                        passwordVisible = false
-                        confirmPasswordVisible = false
-                        onAuthModeChange(AccountAuthMode.SIGN_IN)
-                    },
-                    enabled = !state.loading,
-                    text = { Text("Đăng nhập") },
-                    modifier = Modifier.testTag("account-signin-tab")
-                )
-                Tab(
-                    selected = state.authMode == AccountAuthMode.SIGN_UP,
-                    onClick = {
-                        passwordVisible = false
-                        confirmPasswordVisible = false
-                        onAuthModeChange(AccountAuthMode.SIGN_UP)
-                    },
-                    enabled = !state.loading,
-                    text = { Text("Tạo tài khoản") },
-                    modifier = Modifier.testTag("account-signup-tab")
-                )
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val compact = maxWidth < 360.dp ||
+                    LocalDensity.current.fontScale >= 1.75f
+                val signin = {
+                    passwordVisible = false
+                    confirmPasswordVisible = false
+                    onAuthModeChange(AccountAuthMode.SIGN_IN)
+                }
+                val signup = {
+                    passwordVisible = false
+                    confirmPasswordVisible = false
+                    onAuthModeChange(AccountAuthMode.SIGN_UP)
+                }
+                if (compact) {
+                    // Two 200%-font labels cannot safely share one tab row.
+                    // These retain the same test tags and selection semantics.
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        FilterChip(
+                            selected = state.authMode == AccountAuthMode.SIGN_IN,
+                            onClick = signin,
+                            enabled = !state.loading,
+                            label = { Text("Đăng nhập") },
+                            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                                .testTag("account-signin-tab")
+                        )
+                        FilterChip(
+                            selected = state.authMode == AccountAuthMode.SIGN_UP,
+                            onClick = signup,
+                            enabled = !state.loading,
+                            label = { Text("Tạo tài khoản") },
+                            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                                .testTag("account-signup-tab")
+                        )
+                    }
+                } else {
+                    PrimaryTabRow(
+                        selectedTabIndex = if (state.authMode == AccountAuthMode.SIGN_IN) 0 else 1
+                    ) {
+                        Tab(
+                            selected = state.authMode == AccountAuthMode.SIGN_IN,
+                            onClick = signin,
+                            enabled = !state.loading,
+                            text = { Text("Đăng nhập") },
+                            modifier = Modifier.testTag("account-signin-tab")
+                        )
+                        Tab(
+                            selected = state.authMode == AccountAuthMode.SIGN_UP,
+                            onClick = signup,
+                            enabled = !state.loading,
+                            text = { Text("Tạo tài khoản") },
+                            modifier = Modifier.testTag("account-signup-tab")
+                        )
+                    }
+                }
             }
             if (state.authMode == AccountAuthMode.SIGN_UP) {
                 val confirmationNote = if (state.demoMode) {

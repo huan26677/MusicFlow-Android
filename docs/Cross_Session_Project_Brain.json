@@ -1,24 +1,22 @@
 {
   "meta": {
     "project_id": "MusicFlow-Android",
-    "evolution_version": "v5.1-Audit",
+    "evolution_version": "v6.0-Validated",
     "compression_status": "MAXIMUM_DENSITY",
-    "self_performance_score": "8.5/10: v4 có build, QA và APK ký kiểm chứng; bộ não v4.2 đã đồng bộ Git. Chưa kiểm thử đầy đủ API33/36, TalkBack, máy thật hoặc hiệu năng đo thực."
+    "self_performance_score": "9/10: v6 cải thiện heading/semantics, Account/Player chữ 200%; 199 JVM, 123 Android UI/hồi quy, WAV/SAF/JSON, WebAdmin PASS API30, kiểm thử nâng cấp signed v5→v6 giữ Room/favorite/SAF READ PASS; API33 và API36 targeted 26/26 mỗi API PASS. Chưa TalkBack thủ công, full 98 regression API33/36 hoặc máy vật lý."
   },
   "core_essence": {
     "ultimate_goal": "MusicFlow Android thân thiện cho báo cáo môn học: nghe offline MediaStore+SAF, thư viện/playlist/queue ổn định, trải nghiệm các vai trò demo; online/cloud chỉ dùng nguồn và quyền hợp lệ, không trình bày mô phỏng thành production.",
     "priority_index": {
       "P1_CRITICAL": [],
       "P2_HIGH": [
-        "Accessibility & Offline Search UX v5: kiểm tra TalkBack, nhãn semantic, focus, độ tương phản, chữ lớn và vùng chạm; giữ trải nghiệm Guest/Free/Premium dễ thao tác.",
-        "Hợp nhất SearchViewModel (đang chỉ gọi LocalMusicRepository.getSongs/MediaStore) với file SAF còn quyền từ LocalPickedMusicStore; loại URI trùng, giữ thứ tự queue và làm việc không cần quyền quét khi chỉ có file đã chọn.",
-        "LibraryRoute hiện tự RequestPermission ở lần vào thường; chuyển sang lựa chọn rõ ràng Quét toàn thiết bị/Chọn tệp, giữ onboarding/UX không cưỡng ép quyền.",
-        "Nghiệm thu chính bản v4/v5 trên emulator API33/36: READ_MEDIA_AUDIO, SAF persisted READ, playback và nâng cấp cùng chữ ký để xác nhận giữ dữ liệu."
+        "Accessibility v7: kiểm tra thực tế TalkBack và bàn phím ngoài/thứ tự focus, đo độ tương phản WCAG màu và trạng thái nút ở Dark/Light; các bài v6 chỉ xác nhận semantics Compose và thao tác chữ 200%, không thay thế kiểm toán thủ công.",
+        "Nghiệm thu nâng cấp ký QA trên Android API33/36 hoặc thiết bị thật có dữ liệu bài hát/playlist hợp lệ; đã xác nhận v5→v6 giữ Room/favorite/SAF trên AVD API30, không suy diễn mọi OS/provider."
       ],
       "P3_MEDIUM": [
         "LocalPickedMusicStore.inspect() đang mở file descriptor cho tối đa 250 URI theo thứ tự mỗi lần ON_RESUME; đo thời gian, chọn chiến lược cache/recheck an toàn và giữ nhận diện mất quyền/tệp.",
         "Thử APK ký QA với playlist/Smart Library, MP3/FLAC/WAV thực; đo thời gian scan/RAM/scroll, không coi 1.502 bản ghi mẫu là benchmark.",
-        "Rà soát thanh thao tác Thư viện có Row chứa Quét lại/Chọn tệp ở màn hẹp hoặc font lớn; cải thiện responsive và test."
+        "Kiểm thử API33/36 full regression và kiểm tra các provider SAF khác, quyền READ_MEDIA_AUDIO; v5 API33/36 mới 20 test mục tiêu mỗi API, không phải full regression."
       ],
       "P4_LOW": [
         "Chuẩn hóa bảng APK bàn giao hiện hành: nhiều tài liệu lịch sử còn gắn nhãn bản mới nhất cho APK cũ; đối chiếu HEAD/QA/SHA, không xóa log cũ.",
@@ -43,22 +41,34 @@
       "MediaStore -> getSongs() không tải Genres N+1; mở tab Thể loại mới getSongsWithGenres(); cursor có ensureActive để hủy quét an toàn.",
       "Nhạc ngoài quét Android -> DocumentsUI + persisted READ + LocalPickedMusicStore; Smart Library hợp và loại URI trùng, tệp mất quyền được báo rõ.",
       "Bằng chứng v4 API30: 199 JVM + 98 Android regression + 7 UI v4 + 2 MediaStore WAV + 1 MainActivity SAF + 1 SAF Quick Add + 1 JSON picker + 4 Web Admin PASS; APK ký QA cài và cold-launch PASS.",
-      "Bản demo v4: dist/MusicFlow-1.0-Demo-LibraryUXV4-Android.apk; SHA256 5D1F9D6A5A8CE3CD50BA4C253A3F83B8D5459A23949A1F629ECB1671562977EA; luôn đọc git log/status để biết HEAD."
+      "SearchRoute v5 -> OfflineSearchRepository(scan nếu quyền hiện hành, inspect SAF trên IO) -> hợp nhất URI không trùng, giữ SAF khi revoke MediaStore; 6/6 Android v5 PASS API30 và API33.",
+      "Nút permission Library chuyển thành hành động lựa chọn; SongRow compact menu + Search header Quét lại luôn hiển thị + cuộn trạng thái trống -> Android QA font 165–180% PASS.",
+      "QA v5 API30: 199 JVM + 98 Android regression + 7 Library v4 + 6 v5 + 4 Search UX v3 + 2 real Search runtime = 117 UI/hồi quy, 2 MediaStore WAV, 1 MainActivity SAF, 1 Quick Add SAF, 1 JSON picker, 4 WebAdmin PASS. API33 targeted 6+4+7+2+1=20 PASS; không phải full regression.",
+      "v5 API33/36 targeted 20/20 mỗi API + ký QA APK v5 install/cold start PASS; không gọi đó là full 98 Android regression.",
+      "Accessibility v6: heading semantics cho Ocean Flow/status/Player, play button công bố tên bài, Slider có stateDescription, Account thích nghi font 200%; 6/6 Android test v6 PASS, chỉ là kiểm thử Compose tự động.",
+      "QA v6 API30: 199/199 JVM, 98/98 Android regression + 7 Library v4 + 6 v5 + 4 Search UX v3 + 2 Advanced Search runtime + 6 v6 = 123 Android UI/hồi quy PASS; 2 MediaStore WAV thật, 1 MainActivity DocumentsUI SAF, 1 Quick Add SAF, 1 JSON picker, 4 Web Admin PASS.",
+      "KIỂM THỬ NÂNG CẤP THẬT: cài signed v5 tạo WAV DocumentsUI có persisted READ + LocalPickedMusicStore + Room playlist/track + Favorites, cài đè signed v6 bằng adb install -r không clear; instrumentation tiến trình mới xác nhận tất cả còn nguyên và WAV header RIFF, dọn fixture QA PASS trên API30.",
+      "v6 API33/36: 26/26 Android targeted PASS mỗi API (6 v5 + 4 Search UX + 7 Library v4 + 2 MediaStore WAV + 1 real SAF + 6 v6); không coi đây là full 98-test regression ở các API này.",
+      "BẢN DEMO NỘP: dist/MusicFlow-1.0-Demo-AccessibilityUpgradeV6-Android.apk (31573693 bytes, SHA256 5BECC22142FCB5457A8E4D898AA536ED4805064CCD63B0816F8173BBCF3E9F0D), signed QA/zipalign/apksigner/aapt, chính APK cold launch API30/33/36 PASS; isolated QA AVD đã dọn. dist bị Git-ignore, phải chép APK riêng. Luôn kiểm tra git log/status thay vì suy diễn đã push."
     ],
     "failure_modes_prevented": [
       "Không suy diễn API33/36, TalkBack, máy thật hoặc tối ưu RAM từ bài test API30 và 1.502 bản ghi tổng hợp.",
       "Không nuốt CancellationException, không truy vấn Genres mỗi lần quét, không chuẩn hóa lại toàn bộ catalog trên mỗi phím gõ hoặc phát bài bị lọc.",
       "Không báo đã push khi chỉ sửa working tree; luôn kiểm tra trạng thái Git sau commit/push; dist/ bị Git-ignore.",
       "PowerShell 5.1 không hỗ trợ &&/||; tránh $PID chỉ đọc; kiểm tra import JUnit khi thêm bài test Kotlin.",
-      "Không tự xóa nhạc gốc, thu hồi grant SAF đang dùng nơi khác, cấp quyền Owner/Admin thật qua demo hoặc gọi APK QA là release production."
+      "Không tự xóa nhạc gốc, thu hồi grant SAF đang dùng nơi khác, cấp quyền Owner/Admin thật qua demo hoặc gọi APK QA là release production.",
+      "V5 phát hiện lỗi UX thật ở font 180%: nút Quét lại dưới trạng thái trống bị che, click test không tới nơi dù node có tên; phải sửa vị trí thao tác và cuộn UI, chạy lại full QA, KHÔNG chỉ sửa test.",
+      "Khi quyền MediaStore bị rút, không xoá cả nhạc SAF; luôn gộp chỉ từ URI còn đọc được, dedup theo URI thay vì song.id khi render.",
+      "Không kết luận giữ dữ liệu khi nâng cấp từ việc cùng package/key; v6 đã dùng hai instrumentation process thật, signed v5→v6 install -r, kiểm tra persisted READ, Room/favorite/shortcut và WAV bytes.",
+      "Không tự nhận đã kiểm thử TalkBack thủ công hay đạt WCAG AA từ semantics Compose và màu Material; cần đo tương phản và thử thiết bị thật."
     ]
   },
   "assumptions_to_validate": [
-    "Chưa có bằng chứng nghiệm thu API33/36 hay thiết bị Android vật lý; cần xác minh quyền âm thanh và SAF trên từng phiên bản.",
-    "Kịch bản giữ dữ liệu khi cập nhật APK chỉ chắc chắn khi dùng cùng package và khóa ký phù hợp; cần kiểm thử trên môi trường có dữ liệu mẫu.",
+    "API30 v6 đã có full regression 123 UI/test + nhạc thật; v6 API33 và API36 targeted 26 test mỗi API, nhưng chưa có bằng chứng full 98 regression trên API33/36 hay thiết bị thật.",
+    "Signed v5→v6 QA giữ Room playlist, favorites, SAF grant/file trên một AVD API30 với fixture thực. Các thiết bị/provider/versionCode/khóa ký khác vẫn cần thử; không bảo đảm toàn bộ trường hợp.",
     "Hiệu suất quét thư viện lớn mới dựa trên logic/fixture; chưa đo benchmark trên nhạc thật và nhiều hãng provider.",
     "Quyền Owner/PlatformAdmin/Developer, Premium và dịch vụ online/cloud hiện có phần mô phỏng; không tự coi là RBAC/thanh toán/bản quyền production.",
-    "Audit v5.1 đọc mã nguồn, chưa chạy lại Android runtime: mức độ phiền của permission tự bật, thời gian kiểm tra 250 URI và bố cục font lớn cần đo/test trước khi gọi là bug."
+    "v6 đã chạy tự động 6 test semantic và thao tác 200% tại Home/Player/Account/SongRow/Status/Theme; chưa đo focus TalkBack thực, độ tương phản WCAG và hiệu năng inspect() 250 URI."
   ],
   "entropy_pruned_nodes": [
     "Rút khỏi bộ não: log Gradle/ADB dòng lẻ, PID emulator, cảnh báo CRLF và lỗi thiếu import JUnit đã khắc phục; chứng cứ gốc còn trong qa-logs/Git.",

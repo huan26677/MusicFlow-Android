@@ -13,8 +13,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
@@ -32,8 +35,10 @@ fun SongRow(
     onQueueNext: (() -> Unit)? = null,
     onQueueEnd: (() -> Unit)? = null
 ) {
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+    val compact = maxWidth < 360.dp || LocalDensity.current.fontScale >= 1.35f
     Row(
-        modifier = modifier.fillMaxWidth().padding(vertical = 3.dp)
+        modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)
             .clip(RoundedCornerShape(18.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
             .heightIn(min = 72.dp),
@@ -42,7 +47,10 @@ fun SongRow(
         // Vùng chính vẫn dùng để phát bài hát.
         TextButton(
             onClick = onClick,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).heightIn(min = 48.dp)
+                .semantics {
+                    contentDescription = "Phát ${song.title}, ${song.artist}"
+                },
             contentPadding = PaddingValues(
                 horizontal = 8.dp,
                 vertical = 8.dp
@@ -68,7 +76,7 @@ fun SongRow(
                         text = song.title,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
+                        maxLines = if (compact) 2 else 1,
                         overflow = TextOverflow.Ellipsis
                     )
 
@@ -83,16 +91,53 @@ fun SongRow(
                     )
                 }
 
-                Spacer(Modifier.width(8.dp))
-
-                Text(
-                    text = formatSongDuration(song.durationMs),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                if (!compact) {
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = formatSongDuration(song.durationMs),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
 
+        if (compact && (onToggleFavorite != null || onAddToPlaylist != null ||
+                    onQueueNext != null || onQueueEnd != null)) {
+            var optionsOpen by remember { mutableStateOf(false) }
+            Box {
+                IconButton(
+                    onClick = { optionsOpen = true },
+                    modifier = Modifier.testTag("song-compact-actions")
+                        .semantics {
+                            contentDescription = "Tùy chọn cho ${song.title}"
+                            stateDescription = if (isFavorite) "Đã yêu thích" else "Chưa yêu thích"
+                        }
+                ) { Text("⋮", style = MaterialTheme.typography.titleLarge) }
+                DropdownMenu(
+                    expanded = optionsOpen,
+                    onDismissRequest = { optionsOpen = false }
+                ) {
+                    if (onToggleFavorite != null) DropdownMenuItem(
+                        text = { Text(if (isFavorite) "Bỏ yêu thích" else "Yêu thích") },
+                        onClick = { optionsOpen = false; onToggleFavorite() }
+                    )
+                    if (onAddToPlaylist != null) DropdownMenuItem(
+                        text = { Text("Thêm vào playlist") },
+                        onClick = { optionsOpen = false; onAddToPlaylist() }
+                    )
+                    if (onQueueNext != null) DropdownMenuItem(
+                        text = { Text("Phát tiếp") },
+                        onClick = { optionsOpen = false; onQueueNext() }
+                    )
+                    if (onQueueEnd != null) DropdownMenuItem(
+                        text = { Text("Thêm vào hàng đợi") },
+                        onClick = { optionsOpen = false; onQueueEnd() }
+                    )
+                }
+            }
+        }
+        if (!compact) {
         if (onToggleFavorite != null) {
             IconButton(
                 onClick = onToggleFavorite,
@@ -103,6 +148,7 @@ fun SongRow(
                         } else {
                             "Yêu thích ${song.title}"
                         }
+                    stateDescription = if (isFavorite) "Đã yêu thích" else "Chưa yêu thích"
                 }
             ) {
                 Text(
@@ -167,6 +213,8 @@ fun SongRow(
                 }
             }
         }
+        }
+    }
     }
 }
 
