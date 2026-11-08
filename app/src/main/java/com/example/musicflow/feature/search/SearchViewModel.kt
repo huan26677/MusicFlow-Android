@@ -47,10 +47,15 @@ class SearchViewModel(
 
     private var scanJob: Job? = null
     private var filterJob: Job? = null
+    // Bound to exactly one scanned snapshot, never shared between users or scans.
+    private var indexedSongs: List<DeviceSong>? = null
+    private var searchIndex: AdvancedMusicSearchIndex? = null
 
     fun refresh() {
         scanJob?.cancel()
         filterJob?.cancel()
+        indexedSongs = null
+        searchIndex = null
 
         scanJob = viewModelScope.launch {
             _uiState.update {
@@ -70,6 +75,11 @@ class SearchViewModel(
             try {
                 // Repository đã quét MediaStore trên Dispatchers.IO.
                 val songs = repository.getSongs()
+                val index = withContext(Dispatchers.Default) {
+                    AdvancedMusicSearchIndex(songs)
+                }
+                indexedSongs = songs
+                searchIndex = index
 
                 _uiState.update {
                     it.copy(
@@ -84,7 +94,8 @@ class SearchViewModel(
                 // Giữ lại từ khóa nếu đã nhập trước khi quét xong.
                 scheduleFilter(
                     query = _uiState.value.query,
-                    songs = songs
+                    songs = songs,
+                    index = index
                 )
 
             } catch (e: CancellationException) {
@@ -121,16 +132,18 @@ class SearchViewModel(
             query.isNotBlank() &&
             _uiState.value.isLoaded
         ) {
-            scheduleFilter(
-                query = query,
-                songs = _uiState.value.songs
-            )
+            val currentSongs = _uiState.value.songs
+            val index = searchIndex
+            if (indexedSongs === currentSongs && index != null) {
+                scheduleFilter(query = query, songs = currentSongs, index = index)
+            }
         }
     }
 
     private fun scheduleFilter(
         query: String,
-        songs: List<DeviceSong>
+        songs: List<DeviceSong>,
+        index: AdvancedMusicSearchIndex
     ) {
         filterJob?.cancel()
 
@@ -142,7 +155,7 @@ class SearchViewModel(
             delay(150)
 
             val results = withContext(Dispatchers.Default) {
-                AdvancedMusicSearch.find(songs, query)
+                index.find(query)
             }
 
             // Bỏ kết quả cũ nếu đã nhập từ khóa mới
@@ -151,7 +164,8 @@ class SearchViewModel(
                 if (
                     current.query == query &&
                     current.isLoaded &&
-                    current.songs === songs
+                    current.songs === songs &&
+                    searchIndex === index
                 ) {
                     current.copy(
                         results = results.songs,
@@ -170,6 +184,8 @@ class SearchViewModel(
     fun clearSongs() {
         scanJob?.cancel()
         filterJob?.cancel()
+        indexedSongs = null
+        searchIndex = null
 
         _uiState.update {
             SearchUiState(query = it.query)
@@ -177,6 +193,8 @@ class SearchViewModel(
     }
 
     private fun showError(message: String) {
+        indexedSongs = null
+        searchIndex = null
         _uiState.update {
             it.copy(
                 songs = emptyList(),

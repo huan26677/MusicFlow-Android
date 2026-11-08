@@ -23,7 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.stateDescription
@@ -780,10 +783,12 @@ private fun ColumnScope.AlbumFavoritesContent(
                     val tracks = row.tracks
                     val isFavorite = albumId.toString() in favoriteAlbumIds
                     val expanded = expandedAlbumId == albumId
+                    var keyboardFocused by remember(albumId) { mutableStateOf(false) }
                 ListItem(
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("album-header-$albumId")
+                        .onFocusChanged { keyboardFocused = it.isFocused }
                         .clickable(role = Role.Button) {
                             expandedAlbumId =
                                 if (expanded) {
@@ -792,6 +797,11 @@ private fun ColumnScope.AlbumFavoritesContent(
                                     albumId
                                 }
                         }
+                        .border(
+                            width = if (keyboardFocused) 3.dp else 0.dp,
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(12.dp)
+                        )
                         .semantics {
                             stateDescription = if (expanded) "Đang mở" else "Đang thu gọn"
                         },

@@ -1,6 +1,7 @@
 package com.example.musicflow.feature.library
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -17,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -153,12 +156,19 @@ internal fun ColumnScope.MusicCollectionsContent(
                 is MusicCollectionRow.Header -> {
                     val group = row.group
                     val expanded = expandedKey == group.key
+                    var keyboardFocused by remember(group.key) { mutableStateOf(false) }
                     ListItem(
                         modifier = Modifier.fillMaxWidth()
                             .testTag("collection-header-${group.key}")
+                            .onFocusChanged { keyboardFocused = it.isFocused }
                             .clickable(role = Role.Button) {
                                 expandedKey = if (expanded) null else group.key
                             }
+                            .border(
+                                width = if (keyboardFocused) 3.dp else 0.dp,
+                                color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(12.dp)
+                            )
                             .semantics {
                                 stateDescription = if (expanded) "Đang mở" else "Đang thu gọn"
                             },

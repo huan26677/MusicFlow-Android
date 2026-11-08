@@ -58,6 +58,16 @@ __pycache__/
 !/qa-logs/musicflow-library-accessibility-v7-signed-upgrade-api33.log
 !/qa-logs/musicflow-library-accessibility-v7-signed-upgrade-api36.log
 
+# v8: only reviewed portable QA transcripts. Build/package logs stay local.
+/qa-logs/*v8*.log
+!/qa-logs/musicflow-keyboard-searchindex-v8-regression-api30.log
+!/qa-logs/musicflow-keyboard-searchindex-v8-targeted-api30.log
+!/qa-logs/musicflow-keyboard-searchindex-v8-targeted-api33.log
+!/qa-logs/musicflow-keyboard-searchindex-v8-targeted-api36.log
+!/qa-logs/musicflow-keyboard-searchindex-v8-signed-upgrade-api33.log
+!/qa-logs/musicflow-keyboard-searchindex-v8-signed-upgrade-api36.log
+/qa-logs/impact-regression-*.json
+
 # Operating system
 .DS_Store
 Thumbs.db
