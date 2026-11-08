@@ -1,9 +1,9 @@
 {
   "meta": {
     "project_id": "MusicFlow-Android",
-    "evolution_version": "v7.0-BrainV2-r3",
+    "evolution_version": "v8.0-BrainV2-r4",
     "compression_status": "MAXIMUM_DENSITY",
-    "self_performance_score": "v7: 199 JVM; API30 129 Android UI/hồi quy; API33/36 mỗi bản 32 targeted; signed v6→v7 giữ Room/favorite/SAF trên API33/36; các QA transcript đã commit tại e7951b7. Chưa TalkBack manual, benchmark nhạc thật hay full 98 regression API33/36."
+    "self_performance_score": "v8: 199 JVM, API30 137 UI/regression, API33/36 mỗi bản 40 targeted, signed v7→v8 upgrade API33 PASS. Chưa full 98 API33/36, upgrade API36, TalkBack máy thật hoặc benchmark."
   },
   "core_essence": {
     "ultimate_goal": "MusicFlow Android thân thiện cho báo cáo môn học: nghe offline MediaStore+SAF, thư viện/playlist/queue ổn định, trải nghiệm các vai trò demo; online/cloud chỉ dùng nguồn và quyền hợp lệ, không trình bày mô phỏng thành production.",
@@ -13,7 +13,6 @@
         "TalkBack thực, focus bàn phím/D-pad và contrast WCAG theo từng màn hình"
       ],
       "P3_MEDIUM": [
-        "Dùng lại chỉ mục Album/Nghệ sĩ/Thể loại giữa các lượt tìm kiếm",
         "Đo và giảm mở lặp URI SAF trên ON_RESUME mà vẫn phát hiện tệp mất quyền",
         "Đo scan/RAM/scroll với thư viện MP3/FLAC/WAV, playlist thực",
         "Chạy toàn bộ hồi quy Android trên API33/36, nhiều SAF provider",
@@ -28,13 +27,14 @@
     }
   },
   "evolved_rules": [
-    "Đọc duy nhất docs/Cross_Session_Project_Brain.json qua AGENTS.md; source/Git/QA là sự thật, JSON chỉ là bản đồ.",
-    "Trước và sau mỗi mốc chạy python scripts/project_brain_v2.py check; chỉ ghi PASS khi evidence đã kiểm tra. QA transcript được commit/test_log có thể xác minh từ Git; log không commit chỉ local_only.",
-    "Đánh điểm P1–P5 theo decision_policy; P1 chỉ mở khi blocker có chứng cứ kiểm chứng. sync chỉ sửa trường tính toán, không tự xóa tri thức độc nhất.",
-    "Khi hoàn thành tác vụ, bổ sung evidence trong cùng JSON, ghi review với lesson+proof ID, rồi sync/check/commit/push; không tự nhận đã huấn luyện model.",
-    "Bảo vệ audio và persisted SAF READ, Room/playlist, không uninstall hay xóa tệp; test trên isolated QA AVD, không dùng thiết bị người dùng.",
-    "Demo actor/premium không cấp quyền production, streaming cần giấy phép; QA-signed APK != production; dist Git-ignore, chỉ một số transcript QA v7 đã rà soát được lưu Git.",
-    "Khi bằng chứng local không còn trên máy phiên AI sau, hạ mức tin cậy thành unavailable, KHÔNG chuyển thành PASS mới; tránh lưu mật khẩu/token/log thô."
+    "AGENTS.md → não duy nhất docs/Cross_Session_Project_Brain.json; Git/code/QA mới là nguồn sự thật.",
+    "Mỗi mốc chạy brain check; PASS phải có chứng cứ Git test_log hoặc log local thật; mất log=unavailable.",
+    "P1–P5 theo score; P1 đòi blocker verified; sync không tự xóa bài học độc nhất.",
+    "Xong việc: evidence + review + sync/check + commit/push; không xem là model training.",
+    "Giữ nhạc/Room/playlist/SAF READ; chỉ thử AVD cách ly, không đụng dữ liệu người dùng.",
+    "Actor/Premium/billing demo không nâng quyền production; online cần license; signed QA != Play; APK dist local, log Git đã sàng lọc.",
+    "Log mất => unavailable, không tự coi PASS; không lưu token/mật khẩu/log nhạy cảm.",
+    "Trước/sau code: plan direct/downstream/case IDs/lý do; all direct + smoke downstream; security/Room/SAF/unknown/release/shared bắt buộc full."
   ],
   "experience_learned": {
     "success_heuristics": [
@@ -45,24 +45,24 @@
       "V6 semantics/200% UI đạt 6 Android test; ký v5→v6 giữ Room/favorite/SAF READ trên AVD API30; API33/36 đạt 26 targeted mỗi API, KHÔNG full regression.",
       "APK demo v7 ký QA: dist/MusicFlow-1.0-Demo-LibraryAccessibilityV7-Android.apk; SHA256 215F2DC4B97274768D9E9870C10A6B3D3188ECCABAC9110976878AD6E2E515B0 (local, Git-ignore).",
       "V7 album/nghệ sĩ/thể loại lazy từng track; test 600 bài, cuộn #500 chữ 200% giữ đúng queue.",
-      "Nâng cấp APK ký v6→v7 trên API33/36 giữ Room playlist, favorite, persisted SAF READ/WAV."
+      "Nâng cấp APK ký v6→v7 trên API33/36 giữ Room playlist, favorite, persisted SAF READ/WAV.",
+      "V8 indexed search theo catalog; 5/5 API33 PASS, chưa benchmark nhạc thật."
     ],
     "failure_modes_prevented": [
-      "Không dùng fixture 1.502 bản ghi để tuyên bố benchmark RAM/thư viện thực; không coi Compose semantics là TalkBack/WCAG thủ công.",
-      "Không coi API30 full QA là API33/36 full QA; log đã commit và có marker PASS ở Git khác với log local-only. Không suy đoán TalkBack/hiệu năng máy thật.",
-      "Không nuốt CancellationException, không tải Genres N+1 trên mọi lần scan, không normalization catalog mỗi phím gõ.",
-      "Không xóa nhạc gốc/playlist/SAF grants; không nâng quyền Owner/Admin hoặc Premium thật từ mô phỏng.",
-      "Không chỉ sửa test khi giao diện nút không thể chạm ở font lớn; sửa UI và chạy lại hồi quy.",
-      "Không khẳng định Git đã push khi working tree chưa commit; QA-signed APK không phải production; script không được tự thao tác máy người dùng.",
-      "Android16: bàn phím ảo có thể nuốt tap vào node Text; QA dùng Espresso.closeSoftKeyboard, URI-key scroll và nút phát có semantics rồi chạy lại cả lớp."
+      "Fixture 1.502 bài != benchmark RAM/nhạc thật; Compose semantics != TalkBack/WCAG manual.",
+      "API30 full != API33/36 full; Git test_log verified != local log; không đo máy thật thì NOT RUN.",
+      "Không nuốt CancellationException, quét Genres N+1 hay normalize catalog mỗi phím gõ.",
+      "Không xóa nhạc/playlist/SAF grants; demo Owner/Admin/Premium không cấp quyền thật.",
+      "Font lớn nút khó bấm: sửa UI và chạy lại test, không chỉ sửa test.",
+      "Không báo push khi chưa verify; signed QA != production; script không tác động thiết bị người dùng.",
+      "Android16 IME nuốt tap Text: đóng IME, scroll theo URI key, bấm nút phát có semantics rồi retest."
     ]
   },
   "assumptions_to_validate": [
-    "Chưa thử TalkBack/keyboard/D-pad focus thực và contrast WCAG từng màn/ảnh phủ trên thiết bị vật lý; 6 UI v7 mới chứng minh semantics, 200% và token màu Light/Dark.",
-    "V7 API33/36 mỗi phiên đã targeted 32 PASS và signed v6→v7 giữ Room/SAF PASS; chưa full 98 regression hay thiết bị thật/mọi SAF provider.",
-    "V7 đã ảo hóa album/nghệ sĩ 600 bài trong fixture; thời gian scan/RAM/scroll trên nhạc MP3/FLAC/WAV thật, grouping search và inspect 250 SAF URI chưa benchmark.",
-    "Owner/PlatformAdmin/Developer/Premium và online/cloud có phần demo, không xem là E2E production.",
-    "V7 Compose 200%/màu token WCAG AA đạt; vẫn chưa kiểm thử TalkBack, D-pad và màn thật."
+    "V8 đã test D-pad/Enter trên AVD; chưa thử TalkBack, Bluetooth keyboard/D-pad, WCAG ảnh phủ trên thiết bị vật lý.",
+    "Chưa full 98 Android regression API33/36, nhiều SAF provider hay signed v7→v8 upgrade API36.",
+    "V8 đã index nhóm/search 1.502 fixture; thời gian scan/RAM/scroll trên MP3/FLAC/WAV thật và inspect 250 SAF URI chưa benchmark.",
+    "Owner/PlatformAdmin/Developer/Premium và online/cloud có phần demo, không xem là E2E production."
   ],
   "entropy_pruned_nodes": [
     "Rút log thô, PID emulator, lỗi import đã sửa khỏi JSON; giữ đường dẫn chứng cứ có kiểm tra trạng thái portable/local.",
@@ -72,10 +72,18 @@
   "meta_cognition_and_cross_model_prompt": "CRITICAL DIRECTION FOR ALL LLMs: Kích hoạt chế độ suy luận chuỗi tư duy (Chain-of-Thought) chuyên sâu. Đối chiếu nghiêm ngặt mọi hành động với 'failure_modes_prevented' và 'evolved_rules'. Tự phản biện giải pháp 2 lần trước khi xuất kết quả. Duy trì tính nhất quán logic bất kể cấu trúc nền tảng của mô hình bạn đang chạy.",
   "brain_v2": {
     "engine_version": "2.0",
-    "learning_revision": 3,
+    "learning_revision": 4,
     "mode": "evidence_driven_assisted_not_self_training",
-    "baseline_commit": "e7951b7",
+    "baseline_commit": "10f4c09",
     "entrypoint": "python scripts/project_brain_v2.py check",
+    "test_architecture": {
+      "mode": "Modular Testing & Impact-driven Regression",
+      "map": "qa/impact_modules.json",
+      "cases": "docs/Modular_Test_Catalog.md",
+      "guide": "docs/Test_Impact_Policy.md",
+      "plan": "py -3 scripts/impact_regression.py plan --git-diff --json",
+      "rule": "Direct all, downstream smoke; unknown/security/SAF/Room/shared/release full. Sau code chạy test, lưu log; plan != PASS."
+    },
     "decision_policy": {
       "weights": {
         "risk": 3,
@@ -171,11 +179,12 @@
           "effort": 3
         },
         "evidence_refs": [
-          "source-search-groups"
+          "source-search-groups",
+          "qa-v8-search"
         ],
-        "reason": "AdvancedMusicSearch.find đang groupBy cho từng từ khóa; chưa đo benchmark",
+        "reason": "V8 AdvancedMusicSearchIndex tái sử dụng nhóm album/nghệ sĩ/thể loại theo từng catalog; API30/33/36 targeted PASS, chưa benchmark máy thật",
         "blocker": false,
-        "status": "pending",
+        "status": "done",
         "score": 22,
         "priority": "P3_MEDIUM"
       },
@@ -320,6 +329,22 @@
     ],
     "evidence_ledger": [
       {
+        "id": "qa-module-map",
+        "kind": "repo",
+        "claim_type": "source",
+        "path": "qa/impact_modules.json",
+        "contains": "\"id\": \"SEARCH\"",
+        "commit": "10f4c09"
+      },
+      {
+        "id": "qa-v8-search",
+        "kind": "repo",
+        "claim_type": "test_log",
+        "path": "qa-logs/musicflow-keyboard-searchindex-v8-targeted-api33.log",
+        "contains": "KEYBOARD_SEARCHINDEX_V8_FINAL_RESULT=PASS",
+        "commit": "93ba401"
+      },
+      {
         "id": "source-a11y",
         "kind": "repo",
         "path": "app/src/main/java/com/example/musicflow/feature/player/NowPlayingScreen.kt",
@@ -461,10 +486,10 @@
       }
     ],
     "learning_loop": {
-      "cycle": "read brain → check proofs → plan by score → implement → test → register evidence → review lesson → sync → check → commit/push",
+      "cycle": "read brain → check proofs → modular impact plan → implement → selective/full QA → evidence → review lesson → sync → check → Git",
       "promotion": "PASS runtime đòi QA local_log hoặc repo/test_log đã commit marker PASS (QA vẫn cần môi trường thật); repo/docs source chỉ xác minh tính tồn tại của mã hoặc tuyên bố, không thay QA",
       "history_budget": 8,
-      "last_observation": "V7 full 129 UI/regression API30; 32 targeted mỗi API33/36; signed upgrade v6→v7 API33/36 và cold-start 3 API, có QA transcript portable e7951b7. Manual TalkBack/perf nhạc thật chưa có."
+      "last_observation": "V8 API30 137 regression, API33/36 40 targeted; signed upgrade API33 PASS. QA map 19 modules/457 cases; chưa TalkBack/manual perf."
     },
     "learning_history": [
       {
@@ -506,6 +531,14 @@
         "evidence_ref": "qa-v7-api36",
         "scope": "repo",
         "lesson": "V7 Compose 200%/màu token WCAG AA đạt; vẫn chưa kiểm thử TalkBack, D-pad và màn thật."
+      },
+      {
+        "id": "7986e5b8e39a",
+        "task": "indexed-advanced-search",
+        "outcome": "success",
+        "evidence_ref": "qa-v8-search",
+        "scope": "repo",
+        "lesson": "V8 indexed search theo catalog; 5/5 API33 PASS, chưa benchmark nhạc thật."
       }
     ],
     "entropy_policy": {
