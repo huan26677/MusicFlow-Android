@@ -100,6 +100,16 @@ __pycache__/
 !/qa-logs/musicflow-v12-impact67-api36.log
 !/qa-logs/musicflow-v12-integrated-flake-api36.log
 
+# v13: deny raw Android instrumentation and build transcripts by default.
+# Only reviewed, non-sensitive evidence may be committed with explicit names.
+/qa-logs/*v13*.log
+!/qa-logs/musicflow-v13-focused-api36.log
+!/qa-logs/musicflow-v13-impact67-api36.log
+!/qa-logs/musicflow-v13-keyboard-api36.log
+!/qa-logs/musicflow-v13-album-api36.log
+!/qa-logs/musicflow-v13-search-api36.log
+!/qa-logs/musicflow-v13-lyrics-api36.log
+
 # Operating system
 .DS_Store
 Thumbs.db

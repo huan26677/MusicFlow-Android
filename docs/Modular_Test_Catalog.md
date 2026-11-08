@@ -27,7 +27,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 | `CLOUD_SYNC` | Cloud library/history và đồng bộ Supabase demo | 8 | AUTH, PLAYLIST, HISTORY |
 | `ONLINE_RIGHTS` | Online catalog và quyền phát có giấy phép | 16 | AUTH, UI_ACCESS |
 | `HOME_NAV` | Trang chủ, mini-player, điều hướng | 18 | LIBRARY, SEARCH, PLAYBACK, HISTORY, UI_ACCESS |
-| `UI_ACCESS` | Thiết kế Ocean Flow, focus, TalkBack semantics | 43 |  |
+| `UI_ACCESS` | Thiết kế Ocean Flow, focus, TalkBack semantics | 44 |  |
 | `DEMO_CENTER` | Trung tâm demo và điều hướng theo tài khoản | 11 | AUTH, ROLES_ADMIN, BILLING_DEMO |
 | `RELEASE_BACKUP` | Sao lưu, versioning, APK ký QA và nâng cấp | 14 | MEDIA_SAF, PLAYLIST, FAVORITES |
 
@@ -982,6 +982,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 
 - `UI_ACCESS/MusicFlowUiPolishTest#authButtonsStayReachableAtLargeFontWithoutCallingAuth`
 - `UI_ACCESS/MusicFlowUiPolishTest#guestThemeSelectorRemainsReachableAtLargeFont`
+- `UI_ACCESS/MusicFlowUiPolishTest#libraryExplainsHorizontallyScrollableCategoriesAtLargeFont`
 - `UI_ACCESS/MusicFlowUiPolishTest#playerTransportRemainsClickableAtLargeFontOnNarrowScreen`
 
 **MusicFlowUxFoundationV3Test** (`app/src/androidTest/java/com/example/musicflow/ui/MusicFlowUxFoundationV3Test.kt`; android)

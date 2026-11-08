@@ -205,7 +205,7 @@ internal fun AccountRolePanel(
         ) {
             // Keep actor navigation visible even when editing a long form.
             if (checked) {
-                Text("Chọn công việc cần làm", style = MaterialTheme.typography.titleMedium,
+                Text("1. Chọn khu vực làm việc", style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.semantics { heading() })
                 BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                     val compact = maxWidth < 380.dp || LocalDensity.current.fontScale >= 1.5f
@@ -237,7 +237,8 @@ internal fun AccountRolePanel(
                         }
                         if (workspaces.size > 3) {
                             Text(
-                                "Cuộn danh sách công việc phía trên để xem thêm lựa chọn.",
+                                "Danh sách khu vực phía trên cuộn riêng. " +
+                                    "Nội dung công việc ở phía dưới cuộn riêng.",
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.testTag("role-workspaces-scroll-hint")
                             )
@@ -255,7 +256,7 @@ internal fun AccountRolePanel(
                     }
                 }
                 Text(
-                    "Đang làm: ${currentWorkspace.title} · ${currentWorkspace.description}",
+                    "Đang xem: ${currentWorkspace.title} · ${currentWorkspace.description}",
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.testTag("role-current-workspace-summary")
                 )
@@ -264,7 +265,7 @@ internal fun AccountRolePanel(
                 modifier = Modifier.fillMaxWidth().weight(1f).verticalScroll(contentScroll),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-            Text("Vai trò và quản trị MusicFlow", style = MaterialTheme.typography.titleLarge,
+            Text("2. Nội dung công việc", style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.semantics { heading() })
             Text(identity.email, style = MaterialTheme.typography.bodySmall)
             Text(if (!checked) "Đang kiểm tra vai trò..." else

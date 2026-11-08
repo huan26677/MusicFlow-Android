@@ -80,9 +80,9 @@ fun PlaylistPickerDialog(
                     is PlaylistsUiState.Ready -> {
                         if (current.playlists.isEmpty()) {
                             Text(
-                                "Bạn chưa có playlist. " +
-                                        "Hãy tạo playlist từ Home " +
-                                        "trước khi thêm bài."
+                                "Bạn chưa có danh sách phát. Về Trang chủ → " +
+                                    "Playlist và tùy chọn khác → Danh sách phát của tôi " +
+                                    "→ Tạo playlist mới. Sau đó quay lại thêm bài hát."
                             )
                         } else {
                             Text(

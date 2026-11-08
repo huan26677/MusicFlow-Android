@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -24,9 +25,12 @@ import com.example.musicflow.core.playback.PlayerUiState
 import com.example.musicflow.feature.account.AccountScreen
 import com.example.musicflow.feature.account.AccountUiState
 import com.example.musicflow.feature.account.AccountAuthMode
+import com.example.musicflow.feature.library.LibraryScreen
+import com.example.musicflow.feature.library.LibraryUiState
 import com.example.musicflow.feature.player.NowPlayingScreen
 import com.example.musicflow.ui.theme.MusicFlowTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -80,6 +84,18 @@ class MusicFlowUiPolishTest {
             }
         }
         compose.onNodeWithContentDescription("Vị trí phát nhạc").assertExists()
+        // Main playback action must precede secondary queue/seek controls in
+        // the scrolling layout. Scroll the lower control into view first:
+        // boundsInRoot of an offscreen node can be clipped to an empty rect.
+        compose.onNodeWithContentDescription("Vị trí phát nhạc")
+            .performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("player-play-pause-action").assertIsDisplayed()
+        assertTrue(
+            compose.onNodeWithTag("player-play-pause-action")
+                .fetchSemanticsNode().boundsInRoot.top <
+                compose.onNodeWithContentDescription("Vị trí phát nhạc")
+                    .fetchSemanticsNode().boundsInRoot.top
+        )
         compose.onNodeWithText("Trước").performScrollTo().performClick()
         compose.onNodeWithText("Tạm dừng").performScrollTo().performClick()
         compose.onNodeWithText("Tiếp").performScrollTo().performClick()
@@ -111,8 +127,45 @@ class MusicFlowUiPolishTest {
             }
         }
         compose.onNodeWithText("Tài khoản MusicFlow").assertExists()
+        compose.onNodeWithTag("account-demo-tools-toggle")
+            .performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("account-theme-dark").assertIsDisplayed()
+        assertTrue(
+            compose.onNodeWithTag("account-theme-dark")
+                .fetchSemanticsNode().boundsInRoot.top <
+                compose.onNodeWithTag("account-demo-tools-toggle")
+                    .fetchSemanticsNode().boundsInRoot.top
+        )
         compose.onNodeWithTag("account-theme-dark").performScrollTo().performClick()
         compose.runOnIdle { assertEquals("dark", selected) }
+    }
+
+    @Test fun libraryExplainsHorizontallyScrollableCategoriesAtLargeFont() {
+        compose.setContent {
+            val density = LocalDensity.current
+            CompositionLocalProvider(
+                LocalDensity provides Density(density.density, 1.8f)
+            ) {
+                MusicFlowTheme {
+                    Box(Modifier.width(310.dp).height(640.dp)) {
+                        LibraryScreen(
+                            uiState = LibraryUiState.Idle,
+                            hasPermission = false,
+                            onBack = {},
+                            onPickManual = {},
+                            onRefresh = {},
+                            onSongSelected = { _, _ -> },
+                            onAddToPlaylist = {}
+                        )
+                    }
+                }
+            }
+        }
+        compose.onNodeWithTag("library-categories-scroll-hint")
+            .assertExists()
+        compose.onNodeWithTag("library-category-genres")
+            .performScrollTo().performClick()
+        compose.onNodeWithTag("library-category-genres").assertExists()
     }
 
     @Test fun authButtonsStayReachableAtLargeFontWithoutCallingAuth() {

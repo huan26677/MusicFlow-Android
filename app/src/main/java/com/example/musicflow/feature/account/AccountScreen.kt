@@ -600,35 +600,8 @@ fun AccountScreen(
             }
             }
         }
-        HorizontalDivider()
-        TextButton(
-            onClick = { demoToolsExpanded = !demoToolsExpanded },
-            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                .semantics {
-                    stateDescription = if (demoToolsExpanded) "Đã mở" else "Đã thu gọn"
-                }
-                .testTag("account-demo-tools-toggle")
-        ) { Text(if (demoToolsExpanded) "Ẩn công cụ trình diễn đồ án"
-            else "Khám phá 9 vai trò và Premium (mô phỏng)") }
-        if (demoToolsExpanded) {
-            OceanFlowCard {
-                Text("CHỈ DÀNH CHO TRÌNH DIỄN", style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary)
-                Text("Những chức năng dưới đây chỉ là kịch bản học tập; không thay đổi tài khoản, " +
-                    "không cấp quyền thật và không thu tiền.",
-                    style = MaterialTheme.typography.bodySmall)
-                OutlinedButton(
-                    onClick = onOpenDemoCenter,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                        .testTag("account-demo-center-open")
-                ) { Text("Xem các loại tài khoản (giả lập)") }
-                OutlinedButton(
-                    onClick = onOpenDemoBilling,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                        .testTag("account-demo-billing-open")
-                ) { Text("Thử thanh toán Premium (giả lập)") }
-            }
-        }
+        // Appearance is useful to every role; keep it ahead of optional
+        // coursework/demo tools rather than burying it at the page bottom.
         HorizontalDivider()
         Text("Giao diện", style = MaterialTheme.typography.titleMedium)
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -661,6 +634,35 @@ fun AccountScreen(
                         )
                     }
                 }
+            }
+        }
+        HorizontalDivider()
+        TextButton(
+            onClick = { demoToolsExpanded = !demoToolsExpanded },
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                .semantics {
+                    stateDescription = if (demoToolsExpanded) "Đã mở" else "Đã thu gọn"
+                }
+                .testTag("account-demo-tools-toggle")
+        ) { Text(if (demoToolsExpanded) "Ẩn công cụ trình diễn đồ án"
+            else "Khám phá 9 vai trò và Premium (mô phỏng)") }
+        if (demoToolsExpanded) {
+            OceanFlowCard {
+                Text("CHỈ DÀNH CHO TRÌNH DIỄN", style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary)
+                Text("Những chức năng dưới đây chỉ là kịch bản học tập; không thay đổi tài khoản, " +
+                    "không cấp quyền thật và không thu tiền.",
+                    style = MaterialTheme.typography.bodySmall)
+                OutlinedButton(
+                    onClick = onOpenDemoCenter,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                        .testTag("account-demo-center-open")
+                ) { Text("Xem các loại tài khoản (giả lập)") }
+                OutlinedButton(
+                    onClick = onOpenDemoBilling,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                        .testTag("account-demo-billing-open")
+                ) { Text("Thử thanh toán Premium (giả lập)") }
             }
         }
     }

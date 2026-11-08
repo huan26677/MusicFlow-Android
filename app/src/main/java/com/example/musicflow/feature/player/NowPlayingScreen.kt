@@ -189,11 +189,11 @@ fun NowPlayingScreen(
             }
         }
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(12.dp))
 
         OceanFlowArtworkStage(artworkUri = state.artworkUri)
 
-        Spacer(Modifier.height(28.dp))
+        Spacer(Modifier.height(16.dp))
 
         Text(
             text = state.title,
@@ -211,6 +211,25 @@ fun NowPlayingScreen(
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
+        // Playback controls are the primary task. Keep them above favorites,
+        // queue details and seeking so they remain reachable on small screens.
+        Spacer(Modifier.height(16.dp))
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val compact = maxWidth < 360.dp || LocalDensity.current.fontScale >= 1.35f
+            if (compact) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) { transport(Modifier.fillMaxWidth()) }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) { transport(Modifier.weight(1f)) }
+            }
+        }
 
         Spacer(Modifier.height(12.dp))
 
@@ -296,25 +315,6 @@ fun NowPlayingScreen(
                     "--:--"
                 }
             )
-        }
-
-        Spacer(Modifier.height(22.dp))
-
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val compact = maxWidth < 360.dp ||
-                LocalDensity.current.fontScale >= 1.35f
-            if (compact) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) { transport(Modifier.fillMaxWidth()) }
-            } else {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) { transport(Modifier.weight(1f)) }
-            }
         }
 
         Spacer(Modifier.height(22.dp))

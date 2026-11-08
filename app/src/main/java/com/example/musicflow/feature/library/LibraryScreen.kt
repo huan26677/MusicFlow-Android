@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -361,20 +362,41 @@ fun LibraryScreen(
                 }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                listOf(
-                    "songs" to "Bài hát", "picked" to "Nhạc đã chọn",
-                    "smart" to "Thông minh", "albums" to "Album",
-                    "artists" to "Nghệ sĩ", "genres" to "Thể loại"
-                ).forEach { (category, label) ->
-                    FilterChip(
-                        selected = selectedCategory == category,
-                        onClick = { selectedCategory = category },
-                        label = { Text(label) },
-                        modifier = Modifier.testTag("library-category-$category")
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val showScrollHint = maxWidth < 700.dp ||
+                    androidx.compose.ui.platform.LocalDensity.current.fontScale >= 1.5f
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf(
+                        "songs" to "Bài hát", "picked" to "Nhạc đã chọn",
+                        "smart" to "Thông minh", "albums" to "Album",
+                        "artists" to "Nghệ sĩ", "genres" to "Thể loại"
+                    ).forEach { (category, label) ->
+                        FilterChip(
+                            selected = selectedCategory == category,
+                            onClick = { selectedCategory = category },
+                            label = { Text(label) },
+                            modifier = Modifier.testTag("library-category-$category")
+                        )
+                    }
+                }
+                if (showScrollHint) {
+                    // An in-row visual affordance does not reduce the space
+                    // available for a 600-song LazyColumn at 200% text.
+                    Text(
+                        "›",
+                        modifier = Modifier.align(Alignment.CenterEnd)
+                            .background(MaterialTheme.colorScheme.surface,
+                                RoundedCornerShape(8.dp))
+                            .padding(horizontal = 6.dp)
+                            .semantics {
+                                contentDescription = "Vuốt ngang để xem thêm danh mục nhạc"
+                            }
+                            .testTag("library-categories-scroll-hint"),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
