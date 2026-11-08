@@ -47,42 +47,42 @@
     {
       "id": "LIBRARY", "name": "Thư viện, album, nghệ sĩ, thể loại",
       "source": ["app/src/main/java/com/example/musicflow/feature/library/**", "app/src/main/java/com/example/musicflow/core/catalog/**", "app/src/main/java/com/example/musicflow/feature/catalog/**"],
-      "requires": ["MEDIA_SAF", "FAVORITES"],
+      "requires": ["MEDIA_SAF", "FAVORITES", "UI_ACCESS"],
       "tests": ["**/feature/library/LibraryAccessibilityV7Test.kt", "**/ui/LibraryPerformanceV4UiTest.kt", "**/core/playback/AdvancedLibraryRuntimeTest.kt", "**/ui/MusicFlowPlayerLibraryUxV3Test.kt"],
       "smoke": ["LibraryPerformanceV4UiTest#songSearchPlaysOnlyFilteredQueueAndPreservesIndex", "LibraryAccessibilityV7Test#albumTracksStayVirtualizedInRealLibraryAt200Percent"]
     },
     {
       "id": "SEARCH", "name": "Tìm kiếm không dấu, chỉ mục, lọc nhóm",
       "source": ["app/src/main/java/com/example/musicflow/feature/search/**"],
-      "requires": ["MEDIA_SAF", "LIBRARY"],
+      "requires": ["MEDIA_SAF", "LIBRARY", "UI_ACCESS"],
       "tests": ["**/feature/search/*Test.kt", "**/core/playback/AdvancedSearchRuntimeTest.kt", "**/ui/MusicFlowSearchUxV3Test.kt", "**/ui/AccessibilityOfflineSearchV5Test.kt"],
       "smoke": ["AdvancedSearchIndexV8Test#refreshRevocationAndQueryChangesDoNotReuseStaleCatalog", "AdvancedSearchRuntimeTest#searchRouteAccentInsensitivePlaybackAndQueueActions"]
     },
     {
       "id": "PLAYBACK", "name": "Player service, hàng đợi, runtime, audio focus",
       "source": ["app/src/main/java/com/example/musicflow/core/playback/**", "app/src/main/java/com/example/musicflow/feature/player/**"],
-      "requires": ["MEDIA_SAF", "ONLINE_RIGHTS"],
+      "requires": ["MEDIA_SAF", "ONLINE_RIGHTS", "UI_ACCESS"],
       "tests": ["**/core/playback/*Test.kt", "**/ui/MusicFlowPlayerLibraryUxV3Test.kt"],
       "smoke": ["PlaybackQueuePersistenceTest#savedQueueRestoresPausedAndResumesPlayback", "PlaybackRuntimeAutoSkipTest#singleMissingTrackAutoSkips"]
     },
     {
       "id": "PLAYLIST", "name": "Playlist Room, reorder, import/export",
       "source": ["app/src/main/java/com/example/musicflow/core/playlist/**", "app/src/main/java/com/example/musicflow/feature/playlist/**"],
-      "requires": ["MEDIA_SAF", "PLAYBACK"],
+      "requires": ["MEDIA_SAF", "PLAYBACK", "UI_ACCESS"],
       "tests": ["**/core/playlist/*Test.kt", "**/feature/playlist/*Test.kt", "**/ui/Playlist*Test.kt", "**/ui/MusicFlowPlaylistPolishV3Test.kt"],
       "smoke": ["PlaylistReorderDatabaseTest#reorderPersistsAfterDatabaseReopen", "PlaylistLocalBackupIntegrationTest#invalidDocumentCannotPartiallyModifyRoom"]
     },
     {
       "id": "FAVORITES", "name": "Yêu thích bài hát và album",
       "source": ["app/src/main/java/com/example/musicflow/core/favorites/**"],
-      "requires": ["MEDIA_SAF"],
+      "requires": ["MEDIA_SAF", "UI_ACCESS"],
       "tests": ["**/FavoritesBatchTest.kt", "**/ui/SmartLibraryUiTest.kt"],
       "smoke": ["SmartLibraryUiTest#changingFavoriteRecomputesSmartCollectionImmediately"]
     },
     {
       "id": "SMART", "name": "Smart Library và gợi ý thư viện",
       "source": ["app/src/main/java/com/example/musicflow/core/smart/**", "app/src/main/java/com/example/musicflow/feature/library/Smart*"],
-      "requires": ["LIBRARY", "FAVORITES", "HISTORY"],
+      "requires": ["LIBRARY", "FAVORITES", "HISTORY", "UI_ACCESS"],
       "tests": ["**/core/smart/*Test.kt", "**/ui/SmartLibraryUiTest.kt"],
       "smoke": ["SmartLibraryUiTest#pickedTrackAndMediaStoreDuplicateAppearOnlyOnceInSmartMix"]
     },
@@ -96,7 +96,7 @@
     {
       "id": "LYRICS", "name": "Lời bài hát LRC, đồng bộ lời và SAF",
       "source": ["app/src/main/java/com/example/musicflow/core/lyrics/**"],
-      "requires": ["MEDIA_SAF", "PLAYBACK"],
+      "requires": ["MEDIA_SAF", "PLAYBACK", "UI_ACCESS"],
       "tests": ["**/core/lyrics/*Test.kt"],
       "smoke": ["LyricsSafImportTest#realSafDocumentImportAndPersistentAudioAssociation"]
     },
@@ -113,7 +113,7 @@
         "app/src/main/java/com/example/musicflow/feature/account/AccountViewModel.kt",
         "app/src/main/java/com/example/musicflow/feature/account/AccountFormValidation.kt"
       ],
-      "requires": [],
+      "requires": ["UI_ACCESS"],
       "tests": ["**/AccountAuthUiTest.kt", "**/feature/account/AccountFormValidationTest.kt", "**/core/account/*Auth*Test.kt", "**/core/account/GoogleOAuthFlowTest.kt", "**/core/account/DemoPasswordHashTest.kt", "**/ui/AccountJourneysV4UiTest.kt"],
       "smoke": ["AccountAuthUiTest#signupTabInlineErrorsGoogleDisabledAndGuestNavigation", "AccountAuthErrorLabelsTest#doesNotEchoUnknownServerErrorData"]
     },
@@ -130,7 +130,7 @@
         "app/src/main/java/com/example/musicflow/feature/account/OwnerDemoDashboard.kt",
         "admin-web/**"
       ],
-      "requires": ["AUTH"],
+      "requires": ["AUTH", "UI_ACCESS"],
       "tests": [
         "**/core/account/MusicFlowAccessTest.kt", "**/core/account/OwnerDemoSnapshotTest.kt",
         "**/core/account/AccountHomePlanTest.kt", "**/core/account/AccountReviewPlanTest.kt",
@@ -145,14 +145,14 @@
     {
       "id": "CREATOR", "name": "Creator, draft, xét duyệt nội dung",
       "source": ["app/src/main/java/com/example/musicflow/core/account/Creator*", "app/src/main/java/com/example/musicflow/feature/account/Creator*"],
-      "requires": ["AUTH", "ROLES_ADMIN"],
+      "requires": ["AUTH", "ROLES_ADMIN", "UI_ACCESS"],
       "tests": ["**/core/account/Creator*Test.kt", "**/ui/Creator*Test.kt", "**/ui/AccountJourneysV4UiTest.kt"],
       "smoke": ["CreatorApplicationReviewUiTest#pendingArtistRequestIsShownAndCannotBeResubmitted"]
     },
     {
       "id": "BILLING_DEMO", "name": "Premium và thanh toán giả lập",
       "source": ["app/src/main/java/com/example/musicflow/core/account/DemoBilling*", "app/src/main/java/com/example/musicflow/core/account/AccountTier.kt", "app/src/main/java/com/example/musicflow/feature/account/DemoBillingScreen.kt"],
-      "requires": ["AUTH", "ROLES_ADMIN"],
+      "requires": ["AUTH", "ROLES_ADMIN", "UI_ACCESS"],
       "tests": ["**/core/account/DemoBilling*Test.kt", "**/core/account/AccountTierTest.kt", "**/ui/DemoBillingUiTest.kt"],
       "smoke": ["DemoBillingUiTest#failedCheckoutNeverChangesPriorPaidDemoReceipt", "AccountTierTest#expiredPremiumIsFree"]
     },
@@ -166,7 +166,7 @@
     {
       "id": "ONLINE_RIGHTS", "name": "Online catalog và quyền phát có giấy phép",
       "source": ["app/src/main/java/com/example/musicflow/core/online/**", "app/src/main/java/com/example/musicflow/feature/online/**", "scripts/musicflow_licensed_upload.py"],
-      "requires": ["AUTH"],
+      "requires": ["AUTH", "UI_ACCESS"],
       "tests": ["**/core/online/*Test.kt"],
       "smoke": ["OnlineRightsPolicyTest#missingRightsDefaultToDenied", "OnlineRightsPolicyTest#missingAttributionOrSourceBlocksPlayback"],
       "extra": ["py -3 -m unittest scripts/test_musicflow_licensed_upload.py"]
@@ -174,7 +174,7 @@
     {
       "id": "HOME_NAV", "name": "Trang chủ, mini-player, điều hướng",
       "source": ["app/src/main/java/com/example/musicflow/feature/home/**", "app/src/main/java/com/example/musicflow/core/ux/**"],
-      "requires": ["LIBRARY", "SEARCH", "PLAYBACK", "HISTORY"],
+      "requires": ["LIBRARY", "SEARCH", "PLAYBACK", "HISTORY", "UI_ACCESS"],
       "tests": ["**/core/ux/*Test.kt", "**/ui/ListeningJourneysV1UiTest.kt", "**/ui/MusicFlowUxFoundationV3Test.kt", "**/ui/OceanFlowVisualUiTest.kt"],
       "smoke": ["ListeningJourneysV1UiTest#homeShowsShortHistoryThenAllSongsWithOriginalPlaybackIndex"]
     },

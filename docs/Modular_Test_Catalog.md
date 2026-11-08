@@ -12,21 +12,21 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 | Module | Area | Cases linked | Depends on |
 |---|---|---:|---|
 | `MEDIA_SAF` | MediaStore, tệp offline và quyền SAF | 30 |  |
-| `LIBRARY` | Thư viện, album, nghệ sĩ, thể loại | 18 | MEDIA_SAF, FAVORITES |
-| `SEARCH` | Tìm kiếm không dấu, chỉ mục, lọc nhóm | 25 | MEDIA_SAF, LIBRARY |
-| `PLAYBACK` | Player service, hàng đợi, runtime, audio focus | 87 | MEDIA_SAF, ONLINE_RIGHTS |
-| `PLAYLIST` | Playlist Room, reorder, import/export | 50 | MEDIA_SAF, PLAYBACK |
-| `FAVORITES` | Yêu thích bài hát và album | 17 | MEDIA_SAF |
-| `SMART` | Smart Library và gợi ý thư viện | 19 | LIBRARY, FAVORITES, HISTORY |
+| `LIBRARY` | Thư viện, album, nghệ sĩ, thể loại | 18 | MEDIA_SAF, FAVORITES, UI_ACCESS |
+| `SEARCH` | Tìm kiếm không dấu, chỉ mục, lọc nhóm | 25 | MEDIA_SAF, LIBRARY, UI_ACCESS |
+| `PLAYBACK` | Player service, hàng đợi, runtime, audio focus | 87 | MEDIA_SAF, ONLINE_RIGHTS, UI_ACCESS |
+| `PLAYLIST` | Playlist Room, reorder, import/export | 50 | MEDIA_SAF, PLAYBACK, UI_ACCESS |
+| `FAVORITES` | Yêu thích bài hát và album | 17 | MEDIA_SAF, UI_ACCESS |
+| `SMART` | Smart Library và gợi ý thư viện | 19 | LIBRARY, FAVORITES, HISTORY, UI_ACCESS |
 | `HISTORY` | Lịch sử nghe và Room recent | 17 | PLAYBACK |
-| `LYRICS` | Lời bài hát LRC, đồng bộ lời và SAF | 9 | MEDIA_SAF, PLAYBACK |
-| `AUTH` | Đăng nhập, khách, OAuth, hồ sơ | 36 |  |
-| `ROLES_ADMIN` | Owner, quản trị viên, Developer và RBAC | 72 | AUTH |
-| `CREATOR` | Creator, draft, xét duyệt nội dung | 23 | AUTH, ROLES_ADMIN |
-| `BILLING_DEMO` | Premium và thanh toán giả lập | 17 | AUTH, ROLES_ADMIN |
+| `LYRICS` | Lời bài hát LRC, đồng bộ lời và SAF | 9 | MEDIA_SAF, PLAYBACK, UI_ACCESS |
+| `AUTH` | Đăng nhập, khách, OAuth, hồ sơ | 36 | UI_ACCESS |
+| `ROLES_ADMIN` | Owner, quản trị viên, Developer và RBAC | 72 | AUTH, UI_ACCESS |
+| `CREATOR` | Creator, draft, xét duyệt nội dung | 23 | AUTH, ROLES_ADMIN, UI_ACCESS |
+| `BILLING_DEMO` | Premium và thanh toán giả lập | 17 | AUTH, ROLES_ADMIN, UI_ACCESS |
 | `CLOUD_SYNC` | Cloud library/history và đồng bộ Supabase demo | 8 | AUTH, PLAYLIST, HISTORY |
-| `ONLINE_RIGHTS` | Online catalog và quyền phát có giấy phép | 16 | AUTH |
-| `HOME_NAV` | Trang chủ, mini-player, điều hướng | 17 | LIBRARY, SEARCH, PLAYBACK, HISTORY |
+| `ONLINE_RIGHTS` | Online catalog và quyền phát có giấy phép | 16 | AUTH, UI_ACCESS |
+| `HOME_NAV` | Trang chủ, mini-player, điều hướng | 17 | LIBRARY, SEARCH, PLAYBACK, HISTORY, UI_ACCESS |
 | `UI_ACCESS` | Thiết kế Ocean Flow, focus, TalkBack semantics | 41 |  |
 | `DEMO_CENTER` | Trung tâm demo và điều hướng theo tài khoản | 11 | AUTH, ROLES_ADMIN, BILLING_DEMO |
 | `RELEASE_BACKUP` | Sao lưu, versioning, APK ký QA và nâng cấp | 14 | MEDIA_SAF, PLAYLIST, FAVORITES |

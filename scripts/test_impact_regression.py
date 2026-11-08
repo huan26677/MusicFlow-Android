@@ -85,6 +85,17 @@ class ImpactDrivenRegressionTest(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertEqual("full_required", self.selection(path)["mode"])
 
+    def test_shared_ui_component_selects_downstream_screen_contracts(self):
+        result = self.selection(
+            "app/src/main/java/com/example/musicflow/ui/components/OceanFlowVisuals.kt"
+        )
+        self.assertEqual("selective", result["mode"])
+        self.assertEqual(["UI_ACCESS"], result["direct_modules"])
+        for consumer in ["LIBRARY", "SEARCH", "PLAYBACK", "HOME_NAV", "AUTH"]:
+            self.assertIn(consumer, result["affected_modules"])
+        self.assertTrue(any(i["module"] == "LIBRARY" for i in result["testcases"]))
+        self.assertLess(result["test_count"], 457)
+
     def test_owner_rbac_mutation_forces_full_security_regression(self):
         result = self.selection(
             "app/src/main/java/com/example/musicflow/core/account/MusicFlowAccess.kt"
