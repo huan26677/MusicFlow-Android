@@ -92,6 +92,14 @@ __pycache__/
 !/qa-logs/musicflow-keyboard-v11-impact-retest-api36.log
 /qa-logs/v11picker-*.png
 
+# v12: keep large/diagnostic local runs private on the QA workstation.
+# Only screened transcripts explicitly named below may be committed.
+/qa-logs/*v12*.log
+!/qa-logs/musicflow-v12-ux-json-api36.log
+!/qa-logs/musicflow-v12-keyboard-standalone-api36.log
+!/qa-logs/musicflow-v12-impact67-api36.log
+!/qa-logs/musicflow-v12-integrated-flake-api36.log
+
 # Operating system
 .DS_Store
 Thumbs.db

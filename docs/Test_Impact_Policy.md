@@ -62,4 +62,6 @@ Brain evidence & lesson: ...
 
 **Điều kiện nghiệm thu không thể thay bằng kiểm thử tự động:** thao tác TalkBack nghe/đọc thật, bàn phím Bluetooth/TV D-pad thực, nhạc MP3/FLAC/WAV trên máy thật, hiệu năng RAM/scroll/scan thực, quyền với nhiều SAF provider, thanh toán/Supabase production và giấy phép nhạc online. Chứng cứ fixture/emulator chỉ đủ cho phạm vi ghi trong log.
 
+**Android keyboard QA isolation (v12):** Các case UiAutomator pressDPadDown/pressEnter có thể mất cửa sổ nhận phím khi nối tiếp nhiều trường hợp dùng ActivityScenario, MediaController và Compose host trong **cùng instrumentation runner**. Phải chạy các case keyboard thành **lượt instrumentation riêng**, không che FAIL bằng cách bỏ assertion hay thay thao tác phần cứng thành performSemanticsAction. Báo riêng số PASS của keyboard và UX/MediaStore/JSON; chỉ công bố full khi toàn bộ các test cần thiết đã chạy đủ. Chi tiết và log đối chiếu ở docs/Regression_Stability_v12.md.
+
 **Lưu ý đặc biệt:** `SignedApkUpgradeV6Test` có cặp test seed/verify liên tiếp qua `adb install -r`; phải dùng `scripts/run-signed-upgrade-v8-qa.ps1` trên **AVD QA mới**, tuyệt đối không chạy method verify đơn lẻ rồi tuyên bố upgrade PASS.

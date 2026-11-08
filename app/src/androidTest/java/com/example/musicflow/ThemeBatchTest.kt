@@ -3,11 +3,15 @@ package com.example.musicflow
 import android.content.Context
 import android.util.Log
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -49,9 +53,19 @@ class ThemeBatchTest {
             // while the Account screen scrolls vertically. First reveal the
             // theme section via the OUTER vertical scroll container.
             composeRule.onNodeWithTag("account-scroll")
-                .performScrollToNode(hasText("Tối"))
-            composeRule.onNodeWithText("Tối").performClick()
-            composeRule.onNodeWithText("Tối")
+                .performScrollToNode(hasTestTag("account-theme-light"))
+            // performScrollTo may leave a chip centered *below* the viewport
+            // on API36 when the page has nested horizontal chip rows.
+            // One physical swipe on the containing page reveals the controls.
+            composeRule.onNodeWithTag("account-scroll")
+                .performTouchInput { swipeUp() }
+            composeRule.onNodeWithTag("account-theme-light")
+                .assertIsDisplayed().performClick()
+            composeRule.onNodeWithTag("account-theme-light")
+                .assertIsSelected()
+            composeRule.onNodeWithTag("account-theme-dark")
+                .performScrollTo().performClick()
+            composeRule.onNodeWithTag("account-theme-dark")
                 .assertIsSelected()
 
             assertEquals(
@@ -70,8 +84,11 @@ class ThemeBatchTest {
                 .performClick()
 
             composeRule.onNodeWithTag("account-scroll")
-                .performScrollToNode(hasText("Tối"))
-            composeRule.onNodeWithText("Tối").assertIsSelected()
+                .performScrollToNode(hasTestTag("account-theme-dark"))
+            composeRule.onNodeWithTag("account-scroll")
+                .performTouchInput { swipeUp() }
+            composeRule.onNodeWithTag("account-theme-dark")
+                .assertIsDisplayed().assertIsSelected()
 
             Log.i(
                 "MusicFlowFavoritesQA",

@@ -63,17 +63,18 @@ class PlaylistBackupRealPickerUiTest {
     }
 
     private fun selectBackupDocument(filename: String): Boolean {
-        val deadline = SystemClock.uptimeMillis() + 40_000L
+        val deadline = SystemClock.uptimeMillis() + 50_000L
         var openedDownloads = false
-        var tappedFile = false
+        var tapAttempts = 0
+        var lastTapAt = 0L
         while (SystemClock.uptimeMillis() < deadline) {
-            // Android 13+ DocumentsUI sometimes needs more than 450 ms to
-            // deliver ActivityResult. Do not repeatedly tap after selection.
-            if (tappedFile && device.currentPackageName == context.packageName) return true
+            // DocumentsUI is a separate app, so never mistake a visible file
+            // row for an ActivityResult that has already been delivered.
+            if (tapAttempts > 0 && device.currentPackageName == context.packageName) return true
             // Android 13 DocumentsUI uses multi-select mode for some providers:
             // tapping the JSON highlights it and reveals a bottom SELECT
             // confirmation. Without that click the picker never returns.
-            if (tappedFile) {
+            if (tapAttempts > 0) {
                 val select = device.findObject(By.text("SELECT"))
                     ?: device.findObject(By.text("Select"))
                     ?: device.findObject(By.desc("Select"))
@@ -85,12 +86,19 @@ class PlaylistBackupRealPickerUiTest {
             val file = device.findObject(By.text(filename))
                 ?: device.findObject(By.desc(filename))
                 ?: device.findObject(By.textContains(filename))
-            if (!tappedFile && file != null) {
+            // In a busy full UX suite, the first tap can land while
+            // DocumentsUI is still updating its Downloads grid. If the
+            // picker remains on that screen with the same file visible,
+            // retry only after a grace period, with a strict attempt cap.
+            val canTap = tapAttempts == 0 ||
+                (tapAttempts < 3 && SystemClock.uptimeMillis() - lastTapAt > 6_000L)
+            if (canTap && file != null) {
                 val rect = file.visibleBounds
                 if (!rect.isEmpty) {
-                    device.click(rect.centerX(), rect.centerY())
-                    tappedFile = true
-                    val returnDeadline = SystemClock.uptimeMillis() + 6_000L
+                    file.click()
+                    tapAttempts++
+                    lastTapAt = SystemClock.uptimeMillis()
+                    val returnDeadline = SystemClock.uptimeMillis() + 3_000L
                     while (SystemClock.uptimeMillis() < returnDeadline) {
                         if (device.currentPackageName == context.packageName) return true
                         val select = device.findObject(By.text("SELECT"))
@@ -127,7 +135,7 @@ class PlaylistBackupRealPickerUiTest {
         val visible = device.findObjects(By.clazz("android.widget.TextView"))
             .take(25).mapNotNull { it.text }.joinToString(" | ")
         Log.e("MusicFlowJsonPickerQA",
-            "PICKER_TIMEOUT tapped=$tappedFile root=$openedDownloads " +
+            "PICKER_TIMEOUT taps=$tapAttempts root=$openedDownloads " +
                 "package=${device.currentPackageName} visible=$visible")
         return false
     }

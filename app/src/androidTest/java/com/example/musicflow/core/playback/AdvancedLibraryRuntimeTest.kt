@@ -10,10 +10,13 @@ import android.os.ParcelFileDescriptor
 import android.provider.MediaStore
 import android.util.Log
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToKey
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
@@ -308,12 +311,16 @@ class AdvancedLibraryRuntimeTest {
         }
         Log.i("MusicFlowLibraryQA", "PASS realAlbumGroupPlayback")
 
-        compose.onNodeWithText("Nghệ sĩ").performClick()
+        compose.onNodeWithTag("library-category-artists")
+            .performScrollTo().performClick()
+        compose.onNodeWithTag("music-collections-list").assertExists()
         val artist = artistGroups.first()
-        awaitUi(artist.name)
-        compose.onAllNodesWithText(artist.name).onFirst().performClick()
-        awaitUi("Phát toàn bộ")
-        compose.onNodeWithText("Phát toàn bộ").performClick()
+        compose.onNodeWithTag("music-collections-list")
+            .performScrollToKey("header:${artist.key}")
+        compose.onNodeWithTag("collection-header-${artist.key}").performClick()
+        compose.onNodeWithTag("music-collections-list")
+            .performScrollToKey("play:${artist.key}")
+        compose.onNodeWithTag("collection-play-all").performClick()
         compose.waitUntil(15_000L) {
             var selected = false
             main {
@@ -326,11 +333,16 @@ class AdvancedLibraryRuntimeTest {
         }
         Log.i("MusicFlowLibraryQA", "PASS realArtistGroupPlayback")
 
-        compose.onNodeWithText("Thể loại").performClick()
+        compose.onNodeWithTag("library-category-genres")
+            .performScrollTo().performClick()
+        compose.onNodeWithTag("music-collections-list").assertExists()
         val genre = genreGroups.first()
-        awaitUi(genre.name)
-        compose.onAllNodesWithText(genre.name).onFirst().performClick()
-        awaitUi("Phát toàn bộ")
+        compose.onNodeWithTag("music-collections-list")
+            .performScrollToKey("header:${genre.key}")
+        compose.onNodeWithTag("collection-header-${genre.key}").performClick()
+        compose.onNodeWithTag("music-collections-list")
+            .performScrollToKey("play:${genre.key}")
+        compose.onNodeWithTag("collection-play-all").assertExists()
         Log.i("MusicFlowLibraryQA", "PASS realGenreGroupDisplay")
     }
 }
