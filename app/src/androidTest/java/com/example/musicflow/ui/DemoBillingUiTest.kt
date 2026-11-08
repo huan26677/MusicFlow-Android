@@ -54,6 +54,7 @@ class DemoBillingUiTest {
                 )
             }
         }
+        compose.onNodeWithTag("account-demo-tools-toggle").performScrollTo().performClick()
         compose.onNodeWithTag("account-demo-billing-open").performScrollTo().performClick()
         assertEquals(1, openings)
         compose.onNodeWithTag("account-guest").assertExists()

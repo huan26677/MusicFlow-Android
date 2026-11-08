@@ -76,6 +76,20 @@ class AccountHomeV2UiTest {
         compose.onNodeWithTag("account-google-disabled").assertDoesNotExist()
     }
 
+    @Test fun accountHidesProjectDemoUntilUserExplicitlyRequestsIt() {
+        render(AccountUiState(loading = false))
+        compose.onNodeWithTag("account-guest").assertExists()
+        compose.onNodeWithTag("account-demo-tools-toggle").assertExists()
+        compose.onNodeWithTag("account-demo-center-open").assertDoesNotExist()
+        compose.onNodeWithTag("account-demo-billing-open").assertDoesNotExist()
+        compose.onNodeWithTag("account-demo-tools-toggle").performScrollTo().performClick()
+        compose.onNodeWithTag("account-demo-center-open").assertExists()
+        compose.onNodeWithTag("account-demo-billing-open").assertExists()
+        compose.onNodeWithTag("account-demo-tools-toggle").performScrollTo().performClick()
+        compose.onNodeWithTag("account-demo-center-open").assertDoesNotExist()
+        compose.onNodeWithTag("account-demo-billing-open").assertDoesNotExist()
+    }
+
     @Test fun signupShowsEmailConfirmationInstructionsWithoutAdminSettings() {
         render(AccountUiState(
             loading = false,

@@ -142,6 +142,9 @@ fun HomeScreen(
         mutableStateOf(false)
     }
     var recentExpanded by rememberSaveable { mutableStateOf(false) }
+    // Keep the two common listening actions visible. Optional collections are
+    // discovered on demand instead of competing with the primary CTA.
+    var moreListeningActions by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -185,8 +188,8 @@ fun HomeScreen(
         }
 
         OceanFlowCard {
-                OceanFlowSectionTitle("Bắt đầu nghe")
-                Text("Thư viện riêng luôn sẵn sàng, kể cả khi không có Internet.",
+                OceanFlowSectionTitle("Bạn muốn nghe nhạc?")
+                Text("Không cần tài khoản hay Internet. Chọn tệp nhạc riêng hoặc quét các bài trong máy.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
 
@@ -195,7 +198,7 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
                         .testTag("home-library-action")
                 ) {
-                    Text("Mở thư viện thiết bị")
+                    Text("Chọn nhạc để nghe")
                 }
 
                 OutlinedButton(
@@ -203,22 +206,26 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
                         .testTag("home-search-action")
                 ) {
-                    Text("Tìm kiếm bài hát")
+                    Text("Tìm bài hát đã có")
                 }
-
-                OutlinedButton(
-                    onClick = onOpenPlaylists,
+                TextButton(
+                    onClick = { moreListeningActions = !moreListeningActions },
                     modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                        .testTag("home-playlist-action")
-                ) {
-                    Text("Danh sách phát của tôi")
+                        .testTag("home-more-actions-toggle")
+                ) { Text(if (moreListeningActions) "Ẩn tùy chọn khác"
+                    else "Playlist và tùy chọn khác") }
+                if (moreListeningActions) {
+                    OutlinedButton(
+                        onClick = onOpenPlaylists,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                            .testTag("home-playlist-action")
+                    ) { Text("Danh sách phát của tôi") }
+                    OutlinedButton(
+                        onClick = onOpenSmartLibrary,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                            .testTag("home-smart-library-action")
+                    ) { Text("Playlist thông minh (tự cập nhật)") }
                 }
-
-                OutlinedButton(
-                    onClick = onOpenSmartLibrary,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                        .testTag("home-smart-library-action")
-                ) { Text("Playlist thông minh · Tự cập nhật") }
         }
 
         if (showFirstUseGuide) {
@@ -230,7 +237,7 @@ fun HomeScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        "1. Mở Thư viện để quét nhạc hoặc chọn tệp âm thanh.\n" +
+                            "1. Bấm Chọn nhạc để nghe, rồi chọn tệp hoặc quét nhạc trong máy.\n" +
                             "2. Chạm vào một bài hát để phát.\n" +
                             "3. Dùng trình phát thu nhỏ để tạm dừng hoặc mở màn hình phát.",
                         style = MaterialTheme.typography.bodySmall

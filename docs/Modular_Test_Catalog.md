@@ -21,13 +21,13 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 | `HISTORY` | Lịch sử nghe và Room recent | 17 | PLAYBACK |
 | `LYRICS` | Lời bài hát LRC, đồng bộ lời và SAF | 9 | MEDIA_SAF, PLAYBACK, UI_ACCESS |
 | `AUTH` | Đăng nhập, khách, OAuth, hồ sơ | 36 | UI_ACCESS |
-| `ROLES_ADMIN` | Owner, quản trị viên, Developer và RBAC | 72 | AUTH, UI_ACCESS |
+| `ROLES_ADMIN` | Owner, quản trị viên, Developer và RBAC | 73 | AUTH, UI_ACCESS |
 | `CREATOR` | Creator, draft, xét duyệt nội dung | 23 | AUTH, ROLES_ADMIN, UI_ACCESS |
 | `BILLING_DEMO` | Premium và thanh toán giả lập | 17 | AUTH, ROLES_ADMIN, UI_ACCESS |
 | `CLOUD_SYNC` | Cloud library/history và đồng bộ Supabase demo | 8 | AUTH, PLAYLIST, HISTORY |
 | `ONLINE_RIGHTS` | Online catalog và quyền phát có giấy phép | 16 | AUTH, UI_ACCESS |
-| `HOME_NAV` | Trang chủ, mini-player, điều hướng | 17 | LIBRARY, SEARCH, PLAYBACK, HISTORY, UI_ACCESS |
-| `UI_ACCESS` | Thiết kế Ocean Flow, focus, TalkBack semantics | 41 |  |
+| `HOME_NAV` | Trang chủ, mini-player, điều hướng | 18 | LIBRARY, SEARCH, PLAYBACK, HISTORY, UI_ACCESS |
+| `UI_ACCESS` | Thiết kế Ocean Flow, focus, TalkBack semantics | 42 |  |
 | `DEMO_CENTER` | Trung tâm demo và điều hướng theo tài khoản | 11 | AUTH, ROLES_ADMIN, BILLING_DEMO |
 | `RELEASE_BACKUP` | Sao lưu, versioning, APK ký QA và nâng cấp | 14 | MEDIA_SAF, PLAYLIST, FAVORITES |
 
@@ -641,6 +641,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 
 **AccountHomeV2UiTest** (`app/src/androidTest/java/com/example/musicflow/ui/AccountHomeV2UiTest.kt`; android)
 
+- `ROLES_ADMIN/AccountHomeV2UiTest#accountHidesProjectDemoUntilUserExplicitlyRequestsIt`
 - `ROLES_ADMIN/AccountHomeV2UiTest#approvedArtistSeesCreatorShortcut`
 - `ROLES_ADMIN/AccountHomeV2UiTest#demoSessionKeepsOfflineOnlyTools`
 - `ROLES_ADMIN/AccountHomeV2UiTest#developerSeesDebugQaShortcutOnly`
@@ -901,6 +902,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 
 **MusicFlowUxFoundationV3Test** (`app/src/androidTest/java/com/example/musicflow/ui/MusicFlowUxFoundationV3Test.kt`; android)
 
+- `HOME_NAV/MusicFlowUxFoundationV3Test#firstUseHomeKeepsListeningAndSearchVisibleWhileAdvancedActionsAreOptional`
 - `HOME_NAV/MusicFlowUxFoundationV3Test#libraryPickerUsesGenericAudioLabelAndKeepsAction`
 - `HOME_NAV/MusicFlowUxFoundationV3Test#primaryHomeActionsAndOneTimeGuideCanBeDismissed`
 
@@ -982,6 +984,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 
 **MusicFlowUxFoundationV3Test** (`app/src/androidTest/java/com/example/musicflow/ui/MusicFlowUxFoundationV3Test.kt`; android)
 
+- `UI_ACCESS/MusicFlowUxFoundationV3Test#firstUseHomeKeepsListeningAndSearchVisibleWhileAdvancedActionsAreOptional`
 - `UI_ACCESS/MusicFlowUxFoundationV3Test#libraryPickerUsesGenericAudioLabelAndKeepsAction`
 - `UI_ACCESS/MusicFlowUxFoundationV3Test#primaryHomeActionsAndOneTimeGuideCanBeDismissed`
 

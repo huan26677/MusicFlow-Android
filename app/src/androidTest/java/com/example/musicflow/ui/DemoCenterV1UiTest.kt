@@ -59,7 +59,8 @@ class DemoCenterV1UiTest {
                 )
             }
         }
-        compose.onNodeWithTag("account-demo-center-open").performClick()
+        compose.onNodeWithTag("account-demo-tools-toggle").performScrollTo().performClick()
+        compose.onNodeWithTag("account-demo-center-open").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(1, opened) }
         compose.onNodeWithTag("account-guest").assertExists()
         compose.onNodeWithTag("account-role-tools").assertDoesNotExist()

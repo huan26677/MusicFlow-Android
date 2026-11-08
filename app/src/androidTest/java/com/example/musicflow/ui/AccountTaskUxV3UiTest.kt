@@ -165,6 +165,7 @@ class AccountTaskUxV3UiTest {
             compose.onAllNodesWithTag("role-workspace-management")
                 .fetchSemanticsNodes().isNotEmpty()
         }
+        compose.onNodeWithTag("role-current-workspace-summary").assertExists()
         compose.onNodeWithTag("role-workspace-moderation").performScrollTo().performClick()
         compose.onNodeWithTag("creator-review-load-pending").assertExists()
         compose.onNodeWithTag("role-workspace-creator").performScrollTo().performClick()

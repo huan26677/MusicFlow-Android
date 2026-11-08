@@ -26,6 +26,26 @@ class MusicFlowUxFoundationV3Test {
     @get:Rule val compose = createComposeRule()
 
     @Test
+    fun firstUseHomeKeepsListeningAndSearchVisibleWhileAdvancedActionsAreOptional() {
+        compose.setContent {
+            HomeScreen(
+                state = PlayerUiState(), historyState = HomeHistoryUiState.Empty,
+                onOpenLibrary = {}, onOpenSearch = {}, onOpenPlaylists = {},
+                onOpenPlayer = {}, onRecentSongSelected = { _, _ -> },
+                actionError = null, onDismissActionError = {},
+                onRemoveRecentSong = {}, onClearHistory = {}
+            )
+        }
+        compose.onNodeWithTag("home-library-action").assertExists()
+        compose.onNodeWithTag("home-search-action").assertExists()
+        compose.onNodeWithTag("home-playlist-action").assertDoesNotExist()
+        compose.onNodeWithTag("home-smart-library-action").assertDoesNotExist()
+        compose.onNodeWithTag("home-more-actions-toggle").performScrollTo().performClick()
+        compose.onNodeWithTag("home-playlist-action").assertExists()
+        compose.onNodeWithTag("home-smart-library-action").assertExists()
+    }
+
+    @Test
     fun primaryHomeActionsAndOneTimeGuideCanBeDismissed() {
         var openedLibrary = 0
         var openedSearch = 0
@@ -50,6 +70,7 @@ class MusicFlowUxFoundationV3Test {
         }
         compose.onNodeWithTag("home-library-action").performClick()
         compose.onNodeWithTag("home-search-action").performClick()
+        compose.onNodeWithTag("home-more-actions-toggle").performClick()
         compose.onNodeWithTag("home-playlist-action").performClick()
         compose.onNodeWithTag("home-first-use-guide").assertExists()
         compose.onNodeWithTag("home-guide-dismiss").performScrollTo().performClick()

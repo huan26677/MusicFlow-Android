@@ -68,6 +68,12 @@ __pycache__/
 !/qa-logs/musicflow-keyboard-searchindex-v8-signed-upgrade-api36.log
 /qa-logs/impact-regression-*.json
 
+# v9: only verified, screened Android QA evidence may be shared in Git.
+/qa-logs/*v9*.log
+!/qa-logs/musicflow-simple-experience-v9-focused-api30.log
+!/qa-logs/musicflow-simple-experience-v9-baseline-api30.log
+!/qa-logs/musicflow-simple-experience-v9-signed-upgrade-api30.log
+
 # Operating system
 .DS_Store
 Thumbs.db

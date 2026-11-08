@@ -210,6 +210,7 @@ fun AccountScreen(
     onOpenDemoCenter: () -> Unit = {}
 ) {
     var confirming by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var demoToolsExpanded by rememberSaveable { mutableStateOf(false) }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var confirmPasswordVisible by rememberSaveable { mutableStateOf(false) }
     Column(
@@ -227,24 +228,6 @@ fun AccountScreen(
                 "Gói thành viên, hồ sơ và công cụ theo vai trò của bạn."
             }
         )
-        OceanFlowCard {
-            Text("GÓC TRÌNH DIỄN", style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary)
-            OutlinedButton(
-                onClick = onOpenDemoCenter,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                    .testTag("account-demo-center-open")
-            ) { Text("Trình diễn 9 loại tài khoản (giả lập)") }
-            Text("Xem nghiệp vụ Owner, quản trị, nghệ sĩ và các vai trò khác — không cần Internet.",
-                style = MaterialTheme.typography.bodySmall)
-            OutlinedButton(
-                onClick = onOpenDemoBilling,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                    .testTag("account-demo-billing-open")
-            ) { Text("Trải nghiệm thanh toán Premium (giả lập)") }
-            Text("Chỉ mô phỏng, không thu tiền hoặc cấp Premium thật.",
-                style = MaterialTheme.typography.bodySmall)
-        }
         if (state.loading) {
             MusicFlowStatusPanel(
                 kind = MusicFlowStatusKind.LOADING,
@@ -254,15 +237,17 @@ fun AccountScreen(
         }
         if (state.account == null) {
             Text("Chào mừng bạn!", style = MaterialTheme.typography.titleLarge)
-            OutlinedButton(
+            Button(
                 onClick = onContinueAsGuest,
-                modifier = Modifier.fillMaxWidth().testTag("account-guest")
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("account-guest")
             ) { Text("Nghe nhạc ngay, không cần đăng nhập") }
             Text(
                 "Thư viện và các tệp nhạc offline của bạn vẫn dùng được khi chưa có tài khoản.",
                 style = MaterialTheme.typography.bodySmall
             )
-            Text("Đăng nhập và tạo tài khoản", style = MaterialTheme.typography.titleMedium)
+            Text("Bạn muốn đồng bộ hoặc lưu hồ sơ?", style = MaterialTheme.typography.titleMedium)
+            Text("Chỉ cần đăng nhập nếu muốn sử dụng tài khoản. Nghe nhạc offline vẫn miễn phí.",
+                style = MaterialTheme.typography.bodySmall)
             BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                 val compact = maxWidth < 360.dp ||
                     LocalDensity.current.fontScale >= 1.75f
@@ -271,7 +256,7 @@ fun AccountScreen(
                         selected = !state.demoMode,
                         onClick = { onDemoModeChange(false) },
                         enabled = !state.loading,
-                        label = { Text("Supabase") },
+                        label = { Text("Tài khoản trực tuyến") },
                         modifier = item.heightIn(min = 48.dp)
                             .testTag("account-auth-online-mode")
                     )
@@ -279,7 +264,7 @@ fun AccountScreen(
                         selected = state.demoMode,
                         onClick = { onDemoModeChange(true) },
                         enabled = !state.loading,
-                        label = { Text("Demo offline") },
+                        label = { Text("Tài khoản thử trên máy") },
                         modifier = item.heightIn(min = 48.dp)
                             .testTag("account-auth-demo-mode")
                     )
@@ -600,6 +585,32 @@ fun AccountScreen(
             Text("Premium thật do máy chủ xác nhận; thanh toán demo chỉ là " +
                 "mô phỏng cục bộ, không mở quyền cloud hay đồng bộ tự động.")
             }
+            }
+        }
+        HorizontalDivider()
+        TextButton(
+            onClick = { demoToolsExpanded = !demoToolsExpanded },
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                .testTag("account-demo-tools-toggle")
+        ) { Text(if (demoToolsExpanded) "Ẩn công cụ trình diễn đồ án"
+            else "Khám phá 9 vai trò và Premium (mô phỏng)") }
+        if (demoToolsExpanded) {
+            OceanFlowCard {
+                Text("CHỈ DÀNH CHO TRÌNH DIỄN", style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary)
+                Text("Những chức năng dưới đây chỉ là kịch bản học tập; không thay đổi tài khoản, " +
+                    "không cấp quyền thật và không thu tiền.",
+                    style = MaterialTheme.typography.bodySmall)
+                OutlinedButton(
+                    onClick = onOpenDemoCenter,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                        .testTag("account-demo-center-open")
+                ) { Text("Xem các loại tài khoản (giả lập)") }
+                OutlinedButton(
+                    onClick = onOpenDemoBilling,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                        .testTag("account-demo-billing-open")
+                ) { Text("Thử thanh toán Premium (giả lập)") }
             }
         }
         HorizontalDivider()

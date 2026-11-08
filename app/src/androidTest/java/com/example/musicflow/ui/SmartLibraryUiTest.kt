@@ -134,6 +134,7 @@ class SmartLibraryUiTest {
                 }
             }
         }
+        compose.onNodeWithTag("home-more-actions-toggle").performScrollTo().performClick()
         compose.onNodeWithTag("home-smart-library-action").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(1, opened) }
     }

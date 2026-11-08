@@ -98,6 +98,7 @@ class OceanFlowVisualUiTest {
         compose.onNodeWithTag("ocean-flow-header").assertExists()
         compose.onNodeWithTag("home-library-action").performScrollTo().performClick()
         compose.onNodeWithTag("home-search-action").performScrollTo().performClick()
+        compose.onNodeWithTag("home-more-actions-toggle").performScrollTo().performClick()
         compose.onNodeWithTag("home-playlist-action").performScrollTo().performClick()
         compose.runOnIdle {
             assertEquals(1, library)

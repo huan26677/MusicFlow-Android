@@ -3,6 +3,7 @@ package com.example.musicflow.feature.account
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -203,12 +205,12 @@ internal fun AccountRolePanel(
         ) {
             // Keep actor navigation visible even when editing a long form.
             if (checked) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
-                        .testTag("role-workspace-tabs"),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    workspaces.forEach { workspace ->
+                Text("Chọn công việc cần làm", style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.semantics { heading() })
+                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                    val compact = maxWidth < 380.dp || LocalDensity.current.fontScale >= 1.5f
+                    val workspaceButton: @Composable (AccountWorkspace, Modifier) -> Unit =
+                        { workspace, buttonModifier ->
                         FilterChip(
                             selected = currentWorkspace == workspace,
                             onClick = {
@@ -218,11 +220,38 @@ internal fun AccountRolePanel(
                                 catalogConfirm = null
                             },
                             label = { Text(workspace.title) },
-                            modifier = Modifier.heightIn(min = 48.dp)
+                            modifier = buttonModifier.heightIn(min = 48.dp)
                                 .testTag("role-workspace-${workspace.name.lowercase()}")
                         )
+                        }
+                    if (compact) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth().heightIn(max = 156.dp)
+                                .verticalScroll(rememberScrollState())
+                                .testTag("role-workspace-tabs"),
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            workspaces.forEach { workspace ->
+                                workspaceButton(workspace, Modifier.fillMaxWidth())
+                            }
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
+                                .testTag("role-workspace-tabs"),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            workspaces.forEach { workspace ->
+                                workspaceButton(workspace, Modifier)
+                            }
+                        }
                     }
                 }
+                Text(
+                    "Đang làm: ${currentWorkspace.title} · ${currentWorkspace.description}",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.testTag("role-current-workspace-summary")
+                )
             }
             Column(
                 modifier = Modifier.fillMaxWidth().weight(1f).verticalScroll(contentScroll),
@@ -277,6 +306,8 @@ internal fun AccountRolePanel(
                 Text("Khu vực làm việc", style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.semantics { heading() })
                 Text(currentWorkspace.description, style = MaterialTheme.typography.bodySmall)
+                Text("Bước tiếp theo dành cho bạn:",
+                    style = MaterialTheme.typography.titleSmall)
                 Text(AccountTaskGuide.nextStep(currentWorkspace, access),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.testTag("workspace-next-step"))
