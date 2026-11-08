@@ -1,9 +1,9 @@
 {
 "meta": {
 "project_id": "MusicFlow-Android",
-"evolution_version": "v10.0-BrainV2-r7",
+"evolution_version": "v10.0-BrainV2-r8",
 "compression_status": "MAXIMUM_DENSITY",
-"self_performance_score": "v10: API33 43/43 targeted UX và signed APK v9→v10 2/2 PASS; Android debug/AndroidTest/JVM PASS; modular QA 18/18, Brain 14/14, licensed-upload 17/17, web-admin 4/4 PASS. API36 27 test PASS rồi AVD disconnect. JSON picker/460-case full suite/TalkBack/UAT chưa đạt cổng nghiệm thu."
+"self_performance_score": "v10: API33 43/43 UX và signed v9→v10 2/2 PASS; build/JVM + modular/Brain/Web Admin QA PASS. API36.1 fresh AVD 41/43 PASS, D-pad focus và Enter expand FAIL. JSON picker/full 460/TalkBack/UAT vẫn chưa đạt."
 },
 "core_essence": {
 "ultimate_goal": "MusicFlow Android thân thiện cho báo cáo môn học: nghe offline MediaStore+SAF, thư viện/playlist/queue ổn định, trải nghiệm các vai trò demo; online/cloud chỉ dùng nguồn và quyền hợp lệ, không trình bày mô phỏng thành production.",
@@ -58,15 +58,17 @@
 "Không xóa nhạc/playlist/SAF grants; demo Owner/Admin/Premium không cấp quyền thật.",
 "Font lớn nút khó bấm: sửa UI và chạy lại test, không chỉ sửa test.",
 "Không báo push khi chưa verify; signed QA != production; script không tác động thiết bị người dùng.",
-"Android16 IME che tap: đóng IME, scroll theo URI key, bấm nút phát rồi retest."
+"Android16 IME che tap: đóng IME, scroll theo URI key, bấm nút phát rồi retest.",
+"API36.1 có thể khác API36: luôn chờ runner OK, test D-pad/Enter thất bại phải ghi FAIL; không suy diễn từ API33."
 ]
 },
 "assumptions_to_validate": [
-"V9 chưa thử TalkBack, Bluetooth/D-pad, WCAG ảnh phủ và 5 hành trình khách→Owner với người thật.",
-"V9 chưa chạy full 459 test cases, API33/36, nhiều SAF provider hay signed upgrade API36.",
+"V10 chưa thử TalkBack, Bluetooth/D-pad, WCAG ảnh phủ và 6 hành trình khách→Owner với người thật.",
+"V10 chưa chạy full 460 test cases, nhiều SAF provider hay signed upgrade API36.",
 "V8 index 1.502 fixture, chưa benchmark RAM/scan/scroll nhạc thật hoặc inspect 250 SAF URI.",
 "Owner/PlatformAdmin/Developer/Premium và online/cloud có phần demo, không xem là E2E production.",
-"V10 targeted UI API33 43/43 PASS; API36 AVD mất kết nối sau 27 PASS, signed v9→v10 seed PASS nhưng verify crash/offline. Phải chạy lại QA ổn định trước full acceptance."
+"V10 API33 43/43 targeted và signed v9→v10 2/2 PASS. API36.1 fresh AVD 41/43, D-pad focus/Enter expand FAIL; JSON picker Android13 chưa xác minh. Chưa full acceptance.",
+"API36.1 41/43: D-pad focus va Enter mo nhom FAIL; API33 43/43 PASS. Can test va sua focus thuc, khong goi full PASS."
 ],
 "entropy_pruned_nodes": [
 "Nén log/PID/lỗi cũ; giữ đường dẫn chứng cứ Git/local.",
@@ -76,7 +78,7 @@
 "meta_cognition_and_cross_model_prompt": "CRITICAL DIRECTION FOR ALL LLMs: Kích hoạt chế độ suy luận chuỗi tư duy (Chain-of-Thought) chuyên sâu. Đối chiếu nghiêm ngặt mọi hành động với 'failure_modes_prevented' và 'evolved_rules'. Tự phản biện giải pháp 2 lần trước khi xuất kết quả. Duy trì tính nhất quán logic bất kể cấu trúc nền tảng của mô hình bạn đang chạy.",
 "brain_v2": {
 "engine_version": "2.0",
-"learning_revision": 7,
+"learning_revision": 8,
 "mode": "evidence_driven_assisted_not_self_training",
 "baseline_commit": "87b7349",
 "entrypoint": "python scripts/project_brain_v2.py check",
@@ -226,9 +228,10 @@
 "source-v10-account",
 "qa-v10-targeted-api33",
 "qa-v10-partial-api36",
-"qa-v10-upgrade-api33"
+"qa-v10-upgrade-api33",
+"qa-v10-api36-41of43"
 ],
-"reason": "UX API33 43/43 và signed upgrade v9→v10 2/2 PASS; API36 mất AVD ở bài 28. JSON picker, TalkBack, 460-case full acceptance chưa hoàn tất.",
+"reason": "UX API33 43/43 + signed v9→v10 2/2 PASS. Fresh API36.1 41/43, D-pad/Enter FAIL. JSON picker, TalkBack và full 460/UAT chưa đạt.",
 "blocker": false,
 "status": "partial",
 "score": 23,
@@ -374,6 +377,14 @@
 }
 ],
 "evidence_ledger": [
+{
+"id": "qa-v10-api36-41of43",
+"kind": "repo",
+"claim_type": "test_log",
+"path": "qa-logs/musicflow-clear-journeys-v10-targeted-api36-single-avd.log",
+"contains": "Tests run: 43,  Failures: 2",
+"commit": "89fc462"
+},
 {
 "id": "qa-v10-upgrade-api33",
 "kind": "repo",
@@ -593,14 +604,6 @@
 },
 "learning_history": [
 {
-"id": "v6-signed-upgrade",
-"task": "signed-upgrade-cross-api",
-"outcome": "partial",
-"evidence_ref": "qa-upgrade",
-"scope": "local_only",
-"lesson": "Tại mốc v6, signed upgrade giữ playlist/favorite/SAF chỉ QA trên API30; mốc v7 mới kiểm chứng API33/36."
-},
-{
 "id": "8d8defeccc6a",
 "task": "large-album-virtualization",
 "outcome": "success",
@@ -655,6 +658,14 @@
 "evidence_ref": "qa-v10-upgrade-api33",
 "scope": "repo",
 "lesson": "Signed QA v9→v10 trên API33 2/2 giai đoạn PASS sau chạy lại, giữ playlist, favorites và SAF WAV; API36, JSON picker, TalkBack và full UAT vẫn chờ."
+},
+{
+"id": "4b7d8b477f45",
+"task": "clear-journeys-v10",
+"outcome": "partial",
+"evidence_ref": "qa-v10-api36-41of43",
+"scope": "repo",
+"lesson": "API36.1 41/43: D-pad focus va Enter mo nhom FAIL; API33 43/43 PASS. Can test va sua focus thuc, khong goi full PASS."
 }
 ],
 "entropy_policy": {
