@@ -1,6 +1,6 @@
 # MusicFlow — Project Brain v2 (Evidence-Driven Learning)
 
-**Tình trạng:** Brain v2 đã tích hợp vào repository. Dự án Android vẫn là bản demo v6; phiên bản **bộ não** là `v6.1-BrainV2`, engine `2.0`.
+**Tình trạng 2026-11-08:** Brain v2 đã tích hợp vào repository. Dự án Android hiện là bản demo **v7**, phiên bản bộ não **`v7.0-BrainV2-r3`**, engine **`2.0`**. Transcript QA v7 đã commit cho API30/33/36 và signed v6→v7 upgrade API33/36; TalkBack thủ công/full API33/36 regression và benchmark thiết bị thật còn chờ.
 
 ## Một bộ não chính duy nhất
 
@@ -32,6 +32,6 @@ Sau mỗi lần phát triển: đọc JSON → `check` → kiểm tra mã nguồ
 
 ## Kiểm chứng CI và giới hạn
 
-GitHub Actions `.github/workflows/brain-v2-check.yml` tự chạy unit tests và `check` khi có push/PR liên quan tới bộ não. CI có mã nguồn Git đầy đủ nhưng thường **không có APK và log QA máy cá nhân**. Vì vậy CI có thể PASS schema/logic/source với cảnh báo `unavailable`; đó *không* phải chạy lại Android tests.
+GitHub Actions `.github/workflows/brain-v2-check.yml` tự chạy unit tests và `check` khi có push/PR liên quan tới bộ não. CI có mã nguồn Git đầy đủ và transcript QA v7 được commit; nhưng **không có APK và log QA không commit**. CI có thể xác minh nội dung transcript/source, còn kiểm thử Android thật **chỉ thực sự chạy trên AVD QA khi sử dụng các script chuyên biệt**. GitHub Action PASS không phải tái chạy Android tests.
 
 Các mục quan trọng chưa xác minh: TalkBack thủ công, WCAG thực, hiệu năng nhạc thật, full Android regression API33/36, signed upgrade dữ liệu trên API33/36, thiết bị thật và production.
