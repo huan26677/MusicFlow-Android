@@ -1,5 +1,7 @@
 # MusicFlow — Community v14: đánh giá sao và bình luận
 
+> **Cập nhật bảo trì 2026-11-09 (SQL v14.1 / v14.2):** Hai bản migration đã áp dụng trên Supabase: `musicflow_community_moderation_guard_v14_1` khiến thao tác **Bỏ qua báo cáo** không khôi phục bình luận từng bị ẩn và yêu cầu báo cáo phải còn pending; `musicflow_community_delete_report_cleanup_v14_2` đánh dấu handled cho báo cáo còn chờ khi tác giả xóa bình luận. Hai thay đổi không cần đóng gói lại Android; không làm lộ dữ liệu đã ẩn. Kiểm thử transaction rollback trong `scripts/sql/musicflow_community_rollback_contract_v14_1.sql`: rating upsert duy nhất, đọc bình luận, tác giả-only edit, người không có quyền không kiểm duyệt, hide + dismiss giữ hidden, không xử lý hai lần, xóa của tác giả đóng báo cáo. **PASS, 0 user và 0 track fixture còn lại**, không phải E2E JWT/HTTP thực. Android Community **6/6 UI PASS** API36, JVM **210/210 PASS**; catalog **479** test method, full regression **NOT RUN**. Bằng chứng Git: `qa-logs/musicflow-v14_1-community6-api36.log`, `qa-logs/musicflow-v14_1-supabase-rollback.log`.
+
 **Ngày:** 2026-11-09. **Phạm vi:** module độc lập cho bài hát đã xuất bản và xác minh quyền trên Supabase; phần Demo mẫu không sinh dữ liệu công khai. Không thay trình phát/SAF/Room/playlist/quyền streaming/entitlement.
 
 ## 1. Trải nghiệm và use case
@@ -38,8 +40,10 @@ RPC:
 - **Module mới:** `COMMUNITY_RATING`, `COMMUNITY_COMMENTS`, `COMMUNITY_MODERATION` với test JVM và Compose riêng trong `qa/impact_modules.json`.
 - **Module có thay đổi:** `AUTH` (RPC allow-list), `ONLINE_RIGHTS` (catalog detail entry), `ROLES_ADMIN` (workspace), `UI_ACCESS` (trợ năng).
 - **Gián tiếp:** Guest/free/premium/Creator/Moderator/Owner/Developer journeys, và Home/Playback qua điều hướng; audio pipeline, local URI, quyền phát không được thay.
-- **QA policy:** vì SQL/auth/role và >=4 module, `full_required`. Map v14 có 22 module, **478 phương thức @Test đăng ký** (không đồng nghĩa 478 đã chạy). JVM **210/210 PASS**, Android Community **5/5 PASS**, Android Auth/Owner/Online/v13-UX impact **14/14 PASS** trên máy ảo API36 chuyên dụng. Supabase SQL rollback test: bài chưa xuất bản và Guest ghi sao đều bị từ chối, không để lại dữ liệu. Tuy nhiên chưa chạy trọn 478 phương thức, chưa E2E đăng bình luận thật trên tài khoản thử / nhiều thiết bị hoặc manual TalkBack.
+- **Lịch sử QA v14 gốc (trước hardening):** vì SQL/auth/role và >=4 module, `full_required`. Map v14 có 22 module, **478 phương thức @Test đăng ký** (không đồng nghĩa 478 đã chạy). JVM **210/210 PASS**, Android Community **5/5 PASS**, Android Auth/Owner/Online/v13-UX impact **14/14 PASS** trên máy ảo API36 chuyên dụng. Supabase SQL rollback test: bài chưa xuất bản và Guest ghi sao đều bị từ chối, không để lại dữ liệu. Lượt hiện tại v14.2 có **479 phương thức**, Community **6/6 UI PASS**, nhưng full 479/JWT E2E/TalkBack vẫn NOT RUN.
 
 ## 4. Phạm vi bàn giao
 
 Community v14 là tiện ích demo và cơ sở dữ liệu thật, **không có nội dung đã được cấp quyền trên catalog**. Không tự tạo bài hát giả có cờ quyền phát ở public database, không phát hay tải file không có license. Quyền Owner/PlatformAdmin/Moderator được server xác minh; chỉ chọn persona trong Demo Center không thay đổi auth.role/RLS. Không có hệ thống trả lời lồng nhau, media attachments, notification, tính điểm Premium, realtime hay tự động kiểm duyệt AI.
+
+**APK Demo mới nhất:** `dist/MusicFlow-1.0-Demo-CommunityV14-Android.apk` (31.753.917 bytes, SHA-256 `3C2FFD95231A1AECBE9A76E21EE34A4BA56FF320CD18F14FA6B3E6904B6DD0BD`). Build Release không debuggable, ký khóa Android Debug QA chỉ dùng lớp học; zipalign/apksigner/hash PASS, cài đè và cold launch API36 PASS. APK này tương thích với hai bản sửa SQL-only v14.1/v14.2. APK nằm cục bộ trong `dist/` và không thuộc Git, phải sao lưu riêng.

@@ -120,6 +120,8 @@ __pycache__/
 !/qa-logs/musicflow-v14-supabase-guard.log
 !/qa-logs/musicflow-v14-signed-package.log
 !/qa-logs/musicflow-v14-signed-smoke.log
+!/qa-logs/musicflow-v14_1-community6-api36.log
+!/qa-logs/musicflow-v14_1-supabase-rollback.log
 
 # Operating system
 .DS_Store

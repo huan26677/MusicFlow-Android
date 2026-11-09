@@ -29,6 +29,7 @@
     "app/src/main/java/com/example/musicflow/core/account/DemoBillingStore.kt",
     "app/src/main/java/com/example/musicflow/core/community/SupabaseCommunityRepository.kt",
     "app/src/main/java/com/example/musicflow/feature/community/CommunityModerationPanel.kt",
+    "docs/sql/musicflow_community_*.sql",
     "scripts/build-musicflow-demo-apk-v1.ps1",
     "scripts/run-signed-upgrade-*.ps1"
   ],
@@ -36,7 +37,9 @@
     "docs/**", "qa/**", "scripts/impact_regression.py",
     "scripts/test_impact_regression.py", "scripts/project_brain_v2.py",
     "scripts/test_project_brain_v2.py", "README.md", "AGENTS.md",
-    ".gitignore"
+    ".gitignore", "qa-logs/**",
+    "scripts/sql/musicflow_community_rollback_contract_v14_1.sql",
+    "scripts/test_community_moderation_sql_v14.py"
   ],
   "modules": [
     {
@@ -221,7 +224,8 @@
       "id": "COMMUNITY_COMMENTS", "name": "Đọc, đăng, sửa, xóa bình luận và báo cáo",
       "source": [
         "app/src/main/java/com/example/musicflow/core/community/SupabaseCommunityRepository.kt",
-        "app/src/main/java/com/example/musicflow/feature/community/CommunityRoute.kt"
+        "app/src/main/java/com/example/musicflow/feature/community/CommunityRoute.kt",
+        "docs/sql/musicflow_community_delete_report_cleanup_v14_2.sql"
       ],
       "requires": ["COMMUNITY_RATING", "AUTH", "UI_ACCESS"],
       "tests": ["**/ui/CommunityDemoUiTest.kt", "**/core/community/CommunityRulesTest.kt", "**/core/community/DemoCommunityStoreTest.kt"],
@@ -229,7 +233,10 @@
     },
     {
       "id": "COMMUNITY_MODERATION", "name": "Kiểm duyệt bình luận, phân quyền và nhật ký",
-      "source": ["app/src/main/java/com/example/musicflow/feature/community/CommunityModerationPanel.kt"],
+      "source": [
+        "app/src/main/java/com/example/musicflow/feature/community/CommunityModerationPanel.kt",
+        "docs/sql/musicflow_community_moderation_guard_v14_1.sql"
+      ],
       "requires": ["COMMUNITY_COMMENTS", "ROLES_ADMIN"],
       "tests": ["**/ui/CommunityModerationUiTest.kt", "**/core/account/MusicFlowAccessTest.kt"],
       "smoke": ["CommunityModerationUiTest#moderationRequiresReasonAndConfirm", "MusicFlowAccessTest#guestAndFreeNeverHaveStaffRights"]

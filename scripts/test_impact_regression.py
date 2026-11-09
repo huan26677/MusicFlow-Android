@@ -22,13 +22,15 @@ class ImpactDrivenRegressionTest(unittest.TestCase):
         metrics = qa.validate(self.conf, self.cases, self.unmapped)
         self.assertEqual(22, metrics["modules"])
         self.assertGreaterEqual(metrics["unique_test_classes"], 105)
-        self.assertGreaterEqual(metrics["unique_test_methods"], 478)
+        self.assertGreaterEqual(metrics["unique_test_methods"], 479)
         self.assertGreater(metrics["module_case_links"], metrics["unique_test_methods"])
 
     def test_community_moderation_or_supabase_is_high_risk(self):
         for file in (
             "app/src/main/java/com/example/musicflow/feature/community/CommunityModerationPanel.kt",
             "app/src/main/java/com/example/musicflow/core/community/SupabaseCommunityRepository.kt",
+            "docs/sql/musicflow_community_moderation_guard_v14_1.sql",
+            "docs/sql/musicflow_community_delete_report_cleanup_v14_2.sql",
         ):
             result = self.selection(file)
             self.assertEqual("full_required", result["mode"])

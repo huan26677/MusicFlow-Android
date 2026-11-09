@@ -56,4 +56,39 @@ class CommunityModerationUiTest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
     }
+
+    @Test fun dismissReportOnlySendsHideFalseWithReason() {
+        var decisions = 0
+        var hideFlag: Boolean? = null
+        compose.setContent {
+            MusicFlowTheme {
+                CommunityModerationPanel { name, args ->
+                    when (name) {
+                        "musicflow_community_reports" ->
+                            """[{"id":"report-1","comment_id":"comment-1","reason":"Đã được xem xét","body":"Bình luận đã báo cáo","track_title":"Bài hát"}]"""
+                        "musicflow_community_moderate" -> {
+                            decisions++
+                            hideFlag = args.getBoolean("p_hide")
+                            assertEquals("comment-1", args.getString("p_comment"))
+                            assertEquals("Báo cáo không vi phạm", args.getString("p_reason"))
+                            "true"
+                        }
+                        else -> error("Unexpected RPC")
+                    }
+                }
+            }
+        }
+        compose.onNodeWithTag("community-moderation-load").performClick()
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText("Bình luận đã báo cáo")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("Bỏ qua báo cáo").performClick()
+        assertEquals(0, decisions)
+        compose.onNodeWithTag("community-moderation-reason")
+            .performTextInput("Báo cáo không vi phạm")
+        compose.onNodeWithTag("community-moderation-confirm").performClick()
+        compose.waitUntil(10_000) { decisions == 1 }
+        assertEquals(false, hideFlag)
+    }
 }

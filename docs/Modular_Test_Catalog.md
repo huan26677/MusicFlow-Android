@@ -32,7 +32,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 | `RELEASE_BACKUP` | Sao lưu, versioning, APK ký QA và nâng cấp | 14 | MEDIA_SAF, PLAYLIST, FAVORITES |
 | `COMMUNITY_RATING` | Chấm sao 1–5 và dữ liệu Demo cộng đồng | 11 | ONLINE_RIGHTS |
 | `COMMUNITY_COMMENTS` | Đọc, đăng, sửa, xóa bình luận và báo cáo | 14 | COMMUNITY_RATING, AUTH, UI_ACCESS |
-| `COMMUNITY_MODERATION` | Kiểm duyệt bình luận, phân quyền và nhật ký | 10 | COMMUNITY_COMMENTS, ROLES_ADMIN |
+| `COMMUNITY_MODERATION` | Kiểm duyệt bình luận, phân quyền và nhật ký | 11 | COMMUNITY_COMMENTS, ROLES_ADMIN |
 
 ## Test cases by module
 
@@ -1124,12 +1124,13 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 
 ### COMMUNITY_MODERATION — Kiểm duyệt bình luận, phân quyền và nhật ký
 
-**Source paths:** `app/src/main/java/com/example/musicflow/feature/community/CommunityModerationPanel.kt`
+**Source paths:** `app/src/main/java/com/example/musicflow/feature/community/CommunityModerationPanel.kt`, `docs/sql/musicflow_community_moderation_guard_v14_1.sql`
 
 **Downstream contract/smoke:** `COMMUNITY_MODERATION/CommunityModerationUiTest#moderationRequiresReasonAndConfirm`, `COMMUNITY_MODERATION/MusicFlowAccessTest#guestAndFreeNeverHaveStaffRights`.
 
 **CommunityModerationUiTest** (`app/src/androidTest/java/com/example/musicflow/ui/CommunityModerationUiTest.kt`; android)
 
+- `COMMUNITY_MODERATION/CommunityModerationUiTest#dismissReportOnlySendsHideFalseWithReason`
 - `COMMUNITY_MODERATION/CommunityModerationUiTest#failedPermissionDoesNotShowReports`
 - `COMMUNITY_MODERATION/CommunityModerationUiTest#moderationRequiresReasonAndConfirm`
 
