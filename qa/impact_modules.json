@@ -39,7 +39,8 @@
     "scripts/test_project_brain_v2.py", "README.md", "AGENTS.md",
     ".gitignore", "qa-logs/**",
     "scripts/sql/musicflow_community_rollback_contract_v14_1.sql",
-    "scripts/test_community_moderation_sql_v14.py"
+    "scripts/test_community_moderation_sql_v14.py",
+    "scripts/test_signed_upgrade_v14.py"
   ],
   "modules": [
     {
@@ -207,8 +208,8 @@
       "id": "RELEASE_BACKUP", "name": "Sao lưu, versioning, APK ký QA và nâng cấp",
       "source": ["scripts/build-musicflow-demo-apk-v1.ps1", "scripts/run-signed-upgrade-*.ps1", "app/src/main/java/com/example/musicflow/core/playlist/PlaylistBackup*"],
       "requires": ["MEDIA_SAF", "PLAYLIST", "FAVORITES"],
-      "tests": ["**/ui/SignedApkUpgradeV6Test.kt", "**/core/playlist/PlaylistBackupRulesTest.kt", "**/core/playlist/PlaylistLocalBackupIntegrationTest.kt", "**/ui/PlaylistBackupRealPickerUiTest.kt", "**/ui/OfflineReliabilityUiTest.kt"],
-      "smoke": ["PlaylistLocalBackupIntegrationTest#invalidDocumentCannotPartiallyModifyRoom", "SignedApkUpgradeV6Test#verifySignedV6PreservesAllDataAndCleanUpTestOwnedOnly"]
+      "tests": ["**/ui/SignedApkUpgradeV6Test.kt", "**/ui/SignedCommunityNavigationUiTest.kt", "**/core/playlist/PlaylistBackupRulesTest.kt", "**/core/playlist/PlaylistLocalBackupIntegrationTest.kt", "**/ui/PlaylistBackupRealPickerUiTest.kt", "**/ui/OfflineReliabilityUiTest.kt"],
+      "smoke": ["PlaylistLocalBackupIntegrationTest#invalidDocumentCannotPartiallyModifyRoom", "SignedApkUpgradeV6Test#verifySignedV6PreservesAllDataAndCleanUpTestOwnedOnly", "SignedCommunityNavigationUiTest#guestReachesCommunityDemoFromRealHomeNavigation"]
     },
     {
       "id": "COMMUNITY_RATING", "name": "Chấm sao 1–5 và dữ liệu Demo cộng đồng",
@@ -228,8 +229,8 @@
         "docs/sql/musicflow_community_delete_report_cleanup_v14_2.sql"
       ],
       "requires": ["COMMUNITY_RATING", "AUTH", "UI_ACCESS"],
-      "tests": ["**/ui/CommunityDemoUiTest.kt", "**/core/community/CommunityRulesTest.kt", "**/core/community/DemoCommunityStoreTest.kt"],
-      "smoke": ["CommunityDemoUiTest#demoRatingAndCommentActionsStayLocal", "CommunityRulesTest#onlineIdsMustBeCanonicalUuidNeverLocalSafUri"]
+      "tests": ["**/ui/CommunityDemoUiTest.kt", "**/ui/SignedCommunityNavigationUiTest.kt", "**/core/community/CommunityRulesTest.kt", "**/core/community/DemoCommunityStoreTest.kt"],
+      "smoke": ["CommunityDemoUiTest#demoRatingAndCommentActionsStayLocal", "SignedCommunityNavigationUiTest#guestReachesCommunityDemoFromRealHomeNavigation", "CommunityRulesTest#onlineIdsMustBeCanonicalUuidNeverLocalSafUri"]
     },
     {
       "id": "COMMUNITY_MODERATION", "name": "Kiểm duyệt bình luận, phân quyền và nhật ký",

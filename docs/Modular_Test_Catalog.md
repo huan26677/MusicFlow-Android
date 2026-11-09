@@ -29,9 +29,9 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 | `HOME_NAV` | Trang chủ, mini-player, điều hướng | 18 | LIBRARY, SEARCH, PLAYBACK, HISTORY, UI_ACCESS |
 | `UI_ACCESS` | Thiết kế Ocean Flow, focus, TalkBack semantics | 44 |  |
 | `DEMO_CENTER` | Trung tâm demo và điều hướng theo tài khoản | 11 | AUTH, ROLES_ADMIN, BILLING_DEMO |
-| `RELEASE_BACKUP` | Sao lưu, versioning, APK ký QA và nâng cấp | 14 | MEDIA_SAF, PLAYLIST, FAVORITES |
+| `RELEASE_BACKUP` | Sao lưu, versioning, APK ký QA và nâng cấp | 15 | MEDIA_SAF, PLAYLIST, FAVORITES |
 | `COMMUNITY_RATING` | Chấm sao 1–5 và dữ liệu Demo cộng đồng | 11 | ONLINE_RIGHTS |
-| `COMMUNITY_COMMENTS` | Đọc, đăng, sửa, xóa bình luận và báo cáo | 14 | COMMUNITY_RATING, AUTH, UI_ACCESS |
+| `COMMUNITY_COMMENTS` | Đọc, đăng, sửa, xóa bình luận và báo cáo | 15 | COMMUNITY_RATING, AUTH, UI_ACCESS |
 | `COMMUNITY_MODERATION` | Kiểm duyệt bình luận, phân quyền và nhật ký | 11 | COMMUNITY_COMMENTS, ROLES_ADMIN |
 
 ## Test cases by module
@@ -1036,7 +1036,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 
 **Source paths:** `scripts/build-musicflow-demo-apk-v1.ps1`, `scripts/run-signed-upgrade-*.ps1`, `app/src/main/java/com/example/musicflow/core/playlist/PlaylistBackup*`
 
-**Downstream contract/smoke:** `RELEASE_BACKUP/PlaylistLocalBackupIntegrationTest#invalidDocumentCannotPartiallyModifyRoom`, `RELEASE_BACKUP/SignedApkUpgradeV6Test#verifySignedV6PreservesAllDataAndCleanUpTestOwnedOnly`.
+**Downstream contract/smoke:** `RELEASE_BACKUP/PlaylistLocalBackupIntegrationTest#invalidDocumentCannotPartiallyModifyRoom`, `RELEASE_BACKUP/SignedApkUpgradeV6Test#verifySignedV6PreservesAllDataAndCleanUpTestOwnedOnly`, `RELEASE_BACKUP/SignedCommunityNavigationUiTest#guestReachesCommunityDemoFromRealHomeNavigation`.
 
 **PlaylistLocalBackupIntegrationTest** (`app/src/androidTest/java/com/example/musicflow/core/playlist/PlaylistLocalBackupIntegrationTest.kt`; android)
 
@@ -1060,6 +1060,10 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 
 - `RELEASE_BACKUP/SignedApkUpgradeV6Test#seedSignedV5PlaylistFavoriteAndRealSafGrant`
 - `RELEASE_BACKUP/SignedApkUpgradeV6Test#verifySignedV6PreservesAllDataAndCleanUpTestOwnedOnly`
+
+**SignedCommunityNavigationUiTest** (`app/src/androidTest/java/com/example/musicflow/ui/SignedCommunityNavigationUiTest.kt`; android)
+
+- `RELEASE_BACKUP/SignedCommunityNavigationUiTest#guestReachesCommunityDemoFromRealHomeNavigation`
 
 **PlaylistBackupRulesTest** (`app/src/test/java/com/example/musicflow/core/playlist/PlaylistBackupRulesTest.kt`; jvm)
 
@@ -1094,15 +1098,19 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 
 ### COMMUNITY_COMMENTS — Đọc, đăng, sửa, xóa bình luận và báo cáo
 
-**Source paths:** `app/src/main/java/com/example/musicflow/core/community/SupabaseCommunityRepository.kt`, `app/src/main/java/com/example/musicflow/feature/community/CommunityRoute.kt`
+**Source paths:** `app/src/main/java/com/example/musicflow/core/community/SupabaseCommunityRepository.kt`, `app/src/main/java/com/example/musicflow/feature/community/CommunityRoute.kt`, `docs/sql/musicflow_community_delete_report_cleanup_v14_2.sql`
 
-**Downstream contract/smoke:** `COMMUNITY_COMMENTS/CommunityDemoUiTest#demoRatingAndCommentActionsStayLocal`, `COMMUNITY_COMMENTS/CommunityRulesTest#onlineIdsMustBeCanonicalUuidNeverLocalSafUri`.
+**Downstream contract/smoke:** `COMMUNITY_COMMENTS/CommunityDemoUiTest#demoRatingAndCommentActionsStayLocal`, `COMMUNITY_COMMENTS/SignedCommunityNavigationUiTest#guestReachesCommunityDemoFromRealHomeNavigation`, `COMMUNITY_COMMENTS/CommunityRulesTest#onlineIdsMustBeCanonicalUuidNeverLocalSafUri`.
 
 **CommunityDemoUiTest** (`app/src/androidTest/java/com/example/musicflow/ui/CommunityDemoUiTest.kt`; android)
 
 - `COMMUNITY_COMMENTS/CommunityDemoUiTest#demoDoesNotPretendToBeOnlineUser`
 - `COMMUNITY_COMMENTS/CommunityDemoUiTest#demoRatingAndCommentActionsStayLocal`
 - `COMMUNITY_COMMENTS/CommunityDemoUiTest#emptyOnlineCatalogOffersDemoWithoutPublishedTracks`
+
+**SignedCommunityNavigationUiTest** (`app/src/androidTest/java/com/example/musicflow/ui/SignedCommunityNavigationUiTest.kt`; android)
+
+- `COMMUNITY_COMMENTS/SignedCommunityNavigationUiTest#guestReachesCommunityDemoFromRealHomeNavigation`
 
 **CommunityRulesTest** (`app/src/test/java/com/example/musicflow/core/community/CommunityRulesTest.kt`; jvm)
 

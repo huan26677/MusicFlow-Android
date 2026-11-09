@@ -122,6 +122,11 @@ __pycache__/
 !/qa-logs/musicflow-v14-signed-smoke.log
 !/qa-logs/musicflow-v14_1-community6-api36.log
 !/qa-logs/musicflow-v14_1-supabase-rollback.log
+!/qa-logs/musicflow-v14-signed-upgrade-api33.log
+!/qa-logs/musicflow-v14-signed-upgrade-api36.log
+!/qa-logs/musicflow-v14-signed-navigation-api33.log
+!/qa-logs/musicflow-v14-signed-navigation-api36.log
+!/qa-logs/musicflow-v14-signed-compose6-limitation.log
 
 # Operating system
 .DS_Store

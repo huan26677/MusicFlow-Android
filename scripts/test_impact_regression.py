@@ -22,7 +22,7 @@ class ImpactDrivenRegressionTest(unittest.TestCase):
         metrics = qa.validate(self.conf, self.cases, self.unmapped)
         self.assertEqual(22, metrics["modules"])
         self.assertGreaterEqual(metrics["unique_test_classes"], 105)
-        self.assertGreaterEqual(metrics["unique_test_methods"], 479)
+        self.assertGreaterEqual(metrics["unique_test_methods"], 480)
         self.assertGreater(metrics["module_case_links"], metrics["unique_test_methods"])
 
     def test_community_moderation_or_supabase_is_high_risk(self):
@@ -166,7 +166,7 @@ class ImpactDrivenRegressionTest(unittest.TestCase):
         self.assertEqual("full_required", result["mode"])
         self.assertIn("RELEASE_BACKUP", result["direct_modules"])
         command_list = qa.commands(result)
-        self.assertTrue(any("run-signed-upgrade-v10-qa.ps1" in c for c in command_list))
+        self.assertTrue(any("run-signed-upgrade-v14-qa.ps1" in c for c in command_list))
         self.assertFalse(any("am instrument" in c and "SignedApkUpgradeV6Test" in c
                              for c in command_list))
 

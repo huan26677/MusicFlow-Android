@@ -261,8 +261,8 @@ def commands(plan: dict[str, Any]) -> list[str]:
             # Both steps require an isolated AVD, APK signatures, seed before
             # verify, and install -r between them. Running either alone is wrong.
             lines.append(
-                ".\\scripts\\run-signed-upgrade-v10-qa.ps1 -Serial emulator-5580"
-                "  # Dedicated fresh QA AVD; run full two-stage upgrade"
+                ".\\scripts\\run-signed-upgrade-v14-qa.ps1 -Serial emulator-5554"
+                "  # Fresh MusicFlow_CommunityV14_QA_API33/36 AVD; two-stage signed upgrade"
             )
             continue
         for method in methods:
