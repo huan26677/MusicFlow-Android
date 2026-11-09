@@ -147,6 +147,12 @@ __pycache__/
 !/qa-logs/musicflow-v15_2-signed-package.log
 !/qa-logs/musicflow-v15_2-signed-smoke-api36.log
 
+# v15.3 UAT-ready: share only reviewed non-sensitive summaries.
+/qa-logs/*v15_3*
+!/qa-logs/musicflow-v15_3-owner-accessibility-api36.log
+!/qa-logs/musicflow-v15_3-signed-package.log
+!/qa-logs/musicflow-v15_3-signed-smoke-api36.log
+
 # Operating system
 .DS_Store
 Thumbs.db

@@ -21,7 +21,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 | `HISTORY` | Lịch sử nghe và Room recent | 17 | PLAYBACK |
 | `LYRICS` | Lời bài hát LRC, đồng bộ lời và SAF | 9 | MEDIA_SAF, PLAYBACK, UI_ACCESS |
 | `AUTH` | Đăng nhập, khách, OAuth, hồ sơ | 40 | UI_ACCESS |
-| `ROLES_ADMIN` | Owner, quản trị viên, Developer và RBAC | 78 | AUTH, UI_ACCESS |
+| `ROLES_ADMIN` | Owner, quản trị viên, Developer và RBAC | 80 | AUTH, UI_ACCESS |
 | `CREATOR` | Creator, draft, xét duyệt nội dung | 23 | AUTH, ROLES_ADMIN, UI_ACCESS |
 | `BILLING_DEMO` | Premium và thanh toán giả lập | 17 | AUTH, ROLES_ADMIN, UI_ACCESS |
 | `CLOUD_SYNC` | Cloud library/history và đồng bộ Supabase demo | 8 | AUTH, PLAYLIST, HISTORY |
@@ -679,6 +679,8 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 - `ROLES_ADMIN/AccountTaskUxV3UiTest#creatorStudioIsOptInAndShowsUsefulEmptyState`
 - `ROLES_ADMIN/AccountTaskUxV3UiTest#emptyModerationQueueOnlyAppearsAfterSuccessfulLoad`
 - `ROLES_ADMIN/AccountTaskUxV3UiTest#failedReloadClearsCachedAdminSearchResult`
+- `ROLES_ADMIN/AccountTaskUxV3UiTest#ownerReviewChoicesAreStackedAndSelectableAt320dpAnd200PercentFont`
+- `ROLES_ADMIN/AccountTaskUxV3UiTest#ownerReviewChoicesKeepHorizontalLayoutAtWideNormalFont`
 - `ROLES_ADMIN/AccountTaskUxV3UiTest#ownerStartsWithUserWorkAndOpensOverviewOnlyWhenAsked`
 
 **AccountWorkspacesUiTest** (`app/src/androidTest/java/com/example/musicflow/ui/AccountWorkspacesUiTest.kt`; android)

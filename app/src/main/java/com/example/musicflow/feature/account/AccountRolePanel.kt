@@ -662,22 +662,47 @@ internal fun AccountRolePanel(
                 }
                 if (reviewAreas.size > 1) {
                     Text("Chọn công việc kiểm duyệt", style = MaterialTheme.typography.titleSmall)
-                    Row(
-                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        reviewAreas.forEach { area ->
-                            FilterChip(
-                                selected = area == activeReviewArea,
-                                onClick = {
-                                    reviewArea = area
-                                    reviewConfirm = null
-                                    catalogConfirm = null
-                                },
-                                label = { Text(area.label) },
-                                modifier = Modifier.heightIn(min = 48.dp)
-                                    .testTag("review-area-${area.name.lowercase()}")
-                            )
+                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                        val compact = maxWidth < 380.dp ||
+                            LocalDensity.current.fontScale >= 1.5f
+                        val reviewChip: @Composable (AccountReviewArea, Modifier) -> Unit =
+                            { area, itemModifier ->
+                                FilterChip(
+                                    selected = area == activeReviewArea,
+                                    onClick = {
+                                        reviewArea = area
+                                        reviewConfirm = null
+                                        catalogConfirm = null
+                                    },
+                                    label = { Text(area.label) },
+                                    modifier = itemModifier.heightIn(min = 48.dp)
+                                        .testTag("review-area-${area.name.lowercase()}")
+                                )
+                            }
+                        if (compact) {
+                            // A horizontally hidden review tab is easy to miss on
+                            // a small screen or at 200% font. Reuse the outer
+                            // content scroll and expose every choice in a full row.
+                            Column(
+                                modifier = Modifier.fillMaxWidth()
+                                    .testTag("review-area-compact-choices"),
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                reviewAreas.forEach { area ->
+                                    reviewChip(area, Modifier.fillMaxWidth())
+                                }
+                            }
+                        } else {
+                            Row(
+                                modifier = Modifier.fillMaxWidth()
+                                    .horizontalScroll(rememberScrollState())
+                                    .testTag("review-area-horizontal-choices"),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                reviewAreas.forEach { area ->
+                                    reviewChip(area, Modifier)
+                                }
+                            }
                         }
                     }
                 }

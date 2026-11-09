@@ -7,9 +7,17 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.Modifier
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.musicflow.core.account.AccountIdentity
 import com.example.musicflow.feature.account.AccountRolePanel
@@ -172,5 +180,68 @@ class AccountTaskUxV3UiTest {
         compose.onNodeWithTag("creator-review-load-pending").assertExists()
         compose.onNodeWithTag("role-workspace-creator").performScrollTo().performClick()
         compose.onNodeWithTag("creator-stage-name").assertExists()
+    }
+
+    @Test fun ownerReviewChoicesAreStackedAndSelectableAt320dpAnd200PercentFont() {
+        // Reproduce the narrow/large-text user journey on a fixed viewport,
+        // without real owner credentials or any server-side role changes.
+        compose.setContent {
+            CompositionLocalProvider(LocalDensity provides Density(1f, fontScale = 2f)) {
+                MusicFlowTheme {
+                    Box(Modifier.width(320.dp).height(690.dp)) {
+                        AccountRolePanel(identity, onClose = {}) { name, _ ->
+                            when (name) {
+                                "musicflow_my_access" -> """{"roles":["owner"],"permissions":[]}"""
+                                "musicflow_my_creator_requests" -> "[]"
+                                else -> "[]"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("role-workspace-moderation")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("role-workspace-moderation").performScrollTo().performClick()
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("review-area-catalog")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        // Nodes outside the clipped viewport may all have the same
+        // semantics bounds: check the responsive container, then real clicks.
+        compose.onNodeWithTag("review-area-compact-choices").assertExists()
+        compose.onNodeWithTag("review-area-horizontal-choices").assertDoesNotExist()
+        compose.onNodeWithTag("role-workspace-content").performTouchInput { swipeUp() }
+        compose.onNodeWithTag("review-area-drafts").performScrollTo().performClick()
+        compose.onNodeWithTag("review-area-drafts").assertIsSelected()
+        compose.onNodeWithTag("draft-review-load").assertExists()
+    }
+
+    @Test fun ownerReviewChoicesKeepHorizontalLayoutAtWideNormalFont() {
+        compose.setContent {
+            CompositionLocalProvider(LocalDensity provides Density(1f, fontScale = 1f)) {
+                MusicFlowTheme {
+                    Box(Modifier.width(420.dp).height(690.dp)) {
+                        AccountRolePanel(identity, onClose = {}) { name, _ ->
+                            when (name) {
+                                "musicflow_my_access" -> """{"roles":["owner"],"permissions":[]}"""
+                                "musicflow_my_creator_requests" -> "[]"
+                                else -> "[]"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("role-workspace-moderation")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("role-workspace-moderation").performClick()
+        compose.onNodeWithTag("review-area-horizontal-choices").assertExists()
+        compose.onNodeWithTag("review-area-compact-choices").assertDoesNotExist()
+        compose.onNodeWithTag("creator-review-load-pending").assertExists()
     }
 }
