@@ -135,6 +135,12 @@ __pycache__/
 !/qa-logs/musicflow-v15-signed-package.log
 !/qa-logs/musicflow-v15-signed-smoke-api36.log
 
+# v15.1 UX polish: reviewed proof summaries only.
+/qa-logs/*v15_1*
+!/qa-logs/musicflow-v15_1-ux-android-api36.log
+!/qa-logs/musicflow-v15_1-signed-package.log
+!/qa-logs/musicflow-v15_1-signed-smoke-api36.log
+
 # Operating system
 .DS_Store
 Thumbs.db

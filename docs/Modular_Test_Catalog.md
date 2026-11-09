@@ -27,11 +27,11 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 | `CLOUD_SYNC` | Cloud library/history và đồng bộ Supabase demo | 8 | AUTH, PLAYLIST, HISTORY |
 | `ONLINE_RIGHTS` | Online catalog và quyền phát có giấy phép | 16 | AUTH, UI_ACCESS |
 | `HOME_NAV` | Trang chủ, mini-player, điều hướng | 18 | LIBRARY, SEARCH, PLAYBACK, HISTORY, UI_ACCESS |
-| `UI_ACCESS` | Thiết kế Ocean Flow, focus, TalkBack semantics | 44 |  |
+| `UI_ACCESS` | Thiết kế Ocean Flow, focus, TalkBack semantics | 49 |  |
 | `DEMO_CENTER` | Trung tâm demo và điều hướng theo tài khoản | 11 | AUTH, ROLES_ADMIN, BILLING_DEMO |
 | `RELEASE_BACKUP` | Sao lưu, versioning, APK ký QA và nâng cấp | 15 | MEDIA_SAF, PLAYLIST, FAVORITES |
 | `COMMUNITY_RATING` | Chấm sao 1–5 và dữ liệu Demo cộng đồng | 11 | ONLINE_RIGHTS |
-| `COMMUNITY_COMMENTS` | Đọc, đăng, sửa, xóa bình luận và báo cáo | 23 | COMMUNITY_RATING, AUTH, UI_ACCESS |
+| `COMMUNITY_COMMENTS` | Đọc, đăng, sửa, xóa bình luận và báo cáo | 24 | COMMUNITY_RATING, AUTH, UI_ACCESS |
 | `COMMUNITY_MODERATION` | Kiểm duyệt bình luận, phân quyền và nhật ký | 11 | COMMUNITY_COMMENTS, ROLES_ADMIN |
 
 ## Test cases by module
@@ -1014,6 +1014,14 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 
 - `UI_ACCESS/ExampleUnitTest#addition_isCorrect`
 
+**MusicFlowActionFeedbackTest** (`app/src/test/java/com/example/musicflow/ui/feedback/MusicFlowActionFeedbackTest.kt`; jvm)
+
+- `UI_ACCESS/MusicFlowActionFeedbackTest#cloudConnectionAndExpiredSessionProvideNextSteps`
+- `UI_ACCESS/MusicFlowActionFeedbackTest#corruptBackupExplainsWhichFileToSelect`
+- `UI_ACCESS/MusicFlowActionFeedbackTest#fileSizeAndPlaylistLimitsRemainUnderstandable`
+- `UI_ACCESS/MusicFlowActionFeedbackTest#genericExceptionsNeverEchoPrivateBackendDetails`
+- `UI_ACCESS/MusicFlowActionFeedbackTest#localFilePermissionGivesSelectionHint`
+
 
 ### DEMO_CENTER — Trung tâm demo và điều hướng theo tài khoản
 
@@ -1113,6 +1121,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 
 - `COMMUNITY_COMMENTS/CommunityDemoUiTest#demoDoesNotPretendToBeOnlineUser`
 - `COMMUNITY_COMMENTS/CommunityDemoUiTest#demoRatingAndCommentActionsStayLocal`
+- `COMMUNITY_COMMENTS/CommunityDemoUiTest#editExistingCommentMovesFocusToExistingComposer`
 - `COMMUNITY_COMMENTS/CommunityDemoUiTest#emptyOnlineCatalogOffersDemoWithoutPublishedTracks`
 - `COMMUNITY_COMMENTS/CommunityDemoUiTest#largeTextCanReachDemoFromEmptyManagedCatalog`
 - `COMMUNITY_COMMENTS/CommunityDemoUiTest#largeTextKeepsAllRatingsAndCommentComposerReachable`

@@ -31,6 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.stateDescription
@@ -69,6 +71,13 @@ fun CommunityRoute(
     var reportReason by remember { mutableStateOf("") }
     var offset by remember { mutableStateOf(0) }
     val contentScroll = rememberScrollState()
+    val commentFocus = remember { FocusRequester() }
+
+    // Editing uses the existing input field. Move accessibility/keyboard focus to it
+    // instead of making users scroll and tap a second time.
+    LaunchedEffect(editId) {
+        if (editId != null) commentFocus.requestFocus()
+    }
 
     suspend fun reload(page: Int = 0, append: Boolean = false) {
         val updated = if (demo) demoStore.read(page) else realRepository.read(trackId,page)
@@ -216,7 +225,8 @@ fun CommunityRoute(
                             onValueChange = { commentInput = it.take(CommunityRules.COMMENT_LIMIT) },
                             label = { Text(if (editId != null) "Sửa bình luận" else "Viết bình luận") },
                             supportingText = { Text("${commentInput.length}/500 ký tự") },
-                            modifier = Modifier.fillMaxWidth().testTag("community-comment-input"),
+                            modifier = Modifier.fillMaxWidth().focusRequester(commentFocus)
+                                .testTag("community-comment-input"),
                             minLines = 2
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -266,7 +276,6 @@ fun CommunityRoute(
                                     TextButton(onClick = {
                                         editId = comment.id
                                         commentInput = comment.body
-                                        scope.launch { contentScroll.animateScrollTo(0) }
                                     },enabled = !busy) { Text("Sửa") }
                                     TextButton(onClick = {
                                         pendingDelete = comment.id

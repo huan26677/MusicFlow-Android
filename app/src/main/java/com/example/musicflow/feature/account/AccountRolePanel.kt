@@ -314,9 +314,9 @@ internal fun AccountRolePanel(
             }
 
             if (checked) {
-                Text("Khu vực làm việc", style = MaterialTheme.typography.titleMedium,
+                Text("Đang làm việc: ${currentWorkspace.title}",
+                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.semantics { heading() })
-                Text(currentWorkspace.description, style = MaterialTheme.typography.bodySmall)
                 Text("Bước tiếp theo dành cho bạn:",
                     style = MaterialTheme.typography.titleSmall)
                 Text(AccountTaskGuide.nextStep(currentWorkspace, access),

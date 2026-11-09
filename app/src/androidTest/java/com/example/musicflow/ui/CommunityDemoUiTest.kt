@@ -1,6 +1,7 @@
 package com.example.musicflow.ui
 
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -38,6 +39,24 @@ class CommunityDemoUiTest {
             compose.onAllNodesWithText("Bình luận (3)").fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithText("Một bình luận Demo mới").assertExists()
+    }
+
+    @Test fun editExistingCommentMovesFocusToExistingComposer() {
+        compose.setContent {
+            MusicFlowTheme {
+                CommunityRoute("demo-community", "Bài hát mẫu", demo = true, onClose = {})
+            }
+        }
+        compose.onNodeWithTag("community-comment-input").performScrollTo()
+            .performTextInput("Bình luận trước khi sửa")
+        compose.onNodeWithTag("community-comment-submit").performScrollTo().performClick()
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText("Bình luận (3)").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("Sửa").performScrollTo().performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("community-comment-input").assertIsFocused()
+        compose.onNodeWithText("Lưu chỉnh sửa").assertExists()
     }
 
     @Test fun demoDoesNotPretendToBeOnlineUser() {

@@ -22,7 +22,7 @@ class ImpactDrivenRegressionTest(unittest.TestCase):
         metrics = qa.validate(self.conf, self.cases, self.unmapped)
         self.assertEqual(22, metrics["modules"])
         self.assertGreaterEqual(metrics["unique_test_classes"], 105)
-        self.assertGreaterEqual(metrics["unique_test_methods"], 492)
+        self.assertGreaterEqual(metrics["unique_test_methods"], 498)
         self.assertGreater(metrics["module_case_links"], metrics["unique_test_methods"])
 
     def test_community_moderation_or_supabase_is_high_risk(self):

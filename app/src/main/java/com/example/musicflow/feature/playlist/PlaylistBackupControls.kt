@@ -26,6 +26,7 @@ import com.example.musicflow.core.history.local.RecentHistoryDatabase
 import com.example.musicflow.core.playlist.PlaylistBackupEntry
 import com.example.musicflow.core.playlist.PlaylistLocalBackup
 import com.example.musicflow.core.playlist.RoomPlaylistRepository
+import com.example.musicflow.ui.feedback.MusicFlowActionFeedback
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -63,7 +64,8 @@ internal fun PlaylistBackupControls() {
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
-                message = "Không thể xuất bản sao lưu: ${error.message.orEmpty()}"
+                message = MusicFlowActionFeedback.fileFailure(
+                    error, MusicFlowActionFeedback.FileAction.EXPORT)
             } finally { busy = false }
         }
     }
@@ -101,7 +103,8 @@ internal fun PlaylistBackupControls() {
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
-                message = "Không thể nhập: ${error.message.orEmpty()}"
+                message = MusicFlowActionFeedback.fileFailure(
+                    error, MusicFlowActionFeedback.FileAction.IMPORT)
             } finally { busy = false }
         }
     }
@@ -164,7 +167,8 @@ internal fun PlaylistBackupControls() {
                             } catch (cancelled: CancellationException) {
                                 throw cancelled
                             } catch (error: Exception) {
-                                message = "Không thể nhập: ${error.message.orEmpty()}"
+                                message = MusicFlowActionFeedback.fileFailure(
+                                    error, MusicFlowActionFeedback.FileAction.IMPORT)
                             } finally { busy = false }
                         }
                     }, modifier = Modifier.testTag("playlist-backup-confirm-import")

@@ -3,6 +3,7 @@ package com.example.musicflow.ui
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
@@ -167,6 +168,7 @@ class AccountTaskUxV3UiTest {
         }
         compose.onNodeWithTag("role-current-workspace-summary").assertExists()
         compose.onNodeWithTag("role-workspace-moderation").performScrollTo().performClick()
+        compose.onNodeWithText("Đang làm việc: Kiểm duyệt", substring = true).assertExists()
         compose.onNodeWithTag("creator-review-load-pending").assertExists()
         compose.onNodeWithTag("role-workspace-creator").performScrollTo().performClick()
         compose.onNodeWithTag("creator-stage-name").assertExists()

@@ -41,6 +41,7 @@ import com.example.musicflow.core.playlist.RoomPlaylistRepository
 import com.example.musicflow.core.playlist.PlaylistLocalAccess
 import com.example.musicflow.ui.components.MusicFlowStatusKind
 import com.example.musicflow.ui.components.MusicFlowStatusPanel
+import com.example.musicflow.ui.feedback.MusicFlowActionFeedback
 import com.example.musicflow.ui.components.OceanFlowHeader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -584,7 +585,8 @@ fun PlaylistDetailRoute(
                                                         "Dùng Tùy chọn bài hát để chọn lại tệp."
                                                 }
                                             } catch (error: Exception) {
-                                                fileMessage = "Không kiểm tra được tệp: ${error.message.orEmpty()}"
+                                                fileMessage = MusicFlowActionFeedback.fileFailure(
+                                                    error, MusicFlowActionFeedback.FileAction.CHECK)
                                             } finally { checkingFiles = false }
                                         }
                                     },

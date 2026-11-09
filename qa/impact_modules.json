@@ -192,7 +192,8 @@
       "tests": [
         "**/ui/AccessibilityPolishV6UiTest.kt", "**/ui/MusicFlowUiFoundationTest.kt",
         "**/ui/MusicFlowUiPolishTest.kt", "**/ui/OceanFlowVisualUiTest.kt",
-        "**/ui/MusicFlowUxFoundationV3Test.kt", "**/ThemeBatchTest.kt",
+        "**/ui/MusicFlowUxFoundationV3Test.kt",
+        "**/ui/feedback/MusicFlowActionFeedbackTest.kt", "**/ThemeBatchTest.kt",
         "**/feature/library/LibraryAccessibilityV7Test.kt", "**/feature/library/LibraryKeyboardAccessibilityV8Test.kt",
         "**/ExampleUnitTest.kt", "**/ExampleInstrumentedTest.kt"
       ],

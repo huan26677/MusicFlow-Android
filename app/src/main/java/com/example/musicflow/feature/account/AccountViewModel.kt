@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.example.musicflow.ui.feedback.MusicFlowActionFeedback
 
 data class AccountUiState(
     val loading: Boolean = true,
@@ -384,8 +385,8 @@ class AccountViewModel(
                 _state.update {
                     it.copy(
                         syncing = false,
-                        error = "Đồng bộ chưa hoàn tất: " +
-                            (error.message ?: "Kiểm tra Internet và quyền thư viện.")
+                        error = MusicFlowActionFeedback.cloudFailure(
+                            error, MusicFlowActionFeedback.CloudAction.LIBRARY)
                     )
                 }
             }
@@ -405,8 +406,12 @@ class AccountViewModel(
                         ),
                         message = "Đã liên kết bài. Nhấn Đồng bộ thư viện để cập nhật.")
                 }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (error: Exception) {
-                _state.update { it.copy(syncing = false, error = error.message) }
+                _state.update { it.copy(syncing = false, error =
+                    MusicFlowActionFeedback.cloudFailure(
+                        error, MusicFlowActionFeedback.CloudAction.ITEM)) }
             }
         }
     }
@@ -419,10 +424,15 @@ class AccountViewModel(
                 cloudSync.trashCloudPlaylist(id)
                 _state.update {
                     it.copy(syncing = false, syncSummary = null,
-                        message = "Đã đánh dấu xóa bản sao cloud. Playlist trên máy vẫn giữ nguyên.")
+                        message = "Đã đánh dấu xóa playlist trên đám mây. " +
+                            "Danh sách phát trên thiết bị vẫn giữ nguyên.")
                 }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (error: Exception) {
-                _state.update { it.copy(syncing = false, error = error.message) }
+                _state.update { it.copy(syncing = false, error =
+                    MusicFlowActionFeedback.cloudFailure(
+                        error, MusicFlowActionFeedback.CloudAction.ITEM)) }
             }
         }
     }
@@ -435,10 +445,15 @@ class AccountViewModel(
                 cloudSync.trashCloudFavorite(key)
                 _state.update {
                     it.copy(syncing = false, syncSummary = null,
-                        message = "Đã đánh dấu xóa yêu thích trên cloud. Bản local vẫn còn.")
+                        message = "Đã đánh dấu xóa yêu thích trên đám mây. " +
+                            "Mục yêu thích trên thiết bị vẫn còn.")
                 }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (error: Exception) {
-                _state.update { it.copy(syncing = false, error = error.message) }
+                _state.update { it.copy(syncing = false, error =
+                    MusicFlowActionFeedback.cloudFailure(
+                        error, MusicFlowActionFeedback.CloudAction.ITEM)) }
             }
         }
     }
@@ -461,8 +476,8 @@ class AccountViewModel(
             } catch (error: Exception) {
                 _state.update {
                     it.copy(syncing = false,
-                        error = "Không đồng bộ được lịch sử: " +
-                            (error.message ?: "Kiểm tra kết nối và quyền thư viện."))
+                        error = MusicFlowActionFeedback.cloudFailure(
+                            error, MusicFlowActionFeedback.CloudAction.HISTORY))
                 }
             }
         }
