@@ -1,6 +1,6 @@
 # MusicFlow — Báo cáo nghiệm thu trên điện thoại thật và Google/Gmail (v15.5)
 
-**Ngày:** 09/11/2026. **Phạm vi:** đồ án Android Demo, không phải sản phẩm Play Store. **Kết luận:** **DEMO QA ĐẠT CÁC CA ĐÃ CHẠY; NGHIỆM THU TOÀN BỘ DỰ ÁN CÒN ĐIỀU KIỆN**.
+**Ngày:** 09/11/2026. **Phạm vi:** đồ án Android Demo, không phải sản phẩm Play Store. **Kết luận:** **DEMO QA ĐẠT CÁC CA ĐÃ CHẠY; NGHIỆM THU TOÀN BỘ DỰ ÁN CÒN ĐIỀU KIỆN**. **Cập nhật mới nhất:** đợt QA OPPO sau khi bật Google tại `docs/Bao_Cao_Kiem_Thu_Thiet_Bi_That_Final_v15_5.md`; không sử dụng các trạng thái Google tắt bên dưới làm trạng thái hiện tại.
 
 ## 1. Thiết bị, phạm vi và bảo vệ dữ liệu
 
@@ -22,7 +22,7 @@
 | Media3 PlaybackService thực | `PlaybackServiceIntegrationTest#playbackServiceIntegration`: phát WAV trong cache, hàng đợi playlist, Home→phát nền, Next/Previous, lịch sử trả lại trạng thái ban đầu | **1/1 PASS** API30; **7 marker PASS** trong logcat |
 | JVM/QA engine | Gradle Debug + AndroidTest + Unit, **230/230 JVM**, Impact Python **19/19**, Brain **15/15**, Web Admin **9/9**, license policy **17/17**; danh mục **22 module, 513 @Test (230 JVM + 283 Android)** | **PASS** các ca chạy |
 | Người dùng chọn WAV qua Files/SAF trên OPPO | Tệp QA hiện ở Downloads; thao tác chọn chưa có kết quả trả về ứng dụng | **NOT VERIFIED**; cần UAT thao tác thật |
-| Đăng nhập Gmail bằng nút Google, nhận phiên Supabase thật | Google OAuth provider trên Supabase trả `external.google=false` | **BLOCKED BY CONFIG**, **NOT RUN** xác thực người dùng |
+| Đăng nhập Gmail bằng nút Google, nhận phiên Supabase thật | **Ban đầu** Google OAuth provider trên Supabase trả `external.google=false`; **sau khi cấu hình**, `external.google=true` và người dùng xác nhận đã đăng nhập Google được; màn tài khoản đã đăng nhập được quan sát trên OPPO | **Provider ENABLED**, **phiên tồn tại PASS**; OAuth fresh độc lập chưa chạy bằng QA |
 | Full regression Android 283 ca, JWT nhiều vai trò, TalkBack, 3–5 người UAT, tải dữ liệu lớn, nhiều SAF provider | Chưa có chứng cứ đầy đủ trên bản v15.5 | **NOT RUN** |
 
 Các log raw có thể chứa dữ liệu thiết bị được giữ **cục bộ, không commit**. Bản tóm tắt đã sàng lọc nằm ở `qa-logs/musicflow-v15_5-phone-acceptance-api30.log`. Không tính lại các bài retry thành số ca duy nhất của full suite.
@@ -37,17 +37,17 @@ Kiểm tra **read-only** từ `/auth/v1/settings` trên dự án Supabase của 
 |---|---|
 | Nhà cung cấp Email | **Bật** |
 | Cho phép đăng ký email | **Bật** (`disable_signup=false`) |
-| Nhà cung cấp Google | **Tắt** (`external.google=false`) |
+| Nhà cung cấp Google | **Đã bật sau cấu hình** (`external.google=true`; trước khi cấu hình là `false`) |
 | Tự xác nhận email | **Bật** (`mailer_autoconfirm=true`) |
 
-Vì vậy địa chỉ **Gmail có thể được dùng làm email đăng ký/đăng nhập với mật khẩu riêng của MusicFlow** khi người dùng tự tạo tài khoản, nhưng **không đồng nghĩa “Đăng nhập bằng Google” hoạt động**. Chưa dùng Gmail thật để tạo user hoặc xác thực, không lưu mật khẩu/tokens.
+Vì vậy địa chỉ **Gmail có thể được dùng làm email đăng ký/đăng nhập với mật khẩu riêng của MusicFlow**, độc lập với Google OAuth. Chủ dự án **xác nhận đã đăng nhập Google thành công**; kiểm tra mới cho thấy Provider bật và phiên trên thiết bị còn hoạt động. QA không tự thao tác nhập lại Gmail hoặc đọc mật khẩu/token.
 
-**Cấu hình còn phải do chủ dự án thực hiện:**
+**Các bước chủ dự án đã cấu hình; dùng làm checklist rà soát khi có lỗi:**
 
 1. Trong **Google Auth Platform / Google Cloud Console**, cấu hình OAuth consent screen (đối tượng người dùng thử, scopes `openid`, `email`, `profile`), tạo OAuth **Web application** client và đặt Google **Authorized redirect URI**: `https://vzvxpbwrftlnyvuhfoqn.supabase.co/auth/v1/callback`.
 2. Trong **Supabase Dashboard → Authentication → Providers → Google**, nhập **Client ID + Client Secret từ Google Cloud vào dashboard Supabase**, bật Google và lưu. **Không chép Client Secret vào mã Android, tài liệu GitHub hay cuộc trò chuyện.**
 3. Trong **Supabase Authentication → URL Configuration → Redirect URLs**, thêm callback ứng dụng `musicflow://auth/callback**` để chấp nhận nonce `flow` trên URL; áp dụng allow-list càng hẹp càng tốt. Xem tài liệu chính thức: [Google Auth](https://supabase.com/docs/guides/auth/social-login/auth-google?platform=android) và [Redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls).
-4. Sau khi server trả `external.google=true`, mở lại Tài khoản MusicFlow, dùng **chính Gmail của người dùng** để cấp phép trong màn hình Google, kiểm tra đăng nhập/đăng xuất và quyền Free; không tự cấp vai trò Owner/Admin từ client. **Bước này chưa được thử và không được ghi PASS trước khi có phiên thật.**
+4. Khi server trả `external.google=true`, mở lại Tài khoản MusicFlow, dùng **chính Gmail của người dùng** để cấp phép trong màn hình Google, kiểm tra đăng nhập/đăng xuất và quyền Free; không tự cấp vai trò Owner/Admin từ client. Người dùng báo **đã thực hiện thành công**; QA chỉ xác nhận **phiên tồn tại**, chưa kiểm thử OAuth mới độc lập.
 
 ## 4. Kiến trúc kiểm thử và mức độ hoàn thành
 
@@ -56,4 +56,4 @@ Vì vậy địa chỉ **Gmail có thể được dùng làm email đăng ký/đ
 - Đối với đồ án, **ứng dụng đã có APK QA cài được và phát nhạc thật qua MediaSession trên điện thoại**. Để ký duyệt **hoàn thành dự án đầy đủ**, vẫn cần full Android regression, UAT người thật, picker SAF trên điện thoại, login Google thật sau cấu hình, thử đa vai trò JWT và xác nhận của chủ đồ án.
 - Bản ký QA và thư mục `dist/` lưu **trên máy phát triển**, không đẩy APK lên GitHub. Muốn phát hành công khai/Google Play cần cổng bảo mật và signing riêng.
 
-**Kết luận nghiệm thu:** **PASS có điều kiện cho trình diễn Android offline và QA**, **BLOCKED** đối với nút đăng nhập Google thật cho đến khi cấu hình Google Cloud/Supabase, và **NOT RUN** với nghiệm thu người dùng/full suite. Không tự tuyên bố production ready.
+**Kết luận nghiệm thu sau cập nhật:** **PASS có điều kiện cho trình diễn Android offline/QA**. Google OAuth Provider đã **được bật**, người dùng báo đăng nhập thành công, phiên được quan sát; **NOT RUN** với thử lại OAuth mới độc lập, full Android trên máy thật và UAT người dùng. Xem biên bản chốt **181/181 ca Android chọn lọc PASS sau sửa test** tại `docs/Bao_Cao_Kiem_Thu_Thiet_Bi_That_Final_v15_5.md`. Không tự tuyên bố production ready.

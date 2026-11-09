@@ -1,6 +1,7 @@
 package com.example.musicflow.ui
 
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
@@ -8,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.test.espresso.Espresso
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
@@ -47,9 +49,17 @@ class CommunityDemoUiTest {
                 CommunityRoute("demo-community", "Bài hát mẫu", demo = true, onClose = {})
             }
         }
+        // The initial coroutine loading the demo snapshot may still hold
+        // the submit button disabled on slower physical API 30 devices.
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText("Bình luận (2)")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
         compose.onNodeWithTag("community-comment-input").performScrollTo()
             .performTextInput("Bình luận trước khi sửa")
-        compose.onNodeWithTag("community-comment-submit").performScrollTo().performClick()
+        Espresso.closeSoftKeyboard()
+        compose.onNodeWithTag("community-comment-submit")
+            .performScrollTo().assertIsEnabled().performClick()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithText("Bình luận (3)").fetchSemanticsNodes().isNotEmpty()
         }

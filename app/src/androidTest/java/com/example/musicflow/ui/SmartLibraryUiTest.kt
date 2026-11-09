@@ -272,7 +272,9 @@ class SmartLibraryUiTest {
             }
         }
         compose.onNodeWithText("Hiển thị 1 / 1 bài").assertExists()
-        compose.onNodeWithTag("smart-play-all").performClick()
+        // API 30 physical devices can place this LazyColumn action below
+        // the visible viewport; an off-screen semantic click may not fire.
+        compose.onNodeWithTag("smart-play-all").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(chosen.uri, selected.single().uri) }
     }
 

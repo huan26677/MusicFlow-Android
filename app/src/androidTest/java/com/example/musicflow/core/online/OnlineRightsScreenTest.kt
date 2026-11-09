@@ -64,7 +64,8 @@ class OnlineRightsScreenTest {
             OnlineTrack("missing", "Chưa có quyền", "Artist", null, 1L,
                 "https://example.com/stream.mp3")
         )) { selected++ }
-        compose.onNodeWithText("Chưa xác minh quyền phát").assertExists()
+        // Current UX explains both the blocked action and its reason.
+        compose.onNodeWithText("Chưa phát được: Chưa xác minh quyền phát").assertExists()
         compose.onNodeWithTag("track-rights-missing").performClick()
         compose.onNodeWithText("Giấy phép: Chưa khai báo").assertExists()
         compose.runOnIdle { assertEquals(0, selected) }
