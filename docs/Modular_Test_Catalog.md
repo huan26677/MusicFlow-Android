@@ -30,6 +30,9 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 | `UI_ACCESS` | Thiết kế Ocean Flow, focus, TalkBack semantics | 44 |  |
 | `DEMO_CENTER` | Trung tâm demo và điều hướng theo tài khoản | 11 | AUTH, ROLES_ADMIN, BILLING_DEMO |
 | `RELEASE_BACKUP` | Sao lưu, versioning, APK ký QA và nâng cấp | 14 | MEDIA_SAF, PLAYLIST, FAVORITES |
+| `COMMUNITY_RATING` | Chấm sao 1–5 và dữ liệu Demo cộng đồng | 11 | ONLINE_RIGHTS |
+| `COMMUNITY_COMMENTS` | Đọc, đăng, sửa, xóa bình luận và báo cáo | 14 | COMMUNITY_RATING, AUTH, UI_ACCESS |
+| `COMMUNITY_MODERATION` | Kiểm duyệt bình luận, phân quyền và nhật ký | 10 | COMMUNITY_COMMENTS, ROLES_ADMIN |
 
 ## Test cases by module
 
@@ -1063,6 +1066,83 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 - `RELEASE_BACKUP/PlaylistBackupRulesTest#acceptsLocalMetadataAndEmptyPlaylists`
 - `RELEASE_BACKUP/PlaylistBackupRulesTest#refusesOversizedOrMalformedPlaylistMetadata`
 - `RELEASE_BACKUP/PlaylistBackupRulesTest#refusesRemoteStreamingLinksAndDuplicateTracks`
+
+
+### COMMUNITY_RATING — Chấm sao 1–5 và dữ liệu Demo cộng đồng
+
+**Source paths:** `app/src/main/java/com/example/musicflow/core/community/CommunityModels.kt`, `app/src/main/java/com/example/musicflow/core/community/DemoCommunityStore.kt`
+
+**Downstream contract/smoke:** `COMMUNITY_RATING/CommunityRulesTest#starsOnlyAcceptOneThroughFive`, `COMMUNITY_RATING/DemoCommunityStoreTest#changingRatingUpdatesOnlyOneDemoRating`.
+
+**CommunityRulesTest** (`app/src/test/java/com/example/musicflow/core/community/CommunityRulesTest.kt`; jvm)
+
+- `COMMUNITY_RATING/CommunityRulesTest#commentRejectsMoreThanFiveHundredCharacters`
+- `COMMUNITY_RATING/CommunityRulesTest#commentTrimsWhitespaceAndRejectsEmpty`
+- `COMMUNITY_RATING/CommunityRulesTest#onlineIdsMustBeCanonicalUuidNeverLocalSafUri`
+- `COMMUNITY_RATING/CommunityRulesTest#reportRequiresAtLeastFiveAndAtMostThreeHundredCharacters`
+- `COMMUNITY_RATING/CommunityRulesTest#starsOnlyAcceptOneThroughFive`
+
+**DemoCommunityStoreTest** (`app/src/test/java/com/example/musicflow/core/community/DemoCommunityStoreTest.kt`; jvm)
+
+- `COMMUNITY_RATING/DemoCommunityStoreTest#cannotEditOrDeleteSomeoneElsesComment`
+- `COMMUNITY_RATING/DemoCommunityStoreTest#cannotReportSelfOrUseInvalidReason`
+- `COMMUNITY_RATING/DemoCommunityStoreTest#changingRatingUpdatesOnlyOneDemoRating`
+- `COMMUNITY_RATING/DemoCommunityStoreTest#demoSeedIsClearlyFlaggedAndDoesNotUseCloudId`
+- `COMMUNITY_RATING/DemoCommunityStoreTest#demoUsesPageSizeAndFreshInstanceResets`
+- `COMMUNITY_RATING/DemoCommunityStoreTest#myCommentCanBeAddedEditedAndDeleted`
+
+
+### COMMUNITY_COMMENTS — Đọc, đăng, sửa, xóa bình luận và báo cáo
+
+**Source paths:** `app/src/main/java/com/example/musicflow/core/community/SupabaseCommunityRepository.kt`, `app/src/main/java/com/example/musicflow/feature/community/CommunityRoute.kt`
+
+**Downstream contract/smoke:** `COMMUNITY_COMMENTS/CommunityDemoUiTest#demoRatingAndCommentActionsStayLocal`, `COMMUNITY_COMMENTS/CommunityRulesTest#onlineIdsMustBeCanonicalUuidNeverLocalSafUri`.
+
+**CommunityDemoUiTest** (`app/src/androidTest/java/com/example/musicflow/ui/CommunityDemoUiTest.kt`; android)
+
+- `COMMUNITY_COMMENTS/CommunityDemoUiTest#demoDoesNotPretendToBeOnlineUser`
+- `COMMUNITY_COMMENTS/CommunityDemoUiTest#demoRatingAndCommentActionsStayLocal`
+- `COMMUNITY_COMMENTS/CommunityDemoUiTest#emptyOnlineCatalogOffersDemoWithoutPublishedTracks`
+
+**CommunityRulesTest** (`app/src/test/java/com/example/musicflow/core/community/CommunityRulesTest.kt`; jvm)
+
+- `COMMUNITY_COMMENTS/CommunityRulesTest#commentRejectsMoreThanFiveHundredCharacters`
+- `COMMUNITY_COMMENTS/CommunityRulesTest#commentTrimsWhitespaceAndRejectsEmpty`
+- `COMMUNITY_COMMENTS/CommunityRulesTest#onlineIdsMustBeCanonicalUuidNeverLocalSafUri`
+- `COMMUNITY_COMMENTS/CommunityRulesTest#reportRequiresAtLeastFiveAndAtMostThreeHundredCharacters`
+- `COMMUNITY_COMMENTS/CommunityRulesTest#starsOnlyAcceptOneThroughFive`
+
+**DemoCommunityStoreTest** (`app/src/test/java/com/example/musicflow/core/community/DemoCommunityStoreTest.kt`; jvm)
+
+- `COMMUNITY_COMMENTS/DemoCommunityStoreTest#cannotEditOrDeleteSomeoneElsesComment`
+- `COMMUNITY_COMMENTS/DemoCommunityStoreTest#cannotReportSelfOrUseInvalidReason`
+- `COMMUNITY_COMMENTS/DemoCommunityStoreTest#changingRatingUpdatesOnlyOneDemoRating`
+- `COMMUNITY_COMMENTS/DemoCommunityStoreTest#demoSeedIsClearlyFlaggedAndDoesNotUseCloudId`
+- `COMMUNITY_COMMENTS/DemoCommunityStoreTest#demoUsesPageSizeAndFreshInstanceResets`
+- `COMMUNITY_COMMENTS/DemoCommunityStoreTest#myCommentCanBeAddedEditedAndDeleted`
+
+
+### COMMUNITY_MODERATION — Kiểm duyệt bình luận, phân quyền và nhật ký
+
+**Source paths:** `app/src/main/java/com/example/musicflow/feature/community/CommunityModerationPanel.kt`
+
+**Downstream contract/smoke:** `COMMUNITY_MODERATION/CommunityModerationUiTest#moderationRequiresReasonAndConfirm`, `COMMUNITY_MODERATION/MusicFlowAccessTest#guestAndFreeNeverHaveStaffRights`.
+
+**CommunityModerationUiTest** (`app/src/androidTest/java/com/example/musicflow/ui/CommunityModerationUiTest.kt`; android)
+
+- `COMMUNITY_MODERATION/CommunityModerationUiTest#failedPermissionDoesNotShowReports`
+- `COMMUNITY_MODERATION/CommunityModerationUiTest#moderationRequiresReasonAndConfirm`
+
+**MusicFlowAccessTest** (`app/src/test/java/com/example/musicflow/core/account/MusicFlowAccessTest.kt`; jvm)
+
+- `COMMUNITY_MODERATION/MusicFlowAccessTest#artistOrAuthorIsNotAdmin`
+- `COMMUNITY_MODERATION/MusicFlowAccessTest#collaboratorRequiresExplicitPermission`
+- `COMMUNITY_MODERATION/MusicFlowAccessTest#developerDoesNotInheritAdminPower`
+- `COMMUNITY_MODERATION/MusicFlowAccessTest#guestAndFreeNeverHaveStaffRights`
+- `COMMUNITY_MODERATION/MusicFlowAccessTest#moderatorPermissionTextCannotCreateAdminRights`
+- `COMMUNITY_MODERATION/MusicFlowAccessTest#moderatorReviewsMetadataButCannotGrantRolesOrPublish`
+- `COMMUNITY_MODERATION/MusicFlowAccessTest#ownerHasBusinessAdministrationButNotDeveloperRole`
+- `COMMUNITY_MODERATION/MusicFlowAccessTest#permissionsWithoutPlatformAdminRoleHaveNoEffect`
 
 
 ## Policy and usage

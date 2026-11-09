@@ -303,7 +303,16 @@ class AccountApi(context: Context) {
                 "musicflow_creator_upload_reserve",
                 "musicflow_creator_upload_confirm",
                 "musicflow_creator_upload_list",
-                "musicflow_owner_demo_summary"
+                "musicflow_owner_demo_summary",
+                "musicflow_community_read",
+                "musicflow_community_rate",
+                "musicflow_community_comment_create",
+                "musicflow_community_comment_edit",
+                "musicflow_community_comment_delete",
+                "musicflow_community_report",
+                "musicflow_community_reports",
+                "musicflow_community_moderate",
+                "musicflow_community_grant_moderator"
             )) { "Chức năng chưa được hỗ trợ." }
             cloudRequest("POST", "/rest/v1/rpc/$name", args)
         }

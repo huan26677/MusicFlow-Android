@@ -1,5 +1,7 @@
 # MusicFlow — Actor & Use Case dành cho báo cáo dự án (2026-11-05)
 
+> **Bổ sung 2026-11-09 — Community v14 (UC-C01–C07):** Guest xem sao/bình luận trên bài online có quyền công khai; Free/Premium đăng nhập thật có thể chấm sao, đăng/sửa/xóa bình luận của mình và báo cáo bình luận khác. Owner, PlatformAdmin có quyền `moderate_catalog`, hoặc Moderator được Owner cấp quyền riêng có thể xử lý báo cáo bình luận. Chế độ Demo dùng bình luận mẫu cách ly, **không** gửi Supabase. SQL đã áp dụng, Android/UI cần QA và E2E riêng; không gắn bình luận cộng đồng vào `content://` tệp nhạc offline. Xem `docs/Community_Ratings_Comments_v14.md`.
+
 > **Nguồn tham chiếu chính thức cho các lượt phát triển tiếp theo.** Đọc tài liệu này cùng [Ke_Hoach_Du_An.md](Ke_Hoach_Du_An.md), [Pham_Vi_MusicFlow_1_0.md](Pham_Vi_MusicFlow_1_0.md) và QA logs. Đây là **APK sideload + báo cáo môn học**, không phải phát hành thương mại. **Không được coi use case đang có mã nhưng chưa E2E là đã nghiệm thu hoàn chỉnh**. **Cập nhật 2026-11-07:** xem cuối mục 3 về UC-G13 — Quick Add Playlist, và `Playlist_Quick_Add_v1.md`.
 >
 > **Cập nhật giao diện (2026-11-07):** Ocean Flow Visual Refresh v1 đồng bộ các màn Home/Player/Mini/Library/Search/Playlist/Account/Demo Center và Dark/Light theo cùng một design system; **không thêm actor hoặc mở quyền/backend use case mới**. 6 Android UI tests mới cùng 71 Android regressions/1 SAF và 190 JVM/4 Web Admin PASS. Xem [Ocean_Flow_Visual_Refresh_v1.md](Ocean_Flow_Visual_Refresh_v1.md).

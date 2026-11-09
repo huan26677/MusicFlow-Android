@@ -113,6 +113,14 @@ __pycache__/
 !/qa-logs/musicflow-v13-signed-smoke-api36.log
 /qa-logs/*v13*.json
 
+# v14: do not commit raw QA logs, database metadata or transcripts by default.
+/qa-logs/*v14*
+!/qa-logs/musicflow-v14-community5-api36.log
+!/qa-logs/musicflow-v14-impacted14-api36.log
+!/qa-logs/musicflow-v14-supabase-guard.log
+!/qa-logs/musicflow-v14-signed-package.log
+!/qa-logs/musicflow-v14-signed-smoke.log
+
 # Operating system
 .DS_Store
 Thumbs.db

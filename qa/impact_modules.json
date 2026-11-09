@@ -27,6 +27,8 @@
     "app/src/main/java/com/example/musicflow/core/playlist/**Database*",
     "app/src/main/java/com/example/musicflow/core/history/**Database*",
     "app/src/main/java/com/example/musicflow/core/account/DemoBillingStore.kt",
+    "app/src/main/java/com/example/musicflow/core/community/SupabaseCommunityRepository.kt",
+    "app/src/main/java/com/example/musicflow/feature/community/CommunityModerationPanel.kt",
     "scripts/build-musicflow-demo-apk-v1.ps1",
     "scripts/run-signed-upgrade-*.ps1"
   ],
@@ -204,6 +206,33 @@
       "requires": ["MEDIA_SAF", "PLAYLIST", "FAVORITES"],
       "tests": ["**/ui/SignedApkUpgradeV6Test.kt", "**/core/playlist/PlaylistBackupRulesTest.kt", "**/core/playlist/PlaylistLocalBackupIntegrationTest.kt", "**/ui/PlaylistBackupRealPickerUiTest.kt", "**/ui/OfflineReliabilityUiTest.kt"],
       "smoke": ["PlaylistLocalBackupIntegrationTest#invalidDocumentCannotPartiallyModifyRoom", "SignedApkUpgradeV6Test#verifySignedV6PreservesAllDataAndCleanUpTestOwnedOnly"]
+    },
+    {
+      "id": "COMMUNITY_RATING", "name": "Chấm sao 1–5 và dữ liệu Demo cộng đồng",
+      "source": [
+        "app/src/main/java/com/example/musicflow/core/community/CommunityModels.kt",
+        "app/src/main/java/com/example/musicflow/core/community/DemoCommunityStore.kt"
+      ],
+      "requires": ["ONLINE_RIGHTS"],
+      "tests": ["**/core/community/CommunityRulesTest.kt", "**/core/community/DemoCommunityStoreTest.kt"],
+      "smoke": ["CommunityRulesTest#starsOnlyAcceptOneThroughFive", "DemoCommunityStoreTest#changingRatingUpdatesOnlyOneDemoRating"]
+    },
+    {
+      "id": "COMMUNITY_COMMENTS", "name": "Đọc, đăng, sửa, xóa bình luận và báo cáo",
+      "source": [
+        "app/src/main/java/com/example/musicflow/core/community/SupabaseCommunityRepository.kt",
+        "app/src/main/java/com/example/musicflow/feature/community/CommunityRoute.kt"
+      ],
+      "requires": ["COMMUNITY_RATING", "AUTH", "UI_ACCESS"],
+      "tests": ["**/ui/CommunityDemoUiTest.kt", "**/core/community/CommunityRulesTest.kt", "**/core/community/DemoCommunityStoreTest.kt"],
+      "smoke": ["CommunityDemoUiTest#demoRatingAndCommentActionsStayLocal", "CommunityRulesTest#onlineIdsMustBeCanonicalUuidNeverLocalSafUri"]
+    },
+    {
+      "id": "COMMUNITY_MODERATION", "name": "Kiểm duyệt bình luận, phân quyền và nhật ký",
+      "source": ["app/src/main/java/com/example/musicflow/feature/community/CommunityModerationPanel.kt"],
+      "requires": ["COMMUNITY_COMMENTS", "ROLES_ADMIN"],
+      "tests": ["**/ui/CommunityModerationUiTest.kt", "**/core/account/MusicFlowAccessTest.kt"],
+      "smoke": ["CommunityModerationUiTest#moderationRequiresReasonAndConfirm", "MusicFlowAccessTest#guestAndFreeNeverHaveStaffRights"]
     }
   ]
 }

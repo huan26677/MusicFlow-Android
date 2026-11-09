@@ -5,7 +5,7 @@
 ## 1. Một catalog, một bộ não
 
 - **Bộ não duy nhất:** `docs/Cross_Session_Project_Brain.json` → `brain_v2.test_architecture`. Không tạo brain thứ hai.
-- **Registry kiểm thử:** `qa/impact_modules.json` chứa 19 module, đường dẫn nguồn, dependencies `requires`, lớp test hiện có và smoke case phải chạy cho từng consumer bị ảnh hưởng.
+- **Registry kiểm thử:** `qa/impact_modules.json` chứa 22 module, đường dẫn nguồn, dependencies `requires`, lớp test hiện có và smoke case phải chạy cho từng consumer bị ảnh hưởng.
 - **Danh sách từng test case:** `docs/Modular_Test_Catalog.md` tự sinh từ **phương thức Kotlin `@Test` có thật**. ID ổn định là `MODULE/ClassName#methodName`. Một test E2E có thể phục vụ nhiều module, nhưng khi chọn chạy sẽ gộp, không chạy lặp.
 - **Công cụ kế hoạch:** `scripts/impact_regression.py` là planner **chỉ đọc**, không tự chạy emulator, Gradle, thay đổi mã, tệp nhạc hay quyền.
 

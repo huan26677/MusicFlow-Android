@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.musicflow.BuildConfig
+import com.example.musicflow.feature.community.CommunityRoute
 
 @Composable
 fun OnlineCatalogRoute(
@@ -81,6 +82,8 @@ fun OnlineCatalogScreen(
     isSupabaseManaged: Boolean = false
 ) {
     var rightsDetail by remember { mutableStateOf<OnlineTrack?>(null) }
+    var communityTrack by remember { mutableStateOf<OnlineTrack?>(null) }
+    var communityDemo by remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
     Column(
         modifier = Modifier
@@ -155,6 +158,10 @@ fun OnlineCatalogScreen(
                     onAction = if (state.error == null && !isSupabaseManaged &&
                         state.endpointInput.isNotBlank()) onSaveEndpoint else null
                 )
+                OutlinedButton(
+                    onClick = { communityDemo = true },
+                    modifier = Modifier.testTag("community-open-demo")
+                ) { Text("Xem thử đánh giá và bình luận (Demo)") }
             }
             state.isLoading -> {
                 MusicFlowStatusPanel(
@@ -183,6 +190,10 @@ fun OnlineCatalogScreen(
                             "Danh mục sẽ xuất hiện khi có nội dung hợp lệ. " +
                             "Sử dụng nút Tải lại ở phía trên để kiểm tra lần nữa."
                     )
+                    OutlinedButton(
+                        onClick = { communityDemo = true },
+                        modifier = Modifier.testTag("community-open-demo")
+                    ) { Text("Xem thử đánh giá và bình luận (Demo)") }
                 }
 
                 if (state.tracks.isNotEmpty()) {
@@ -233,6 +244,12 @@ fun OnlineCatalogScreen(
                                             onClick = { rightsDetail = track },
                                             modifier = Modifier.testTag("track-rights-${track.id}")
                                         ) { Text("Nguồn và giấy phép") }
+                                        if (isSupabaseManaged) {
+                                            TextButton(
+                                                onClick = { communityTrack = track },
+                                                modifier = Modifier.testTag("track-community-${track.id}")
+                                            ) { Text("Đánh giá & bình luận") }
+                                        }
                                     }
                                 },
                                 trailingContent = {
@@ -306,6 +323,18 @@ fun OnlineCatalogScreen(
             confirmButton = {
                 TextButton(onClick = { rightsDetail = null }) { Text("Đóng") }
             }
+        )
+    }
+    communityTrack?.let { track ->
+        CommunityRoute(
+            trackId = track.id, title = track.title, demo = false,
+            onClose = { communityTrack = null }
+        )
+    }
+    if (communityDemo) {
+        CommunityRoute(
+            trackId = "demo-community",title = "Bài hát mẫu MusicFlow",
+            demo = true,onClose = { communityDemo = false }
         )
     }
 }

@@ -44,6 +44,7 @@ import com.example.musicflow.core.account.AccountReviewArea
 import com.example.musicflow.core.account.AccountReviewPlan
 import com.example.musicflow.core.account.CreatorApplicationUiRules
 import com.example.musicflow.core.account.MusicFlowAccess
+import com.example.musicflow.feature.community.CommunityModerationPanel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import org.json.JSONArray
@@ -93,6 +94,7 @@ internal fun AccountRolePanel(
     var confirm by remember { mutableStateOf<AccountRoleDecision?>(null) }
     var reviewConfirm by remember { mutableStateOf<Pair<JSONObject, Boolean>?>(null) }
     var catalogConfirm by remember { mutableStateOf<AccountCatalogDecision?>(null) }
+    var communityGrantConfirm by remember { mutableStateOf<Pair<String, Boolean>?>(null) }
     var reviewArea by remember(identity.userId) { mutableStateOf<AccountReviewArea?>(null) }
 
     var creatorType by remember { mutableStateOf("artist") }
@@ -609,6 +611,26 @@ internal fun AccountRolePanel(
                                 enabled = !busy && reason.trim().length in 5..300
                             ) { Text("Thu hồi quyền") }
                         }
+                        Text(
+                            "Quyền kiểm duyệt bình luận dành riêng cho Moderator",
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Text("Tài khoản cần có vai trò Moderator trước khi cấp quyền này.",
+                            style = MaterialTheme.typography.bodySmall)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(
+                                onClick = {
+                                    communityGrantConfirm = it.optString("id") to true
+                                },
+                                enabled = !busy && reason.trim().length in 5..300
+                            ) { Text("Cấp quyền bình luận") }
+                            OutlinedButton(
+                                onClick = {
+                                    communityGrantConfirm = it.optString("id") to false
+                                },
+                                enabled = !busy && reason.trim().length in 5..300
+                            ) { Text("Thu hồi quyền bình luận") }
+                        }
                     }
                     OutlinedButton(
                         onClick = {
@@ -631,6 +653,9 @@ internal fun AccountRolePanel(
                 }
                 }
                 if (currentWorkspace == AccountWorkspace.MODERATION) {
+                if (access.isOwner || access.isModerator || access.canModerateCatalog) {
+                    CommunityModerationPanel(rpc = rpc)
+                }
                 if (reviewAreas.size > 1) {
                     Text("Chọn công việc kiểm duyệt", style = MaterialTheme.typography.titleSmall)
                     Row(
@@ -800,6 +825,36 @@ internal fun AccountRolePanel(
             },
             dismissButton = {
                 TextButton(onClick = { confirm = null }) { Text("Hủy") }
+            }
+        )
+    }
+    communityGrantConfirm?.let { (targetId, grant) ->
+        AlertDialog(
+            onDismissRequest = { communityGrantConfirm = null },
+            title = { Text(if (grant) "Cấp quyền kiểm duyệt bình luận?"
+                else "Thu hồi quyền kiểm duyệt bình luận?") },
+            text = { Text("Chỉ Owner được phép thực hiện. Lý do: ${reason.trim()}. " +
+                "Quyết định sẽ lưu vào nhật ký quản trị.") },
+            confirmButton = {
+                TextButton(
+                    enabled = !busy && reason.trim().length in 5..300,
+                    onClick = {
+                        val why = reason.trim()
+                        communityGrantConfirm = null
+                        runAction("musicflow_community_grant_moderator",
+                            JSONObject().put("p_user",targetId)
+                                .put("p_grant",grant).put("p_reason",why)) { raw ->
+                            check(raw.trim() == "true") {
+                                "Máy chủ chưa xác nhận thay đổi quyền."
+                            }
+                            info = "Đã cập nhật quyền kiểm duyệt bình luận trên Supabase."
+                            reason = ""
+                        }
+                    }
+                ) { Text("Xác nhận") }
+            },
+            dismissButton = {
+                TextButton(onClick = { communityGrantConfirm = null }) { Text("Hủy") }
             }
         )
     }
