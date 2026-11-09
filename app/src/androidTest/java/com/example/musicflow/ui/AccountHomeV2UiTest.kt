@@ -44,7 +44,8 @@ class AccountHomeV2UiTest {
         state: AccountUiState,
         onGuest: () -> Unit = {},
         onRole: () -> Unit = {},
-        onRefresh: () -> Unit = {}
+        onRefresh: () -> Unit = {},
+        onGoogle: () -> Unit = {}
     ) {
         compose.setContent {
             MusicFlowTheme {
@@ -57,7 +58,7 @@ class AccountHomeV2UiTest {
                     onDisplayNameChange = {},
                     onSignIn = {},
                     onSignUp = {},
-                    onGoogleSignIn = {},
+                    onGoogleSignIn = onGoogle,
                     onSaveProfile = {},
                     onSignOut = {},
                     onSyncLibrary = {},
@@ -81,6 +82,35 @@ class AccountHomeV2UiTest {
         compose.onNodeWithTag("account-signin-tab").assertExists()
         compose.onNodeWithTag("account-home-tier").assertDoesNotExist()
         compose.onNodeWithTag("account-google-disabled").assertDoesNotExist()
+    }
+
+    @Test fun googleSignInAppearsOnlyWhenProviderIsReallyEnabled() {
+        var launches = 0
+        render(
+            AccountUiState(loading = false, configured = true, googleAvailable = true),
+            onGoogle = { launches++ }
+        )
+        compose.onNodeWithTag("account-google-signin")
+            .performScrollTo().performClick()
+        assertEquals(1, launches)
+    }
+
+    @Test fun unavailableGoogleProviderIsExplainedWithoutDeadEndButton() {
+        render(
+            AccountUiState(loading = false, configured = true, googleAvailable = false)
+        )
+        compose.onNodeWithTag("account-google-signin").assertDoesNotExist()
+        compose.onNodeWithTag("account-google-unavailable").assertExists()
+    }
+
+    @Test fun localDemoNeverOffersRealGoogleSignIn() {
+        render(
+            AccountUiState(
+                loading = false, configured = true, demoMode = true,
+                googleAvailable = true
+            )
+        )
+        compose.onNodeWithTag("account-google-signin").assertDoesNotExist()
     }
 
     @Test fun accountHidesProjectDemoUntilUserExplicitlyRequestsIt() {

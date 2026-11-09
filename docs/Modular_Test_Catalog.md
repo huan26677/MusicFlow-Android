@@ -21,7 +21,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 | `HISTORY` | Lịch sử nghe và Room recent | 17 | PLAYBACK |
 | `LYRICS` | Lời bài hát LRC, đồng bộ lời và SAF | 9 | MEDIA_SAF, PLAYBACK, UI_ACCESS |
 | `AUTH` | Đăng nhập, khách, OAuth, hồ sơ | 40 | UI_ACCESS |
-| `ROLES_ADMIN` | Owner, quản trị viên, Developer và RBAC | 81 | AUTH, UI_ACCESS |
+| `ROLES_ADMIN` | Owner, quản trị viên, Developer và RBAC | 84 | AUTH, UI_ACCESS |
 | `CREATOR` | Creator, draft, xét duyệt nội dung | 24 | AUTH, ROLES_ADMIN, UI_ACCESS |
 | `BILLING_DEMO` | Premium và thanh toán giả lập | 17 | AUTH, ROLES_ADMIN, UI_ACCESS |
 | `CLOUD_SYNC` | Cloud library/history và đồng bộ Supabase demo | 8 | AUTH, PLAYLIST, HISTORY |
@@ -657,11 +657,14 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 - `ROLES_ADMIN/AccountHomeV2UiTest#demoSessionKeepsOfflineOnlyTools`
 - `ROLES_ADMIN/AccountHomeV2UiTest#developerSeesDebugQaShortcutOnly`
 - `ROLES_ADMIN/AccountHomeV2UiTest#freeListenerSeesCompactActionsAndOpensDetailsOnDemand`
+- `ROLES_ADMIN/AccountHomeV2UiTest#googleSignInAppearsOnlyWhenProviderIsReallyEnabled`
 - `ROLES_ADMIN/AccountHomeV2UiTest#guestCanChooseOfflineListeningBeforeSignIn`
+- `ROLES_ADMIN/AccountHomeV2UiTest#localDemoNeverOffersRealGoogleSignIn`
 - `ROLES_ADMIN/AccountHomeV2UiTest#moderatorSeesReviewShortcutWithoutAdminClaim`
 - `ROLES_ADMIN/AccountHomeV2UiTest#ownerAndModeratorHaveDifferentRelevantActions`
 - `ROLES_ADMIN/AccountHomeV2UiTest#premiumNeverShowsAdminToolsWithoutBackendRole`
 - `ROLES_ADMIN/AccountHomeV2UiTest#signupShowsEmailConfirmationInstructionsWithoutAdminSettings`
+- `ROLES_ADMIN/AccountHomeV2UiTest#unavailableGoogleProviderIsExplainedWithoutDeadEndButton`
 - `ROLES_ADMIN/AccountHomeV2UiTest#unconfiguredOnlineAccountExplainsOfflineAlternativeAndOpensLocalDemoForm`
 
 **AccountJourneysV4UiTest** (`app/src/androidTest/java/com/example/musicflow/ui/AccountJourneysV4UiTest.kt`; android)

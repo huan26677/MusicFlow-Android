@@ -160,6 +160,11 @@ __pycache__/
 !/qa-logs/musicflow-v15_4-signed-smoke-api36.log
 !/qa-logs/musicflow-v15_4-signed-upgrade-api36.log
 
+# v15.5 physical-device QA: deny raw instrumentation and screenshots.
+# Only the explicit screened summary may be committed.
+/qa-logs/*v15_5*
+!/qa-logs/musicflow-v15_5-phone-acceptance-api30.log
+
 # Operating system
 .DS_Store
 Thumbs.db

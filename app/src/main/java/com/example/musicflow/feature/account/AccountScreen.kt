@@ -468,8 +468,32 @@ fun AccountScreen(
                 Text(it, style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
             }
-            // Do not advertise a disabled Google sign-in: it has no usable workflow
-            // in this demo. OAuth implementation stays dormant until officially enabled.
+            if (!state.demoMode && state.configured &&
+                state.authMode == AccountAuthMode.SIGN_IN
+            ) {
+                when (state.googleAvailable) {
+                    true -> OutlinedButton(
+                        onClick = onGoogleSignIn,
+                        enabled = !state.loading,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                            .testTag("account-google-signin")
+                    ) {
+                        Text("Tiếp tục bằng Google")
+                    }
+                    false -> Text(
+                        "Đăng nhập Google chưa được bật trên máy chủ MusicFlow. " +
+                            "Bạn vẫn có thể dùng email hoặc nghe nhạc offline.",
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.testTag("account-google-unavailable")
+                    )
+                    null -> Text(
+                        "Chưa thể kiểm tra đăng nhập Google. " +
+                            "Hãy kiểm tra Internet rồi mở lại Tài khoản.",
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.testTag("account-google-check-pending")
+                    )
+                }
+            }
         } else {
             val identity = state.account
             val overview = AccountHomePlan.overview(identity, state.demoSession, BuildConfig.DEBUG)
