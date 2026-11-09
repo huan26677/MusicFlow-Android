@@ -145,7 +145,7 @@ class OnlineCatalogViewModel(
             } catch (error: Exception) {
                 val explanation = when (error) {
                     is IOException ->
-                        "Không thể kết nối máy chủ. Kiểm tra Internet hoặc API."
+                        "Không thể tải nhạc online. Kiểm tra Internet rồi chọn Thử lại."
                     else -> error.message ?: "Không thể tải danh mục online."
                 }
                 _uiState.update { current ->

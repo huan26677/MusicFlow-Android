@@ -128,6 +128,13 @@ __pycache__/
 !/qa-logs/musicflow-v14-signed-navigation-api36.log
 !/qa-logs/musicflow-v14-signed-compose6-limitation.log
 
+# v15: retain only reviewed QA summaries; raw instrumentation stays local.
+/qa-logs/*v15*
+!/qa-logs/musicflow-v15-ux-community-api36.log
+!/qa-logs/musicflow-v15-ux-impacted-api36.log
+!/qa-logs/musicflow-v15-signed-package.log
+!/qa-logs/musicflow-v15-signed-smoke-api36.log
+
 # Operating system
 .DS_Store
 Thumbs.db

@@ -153,7 +153,8 @@ internal fun AccountRolePanel(
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (_: Exception) {
-            error = "Không xác minh được quyền với Supabase. Các thao tác quản trị bị khóa."
+            error = "Chưa xác minh được quyền của tài khoản. " +
+                "Các thao tác quản trị tạm khóa. Kiểm tra Internet rồi thử lại."
         } finally {
             checked = true
         }
@@ -305,7 +306,7 @@ internal fun AccountRolePanel(
                         auditLoaded = false
                         runAction("musicflow_my_access") { raw ->
                             access = MusicFlowAccess.fromResponse(JSONObject(raw))
-                            info = "Đã kiểm tra lại vai trò trực tiếp từ Supabase."
+                            info = "Đã cập nhật vai trò và quyền truy cập."
                         }
                     },
                     modifier = Modifier.fillMaxWidth().testTag("role-access-refresh")

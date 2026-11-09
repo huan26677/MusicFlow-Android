@@ -20,7 +20,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 | `SMART` | Smart Library và gợi ý thư viện | 19 | LIBRARY, FAVORITES, HISTORY, UI_ACCESS |
 | `HISTORY` | Lịch sử nghe và Room recent | 17 | PLAYBACK |
 | `LYRICS` | Lời bài hát LRC, đồng bộ lời và SAF | 9 | MEDIA_SAF, PLAYBACK, UI_ACCESS |
-| `AUTH` | Đăng nhập, khách, OAuth, hồ sơ | 36 | UI_ACCESS |
+| `AUTH` | Đăng nhập, khách, OAuth, hồ sơ | 40 | UI_ACCESS |
 | `ROLES_ADMIN` | Owner, quản trị viên, Developer và RBAC | 74 | AUTH, UI_ACCESS |
 | `CREATOR` | Creator, draft, xét duyệt nội dung | 23 | AUTH, ROLES_ADMIN, UI_ACCESS |
 | `BILLING_DEMO` | Premium và thanh toán giả lập | 17 | AUTH, ROLES_ADMIN, UI_ACCESS |
@@ -31,7 +31,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 | `DEMO_CENTER` | Trung tâm demo và điều hướng theo tài khoản | 11 | AUTH, ROLES_ADMIN, BILLING_DEMO |
 | `RELEASE_BACKUP` | Sao lưu, versioning, APK ký QA và nâng cấp | 15 | MEDIA_SAF, PLAYLIST, FAVORITES |
 | `COMMUNITY_RATING` | Chấm sao 1–5 và dữ liệu Demo cộng đồng | 11 | ONLINE_RIGHTS |
-| `COMMUNITY_COMMENTS` | Đọc, đăng, sửa, xóa bình luận và báo cáo | 15 | COMMUNITY_RATING, AUTH, UI_ACCESS |
+| `COMMUNITY_COMMENTS` | Đọc, đăng, sửa, xóa bình luận và báo cáo | 23 | COMMUNITY_RATING, AUTH, UI_ACCESS |
 | `COMMUNITY_MODERATION` | Kiểm duyệt bình luận, phân quyền và nhật ký | 11 | COMMUNITY_COMMENTS, ROLES_ADMIN |
 
 ## Test cases by module
@@ -577,7 +577,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 
 ### AUTH — Đăng nhập, khách, OAuth, hồ sơ
 
-**Source paths:** `app/src/main/java/com/example/musicflow/core/account/AccountApi.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountOAuth*`, `app/src/main/java/com/example/musicflow/core/account/GoogleOAuth*`, `app/src/main/java/com/example/musicflow/core/account/DemoAccountStore.kt`, `app/src/main/java/com/example/musicflow/core/account/DemoPasswordHash.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountAuth*`, `app/src/main/java/com/example/musicflow/feature/account/AccountScreen.kt`, `app/src/main/java/com/example/musicflow/feature/account/AccountViewModel.kt`, `app/src/main/java/com/example/musicflow/feature/account/AccountFormValidation.kt`
+**Source paths:** `app/src/main/java/com/example/musicflow/core/account/AccountApi.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountOAuth*`, `app/src/main/java/com/example/musicflow/core/account/GoogleOAuth*`, `app/src/main/java/com/example/musicflow/core/account/DemoAccountStore.kt`, `app/src/main/java/com/example/musicflow/core/account/DemoPasswordHash.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountAuth*`, `app/src/main/java/com/example/musicflow/feature/account/AccountScreen.kt`, `app/src/main/java/com/example/musicflow/feature/account/AccountViewModel.kt`, `app/src/main/java/com/example/musicflow/feature/account/AccountFormValidation.kt`, `app/src/main/java/com/example/musicflow/feature/account/AccountFriendlyErrors.kt`
 
 **Downstream contract/smoke:** `AUTH/AccountAuthUiTest#signupTabInlineErrorsGoogleDisabledAndGuestNavigation`, `AUTH/AccountAuthErrorLabelsTest#doesNotEchoUnknownServerErrorData`.
 
@@ -634,6 +634,13 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 - `AUTH/AccountFormValidationTest#signinDoesNotRequireConfirmation`
 - `AUTH/AccountFormValidationTest#signupAcceptsMatchingPasswordAndTrimmedEmail`
 - `AUTH/AccountFormValidationTest#signupRequiresMatchingPassword`
+
+**AccountFriendlyErrorsTest** (`app/src/test/java/com/example/musicflow/feature/account/AccountFriendlyErrorsTest.kt`; jvm)
+
+- `AUTH/AccountFriendlyErrorsTest#emailConfirmationHasClearNextStep`
+- `AUTH/AccountFriendlyErrorsTest#incorrectPasswordHasFriendlyNextStep`
+- `AUTH/AccountFriendlyErrorsTest#rawBackendDetailsAreNeverExposedForUnexpectedErrors`
+- `AUTH/AccountFriendlyErrorsTest#registeredEmailExplainsHowToProceed`
 
 
 ### ROLES_ADMIN — Owner, quản trị viên, Developer và RBAC
@@ -1098,7 +1105,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 
 ### COMMUNITY_COMMENTS — Đọc, đăng, sửa, xóa bình luận và báo cáo
 
-**Source paths:** `app/src/main/java/com/example/musicflow/core/community/SupabaseCommunityRepository.kt`, `app/src/main/java/com/example/musicflow/feature/community/CommunityRoute.kt`, `docs/sql/musicflow_community_delete_report_cleanup_v14_2.sql`
+**Source paths:** `app/src/main/java/com/example/musicflow/core/community/SupabaseCommunityRepository.kt`, `app/src/main/java/com/example/musicflow/feature/community/CommunityRoute.kt`, `app/src/main/java/com/example/musicflow/feature/community/CommunityUiPresentation.kt`, `docs/sql/musicflow_community_delete_report_cleanup_v14_2.sql`
 
 **Downstream contract/smoke:** `COMMUNITY_COMMENTS/CommunityDemoUiTest#demoRatingAndCommentActionsStayLocal`, `COMMUNITY_COMMENTS/SignedCommunityNavigationUiTest#guestReachesCommunityDemoFromRealHomeNavigation`, `COMMUNITY_COMMENTS/CommunityRulesTest#onlineIdsMustBeCanonicalUuidNeverLocalSafUri`.
 
@@ -1107,6 +1114,10 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 - `COMMUNITY_COMMENTS/CommunityDemoUiTest#demoDoesNotPretendToBeOnlineUser`
 - `COMMUNITY_COMMENTS/CommunityDemoUiTest#demoRatingAndCommentActionsStayLocal`
 - `COMMUNITY_COMMENTS/CommunityDemoUiTest#emptyOnlineCatalogOffersDemoWithoutPublishedTracks`
+- `COMMUNITY_COMMENTS/CommunityDemoUiTest#largeTextCanReachDemoFromEmptyManagedCatalog`
+- `COMMUNITY_COMMENTS/CommunityDemoUiTest#largeTextKeepsAllRatingsAndCommentComposerReachable`
+- `COMMUNITY_COMMENTS/CommunityDemoUiTest#managedOnlineSourceDoesNotShowTechnicalServerField`
+- `COMMUNITY_COMMENTS/CommunityDemoUiTest#manuallyConfiguredSourceStillOffersExistingEditor`
 
 **SignedCommunityNavigationUiTest** (`app/src/androidTest/java/com/example/musicflow/ui/SignedCommunityNavigationUiTest.kt`; android)
 
@@ -1128,6 +1139,13 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 - `COMMUNITY_COMMENTS/DemoCommunityStoreTest#demoSeedIsClearlyFlaggedAndDoesNotUseCloudId`
 - `COMMUNITY_COMMENTS/DemoCommunityStoreTest#demoUsesPageSizeAndFreshInstanceResets`
 - `COMMUNITY_COMMENTS/DemoCommunityStoreTest#myCommentCanBeAddedEditedAndDeleted`
+
+**CommunityUiPresentationTest** (`app/src/test/java/com/example/musicflow/feature/community/CommunityUiPresentationTest.kt`; jvm)
+
+- `COMMUNITY_COMMENTS/CommunityUiPresentationTest#demoTimeAndMalformedInputStayReadable`
+- `COMMUNITY_COMMENTS/CommunityUiPresentationTest#errorsNeverExposeRawBackendDetails`
+- `COMMUNITY_COMMENTS/CommunityUiPresentationTest#loginAndConnectionErrorsHaveActions`
+- `COMMUNITY_COMMENTS/CommunityUiPresentationTest#serverDatesAreShownInVietnameseOrderAndLocalZone`
 
 
 ### COMMUNITY_MODERATION — Kiểm duyệt bình luận, phân quyền và nhật ký

@@ -117,10 +117,11 @@
         "app/src/main/java/com/example/musicflow/core/account/AccountAuth*",
         "app/src/main/java/com/example/musicflow/feature/account/AccountScreen.kt",
         "app/src/main/java/com/example/musicflow/feature/account/AccountViewModel.kt",
-        "app/src/main/java/com/example/musicflow/feature/account/AccountFormValidation.kt"
+        "app/src/main/java/com/example/musicflow/feature/account/AccountFormValidation.kt",
+        "app/src/main/java/com/example/musicflow/feature/account/AccountFriendlyErrors.kt"
       ],
       "requires": ["UI_ACCESS"],
-      "tests": ["**/AccountAuthUiTest.kt", "**/feature/account/AccountFormValidationTest.kt", "**/core/account/*Auth*Test.kt", "**/core/account/GoogleOAuthFlowTest.kt", "**/core/account/DemoPasswordHashTest.kt", "**/ui/AccountJourneysV4UiTest.kt"],
+      "tests": ["**/AccountAuthUiTest.kt", "**/feature/account/AccountFormValidationTest.kt", "**/feature/account/AccountFriendlyErrorsTest.kt", "**/core/account/*Auth*Test.kt", "**/core/account/GoogleOAuthFlowTest.kt", "**/core/account/DemoPasswordHashTest.kt", "**/ui/AccountJourneysV4UiTest.kt"],
       "smoke": ["AccountAuthUiTest#signupTabInlineErrorsGoogleDisabledAndGuestNavigation", "AccountAuthErrorLabelsTest#doesNotEchoUnknownServerErrorData"]
     },
     {
@@ -226,10 +227,11 @@
       "source": [
         "app/src/main/java/com/example/musicflow/core/community/SupabaseCommunityRepository.kt",
         "app/src/main/java/com/example/musicflow/feature/community/CommunityRoute.kt",
+        "app/src/main/java/com/example/musicflow/feature/community/CommunityUiPresentation.kt",
         "docs/sql/musicflow_community_delete_report_cleanup_v14_2.sql"
       ],
       "requires": ["COMMUNITY_RATING", "AUTH", "UI_ACCESS"],
-      "tests": ["**/ui/CommunityDemoUiTest.kt", "**/ui/SignedCommunityNavigationUiTest.kt", "**/core/community/CommunityRulesTest.kt", "**/core/community/DemoCommunityStoreTest.kt"],
+      "tests": ["**/ui/CommunityDemoUiTest.kt", "**/ui/SignedCommunityNavigationUiTest.kt", "**/core/community/CommunityRulesTest.kt", "**/core/community/DemoCommunityStoreTest.kt", "**/feature/community/CommunityUiPresentationTest.kt"],
       "smoke": ["CommunityDemoUiTest#demoRatingAndCommentActionsStayLocal", "SignedCommunityNavigationUiTest#guestReachesCommunityDemoFromRealHomeNavigation", "CommunityRulesTest#onlineIdsMustBeCanonicalUuidNeverLocalSafUri"]
     },
     {

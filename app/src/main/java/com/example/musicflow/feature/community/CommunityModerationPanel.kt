@@ -1,6 +1,7 @@
 package com.example.musicflow.feature.community
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,7 +20,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.musicflow.core.community.CommunityRules
 import kotlinx.coroutines.CancellationException
@@ -53,8 +57,8 @@ fun CommunityModerationPanel(
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (failure: Exception) {
-                error = "Không thể tải báo cáo. Tài khoản có thể chưa được cấp quyền: " +
-                    (failure.message ?: "Thử lại.")
+                error = "Không thể tải báo cáo. Hãy kiểm tra kết nối " +
+                    "hoặc quyền quản trị rồi thử lại."
             } finally {
                 busy = false
             }
@@ -63,9 +67,10 @@ fun CommunityModerationPanel(
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         HorizontalDivider()
-        Text("Báo cáo bình luận",style = MaterialTheme.typography.titleMedium)
-        Text("Chỉ Owner, quản trị viên có quyền hoặc Moderator được Owner cấp " +
-            "quyền mới xử lý được báo cáo.",style = MaterialTheme.typography.bodySmall)
+        Text("Báo cáo bình luận",style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.semantics { heading() })
+        Text("Bạn chỉ có thể xử lý báo cáo khi đã được cấp quyền kiểm duyệt.",
+            style = MaterialTheme.typography.bodySmall)
         OutlinedButton(
             onClick = { load() },enabled = !busy,
             modifier = Modifier.testTag("community-moderation-load")
@@ -74,19 +79,32 @@ fun CommunityModerationPanel(
         notice?.let { Text(it,color = MaterialTheme.colorScheme.primary) }
         if (loaded && rows.isEmpty()) Text("Không có bình luận cần xử lý.")
         rows.forEach { item ->
-            Text("${item.optString("track_title")} · ${item.optString("created_at")}")
+            Text("${item.optString("track_title")} · " +
+                CommunityUiPresentation.dateLabel(item.optString("created_at")))
             Text(item.optString("body"),style = MaterialTheme.typography.bodyMedium)
             Text("Báo cáo: ${item.optString("reason")}",
                 style = MaterialTheme.typography.bodySmall)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(
-                    enabled = !busy,
-                    onClick = { pending = item.optString("comment_id") to true }
-                ) { Text("Ẩn bình luận") }
-                OutlinedButton(
-                    enabled = !busy,
-                    onClick = { pending = item.optString("comment_id") to false }
-                ) { Text("Bỏ qua báo cáo") }
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val compact = maxWidth < 350.dp || LocalDensity.current.fontScale >= 1.5f
+                val actions: @Composable () -> Unit = {
+                    Button(
+                        enabled = !busy,
+                        onClick = { pending = item.optString("comment_id") to true }
+                    ) { Text("Ẩn bình luận") }
+                    OutlinedButton(
+                        enabled = !busy,
+                        onClick = { pending = item.optString("comment_id") to false }
+                    ) { Text("Bỏ qua báo cáo") }
+                }
+                if (compact) {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        actions()
+                    }
+                } else {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        actions()
+                    }
+                }
             }
             HorizontalDivider()
         }
@@ -122,11 +140,13 @@ fun CommunityModerationPanel(
                                 rows = rows.filterNot {
                                     it.optString("comment_id") == commentId
                                 }
-                                notice = "Quyết định đã được ghi vào nhật ký kiểm duyệt."
+                                notice = if (hide) "Đã ẩn bình luận và xử lý báo cáo."
+                                    else "Đã bỏ qua báo cáo. Bình luận giữ nguyên trạng thái."
                             } catch (cancelled: CancellationException) {
                                 throw cancelled
                             } catch (failure: Exception) {
-                                error = failure.message ?: "Không thể xử lý báo cáo."
+                                error = "Không thể xử lý báo cáo. " +
+                                    "Kiểm tra quyền quản trị hoặc thử lại sau."
                             } finally {
                                 busy = false
                             }

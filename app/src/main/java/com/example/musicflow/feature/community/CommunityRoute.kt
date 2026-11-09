@@ -1,8 +1,10 @@
 package com.example.musicflow.feature.community
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -27,8 +29,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -64,6 +68,7 @@ fun CommunityRoute(
     var pendingReport by remember { mutableStateOf<String?>(null) }
     var reportReason by remember { mutableStateOf("") }
     var offset by remember { mutableStateOf(0) }
+    val contentScroll = rememberScrollState()
 
     suspend fun reload(page: Int = 0, append: Boolean = false) {
         val updated = if (demo) demoStore.read(page) else realRepository.read(trackId,page)
@@ -84,7 +89,9 @@ fun CommunityRoute(
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (failure: Exception) {
-                error = failure.message ?: "Không thể hoàn thành. Hãy thử lại."
+                error = CommunityUiPresentation.errorLabel(
+                    failure, "Không thể hoàn thành thao tác. Hãy thử lại."
+                )
             } finally {
                 busy = false
             }
@@ -97,31 +104,52 @@ fun CommunityRoute(
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (failure: Exception) {
-            error = failure.message ?: "Không thể tải đánh giá và bình luận."
+            error = CommunityUiPresentation.errorLabel(
+                failure, "Không thể tải đánh giá và bình luận. Hãy thử lại."
+            )
         } finally {
             busy = false
         }
     }
 
     Dialog(onDismissRequest = { if (!busy) onClose() }) {
-        Surface(shape = MaterialTheme.shapes.large) {
+        Surface(
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(0.88f).heightIn(max = 640.dp),
+            shape = MaterialTheme.shapes.large
+        ) {
             Column(
-                modifier = Modifier.fillMaxWidth().heightIn(max = 620.dp)
-                    .verticalScroll(rememberScrollState()).padding(16.dp)
+                modifier = Modifier.fillMaxWidth().padding(16.dp)
                     .testTag("community-panel"),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("Đánh giá & bình luận",style = MaterialTheme.typography.titleLarge)
-                    TextButton(onClick = onClose,enabled = !busy) { Text("Đóng") }
+                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                    val compact = maxWidth < 340.dp ||
+                        LocalDensity.current.fontScale >= 1.5f
+                    val titleLabel: @Composable () -> Unit = {
+                        Text("Đánh giá & bình luận",
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.semantics { heading() })
+                    }
+                    val closeButton: @Composable () -> Unit = {
+                        TextButton(onClick = onClose, enabled = !busy) { Text("Đóng") }
+                    }
+                    if (compact) {
+                        Column { titleLabel(); closeButton() }
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) { titleLabel(); closeButton() }
+                    }
                 }
+                Column(
+                    modifier = Modifier.fillMaxWidth().weight(1f).verticalScroll(contentScroll),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
                 Text(title,style = MaterialTheme.typography.titleMedium)
                 if (demo) {
                     Text(
-                        "CHẾ ĐỘ DEMO — dữ liệu mẫu, không gửi lên Supabase.",
+                        "CHẾ ĐỘ DEMO — dữ liệu mẫu, không gửi lên tài khoản trực tuyến.",
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.testTag("community-demo-label")
                     )
@@ -137,81 +165,51 @@ fun CommunityRoute(
                             "${current.ratingCount} lượt đánh giá",
                         modifier = Modifier.testTag("community-rating-summary")
                     )
-                    Text("Đánh giá của bạn",style = MaterialTheme.typography.titleSmall)
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        (1..5).forEach { stars ->
-                            TextButton(
-                                enabled = !busy && current.authenticated,
-                                onClick = {
-                                    action {
-                                        if (demo) demoStore.rate(stars)
-                                        else realRepository.rate(trackId,stars)
-                                        info = "Đã lưu ${stars} sao."
+                    Text("Đánh giá của bạn",style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.semantics { heading() })
+                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                        val largeText = LocalDensity.current.fontScale >= 1.5f
+                        val groups = if (maxWidth < 360.dp || largeText) {
+                            listOf(1..3, 4..5)
+                        } else listOf(1..5)
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            groups.forEach { group ->
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    group.forEach { stars ->
+                                        TextButton(
+                                            enabled = !busy && current.authenticated,
+                                            onClick = {
+                                                action {
+                                                    if (demo) demoStore.rate(stars)
+                                                    else realRepository.rate(trackId,stars)
+                                                    info = "Đã lưu ${stars} sao."
+                                                }
+                                            },
+                                            modifier = Modifier.heightIn(min = 48.dp)
+                                                .semantics {
+                                                    contentDescription = "Đánh giá $stars sao"
+                                                    stateDescription = if (stars == current.myStars)
+                                                        "Đã chọn" else "Chưa chọn"
+                                                }.testTag("community-rate-$stars")
+                                        ) {
+                                            Text(if (stars <= current.myStars) "★" else "☆",
+                                                style = MaterialTheme.typography.titleLarge)
+                                        }
                                     }
-                                },
-                                modifier = Modifier.semantics {
-                                    contentDescription = "Đánh giá $stars sao"
-                                    stateDescription = if (stars == current.myStars)
-                                        "Đã chọn" else "Chưa chọn"
-                                }.testTag("community-rate-$stars")
-                            ) {
-                                Text(if (stars <= current.myStars) "★" else "☆",
-                                    style = MaterialTheme.typography.titleLarge)
+                                }
                             }
                         }
                     }
                     if (!current.authenticated) {
                         Text(
                             "Bạn có thể đọc bình luận. Để chấm sao hoặc viết bình luận, " +
-                                "hãy đăng nhập tài khoản Supabase thật ở mục Tài khoản.",
+                                "hãy đăng nhập tài khoản trực tuyến ở mục Tài khoản.",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
                     HorizontalDivider()
-                    Text(
-                        "Bình luận (${current.commentCount})",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    if (current.comments.isEmpty()) {
-                        Text("Chưa có bình luận nào. Hãy là người đầu tiên chia sẻ cảm nhận.")
-                    }
-                    current.comments.forEach { comment ->
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(
-                                "${comment.displayName} · ${comment.createdAt}",
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                            Text(comment.body)
-                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                if (comment.mine) {
-                                    TextButton(onClick = {
-                                        editId = comment.id
-                                        commentInput = comment.body
-                                    },enabled = !busy) { Text("Sửa") }
-                                    TextButton(onClick = {
-                                        pendingDelete = comment.id
-                                    },enabled = !busy) { Text("Xóa") }
-                                } else if (current.authenticated) {
-                                    TextButton(onClick = {
-                                        pendingReport = comment.id
-                                        reportReason = ""
-                                    },enabled = !busy) { Text("Báo cáo") }
-                                }
-                            }
-                        }
-                        HorizontalDivider()
-                    }
-                    if (current.comments.size < current.commentCount &&
-                        current.comments.size < 1020) {
-                        OutlinedButton(
-                            onClick = {
-                                action(refreshAfter = false) {
-                                    reload(offset + CommunityRules.PAGE_SIZE,append = true)
-                                }
-                            },
-                            enabled = !busy,modifier = Modifier.testTag("community-load-more")
-                        ) { Text("Xem thêm bình luận") }
-                    }
+                    // Keep the existing composer before the growing comment history.
+                    // This makes it reachable even at 200% text scale or with the IME.
                     if (current.authenticated) {
                         OutlinedTextField(
                             value = commentInput,
@@ -237,6 +235,7 @@ fun CommunityRoute(
                                 },
                                 enabled = !busy && commentInput.trim().isNotEmpty(),
                                 modifier = Modifier.testTag("community-comment-submit")
+                                    .heightIn(min = 48.dp)
                             ) { Text(if (editId == null) "Đăng bình luận" else "Lưu chỉnh sửa") }
                             if (editId != null) {
                                 TextButton(onClick = {
@@ -246,9 +245,57 @@ fun CommunityRoute(
                             }
                         }
                     }
+                    Text(
+                        "Bình luận (${current.commentCount})",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.semantics { heading() }
+                    )
+                    if (current.comments.isEmpty()) {
+                        Text("Chưa có bình luận nào. Hãy là người đầu tiên chia sẻ cảm nhận.")
+                    }
+                    current.comments.forEach { comment ->
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                "${comment.displayName} · " +
+                                    CommunityUiPresentation.dateLabel(comment.createdAt),
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                            Text(comment.body)
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                if (comment.mine) {
+                                    TextButton(onClick = {
+                                        editId = comment.id
+                                        commentInput = comment.body
+                                        scope.launch { contentScroll.animateScrollTo(0) }
+                                    },enabled = !busy) { Text("Sửa") }
+                                    TextButton(onClick = {
+                                        pendingDelete = comment.id
+                                    },enabled = !busy) { Text("Xóa") }
+                                } else if (current.authenticated) {
+                                    TextButton(onClick = {
+                                        pendingReport = comment.id
+                                        reportReason = ""
+                                    },enabled = !busy) { Text("Báo cáo") }
+                                }
+                            }
+                        }
+                        HorizontalDivider()
+                    }
+                    if (current.comments.size < current.commentCount &&
+                        current.comments.size < 1020) {
+                        OutlinedButton(
+                            onClick = {
+                                action(refreshAfter = false) {
+                                    reload(offset + CommunityRules.PAGE_SIZE,append = true)
+                                }
+                            },
+                            enabled = !busy,modifier = Modifier.testTag("community-load-more")
+                        ) { Text("Xem thêm bình luận") }
+                    }
                 }
                 if (snapshot == null && !busy) {
                     OutlinedButton(onClick = { action { reload() } }) { Text("Thử lại") }
+                }
                 }
             }
         }

@@ -1,12 +1,16 @@
 package com.example.musicflow.feature.online
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -35,6 +39,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
@@ -85,60 +90,82 @@ fun OnlineCatalogScreen(
     var communityTrack by remember { mutableStateOf<OnlineTrack?>(null) }
     var communityDemo by remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
+    val statusScroll = rememberScrollState()
+    val scrollStatus = state.savedEndpoint.isBlank() ||
+        (state.tracks.isEmpty() && (state.isLoaded || state.error != null))
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .then(if (scrollStatus) Modifier.verticalScroll(statusScroll) else Modifier)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                "Khám phá online",
-                style = MaterialTheme.typography.headlineSmall
-            )
-            TextButton(onClick = onBack) { Text("Quay lại") }
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val compact = maxWidth < 360.dp || LocalDensity.current.fontScale >= 1.5f
+            val title: @Composable () -> Unit = {
+                Text("Khám phá online", style = MaterialTheme.typography.headlineSmall)
+            }
+            val back: @Composable () -> Unit = {
+                TextButton(onClick = onBack) { Text("Quay lại") }
+            }
+            if (compact) {
+                Column { title(); back() }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) { title(); back() }
+            }
         }
 
         Text(
-            "Kết nối API danh mục nhạc do bạn quản lý hoặc được cấp phép. " +
-                "Chỉ phát các bài có URL HTTPS, thông tin quyền phát và ghi công " +
-                "được nhà cung cấp xác nhận. Không tự cho phép tải nhạc.",
+            if (isSupabaseManaged) {
+                "Khám phá các bài hát đã được xác nhận quyền phát. " +
+                    "Danh mục sẽ xuất hiện khi có nhạc phù hợp."
+            } else {
+                "Chỉ kết nối nguồn nhạc bạn quản lý hoặc được phép sử dụng. " +
+                    "MusicFlow không tự tải nhạc online."
+            },
             style = MaterialTheme.typography.bodyMedium
         )
-
-        OutlinedTextField(
-            value = state.endpointInput,
-            onValueChange = onEndpointChange,
-            label = { Text("Địa chỉ gốc API (HTTPS)") },
-            placeholder = { Text("https://music.example.com") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = isSupabaseManaged
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (!isSupabaseManaged) {
-                Button(
-                    onClick = onSaveEndpoint,
-                    enabled = !state.isLoading && !state.isLoadingMore &&
-                        state.endpointInput.isNotBlank()
-                ) {
-                    Text("Lưu và kết nối")
+        // The configured server URL is not actionable by everyday listeners.
+        // Keep manual source configuration intact for coursework/custom catalog.
+        if (!isSupabaseManaged) {
+            OutlinedTextField(
+                value = state.endpointInput,
+                onValueChange = onEndpointChange,
+                label = { Text("Địa chỉ nguồn nhạc (HTTPS)") },
+                placeholder = { Text("https://music.example.com") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth().testTag("online-manual-endpoint")
+            )
+        }
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val compact = maxWidth < 340.dp || LocalDensity.current.fontScale >= 1.5f
+            val actions: @Composable () -> Unit = {
+                if (!isSupabaseManaged) {
+                    Button(
+                        onClick = onSaveEndpoint,
+                        enabled = !state.isLoading && !state.isLoadingMore &&
+                            state.endpointInput.isNotBlank(),
+                        modifier = Modifier.heightIn(min = 48.dp)
+                    ) { Text("Lưu và kết nối") }
+                }
+                OutlinedButton(
+                    onClick = onRefresh,
+                    enabled = state.savedEndpoint.isNotEmpty() &&
+                        !state.isLoading && !state.isLoadingMore,
+                    modifier = Modifier.heightIn(min = 48.dp)
+                ) { Text("Tải lại") }
+                if (!isSupabaseManaged && state.savedEndpoint.isNotEmpty()) {
+                    TextButton(onClick = onClearEndpoint,
+                        modifier = Modifier.heightIn(min = 48.dp)) { Text("Ngắt") }
                 }
             }
-            OutlinedButton(
-                onClick = onRefresh,
-                enabled = state.savedEndpoint.isNotEmpty() &&
-                    !state.isLoading && !state.isLoadingMore
-            ) {
-                Text("Tải lại")
-            }
-            if (!isSupabaseManaged && state.savedEndpoint.isNotEmpty()) {
-                TextButton(onClick = onClearEndpoint) {
-                    Text("Ngắt")
-                }
+            if (compact) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { actions() }
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { actions() }
             }
         }
 
@@ -149,10 +176,14 @@ fun OnlineCatalogScreen(
                 MusicFlowStatusPanel(
                     kind = if (state.error != null) MusicFlowStatusKind.ERROR
                         else MusicFlowStatusKind.INFO,
-                    title = if (state.error != null) "Cấu hình nguồn nhạc chưa hợp lệ"
+                    title = if (state.error != null) "Chưa kết nối được nhạc online"
+                        else if (isSupabaseManaged) "Nguồn nhạc online chưa sẵn sàng"
                         else "Chưa kết nối nguồn nhạc online",
-                    description = state.error ?: "Nhập URL HTTPS của máy chủ có quyền " +
-                        "cung cấp nội dung và lưu kết nối để tải danh mục.",
+                    description = if (isSupabaseManaged) {
+                        "Danh mục hiện chưa sẵn sàng. Bạn vẫn có thể nghe nhạc " +
+                            "trên điện thoại và thử lại sau."
+                    } else state.error ?: "Nhập địa chỉ HTTPS của nguồn nhạc " +
+                        "được cấp quyền, sau đó chọn Kết nối.",
                     actionLabel = if (state.error == null && !isSupabaseManaged)
                         "Kết nối" else null,
                     onAction = if (state.error == null && !isSupabaseManaged &&
@@ -167,7 +198,7 @@ fun OnlineCatalogScreen(
                 MusicFlowStatusPanel(
                     kind = MusicFlowStatusKind.LOADING,
                     title = "Đang tải danh mục từ máy chủ...",
-                    description = "MusicFlow đang kết nối nguồn nhạc được cấu hình."
+                    description = "Danh mục sẽ xuất hiện khi tải xong."
                 )
             }
             else -> {
@@ -188,7 +219,7 @@ fun OnlineCatalogScreen(
                         title = "Chưa có bài hát online",
                         description = "Máy chủ chưa trả về bài hát nào có thể hiển thị. " +
                             "Danh mục sẽ xuất hiện khi có nội dung hợp lệ. " +
-                            "Sử dụng nút Tải lại ở phía trên để kiểm tra lần nữa."
+                            "Bạn vẫn có thể nghe nhạc offline, hoặc chọn Tải lại."
                     )
                     OutlinedButton(
                         onClick = { communityDemo = true },

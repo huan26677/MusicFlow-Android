@@ -264,8 +264,8 @@ class AccountViewModel(
                         message = if (account == null) {
                             "Đã gửi yêu cầu đăng ký. Hãy kiểm tra email để xác nhận rồi đăng nhập."
                         } else if (register) {
-                            "Đăng ký Supabase thành công! Tài khoản đã được lưu và đăng nhập."
-                        } else "Đã đăng nhập Supabase thành công."
+                            "Đã tạo tài khoản và đăng nhập thành công."
+                        } else "Đã đăng nhập thành công."
                     )
                 }
             } catch (cancelled: CancellationException) {
@@ -273,7 +273,7 @@ class AccountViewModel(
             } catch (error: Exception) {
                 _state.update {
                     it.copy(loading = false, password = "", confirmPassword = "",
-                        error = error.message ?: "Không thể xác thực tài khoản.")
+                        error = AccountFriendlyErrors.authentication(error, register))
                 }
             }
         }
@@ -324,7 +324,7 @@ class AccountViewModel(
                     it.copy(
                         loading = false, account = latest,
                         displayName = latest.displayName,
-                        message = "Đã cập nhật gói và quyền từ Supabase."
+                        message = "Đã cập nhật gói thành viên và quyền truy cập."
                     )
                 }
             } catch (cancelled: CancellationException) {

@@ -345,9 +345,9 @@ fun AccountScreen(
                 val confirmationNote = if (state.demoMode) {
                     "Tài khoản Demo được tạo ngay trên máy, không cần xác nhận email."
                 } else when (state.emailConfirmationRequired) {
-                    false -> "Không cần xác nhận email. Tài khoản được lưu trên Supabase."
+                    false -> "Bạn có thể đăng nhập ngay sau khi đăng ký."
                     true -> "Sau khi đăng ký, hãy kiểm tra hộp thư để xác nhận email trước khi đăng nhập."
-                    null -> "Tài khoản được tạo trên Supabase. Có thể cần xác nhận email."
+                    null -> "Sau khi đăng ký, có thể cần xác nhận email trước khi đăng nhập."
                 }
                 Text(
                     confirmationNote,
@@ -528,8 +528,8 @@ fun AccountScreen(
             }
             if (state.demoSession) {
                 Text(
-                    "Tài khoản Demo được lưu trên thiết bị, không dùng Supabase. " +
-                        "Tài khoản này không có quyền Premium và không đồng bộ cloud.",
+                    "Tài khoản dùng thử chỉ lưu trên thiết bị. " +
+                        "Không có Premium thật hoặc đồng bộ đám mây.",
                     style = MaterialTheme.typography.bodySmall
                 )
             } else {
