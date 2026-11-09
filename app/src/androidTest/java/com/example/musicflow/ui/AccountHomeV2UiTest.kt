@@ -154,6 +154,7 @@ class AccountHomeV2UiTest {
         compose.onNodeWithTag("account-profile-save").assertExists()
         compose.onNodeWithTag("account-cloud-toggle").performScrollTo().performClick()
         compose.onNodeWithText("Đồng bộ thư viện").assertExists()
+        compose.onNodeWithText("không tải tệp nhạc lên đám mây.", substring = true).assertExists()
         compose.onNodeWithTag("account-home-signout").assertExists()
     }
 

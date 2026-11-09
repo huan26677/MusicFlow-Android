@@ -2,6 +2,7 @@ package com.example.musicflow.ui
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -29,6 +30,8 @@ class CreatorDraftStudioUiTest {
         rule.onNodeWithTag("draft-add-credit").assertExists()
         rule.onNodeWithTag("draft-streaming-claim").assertExists()
         rule.onNodeWithTag("draft-save").assertExists()
+        rule.onNodeWithText("Lưu bản nháp riêng tư").assertExists()
+        rule.onNodeWithText("Lưu nháp lên Supabase").assertDoesNotExist()
         rule.onNodeWithTag("draft-submit").assertDoesNotExist()
     }
 

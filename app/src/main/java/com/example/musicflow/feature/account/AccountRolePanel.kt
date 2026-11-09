@@ -126,7 +126,9 @@ internal fun AccountRolePanel(
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (failure: Exception) {
-                error = failure.message ?: "Không thể hoàn thành thao tác. Kiểm tra kết nối và quyền."
+                error = AccountOperationFeedback.failure(
+                    failure, AccountOperationFeedback.Action.ADMIN
+                )
             } finally {
                 busy = false
             }
@@ -265,7 +267,8 @@ internal fun AccountRolePanel(
                 )
             }
             Column(
-                modifier = Modifier.fillMaxWidth().weight(1f).verticalScroll(contentScroll),
+                modifier = Modifier.fillMaxWidth().weight(1f).verticalScroll(contentScroll)
+                    .testTag("role-workspace-content"),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
             Text("2. Nội dung công việc", style = MaterialTheme.typography.titleLarge,

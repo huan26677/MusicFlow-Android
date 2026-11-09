@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.IOException
 
 data class OnlineCatalogUiState(
     val endpointInput: String = "",
@@ -75,7 +74,9 @@ class OnlineCatalogViewModel(
             refresh()
         } catch (error: Exception) {
             _uiState.update {
-                it.copy(error = error.message ?: "Không thể lưu máy chủ.")
+                it.copy(error = OnlineCatalogFeedback.failure(
+                    error, OnlineCatalogFeedback.Action.CONNECT
+                ))
             }
         }
     }
@@ -87,7 +88,9 @@ class OnlineCatalogViewModel(
             _uiState.value = OnlineCatalogUiState()
         } catch (error: Exception) {
             _uiState.update {
-                it.copy(error = error.message ?: "Không thể xóa máy chủ.")
+                it.copy(error = OnlineCatalogFeedback.failure(
+                    error, OnlineCatalogFeedback.Action.DISCONNECT
+                ))
             }
         }
     }
@@ -143,11 +146,9 @@ class OnlineCatalogViewModel(
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
-                val explanation = when (error) {
-                    is IOException ->
-                        "Không thể tải nhạc online. Kiểm tra Internet rồi chọn Thử lại."
-                    else -> error.message ?: "Không thể tải danh mục online."
-                }
+                val explanation = OnlineCatalogFeedback.failure(
+                    error, OnlineCatalogFeedback.Action.LOAD
+                )
                 _uiState.update { current ->
                     if (current.savedEndpoint != endpoint) return@update current
                     current.copy(

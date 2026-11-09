@@ -141,6 +141,12 @@ __pycache__/
 !/qa-logs/musicflow-v15_1-signed-package.log
 !/qa-logs/musicflow-v15_1-signed-smoke-api36.log
 
+# v15.2: only reviewed, non-sensitive QA proof summaries are portable.
+/qa-logs/*v15_2*
+!/qa-logs/musicflow-v15_2-ux-selected-api36.log
+!/qa-logs/musicflow-v15_2-signed-package.log
+!/qa-logs/musicflow-v15_2-signed-smoke-api36.log
+
 # Operating system
 .DS_Store
 Thumbs.db

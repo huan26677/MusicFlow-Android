@@ -133,12 +133,14 @@
         "app/src/main/java/com/example/musicflow/core/account/AccountReviewPlan.kt",
         "app/src/main/java/com/example/musicflow/core/account/AccountTaskGuide.kt",
         "app/src/main/java/com/example/musicflow/core/account/AccountWorkspacePlan.kt",
+        "app/src/main/java/com/example/musicflow/feature/account/AccountOperationFeedback.kt",
         "app/src/main/java/com/example/musicflow/feature/account/AccountRolePanel.kt",
         "app/src/main/java/com/example/musicflow/feature/account/OwnerDemoDashboard.kt",
         "admin-web/**"
       ],
       "requires": ["AUTH", "UI_ACCESS"],
       "tests": [
+        "**/feature/account/AccountOperationFeedbackTest.kt",
         "**/core/account/MusicFlowAccessTest.kt", "**/core/account/OwnerDemoSnapshotTest.kt",
         "**/core/account/AccountHomePlanTest.kt", "**/core/account/AccountReviewPlanTest.kt",
         "**/core/account/AccountTaskGuideTest.kt", "**/core/account/AccountWorkspacePlanTest.kt",
@@ -174,7 +176,7 @@
       "id": "ONLINE_RIGHTS", "name": "Online catalog và quyền phát có giấy phép",
       "source": ["app/src/main/java/com/example/musicflow/core/online/**", "app/src/main/java/com/example/musicflow/feature/online/**", "scripts/musicflow_licensed_upload.py"],
       "requires": ["AUTH", "UI_ACCESS"],
-      "tests": ["**/core/online/*Test.kt"],
+      "tests": ["**/core/online/*Test.kt", "**/feature/online/OnlineCatalogFeedbackTest.kt"],
       "smoke": ["OnlineRightsPolicyTest#missingRightsDefaultToDenied", "OnlineRightsPolicyTest#missingAttributionOrSourceBlocksPlayback"],
       "extra": ["py -3 scripts/test_musicflow_licensed_upload.py"]
     },

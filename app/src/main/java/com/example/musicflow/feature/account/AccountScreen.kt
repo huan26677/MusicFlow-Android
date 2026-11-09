@@ -146,7 +146,7 @@ fun AccountRoute(
                                 "THẤT BẠI (giả lập): giao dịch bị từ chối; gói hiện tại giữ nguyên."
                         }
                     }.onFailure { error ->
-                        feedback = error.message ?: "Không lưu được giao dịch mô phỏng."
+                        feedback = "Không lưu được giao dịch mô phỏng. Hãy thử lại."
                     }
                 },
                 onCancel = {
@@ -154,7 +154,9 @@ fun AccountRoute(
                         .onSuccess {
                             receipt = billingStore.receipt(scope)
                             feedback = "Đã hủy gói Premium mô phỏng. Gói thật không thay đổi."
-                        }.onFailure { feedback = it.message }
+                        }.onFailure {
+                            feedback = "Không hủy được gói mô phỏng. Hãy thử lại."
+                        }
                 },
                 onReset = {
                     runCatching { billingStore.reset(scope) }
@@ -283,7 +285,7 @@ fun AccountScreen(
             }
             if (state.demoMode) {
                 Text("Chế độ Demo chỉ lưu tài khoản trên thiết bị. Không gửi email, " +
-                    "không tạo phiên Supabase và không cấp quyền Premium/quản trị thật.",
+                    "không tạo phiên đăng nhập trực tuyến và không cấp quyền Premium/quản trị thật.",
                     modifier = Modifier.testTag("account-auth-demo-explanation"))
             }
             BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -539,8 +541,8 @@ fun AccountScreen(
                 modifier = Modifier.fillMaxWidth().testTag("account-cloud-toggle")
             ) { Text(if (cloudExpanded) "Thu gọn đồng bộ đám mây" else "Đồng bộ và bản sao đám mây") }
             if (cloudExpanded) {
-            Text("Đồng bộ Playlist và Favorites (thủ công). Chỉ gửi tên bài, " +
-                "nghệ sĩ và danh sách phát; không tải file nhạc lên cloud.")
+            Text("Đồng bộ thủ công danh sách phát và bài yêu thích. Chỉ gửi tên bài, " +
+                "nghệ sĩ và danh sách phát; không tải tệp nhạc lên đám mây.")
             Button(
                 onClick = onSyncLibrary,
                 enabled = !state.loading && !state.syncing
@@ -553,7 +555,7 @@ fun AccountScreen(
                 enabled = !state.loading && !state.syncing
             ) { Text("Đồng bộ lịch sử nghe") }
             Text("Đồng bộ thủ công: tên bài, nghệ sĩ, thời điểm nghe; " +
-                "Free chỉ xem 30 ngày, Premium xem dữ liệu cloud còn lưu.",
+                "Free chỉ xem 30 ngày, Premium xem dữ liệu còn lưu trên đám mây.",
                 style = MaterialTheme.typography.bodySmall)
             state.syncSummary?.let { summary ->
                 Text("Bài chưa liên kết: ${summary.pending.size}",
@@ -578,25 +580,25 @@ fun AccountScreen(
                         }
                     }
                 }
-                Text("Bản sao cloud (xóa không ảnh hưởng dữ liệu trên máy)",
+                Text("Bản sao trên đám mây (xóa không ảnh hưởng dữ liệu trên thiết bị)",
                     style = MaterialTheme.typography.titleMedium)
                 summary.cloudPlaylists.take(30).forEach { playlist ->
                     TextButton(
                         enabled = !state.syncing,
                         onClick = { confirming = "playlist" to playlist.id }
-                    ) { Text("Xóa cloud: ${playlist.name}") }
+                    ) { Text("Xóa bản sao đám mây: ${playlist.name}") }
                 }
                 summary.cloudFavorites.take(30).forEach { favorite ->
                     TextButton(
                         enabled = !state.syncing,
                         onClick = { confirming = "favorite" to favorite.key }
-                    ) { Text("Xóa cloud: ${favorite.title}") }
+                    ) { Text("Xóa bản sao đám mây: ${favorite.title}") }
                 }
             }
             Text("Bài nhạc ở điện thoại khác chỉ được liên kết lại nếu có " +
-                "một bài trùng duy nhất trên máy này. Không xóa Playlist local.")
+                "một bài trùng duy nhất trên máy này. Không xóa danh sách phát trên thiết bị.")
             Text("Premium thật do máy chủ xác nhận; thanh toán demo chỉ là " +
-                "mô phỏng cục bộ, không mở quyền cloud hay đồng bộ tự động.")
+                "mô phỏng trên thiết bị, không mở quyền đám mây hay đồng bộ tự động.")
             }
             }
         }
@@ -669,15 +671,15 @@ fun AccountScreen(
     confirming?.let { (type, id) ->
         AlertDialog(
             onDismissRequest = { confirming = null },
-            title = { Text("Xóa bản sao trên cloud?") },
-            text = { Text("Thao tác này đánh dấu mục đã xóa trên Supabase; " +
-                "bản lưu trên máy sẽ không bị xóa.") },
+            title = { Text("Xóa bản sao trên đám mây?") },
+            text = { Text("Mục sẽ được đánh dấu đã xóa trên đám mây. " +
+                "Dữ liệu trên thiết bị của bạn vẫn giữ nguyên.") },
             confirmButton = {
                 TextButton(onClick = {
                     if (type == "playlist") onDeleteCloudPlaylist(id)
                     else onDeleteCloudFavorite(id)
                     confirming = null
-                }) { Text("Xóa trên cloud") }
+                }) { Text("Xóa bản sao đám mây") }
             },
             dismissButton = {
                 TextButton(onClick = { confirming = null }) { Text("Hủy") }

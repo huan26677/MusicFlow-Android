@@ -197,11 +197,13 @@ internal fun CreatorDraftStudio(
                 hasLoaded = true
                 savedSnapshot = snapshot()
                 editorDirty = false
-                info = "Đã lưu nháp riêng trên Supabase; chưa xuất bản."
+                info = "Đã lưu bản nháp riêng tư trên đám mây; chưa xuất bản."
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (failure: Exception) {
-                error = failure.message ?: "Không lưu được bản nháp."
+                error = AccountOperationFeedback.failure(
+                    failure, AccountOperationFeedback.Action.DRAFT_SAVE
+                )
             } finally { busy = false }
         }
     }
@@ -225,7 +227,9 @@ internal fun CreatorDraftStudio(
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (failure: Exception) {
-                error = failure.message ?: "Chưa thể gửi xét duyệt."
+                error = AccountOperationFeedback.failure(
+                    failure, AccountOperationFeedback.Action.DRAFT_SUBMIT
+                )
             } finally { busy = false }
         }
     }
@@ -234,7 +238,7 @@ internal fun CreatorDraftStudio(
         HorizontalDivider()
         Text("Creator Studio • Bản nháp tác phẩm", style = MaterialTheme.typography.titleMedium)
         Text(
-            "Lưu thông tin tác phẩm và tín chỉ trên Supabase. " +
+            "Lưu thông tin tác phẩm và người đóng góp trên đám mây. " +
                 "Sau khi lưu nháp, tải bản thu thử và bằng chứng bản quyền riêng tư. " +
                 "Duyệt hồ sơ không đồng nghĩa được phát hành online.",
             style = MaterialTheme.typography.bodySmall
@@ -371,7 +375,7 @@ internal fun CreatorDraftStudio(
             Button(
                 onClick = { saveDraft() }, enabled = !busy && valid,
                 modifier = Modifier.fillMaxWidth().testTag("draft-save")
-            ) { Text("Lưu nháp lên Supabase") }
+            ) { Text("Lưu bản nháp riêng tư") }
             if (editingId != null) {
                 CreatorPrivateAttachmentPanel(
                     draftId = editingId!!,
@@ -417,7 +421,8 @@ internal fun CreatorDraftStudio(
         AlertDialog(
             onDismissRequest = { exitEditorConfirm = false },
             title = { Text("Đóng khi chưa lưu?") },
-            text = { Text("Những thay đổi chưa lưu vào Supabase sẽ bị bỏ. Bạn có thể tiếp tục sửa hoặc đóng.") },
+            text = { Text("Những thay đổi chưa lưu sẽ bị bỏ. " +
+                "Bản nháp đã lưu trên đám mây vẫn giữ nguyên.") },
             confirmButton = {
                 TextButton(onClick = { exitEditorConfirm = false; showEditor = false },
                     modifier = Modifier.testTag("creator-editor-discard")) {
@@ -576,11 +581,13 @@ internal fun CreatorDraftReviewPanel(
                             }
                             expandedReviewId = null
                             reason = ""
-                            info = "Đã ghi quyết định xét duyệt trên Supabase."
+                            info = "Đã lưu quyết định xét duyệt."
                         } catch (cancelled: CancellationException) {
                             throw cancelled
                         } catch (failure: Exception) {
-                            error = failure.message ?: "Không thể duyệt bản nháp."
+                            error = AccountOperationFeedback.failure(
+                                failure, AccountOperationFeedback.Action.DRAFT_REVIEW
+                            )
                         } finally { busy = false }
                     }
                 }, modifier = Modifier.testTag("draft-review-confirm")) { Text("Xác nhận") }

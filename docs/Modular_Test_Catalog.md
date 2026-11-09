@@ -21,11 +21,11 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 | `HISTORY` | Lịch sử nghe và Room recent | 17 | PLAYBACK |
 | `LYRICS` | Lời bài hát LRC, đồng bộ lời và SAF | 9 | MEDIA_SAF, PLAYBACK, UI_ACCESS |
 | `AUTH` | Đăng nhập, khách, OAuth, hồ sơ | 40 | UI_ACCESS |
-| `ROLES_ADMIN` | Owner, quản trị viên, Developer và RBAC | 74 | AUTH, UI_ACCESS |
+| `ROLES_ADMIN` | Owner, quản trị viên, Developer và RBAC | 78 | AUTH, UI_ACCESS |
 | `CREATOR` | Creator, draft, xét duyệt nội dung | 23 | AUTH, ROLES_ADMIN, UI_ACCESS |
 | `BILLING_DEMO` | Premium và thanh toán giả lập | 17 | AUTH, ROLES_ADMIN, UI_ACCESS |
 | `CLOUD_SYNC` | Cloud library/history và đồng bộ Supabase demo | 8 | AUTH, PLAYLIST, HISTORY |
-| `ONLINE_RIGHTS` | Online catalog và quyền phát có giấy phép | 16 | AUTH, UI_ACCESS |
+| `ONLINE_RIGHTS` | Online catalog và quyền phát có giấy phép | 19 | AUTH, UI_ACCESS |
 | `HOME_NAV` | Trang chủ, mini-player, điều hướng | 18 | LIBRARY, SEARCH, PLAYBACK, HISTORY, UI_ACCESS |
 | `UI_ACCESS` | Thiết kế Ocean Flow, focus, TalkBack semantics | 49 |  |
 | `DEMO_CENTER` | Trung tâm demo và điều hướng theo tài khoản | 11 | AUTH, ROLES_ADMIN, BILLING_DEMO |
@@ -645,7 +645,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 
 ### ROLES_ADMIN — Owner, quản trị viên, Developer và RBAC
 
-**Source paths:** `app/src/main/java/com/example/musicflow/core/account/MusicFlowAccess.kt`, `app/src/main/java/com/example/musicflow/core/account/OwnerDemoSnapshot.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountHomePlan.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountReviewPlan.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountTaskGuide.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountWorkspacePlan.kt`, `app/src/main/java/com/example/musicflow/feature/account/AccountRolePanel.kt`, `app/src/main/java/com/example/musicflow/feature/account/OwnerDemoDashboard.kt`, `admin-web/**`
+**Source paths:** `app/src/main/java/com/example/musicflow/core/account/MusicFlowAccess.kt`, `app/src/main/java/com/example/musicflow/core/account/OwnerDemoSnapshot.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountHomePlan.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountReviewPlan.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountTaskGuide.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountWorkspacePlan.kt`, `app/src/main/java/com/example/musicflow/feature/account/AccountOperationFeedback.kt`, `app/src/main/java/com/example/musicflow/feature/account/AccountRolePanel.kt`, `app/src/main/java/com/example/musicflow/feature/account/OwnerDemoDashboard.kt`, `admin-web/**`
 
 **Downstream contract/smoke:** `ROLES_ADMIN/MusicFlowRolesUiTest#scopedPlatformAdminCannotAccessOwnerGrants`, `ROLES_ADMIN/MusicFlowRolesUiTest#failedAccessRefreshHidesPreviousAdminTools`.
 
@@ -758,6 +758,13 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 - `ROLES_ADMIN/OwnerDemoSnapshotTest#oneVerifiedOwnerAndNoTestActorsMeansGuidanceNeeded`
 - `ROLES_ADMIN/OwnerDemoSnapshotTest#platformAdminWithoutThreePermissionsIsNotReady`
 - `ROLES_ADMIN/OwnerDemoSnapshotTest#rolesReadyForDemoDoNotImplyPublishingOrProduction`
+
+**AccountOperationFeedbackTest** (`app/src/test/java/com/example/musicflow/feature/account/AccountOperationFeedbackTest.kt`; jvm)
+
+- `ROLES_ADMIN/AccountOperationFeedbackTest#expiredLoginAndDeniedPermissionsRemainActionable`
+- `ROLES_ADMIN/AccountOperationFeedbackTest#networkAndFileDownloadErrorsTellUserNextStep`
+- `ROLES_ADMIN/AccountOperationFeedbackTest#privateAttachmentsKeepSizeAndFormatGuidance`
+- `ROLES_ADMIN/AccountOperationFeedbackTest#unknownErrorsDoNotExposeRpcOrPrivateServerDetails`
 
 
 ### CREATOR — Creator, draft, xét duyệt nội dung
@@ -895,6 +902,12 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 - `ONLINE_RIGHTS/OnlineRightsPolicyTest#safeLinksMustBeHttpsWithoutCredentialsOrFragments`
 - `ONLINE_RIGHTS/OnlineRightsPolicyTest#streamingIsSeparateFromDownloadAndCommercialPermission`
 - `ONLINE_RIGHTS/OnlineRightsPolicyTest#unsupportedAndNcLicensesBlocked`
+
+**OnlineCatalogFeedbackTest** (`app/src/test/java/com/example/musicflow/feature/online/OnlineCatalogFeedbackTest.kt`; jvm)
+
+- `ONLINE_RIGHTS/OnlineCatalogFeedbackTest#invalidManualEndpointGivesHttpsGuidance`
+- `ONLINE_RIGHTS/OnlineCatalogFeedbackTest#networkFailureSuggestsRetryWithoutServerDetails`
+- `ONLINE_RIGHTS/OnlineCatalogFeedbackTest#unexpectedErrorsDoNotEchoPrivateUrlsOrRpc`
 
 
 ### HOME_NAV — Trang chủ, mini-player, điều hướng

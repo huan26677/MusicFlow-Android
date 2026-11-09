@@ -58,11 +58,13 @@ internal fun CreatorPrivateAttachmentPanel(
             try {
                 upload(draftId, kind, uri)
                 refresh()
-                notice = "Đã lưu tệp riêng tư trên Supabase."
+                notice = "Đã lưu tệp riêng tư trên đám mây."
             } catch (c: CancellationException) {
                 throw c
             } catch (e: Exception) {
-                error = e.message ?: "Chưa thể tải tệp."
+                error = AccountOperationFeedback.failure(
+                    e, AccountOperationFeedback.Action.FILE_UPLOAD
+                )
             } finally { busy = false }
         }
     }
@@ -86,7 +88,9 @@ internal fun CreatorPrivateAttachmentPanel(
                 } catch (c: CancellationException) {
                     throw c
                 } catch (e: Exception) {
-                    error = e.message ?: "Chưa thể tải tệp."
+                    error = AccountOperationFeedback.failure(
+                        e, AccountOperationFeedback.Action.FILE_DOWNLOAD
+                    )
                 } finally { busy = false }
             }
         }
@@ -156,7 +160,11 @@ internal fun CreatorPrivateAttachmentPanel(
                 scope.launch {
                     busy = true; error = null
                     try { refresh() } catch (c: CancellationException) { throw c }
-                    catch (e: Exception) { error = e.message ?: "Không thể làm mới." }
+                    catch (e: Exception) {
+                        error = AccountOperationFeedback.failure(
+                            e, AccountOperationFeedback.Action.FILE_LIST
+                        )
+                    }
                     finally { busy = false }
                 }
             },

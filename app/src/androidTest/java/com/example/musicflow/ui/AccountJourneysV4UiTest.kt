@@ -12,6 +12,9 @@ import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
+import androidx.compose.ui.test.assertIsSelected
 import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.musicflow.core.account.AccountIdentity
@@ -105,7 +108,12 @@ class AccountJourneysV4UiTest {
         compose.onNodeWithTag("review-area-catalog").assertExists()
         compose.onNodeWithTag("creator-review-load-pending").assertExists()
         compose.onNodeWithTag("draft-review-load").assertDoesNotExist()
-        compose.onNodeWithTag("review-area-drafts").performClick()
+        // Review choices are in a horizontally scrollable row: reveal the
+        // actual chip before tapping on narrow emulator windows.
+        compose.onNodeWithTag("role-workspace-content").performTouchInput { swipeUp() }
+        compose.onNodeWithTag("review-area-drafts").performScrollTo().performClick()
+        compose.onNodeWithTag("review-area-drafts").assertIsSelected()
+        compose.onNodeWithTag("role-workspace-content").performTouchInput { swipeUp() }
         compose.onNodeWithTag("draft-review-load").assertExists()
         compose.onNodeWithTag("creator-review-load-pending").assertDoesNotExist()
         compose.onNodeWithTag("creator-review-reason").assertDoesNotExist()
