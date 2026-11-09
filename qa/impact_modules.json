@@ -136,7 +136,8 @@
         "app/src/main/java/com/example/musicflow/feature/account/AccountOperationFeedback.kt",
         "app/src/main/java/com/example/musicflow/feature/account/AccountRolePanel.kt",
         "app/src/main/java/com/example/musicflow/feature/account/OwnerDemoDashboard.kt",
-        "admin-web/**"
+        "admin-web/**",
+        "scripts/test-admin-web-ux-v15_4.js"
       ],
       "requires": ["AUTH", "UI_ACCESS"],
       "tests": [
@@ -149,7 +150,10 @@
         "**/ui/AccountTaskUxV3UiTest.kt", "**/ui/AccountJourneysV4UiTest.kt"
       ],
       "smoke": ["MusicFlowRolesUiTest#scopedPlatformAdminCannotAccessOwnerGrants", "MusicFlowRolesUiTest#failedAccessRefreshHidesPreviousAdminTools"],
-      "extra": ["node scripts/test-admin-web-role-refresh-v1.js"]
+      "extra": [
+        "node scripts/test-admin-web-role-refresh-v1.js",
+        "node scripts/test-admin-web-ux-v15_4.js"
+      ]
     },
     {
       "id": "CREATOR", "name": "Creator, draft, xét duyệt nội dung",

@@ -4,8 +4,10 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -18,7 +20,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -111,23 +117,31 @@ internal fun CreatorPrivateAttachmentPanel(
             style = MaterialTheme.typography.bodySmall
         )
         if (editable) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(
-                    onClick = { chooseAudio.launch(arrayOf("audio/*")) },
-                    enabled = !busy && files.none {
-                        it.optString("kind") == "audio" && it.optString("state") == "uploaded"
-                    },
-                    modifier = Modifier.testTag("creator-audio-upload")
-                ) { Text("Chọn bản thu") }
-                OutlinedButton(
-                    onClick = { chooseEvidence.launch(
-                        arrayOf("application/pdf", "image/jpeg", "image/png")
-                    ) },
-                    enabled = !busy && files.none {
-                        it.optString("kind") == "evidence" && it.optString("state") == "uploaded"
-                    },
-                    modifier = Modifier.testTag("creator-evidence-upload")
-                ) { Text("Chọn chứng cứ") }
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val compact = maxWidth < 360.dp || LocalDensity.current.fontScale >= 1.5f
+                val actions: @Composable (Modifier) -> Unit = { m ->
+                    Button(
+                        onClick = { chooseAudio.launch(arrayOf("audio/*")) },
+                        enabled = !busy && files.none {
+                            it.optString("kind") == "audio" && it.optString("state") == "uploaded"
+                        },
+                        modifier = m.testTag("creator-audio-upload")
+                    ) { Text("Chọn bản thu") }
+                    OutlinedButton(
+                        onClick = { chooseEvidence.launch(
+                            arrayOf("application/pdf", "image/jpeg", "image/png")
+                        ) },
+                        enabled = !busy && files.none {
+                            it.optString("kind") == "evidence" && it.optString("state") == "uploaded"
+                        },
+                        modifier = m.testTag("creator-evidence-upload")
+                    ) { Text("Chọn chứng cứ") }
+                }
+                if (compact) Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    actions(Modifier.fillMaxWidth())
+                } else Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    actions(Modifier)
+                }
             }
         }
         files.forEach { file ->
@@ -151,7 +165,7 @@ internal fun CreatorPrivateAttachmentPanel(
                     }
                     saveFile.launch("musicflow-" + file.optString("kind") +
                         "-" + draftId + ext)
-                }, enabled = !busy) { Text("Tải về để xem") }
+                }, enabled = !busy) { Text("Tải ${kind.lowercase()} về để xem") }
             }
         }
         OutlinedButton(
@@ -170,8 +184,10 @@ internal fun CreatorPrivateAttachmentPanel(
             },
             modifier = Modifier.testTag("creator-attachment-refresh")
         ) { Text("Làm mới danh sách tệp") }
-        notice?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        notice?.let { Text(it, color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) }
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) }
     }
 }
 

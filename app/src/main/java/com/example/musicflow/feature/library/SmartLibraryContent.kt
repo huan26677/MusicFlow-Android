@@ -112,6 +112,10 @@ fun SmartLibraryContent(
                     )
                 }
             }
+            Text("Vuốt ngang để xem các bộ sưu tập nhạc khác.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.testTag("smart-collections-scroll-hint"))
         }
         item {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

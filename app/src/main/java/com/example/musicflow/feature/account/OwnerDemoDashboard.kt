@@ -56,7 +56,7 @@ internal fun OwnerDemoDashboard(rpc: suspend (String, JSONObject) -> String) {
         HorizontalDivider()
         Text("Owner • Tổng quan bản demo", style = MaterialTheme.typography.titleMedium)
         Text(
-            "Dữ liệu tổng hợp từ Supabase. Không hiển thị email, mật khẩu hoặc khóa bí mật.",
+            "Dữ liệu tổng hợp từ hệ thống quản trị. Không hiển thị email, mật khẩu hoặc khóa bí mật.",
             style = MaterialTheme.typography.bodySmall
         )
         if (busy && data == null) {
@@ -125,14 +125,14 @@ internal fun OwnerDemoDashboard(rpc: suspend (String, JSONObject) -> String) {
                         "2. Tại danh sách người dùng bên dưới, chọn tài khoản rồi cấp PlatformAdmin " +
                         "hoặc Moderator. Cấp Artist/Author cho tài khoản Creator.\n" +
                         "3. PlatformAdmin chỉ được xử lý phần Owner ủy quyền; " +
-                        "Moderator chỉ xét duyệt metadata.\n" +
+                        "Moderator chỉ xét duyệt thông tin tác phẩm.\n" +
                         "4. Đăng xuất/đăng nhập lại từng tài khoản để kiểm tra đúng vai trò."
                 )
             } else {
                 Text(
                     "Các vai trò chính đã có tài khoản. Bạn có thể thử: " +
-                        "Creator tạo nháp → tải bản thu/chứng cứ private → gửi duyệt → " +
-                        "Moderator duyệt metadata; không xuất bản nhạc online."
+                        "Creator tạo nháp → tải bản thu/chứng cứ riêng tư → gửi duyệt → " +
+                        "Moderator duyệt thông tin tác phẩm; không xuất bản nhạc online."
                 )
             }
             Text(

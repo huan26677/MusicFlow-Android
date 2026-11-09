@@ -3,7 +3,9 @@ package com.example.musicflow.feature.account
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,7 +27,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.unit.dp
 import com.example.musicflow.core.account.CreatorCredit
 import com.example.musicflow.core.account.CreatorDraftRules
@@ -39,8 +47,16 @@ private val contributions = listOf(
     "composer" to "Sáng tác",
     "lyricist" to "Viết lời",
     "producer" to "Sản xuất",
-    "master_owner" to "Chủ master"
+    "master_owner" to "Chủ sở hữu bản ghi âm"
 )
+
+private fun licenseLabel(code: String): String = when (code) {
+    "UNVERIFIED" -> "Chưa xác minh quyền"
+    "CC0-1.0" -> "CC0 — cho phép sử dụng tự do"
+    "CC-BY-4.0" -> "CC BY — cần ghi công"
+    "DIRECT" -> "Cấp phép trực tiếp"
+    else -> code
+}
 
 private data class DraftFormSnapshot(
     val title: String,
@@ -243,21 +259,31 @@ internal fun CreatorDraftStudio(
                 "Duyệt hồ sơ không đồng nghĩa được phát hành online.",
             style = MaterialTheme.typography.bodySmall
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { reload() }, enabled = !busy,
-                modifier = Modifier.testTag("creator-drafts-load")
-            ) { Text("Tải nháp của tôi") }
-            Button(onClick = { newDraft() }, enabled = !busy,
-                modifier = Modifier.testTag("creator-new-draft")
-            ) { Text("Tạo nháp") }
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val compact = maxWidth < 360.dp || LocalDensity.current.fontScale >= 1.5f
+            val actions: @Composable (Modifier) -> Unit = { m ->
+                OutlinedButton(onClick = { reload() }, enabled = !busy,
+                    modifier = m.testTag("creator-drafts-load")
+                ) { Text("Tải nháp của tôi") }
+                Button(onClick = { newDraft() }, enabled = !busy,
+                    modifier = m.testTag("creator-new-draft")
+                ) { Text("Tạo nháp") }
+            }
+            if (compact) Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                actions(Modifier.fillMaxWidth())
+            } else Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                actions(Modifier)
+            }
         }
         if (!hasLoaded && !busy && error == null) {
             Text("Nhấn Tải nháp của tôi để xem tác phẩm đã lưu, hoặc Tạo nháp để bắt đầu.",
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.testTag("creator-drafts-start-hint"))
         }
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        info?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) }
+        info?.let { Text(it, color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) }
         if (hasLoaded && drafts.isEmpty()) {
             Text("Chưa có tác phẩm nào. Nhấn Tạo nháp để bắt đầu hồ sơ tác phẩm đầu tiên.",
                 style = MaterialTheme.typography.bodySmall,
@@ -312,6 +338,8 @@ internal fun CreatorDraftStudio(
             )
             Text("2. Chủ sở hữu và giấy phép", style = MaterialTheme.typography.titleSmall)
             Text("Giấy phép dự kiến", style = MaterialTheme.typography.bodyMedium)
+            Text("Chọn đúng loại quyền bạn có. Chưa xác minh thì chưa thể gửi xét duyệt.",
+                style = MaterialTheme.typography.bodySmall)
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -319,18 +347,24 @@ internal fun CreatorDraftStudio(
                 CreatorDraftRules.licenseCodes.sorted().forEach { code ->
                     FilterChip(selected = license == code,
                         onClick = { license = code; editorDirty = true },
-                        label = { Text(code) })
+                        label = { Text(licenseLabel(code)) })
                 }
             }
+            Text("Vuốt ngang để xem các loại giấy phép khác.",
+                style = MaterialTheme.typography.bodySmall)
             OutlinedTextField(
                 value = evidence, onValueChange = { evidence = it.take(1000); editorDirty = true },
                 label = { Text("Mã hợp đồng / mô tả bằng chứng quyền phát") },
                 supportingText = { Text("Không tải tệp bằng chứng lên ở giai đoạn này.") },
                 modifier = Modifier.fillMaxWidth()
             )
-            Row {
-                Checkbox(checked = streaming, onCheckedChange = { streaming = it; editorDirty = true },
-                    modifier = Modifier.testTag("draft-streaming-claim"))
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .toggleable(value = streaming, role = Role.Checkbox,
+                        onValueChange = { streaming = it; editorDirty = true })
+                    .testTag("draft-streaming-claim")
+            ) {
+                Checkbox(checked = streaming, onCheckedChange = null)
                 Text("Tôi xác nhận có quyền cho phép MusicFlow phát online. " +
                     "Quản trị viên vẫn phải kiểm duyệt.")
             }
@@ -350,6 +384,8 @@ internal fun CreatorDraftStudio(
                         label = { Text(label) })
                 }
             }
+            Text("Vuốt ngang để xem thêm vai trò người tham gia.",
+                style = MaterialTheme.typography.bodySmall)
             OutlinedButton(
                 onClick = {
                     credits = credits + CreatorCredit(creditName.trim(), creditRole)
@@ -366,6 +402,8 @@ internal fun CreatorDraftStudio(
                     TextButton(onClick = {
                         credits = credits.filterIndexed { i, _ -> i != index }
                         editorDirty = true
+                    }, modifier = Modifier.semantics {
+                        contentDescription = "Xóa người tham gia ${credit.name}"
                     }) { Text("Xóa") }
                 }
             }
@@ -403,6 +441,20 @@ internal fun CreatorDraftStudio(
                                 credit.optString("contribution") == credits[index].contribution
                         } == true
                     }
+                val submitHint = when {
+                    !valid -> "Hoàn thiện tên bài, nghệ sĩ, chủ quyền và ít nhất một người tham gia rồi lưu."
+                    license == "UNVERIFIED" ->
+                        "Chọn giấy phép đã xác minh trước khi gửi xét duyệt."
+                    !streaming -> "Xác nhận bạn có quyền cho phép phát online."
+                    evidence.trim().length < 8 ->
+                        "Bổ sung mã hợp đồng hoặc mô tả bằng chứng quyền phát (ít nhất 8 ký tự)."
+                    !matchesSaved -> "Lưu bản nháp sau khi chỉnh sửa rồi gửi xét duyệt."
+                    !attachmentsReady ->
+                        "Tải bản thu và chứng cứ riêng tư rồi làm mới danh sách tệp."
+                    else -> "Đã đủ điều kiện để gửi hồ sơ xét duyệt. Chưa phát hành online."
+                }
+                Text(submitHint, style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.testTag("draft-submit-guidance"))
                 OutlinedButton(
                     onClick = { confirmSubmit = true },
                     enabled = !busy && CreatorDraftRules.canSubmit(
@@ -442,7 +494,7 @@ internal fun CreatorDraftStudio(
             onDismissRequest = { confirmSubmit = false },
             title = { Text("Gửi xét duyệt hồ sơ tác phẩm?") },
             text = { Text("Nháp sẽ khóa chỉnh sửa trong lúc duyệt. " +
-                "Duyệt metadata không cấp quyền phát online.") },
+                "Duyệt thông tin tác phẩm không đồng nghĩa cấp quyền phát online.") },
             confirmButton = {
                 TextButton(onClick = { confirmSubmit = false; submitDraft() }) {
                     Text("Gửi xét duyệt")
@@ -496,13 +548,15 @@ internal fun CreatorDraftReviewPanel(
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         HorizontalDivider()
         Text("Duyệt bản nháp tác phẩm", style = MaterialTheme.typography.titleMedium)
-        Text("Duyệt metadata/tín chỉ, không phát hành online hay cấp phép âm thanh.",
+        Text("Chỉ duyệt thông tin tác phẩm và người tham gia; không phát hành online hay cấp phép âm thanh.",
             style = MaterialTheme.typography.bodySmall)
         OutlinedButton(onClick = { refresh() }, enabled = !busy,
             modifier = Modifier.testTag("draft-review-load")
         ) { Text("Tải bản nháp chờ duyệt") }
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        info?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) }
+        info?.let { Text(it, color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) }
         if (loaded && pending.isEmpty()) Text("Hiện không có tác phẩm đang chờ duyệt.",
             modifier = Modifier.testTag("draft-review-empty"))
         if (pending.isNotEmpty()) {
@@ -525,7 +579,8 @@ internal fun CreatorDraftReviewPanel(
                 else "Xem hồ sơ và chứng cứ") }
             if (expandedReviewId == row.optString("id")) {
             Text("Người gửi: ${row.optString("creator_email")}")
-            Text("Chủ master: ${row.optString("rights_holder")} • ${row.optString("license_code")}")
+            Text("Chủ sở hữu bản ghi âm: ${row.optString("rights_holder")} • " +
+                licenseLabel(row.optString("license_code")))
             Text("Chứng cứ khai báo: ${row.optString("rights_reference")}")
             val credits = row.optJSONArray("credits") ?: JSONArray()
             (0 until credits.length()).forEach { index ->
@@ -540,17 +595,25 @@ internal fun CreatorDraftReviewPanel(
                 upload = { _, _, _ -> error("Reviewer cannot upload") },
                 download = download
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(
-                    onClick = { confirm = DraftReviewDecision(row, true, reason.trim()) },
-                    enabled = !busy && reason.trim().length in 5..300,
-                    modifier = Modifier.testTag("draft-review-approve")
-                ) { Text("Duyệt hồ sơ") }
-                OutlinedButton(
-                    onClick = { confirm = DraftReviewDecision(row, false, reason.trim()) },
-                    enabled = !busy && reason.trim().length in 5..300,
-                    modifier = Modifier.testTag("draft-review-needs-changes")
-                ) { Text("Yêu cầu bổ sung") }
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val compact = maxWidth < 360.dp || LocalDensity.current.fontScale >= 1.5f
+                val decisions: @Composable (Modifier) -> Unit = { m ->
+                    Button(
+                        onClick = { confirm = DraftReviewDecision(row, true, reason.trim()) },
+                        enabled = !busy && reason.trim().length in 5..300,
+                        modifier = m.testTag("draft-review-approve")
+                    ) { Text("Duyệt hồ sơ") }
+                    OutlinedButton(
+                        onClick = { confirm = DraftReviewDecision(row, false, reason.trim()) },
+                        enabled = !busy && reason.trim().length in 5..300,
+                        modifier = m.testTag("draft-review-needs-changes")
+                    ) { Text("Yêu cầu bổ sung") }
+                }
+                if (compact) Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    decisions(Modifier.fillMaxWidth())
+                } else Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    decisions(Modifier)
+                }
             }
             }
         }
@@ -558,7 +621,7 @@ internal fun CreatorDraftReviewPanel(
     confirm?.let { decision ->
         AlertDialog(
             onDismissRequest = { confirm = null },
-            title = { Text(if (decision.approved) "Xác nhận duyệt metadata?" else "Yêu cầu chỉnh sửa?") },
+            title = { Text(if (decision.approved) "Xác nhận duyệt thông tin tác phẩm?" else "Yêu cầu chỉnh sửa?") },
             text = { Text("${decision.item.optString("title")}\nLý do: ${decision.reason}\n" +
                 "Không thay đổi catalog nhạc đã phát hành.") },
             confirmButton = {

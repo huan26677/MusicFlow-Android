@@ -153,6 +153,13 @@ __pycache__/
 !/qa-logs/musicflow-v15_3-signed-package.log
 !/qa-logs/musicflow-v15_3-signed-smoke-api36.log
 
+# v15.4 final UX batch: only sanitized proof summaries are versioned.
+/qa-logs/*v15_4*
+!/qa-logs/musicflow-v15_4-ux-final-api36.log
+!/qa-logs/musicflow-v15_4-signed-package.log
+!/qa-logs/musicflow-v15_4-signed-smoke-api36.log
+!/qa-logs/musicflow-v15_4-signed-upgrade-api36.log
+
 # Operating system
 .DS_Store
 Thumbs.db

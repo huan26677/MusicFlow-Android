@@ -27,6 +27,7 @@ button:disabled{cursor:not-allowed;opacity:.5}button:focus-visible,input:focus-v
 <p>Chỉ dành cho Owner và quản trị viên được ủy quyền. Quyền được kiểm tra tại Supabase cho từng thao tác; không sử dụng khóa service_role.</p>
 <section class="panel" id="login-panel">
 <h2>Đăng nhập quản trị</h2>
+<p class="small">Thông tin kết nối do chủ dự án cung cấp. URL và khóa công khai dùng để kết nối, không phải mật khẩu hay khóa quản trị bí mật.</p>
 <form id="login-form">
 <div class="grid">
 <label>Supabase URL<input id="url" type="url" required placeholder="https://...supabase.co" autocomplete="url"></label>
@@ -43,7 +44,8 @@ button:disabled{cursor:not-allowed;opacity:.5}button:focus-visible,input:focus-v
 <h2>Phiên quản trị</h2>
 <p id="roles-label"></p>
 <label>Lý do hành động quản trị (bắt buộc, 5–300 ký tự)
-<textarea id="reason" maxlength="300" rows="2"></textarea></label>
+<textarea id="reason" maxlength="300" rows="2" aria-describedby="reason-hint"></textarea></label>
+<p id="reason-hint" class="small">Lý do này được dùng khi cấp/thu hồi quyền, xét duyệt Creator và phát hành nhạc. Bạn có thể trở lại ô này bằng nút thao tác.</p>
 <button class="secondary" id="refresh-role" type="button">Kiểm tra lại vai trò và quyền</button>
 <button class="secondary" id="logout">Đăng xuất</button>
 </section>
@@ -57,6 +59,7 @@ button:disabled{cursor:not-allowed;opacity:.5}button:focus-visible,input:focus-v
 </section>
 <section class="panel" id="users-panel" hidden>
 <h2>Người dùng</h2>
+<p class="small">Mỗi lần tải tối đa 20 tài khoản phù hợp. Hãy nhập email cụ thể để thu hẹp kết quả.</p>
 <label>Tìm email<input id="user-search" placeholder="Nhập email hoặc để trống"></label>
 <button id="load-users">Tải danh sách</button>
 <div id="user-list" class="list" aria-live="polite"></div>
@@ -115,6 +118,9 @@ const allowed = p => hasRole("owner") ||
   (hasRole("platform_admin") && access.permissions.includes(p));
 const canReviewMetadata = () => allowed("review_creators") || hasRole("moderator");
 function message(text,bad=false){$("notice").textContent=text;$("notice").setAttribute("role",bad?"alert":"status");}
+const roleLabels={owner:"Chủ sở hữu",platform_admin:"Quản trị viên nền tảng",developer:"Nhà phát triển",moderator:"Kiểm duyệt viên",artist:"Nghệ sĩ",author:"Tác giả"};
+const permissionLabels={manage_users:"Quản lý người dùng",review_creators:"Xét duyệt Creator",moderate_catalog:"Quản lý nhạc online"};
+const displayRole=value=>roleLabels[value]||permissionLabels[value]||value;
 function node(tag,text,parent){const el=document.createElement(tag);el.textContent=String(text??"");parent.append(el);return el;}
 function btn(label,parent,handler,secondary=false){
   const el=node("button",label,parent);if(secondary)el.className="secondary";
@@ -162,8 +168,8 @@ async function refreshCurrentAccess(){
     setVisible("creators-panel",allowed("review_creators"));
     setVisible("drafts-panel",canReviewMetadata());
     setVisible("tracks-panel",allowed("moderate_catalog"));
-    $("roles-label").textContent="Vai trò: "+access.roles.join(", ")+
-      " · Quyền: "+access.permissions.join(", ");
+    $("roles-label").textContent="Vai trò: "+(access.roles.map(displayRole).join(", ")||"Người nghe")+
+      " · Quyền: "+(access.permissions.map(displayRole).join(", ")||"Chưa có");
     if(hasRole("owner")){
       try{await refreshOwnerSummary();}
       catch(_){$("owner-summary-next").textContent="Không tải được tổng quan, hãy nhấn Làm mới.";}
@@ -242,11 +248,18 @@ async function downloadCreatorPrivate(path,kind,mime){
 }
 function reason(){
   const result=$("reason").value.trim();
-  if(result.length<5)throw Error("Hãy ghi lý do ít nhất 5 ký tự.");
+  if(result.length<5){
+    $("reason").focus();
+    throw Error("Hãy ghi lý do ít nhất 5 ký tự trong phần Phiên quản trị phía trên.");
+  }
   return result;
 }
 async function perform(task){
-  try{message("Đang thực hiện…");await task();message("Thao tác đã hoàn thành.");}
+  try{
+    message("Đang thực hiện…");
+    const result=await task();
+    message(result===false?"Đã hủy thao tác, không có thay đổi.":"Thao tác đã hoàn thành.");
+  }
   catch(e){message(e.message||"Có lỗi.",true);}
 }
 function reset(){
@@ -294,8 +307,8 @@ $("load-users").addEventListener("click",()=>perform(async()=>{
   const list=$("user-list");list.replaceChildren();
   rows.forEach(user=>{
     const row=node("div","",list);row.className="item";
-    node("span",user.email+" • "+user.tier+" • "+user.roles.join(", "),row);
-    btn("Chọn",row,()=>{
+    node("span",user.email+" • "+user.tier+" • "+user.roles.map(displayRole).join(", "),row);
+    btn("Chọn "+user.email,row,()=>{
       selected=user;
       $("selected-user").textContent="Đã chọn: "+user.email;
       message("Đã chọn tài khoản; hãy nhập lý do trước khi cấp/thu hồi.");
@@ -308,15 +321,17 @@ async function change(kind,enable){
   if(!selected)throw Error("Chưa chọn tài khoản.");
   const why=reason();
   const item=kind==="role"?$("role").value:$("permission").value;
-  if(!confirm((enable?"Cấp ":"Thu hồi ")+item+" cho "+selected.email+"?"))return;
+  if(!confirm((enable?"Cấp ":"Thu hồi ")+displayRole(item)+" cho "+selected.email+"?"))return false;
   if(kind==="role"){
-    await rpc("musicflow_manage_role",{
+    const result=await rpc("musicflow_manage_role",{
       p_user_id:selected.id,p_role:item,p_grant:enable,p_reason:why
     });
+    if(!result||!Array.isArray(result.roles))throw Error("Máy chủ chưa xác nhận thay đổi vai trò.");
   }else{
-    await rpc("musicflow_set_admin_permission",{
+    const result=await rpc("musicflow_set_admin_permission",{
       p_user_id:selected.id,p_permission:item,p_grant:enable,p_reason:why
     });
+    if(result!==true)throw Error("Máy chủ chưa xác nhận thay đổi quyền.");
   }
   try{
     await refreshOwnerSummary();
@@ -340,10 +355,11 @@ $("load-creators").addEventListener("click",()=>perform(async()=>{
     [true,false].forEach(accept=>{
       btn(accept?"Duyệt":"Từ chối",row,()=>perform(async()=>{
         const why=reason();
-        if(!confirm((accept?"Duyệt ":"Từ chối ")+app.requested_name+"?"))return;
-        await rpc("musicflow_review_creator",{
+        if(!confirm((accept?"Duyệt ":"Từ chối ")+app.requested_name+"?"))return false;
+        const accepted=await rpc("musicflow_review_creator",{
           p_application:app.id,p_approve:accept,p_reason:why
         });
+        if(accepted!==true)throw Error("Máy chủ chưa xác nhận quyết định xét duyệt.");
         row.remove();
       }),!accept);
     });
@@ -377,10 +393,11 @@ $("load-drafts").addEventListener("click",()=>perform(async()=>{
     [true,false].forEach(approve=>{
       btn(approve?"Duyệt hồ sơ":"Yêu cầu chỉnh sửa",row,()=>perform(async()=>{
         const why=reason();
-        if(!confirm((approve?"Duyệt hồ sơ ":"Yêu cầu sửa ")+draft.title+"?"))return;
-        await rpc("musicflow_review_draft",{
+        if(!confirm((approve?"Duyệt hồ sơ ":"Yêu cầu sửa ")+draft.title+"?"))return false;
+        const accepted=await rpc("musicflow_review_draft",{
           p_id:draft.id,p_approve:approve,p_reason:why
         });
+        if(accepted!==true)throw Error("Máy chủ chưa xác nhận quyết định xét duyệt.");
         row.remove();
       }),!approve);
     });
@@ -397,12 +414,17 @@ $("load-tracks").addEventListener("click",()=>perform(async()=>{
     [true,false].forEach(publish=>{
       const control=btn(publish?"Xuất bản":"Gỡ phát",row,()=>perform(async()=>{
         const why=reason();
-        if(!confirm((publish?"Xuất bản ":"Gỡ phát ")+track.title+"?"))return;
-        await rpc("musicflow_review_track",{
+        if(!confirm((publish?"Xuất bản ":"Gỡ phát ")+track.title+"?"))return false;
+        const accepted=await rpc("musicflow_review_track",{
           p_track:track.id,p_publish:publish,p_reason:why
         });
+        if(accepted!==true)throw Error("Máy chủ chưa xác nhận thay đổi phát nhạc.");
       }),!publish);
-      if(publish&&(!track.rights_confirmed||!track.streaming_allowed))control.disabled=true;
+      if(publish&&(!track.rights_confirmed||!track.streaming_allowed)){
+        control.disabled=true;
+        control.title="Chưa xác minh đủ giấy phép và quyền phát trực tuyến.";
+        node("p","Chưa thể xuất bản: thiếu xác minh giấy phép hoặc quyền phát.",row);
+      }
     });
   });
   if(rows.length===0)node("p","Không có bản ghi trong catalog.",list);

@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -89,7 +90,7 @@ fun QueueManagerScreen(
             MusicFlowStatusPanel(
                 kind = MusicFlowStatusKind.LOADING,
                 title = "Đang kết nối với bộ phát nhạc...",
-                description = "Hàng đợi sẽ hiển thị khi kết nối MediaSession sẵn sàng."
+                description = "Hàng đợi sẽ hiển thị khi bộ phát nhạc kết nối xong."
             )
         } else if (state.queueItems.isEmpty()) {
             MusicFlowStatusPanel(
@@ -99,7 +100,7 @@ fun QueueManagerScreen(
             )
         } else {
             LazyColumn(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).testTag("queue-items-list"),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 itemsIndexed(state.queueItems, key = { index, _ -> index }) {

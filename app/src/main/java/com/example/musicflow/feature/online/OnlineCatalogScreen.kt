@@ -38,6 +38,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
@@ -180,8 +182,8 @@ fun OnlineCatalogScreen(
                         else if (isSupabaseManaged) "Nguồn nhạc online chưa sẵn sàng"
                         else "Chưa kết nối nguồn nhạc online",
                     description = if (isSupabaseManaged) {
-                        "Danh mục hiện chưa sẵn sàng. Bạn vẫn có thể nghe nhạc " +
-                            "trên điện thoại và thử lại sau."
+                        "Danh mục hiện chưa sẵn sàng. Hãy quay lại Thư viện để " +
+                            "nghe nhạc offline; thử tải lại danh mục sau."
                     } else state.error ?: "Nhập địa chỉ HTTPS của nguồn nhạc " +
                         "được cấp quyền, sau đó chọn Kết nối.",
                     actionLabel = if (state.error == null && !isSupabaseManaged)
@@ -217,9 +219,9 @@ fun OnlineCatalogScreen(
                     MusicFlowStatusPanel(
                         kind = MusicFlowStatusKind.EMPTY,
                         title = "Chưa có bài hát online",
-                        description = "Máy chủ chưa trả về bài hát nào có thể hiển thị. " +
-                            "Danh mục sẽ xuất hiện khi có nội dung hợp lệ. " +
-                            "Bạn vẫn có thể nghe nhạc offline, hoặc chọn Tải lại."
+                        description = "Chưa có bài hát được phép phát trực tuyến. " +
+                            "Bạn vẫn có thể quay lại Thư viện để nghe nhạc offline, " +
+                            "hoặc thử Tải lại khi có nội dung hợp lệ."
                     )
                     OutlinedButton(
                         onClick = { communityDemo = true },
@@ -264,7 +266,7 @@ fun OnlineCatalogScreen(
                                         )
                                         Text(
                                             if (canPlay) "Có quyền phát trực tuyến"
-                                            else OnlineRightsPolicy.statusLabel(
+                                            else "Chưa phát được: " + OnlineRightsPolicy.statusLabel(
                                                 OnlineRightsPolicy.streamingStatus(track.rights)
                                             ),
                                             style = MaterialTheme.typography.bodySmall,
@@ -274,11 +276,19 @@ fun OnlineCatalogScreen(
                                         TextButton(
                                             onClick = { rightsDetail = track },
                                             modifier = Modifier.testTag("track-rights-${track.id}")
+                                                .semantics {
+                                                    contentDescription =
+                                                        "Nguồn và giấy phép của ${track.title}"
+                                                }
                                         ) { Text("Nguồn và giấy phép") }
                                         if (isSupabaseManaged) {
                                             TextButton(
                                                 onClick = { communityTrack = track },
                                                 modifier = Modifier.testTag("track-community-${track.id}")
+                                                    .semantics {
+                                                        contentDescription =
+                                                            "Đánh giá và bình luận về ${track.title}"
+                                                    }
                                             ) { Text("Đánh giá & bình luận") }
                                         }
                                     }

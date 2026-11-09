@@ -33,6 +33,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.unit.dp
 import android.net.Uri
 import com.example.musicflow.BuildConfig
@@ -278,8 +280,10 @@ internal fun AccountRolePanel(
                 "Vai trò: " + access.roles.sorted().takeIf { it.isNotEmpty() }
                     ?.joinToString(", ") { AccountWorkspacePlan.roleLabel(it) }
                     .orEmpty().ifBlank { "Người nghe" })
-            error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            info?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) }
+            info?.let { Text(it, color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) }
 
             if (checked) {
                 OutlinedButton(
@@ -458,7 +462,7 @@ internal fun AccountRolePanel(
                                         .put("p_bio", creatorBio.trim())
                                 ) {
                                     creatorProfileExpanded = false
-                                    info = "Đã lưu hồ sơ sáng tạo trên Supabase."
+                                    info = "Đã lưu hồ sơ sáng tạo vào tài khoản trực tuyến."
                                 }
                             },
                             modifier = Modifier.fillMaxWidth().testTag("creator-profile-save")
@@ -564,56 +568,99 @@ internal fun AccountRolePanel(
                             modifier = Modifier.testTag("owner-clear-selection")
                         ) { Text("Bỏ chọn tài khoản") }
                         Text("Vai trò", style = MaterialTheme.typography.titleSmall)
-                        Row(
-                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            listOf("platform_admin","developer","moderator","artist","author")
-                                .forEach { item ->
-                                    FilterChip(
-                                        selected = role == item, onClick = { role = item },
-                                        label = { Text(AccountWorkspacePlan.roleLabel(item)) }
-                                    )
+                        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                            val compact = maxWidth < 380.dp || LocalDensity.current.fontScale >= 1.5f
+                            val roleChoice: @Composable (String, Modifier) -> Unit = { item, itemModifier ->
+                                FilterChip(
+                                    selected = role == item, onClick = { role = item },
+                                    label = { Text(AccountWorkspacePlan.roleLabel(item)) },
+                                    modifier = itemModifier.heightIn(min = 48.dp)
+                                        .testTag("owner-role-choice-$item")
+                                )
+                            }
+                            if (compact) {
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    listOf("platform_admin","developer","moderator","artist","author")
+                                        .forEach { roleChoice(it, Modifier.fillMaxWidth()) }
                                 }
+                            } else {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth()
+                                        .horizontalScroll(rememberScrollState()),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    listOf("platform_admin","developer","moderator","artist","author")
+                                        .forEach { roleChoice(it, Modifier) }
+                                }
+                            }
                         }
                         OutlinedTextField(
                             value = reason, onValueChange = { reason = it.take(300) },
                             label = { Text("Lý do cấp/thu hồi quyền (5–300 ký tự)") },
                             modifier = Modifier.fillMaxWidth().testTag("admin-reason")
                         )
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(
-                                onClick = { prepareRoleDecision("role", true) },
-                                enabled = !busy && reason.trim().length in 5..300
-                            ) { Text("Cấp vai trò") }
-                            OutlinedButton(
-                                onClick = { prepareRoleDecision("role", false) },
-                                enabled = !busy && reason.trim().length in 5..300
-                            ) { Text("Thu hồi") }
+                        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                            val compact = maxWidth < 380.dp || LocalDensity.current.fontScale >= 1.5f
+                            val roleActions: @Composable (Modifier) -> Unit = { m ->
+                                Button(
+                                    onClick = { prepareRoleDecision("role", true) },
+                                    enabled = !busy && reason.trim().length in 5..300,
+                                    modifier = m.heightIn(min = 48.dp)
+                                ) { Text("Cấp vai trò") }
+                                OutlinedButton(
+                                    onClick = { prepareRoleDecision("role", false) },
+                                    enabled = !busy && reason.trim().length in 5..300,
+                                    modifier = m.heightIn(min = 48.dp)
+                                ) { Text("Thu hồi vai trò") }
+                            }
+                            if (compact) Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                roleActions(Modifier.fillMaxWidth())
+                            } else Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                roleActions(Modifier)
+                            }
                         }
                         Text("Quyền cộng tác quản trị", style = MaterialTheme.typography.titleSmall)
-                        Row(
-                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            listOf("manage_users","review_creators","moderate_catalog")
-                                .forEach { item ->
-                                    FilterChip(
-                                        selected = permission == item,
-                                        onClick = { permission = item },
-                                        label = { Text(AccountReviewPlan.permissionLabel(item)) }
-                                    )
-                                }
+                        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                            val compact = maxWidth < 380.dp || LocalDensity.current.fontScale >= 1.5f
+                            val permissionChoice: @Composable (String, Modifier) -> Unit = { item, m ->
+                                FilterChip(
+                                    selected = permission == item,
+                                    onClick = { permission = item },
+                                    label = { Text(AccountReviewPlan.permissionLabel(item)) },
+                                    modifier = m.heightIn(min = 48.dp)
+                                        .testTag("owner-permission-choice-$item")
+                                )
+                            }
+                            if (compact) Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                listOf("manage_users","review_creators","moderate_catalog")
+                                    .forEach { permissionChoice(it, Modifier.fillMaxWidth()) }
+                            } else Row(
+                                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                listOf("manage_users","review_creators","moderate_catalog")
+                                    .forEach { permissionChoice(it, Modifier) }
+                            }
                         }
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(
-                                onClick = { prepareRoleDecision("permission", true) },
-                                enabled = !busy && reason.trim().length in 5..300
-                            ) { Text("Cấp quyền") }
-                            OutlinedButton(
-                                onClick = { prepareRoleDecision("permission", false) },
-                                enabled = !busy && reason.trim().length in 5..300
-                            ) { Text("Thu hồi quyền") }
+                        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                            val compact = maxWidth < 380.dp || LocalDensity.current.fontScale >= 1.5f
+                            val permissionActions: @Composable (Modifier) -> Unit = { m ->
+                                Button(
+                                    onClick = { prepareRoleDecision("permission", true) },
+                                    enabled = !busy && reason.trim().length in 5..300,
+                                    modifier = m.heightIn(min = 48.dp)
+                                ) { Text("Cấp quyền") }
+                                OutlinedButton(
+                                    onClick = { prepareRoleDecision("permission", false) },
+                                    enabled = !busy && reason.trim().length in 5..300,
+                                    modifier = m.heightIn(min = 48.dp)
+                                ) { Text("Thu hồi quyền") }
+                            }
+                            if (compact) Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                permissionActions(Modifier.fillMaxWidth())
+                            } else Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                permissionActions(Modifier)
+                            }
                         }
                         Text(
                             "Quyền kiểm duyệt bình luận dành riêng cho Moderator",
@@ -817,7 +864,7 @@ internal fun AccountRolePanel(
                     "${if (decision.kind == "role") "Vai trò" else "Quyền"}: " +
                     "${if (decision.kind == "role") AccountWorkspacePlan.roleLabel(decision.name)
                     else AccountReviewPlan.permissionLabel(decision.name)}\n" +
-                    "Lý do: ${decision.reason}\nQuyết định sẽ được ghi trên Supabase.")
+                    "Lý do: ${decision.reason}\nQuyết định sẽ được lưu trong hệ thống quản trị.")
             },
             confirmButton = {
                 TextButton(
@@ -876,7 +923,7 @@ internal fun AccountRolePanel(
                             check(raw.trim() == "true") {
                                 "Máy chủ chưa xác nhận thay đổi quyền."
                             }
-                            info = "Đã cập nhật quyền kiểm duyệt bình luận trên Supabase."
+                            info = "Đã cập nhật quyền kiểm duyệt bình luận trong hệ thống."
                             reason = ""
                         }
                     }
@@ -898,7 +945,7 @@ internal fun AccountRolePanel(
                         CreatorApplicationUiRules.roleLabel(application.optString("requested_role")) +
                         "\nTài khoản: ${application.optString("email")}" +
                         "\nLý do ghi vào nhật ký: ${reason.trim()}" +
-                        "\nQuyết định này được ghi lại trên Supabase."
+                        "\nQuyết định này được ghi lại trong hệ thống quản trị."
                 )
             },
             confirmButton = {
@@ -915,7 +962,7 @@ internal fun AccountRolePanel(
                         ) { raw ->
                             check(raw.trim() == "true") { "Máy chủ chưa xác nhận quyết định." }
                             pending = pending.filterNot { it.optString("id") == id }
-                            info = "Đã xử lý xét duyệt trên Supabase."
+                            info = "Đã ghi nhận quyết định xét duyệt."
                         }
                     },
                     modifier = Modifier.testTag("creator-review-confirm")

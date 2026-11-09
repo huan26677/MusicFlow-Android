@@ -35,6 +35,17 @@ class CreatorDraftStudioUiTest {
         rule.onNodeWithTag("draft-submit").assertDoesNotExist()
     }
 
+    @Test fun creatorExplainsLicenseChoicesAndKeepsRightsConfirmationExplicit() {
+        rule.setContent {
+            MusicFlowTheme { CreatorDraftStudio(rpc = { _, _ -> "[]" }) }
+        }
+        rule.onNodeWithTag("creator-new-draft").performClick()
+        rule.onNodeWithText("Chưa xác minh quyền").assertExists()
+        rule.onNodeWithText("Vuốt ngang để xem các loại giấy phép khác.").assertExists()
+        rule.onNodeWithTag("draft-streaming-claim").assertExists()
+        rule.onNodeWithText("Vuốt ngang để xem thêm vai trò người tham gia.").assertExists()
+    }
+
     @Test fun moderatorReviewScreenDoesNotPublishWithoutDecision() {
         rule.setContent {
             MusicFlowTheme {

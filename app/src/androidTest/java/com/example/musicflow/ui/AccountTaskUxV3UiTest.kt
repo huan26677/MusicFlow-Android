@@ -244,4 +244,38 @@ class AccountTaskUxV3UiTest {
         compose.onNodeWithTag("review-area-compact-choices").assertDoesNotExist()
         compose.onNodeWithTag("creator-review-load-pending").assertExists()
     }
+
+    @Test fun ownerRoleAndPermissionOptionsRemainSelectableAt320dpAnd200PercentFont() {
+        compose.setContent {
+            CompositionLocalProvider(LocalDensity provides Density(1f, fontScale = 2f)) {
+                MusicFlowTheme {
+                    Box(Modifier.width(320.dp).height(690.dp)) {
+                        AccountRolePanel(identity, onClose = {}) { name, _ ->
+                            when (name) {
+                                "musicflow_my_access" -> """{"roles":["owner"],"permissions":[]}"""
+                                "musicflow_my_creator_requests" -> "[]"
+                                "musicflow_admin_users" ->
+                                    """[{"id":"00000000-0000-4000-8000-000000000093",
+                                      "email":"editor@example.invalid","tier":"free"}]"""
+                                else -> "[]"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("admin-users-load").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("admin-users-load").performScrollTo().performClick()
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("admin-user-item").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("admin-user-item").performScrollTo().performClick()
+        compose.onNodeWithTag("owner-role-choice-moderator").performScrollTo().performClick()
+        compose.onNodeWithTag("owner-role-choice-moderator").assertIsSelected()
+        compose.onNodeWithTag("owner-permission-choice-review_creators")
+            .performScrollTo().performClick()
+        compose.onNodeWithTag("owner-permission-choice-review_creators").assertIsSelected()
+    }
 }

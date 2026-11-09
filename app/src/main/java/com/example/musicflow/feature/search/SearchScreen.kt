@@ -306,6 +306,12 @@ fun SearchScreen(
                     )
                 }
             }
+            Text(
+                "Vuốt ngang để xem đủ nhóm kết quả: Bài hát, Album, Nghệ sĩ và Thể loại.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.testTag("search-category-scroll-hint")
+            )
         }
 
         if (state.isLoaded && !state.isLoading && !state.isFiltering &&

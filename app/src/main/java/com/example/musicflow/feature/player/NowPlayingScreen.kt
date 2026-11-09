@@ -397,6 +397,11 @@ fun NowPlayingScreen(
                     )
                 }
         }
+        Text(
+            "Vuốt ngang để chọn tốc độ khác.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
 
         Spacer(Modifier.height(16.dp))
 
@@ -435,6 +440,9 @@ fun NowPlayingScreen(
                     Text("$minutes phút")
                 }
             }
+        Text("Vuốt ngang để xem các mốc hẹn giờ còn lại.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
         if (remainingMs > 0L) {
@@ -451,7 +459,8 @@ fun NowPlayingScreen(
         HorizontalDivider()
         Spacer(Modifier.height(12.dp))
         Text("Chuyển bài", style = MaterialTheme.typography.titleLarge)
-        Text("Gapless tự động khi tệp hỗ trợ. Crossfade thử nghiệm, mặc định tắt.",
+        Text("Chuyển bài liền mạch khi tệp hỗ trợ. " +
+            "Hòa âm khi chuyển bài (Crossfade) là thử nghiệm, mặc định tắt.",
             style = MaterialTheme.typography.bodySmall)
         Row(
             modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
@@ -466,8 +475,11 @@ fun NowPlayingScreen(
                 )
             }
         }
+        Text("Vuốt ngang để chọn thời gian hòa âm khác.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(16.dp))
-        Text("Equalizer", style = MaterialTheme.typography.titleLarge)
+        Text("Cân bằng âm thanh (Equalizer)", style = MaterialTheme.typography.titleLarge)
         val eq = state.equalizer
         if (!eq.supported) {
             Text("Thiết bị chưa cung cấp bộ cân bằng âm thanh.",

@@ -37,6 +37,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -357,6 +359,11 @@ internal fun PlaylistQuickAddScreen(
                                                     onClick = { onAddSong(song) },
                                                     modifier = Modifier.heightIn(min = 48.dp)
                                                         .testTag("quick-add-item-$key")
+                                                        .semantics {
+                                                            contentDescription = if (exists)
+                                                                "${song.title} đã có trong playlist"
+                                                            else "Thêm ${song.title} vào playlist"
+                                                        }
                                                 ) { Text(if (exists) "Đã có" else "Thêm") }
                                             }
                                         }

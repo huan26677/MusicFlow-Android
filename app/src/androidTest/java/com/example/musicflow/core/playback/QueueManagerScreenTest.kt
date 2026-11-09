@@ -5,6 +5,18 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.Modifier
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.musicflow.feature.player.QueueManagerScreen
 import org.junit.Assert.assertEquals
@@ -77,5 +89,26 @@ class QueueManagerScreenTest {
         compose.runOnIdle { assertEquals(null, clearedVersion) }
         compose.onNodeWithText("Dọn hàng đợi").performClick()
         compose.runOnIdle { assertEquals(42L, clearedVersion) }
+    }
+
+    @Test
+    fun actionButtonsRemainReachableAt320dpAnd200PercentFont() {
+        compose.setContent {
+            CompositionLocalProvider(LocalDensity provides Density(1f, 2f)) {
+                Box(Modifier.width(320.dp).height(690.dp)) {
+                    QueueManagerScreen(
+                        state = state, onBack = {},
+                        onMove = { _, _, _ -> true },
+                        onRemove = { _, _ -> true },
+                        onClearOthers = { true }
+                    )
+                }
+            }
+        }
+        // LazyColumn does not compose offscreen rows until its owner scrolls.
+        compose.onNodeWithTag("queue-items-list").performScrollToIndex(3)
+        compose.onNodeWithContentDescription("Đưa Bài 4 lên").assertIsDisplayed()
+        compose.onNodeWithTag("queue-items-list").performScrollToIndex(2)
+        compose.onNodeWithContentDescription("Xóa Bài 3 khỏi hàng đợi").assertIsDisplayed()
     }
 }

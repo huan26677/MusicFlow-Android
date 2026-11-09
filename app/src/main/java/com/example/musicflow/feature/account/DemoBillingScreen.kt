@@ -72,7 +72,7 @@ fun DemoBillingScreen(
                 subtitle = "Trải nghiệm hành trình mua gói, không thực hiện thanh toán thật."
             )
             Text("Chỉ dùng trong dự án báo cáo. KHÔNG thu tiền, KHÔNG kết nối ngân hàng, " +
-                "KHÔNG cấp Premium thật trên Supabase hoặc quyền quản trị.",
+                "KHÔNG cấp Premium thật trên máy chủ hoặc quyền quản trị.",
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.testTag("demo-billing-disclaimer"))
@@ -154,7 +154,7 @@ fun DemoBillingScreen(
                 else "Mô phỏng thanh toán") }
             feedback?.let { Text(it, modifier = Modifier.testTag("demo-billing-feedback")) }
             Text("Hóa đơn và thời hạn chỉ lưu cục bộ cho phạm vi tài khoản đang xem. " +
-                "Không chuyển thành quyền Premium máy chủ, không mở khóa sync, streaming " +
+                "Không chuyển thành quyền Premium máy chủ, không mở khóa đồng bộ hoặc phát nhạc trực tuyến " +
                 "hay quyền Owner/Admin.", style = MaterialTheme.typography.bodySmall)
             TextButton(onClick = onClose,
                 modifier = Modifier.fillMaxWidth().testTag("demo-billing-close")) {

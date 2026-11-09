@@ -97,7 +97,7 @@ class AccountViewModel(
                         displayName = localDemo?.displayName.orEmpty(),
                         message = if (localDemo == null) {
                             "Chưa thể khôi phục phiên. Kiểm tra Internet để đăng nhập."
-                        } else "Đã mở tài khoản Demo lưu trên thiết bị. Không có quyền cloud."
+                        } else "Đã mở tài khoản Demo lưu trên thiết bị. Không có quyền đám mây."
                     )
                 }
             }
@@ -121,7 +121,7 @@ class AccountViewModel(
                     _state.update {
                         it.copy(
                             loading = false,
-                            error = error.message ?: "Không đăng nhập Google được."
+                            error = AccountFriendlyErrors.authentication(error, register = false)
                         )
                     }
                 }
@@ -152,7 +152,7 @@ class AccountViewModel(
         return try {
             api.prepareGoogleSignIn()
         } catch (error: Exception) {
-            _state.update { it.copy(error = error.message ?: "Không mở được Google.") }
+            _state.update { it.copy(error = "Không thể mở đăng nhập Google. Hãy thử lại sau.") }
             null
         }
     }
@@ -300,7 +300,8 @@ class AccountViewModel(
                 throw cancelled
             } catch (error: Exception) {
                 _state.update { it.copy(
-                    loading = false, error = error.message ?: "Không lưu được hồ sơ."
+                    loading = false,
+                    error = "Chưa lưu được hồ sơ. Hãy kiểm tra kết nối hoặc phiên đăng nhập rồi thử lại."
                 ) }
             }
         }

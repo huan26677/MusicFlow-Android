@@ -60,7 +60,7 @@ internal fun PlaylistBackupControls() {
                         "Không ghi được tệp sao lưu."
                     }.use { it.write(bytes) }
                 }
-                message = "Đã xuất playlist. Tệp chỉ chứa metadata, không chứa nhạc hay mật khẩu."
+                message = "Đã xuất playlist. Tệp chỉ chứa thông tin bài hát, không chứa nhạc hay mật khẩu."
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
@@ -116,7 +116,7 @@ internal fun PlaylistBackupControls() {
             Text(if (expanded) "Thu gọn sao lưu / khôi phục" else "Sao lưu / khôi phục playlist")
         }
         if (expanded) {
-            Text("Xuất/nhập playlist dạng JSON, không sao chép tệp nhạc. " +
+            Text("Xuất/nhập danh sách phát bằng tệp sao lưu (.json), không sao chép tệp nhạc. " +
                 "Khi chuyển thiết bị, hãy liên kết lại những bài bị mất quyền đọc.",
                 style = MaterialTheme.typography.bodySmall)
             OutlinedButton(

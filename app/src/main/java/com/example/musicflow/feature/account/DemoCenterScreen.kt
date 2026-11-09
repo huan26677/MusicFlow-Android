@@ -101,7 +101,7 @@ internal fun DemoCenterScreen(
             )
             Text(
                 "MÔ PHỎNG — Dữ liệu, vai trò và kết quả bên dưới hoàn toàn là ví dụ. " +
-                    "Không đăng nhập Supabase, không cấp quyền thật, không gửi dữ liệu lên cloud.",
+                    "Không đăng nhập trực tuyến, không cấp quyền thật, không gửi dữ liệu lên đám mây.",
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.testTag("demo-center-warning")

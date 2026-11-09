@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
@@ -309,7 +310,9 @@ fun HomeScreen(
                 MusicFlowStatusPanel(
                     kind = MusicFlowStatusKind.ERROR,
                     title = "Không thể tải lịch sử nghe",
-                    description = history.message
+                    description = history.message,
+                    actionLabel = "Tiếp tục nghe nhạc trong Thư viện",
+                    onAction = onOpenLibrary
                 )
             }
 
@@ -359,6 +362,9 @@ fun HomeScreen(
                                     TextButton(
                                         onClick = {
                                             onRemoveRecentSong(song.mediaId)
+                                        },
+                                        modifier = Modifier.semantics {
+                                            contentDescription = "Xóa ${song.title} khỏi lịch sử nghe"
                                         }
                                     ) {
                                         Text("Xóa")

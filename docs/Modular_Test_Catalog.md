@@ -14,15 +14,15 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 | `MEDIA_SAF` | MediaStore, tệp offline và quyền SAF | 30 |  |
 | `LIBRARY` | Thư viện, album, nghệ sĩ, thể loại | 18 | MEDIA_SAF, FAVORITES, UI_ACCESS |
 | `SEARCH` | Tìm kiếm không dấu, chỉ mục, lọc nhóm | 25 | MEDIA_SAF, LIBRARY, UI_ACCESS |
-| `PLAYBACK` | Player service, hàng đợi, runtime, audio focus | 87 | MEDIA_SAF, ONLINE_RIGHTS, UI_ACCESS |
+| `PLAYBACK` | Player service, hàng đợi, runtime, audio focus | 88 | MEDIA_SAF, ONLINE_RIGHTS, UI_ACCESS |
 | `PLAYLIST` | Playlist Room, reorder, import/export | 50 | MEDIA_SAF, PLAYBACK, UI_ACCESS |
 | `FAVORITES` | Yêu thích bài hát và album | 17 | MEDIA_SAF, UI_ACCESS |
 | `SMART` | Smart Library và gợi ý thư viện | 19 | LIBRARY, FAVORITES, HISTORY, UI_ACCESS |
 | `HISTORY` | Lịch sử nghe và Room recent | 17 | PLAYBACK |
 | `LYRICS` | Lời bài hát LRC, đồng bộ lời và SAF | 9 | MEDIA_SAF, PLAYBACK, UI_ACCESS |
 | `AUTH` | Đăng nhập, khách, OAuth, hồ sơ | 40 | UI_ACCESS |
-| `ROLES_ADMIN` | Owner, quản trị viên, Developer và RBAC | 80 | AUTH, UI_ACCESS |
-| `CREATOR` | Creator, draft, xét duyệt nội dung | 23 | AUTH, ROLES_ADMIN, UI_ACCESS |
+| `ROLES_ADMIN` | Owner, quản trị viên, Developer và RBAC | 81 | AUTH, UI_ACCESS |
+| `CREATOR` | Creator, draft, xét duyệt nội dung | 24 | AUTH, ROLES_ADMIN, UI_ACCESS |
 | `BILLING_DEMO` | Premium và thanh toán giả lập | 17 | AUTH, ROLES_ADMIN, UI_ACCESS |
 | `CLOUD_SYNC` | Cloud library/history và đồng bộ Supabase demo | 8 | AUTH, PLAYLIST, HISTORY |
 | `ONLINE_RIGHTS` | Online catalog và quyền phát có giấy phép | 19 | AUTH, UI_ACCESS |
@@ -292,6 +292,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 
 **QueueManagerScreenTest** (`app/src/androidTest/java/com/example/musicflow/core/playback/QueueManagerScreenTest.kt`; android)
 
+- `PLAYBACK/QueueManagerScreenTest#actionButtonsRemainReachableAt320dpAnd200PercentFont`
 - `PLAYBACK/QueueManagerScreenTest#actionsUseCurrentTimelineVersionAndCurrentRowIsProtected`
 - `PLAYBACK/QueueManagerScreenTest#clearingRequiresConfirmationAndKeepsCurrent`
 
@@ -645,7 +646,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 
 ### ROLES_ADMIN — Owner, quản trị viên, Developer và RBAC
 
-**Source paths:** `app/src/main/java/com/example/musicflow/core/account/MusicFlowAccess.kt`, `app/src/main/java/com/example/musicflow/core/account/OwnerDemoSnapshot.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountHomePlan.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountReviewPlan.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountTaskGuide.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountWorkspacePlan.kt`, `app/src/main/java/com/example/musicflow/feature/account/AccountOperationFeedback.kt`, `app/src/main/java/com/example/musicflow/feature/account/AccountRolePanel.kt`, `app/src/main/java/com/example/musicflow/feature/account/OwnerDemoDashboard.kt`, `admin-web/**`
+**Source paths:** `app/src/main/java/com/example/musicflow/core/account/MusicFlowAccess.kt`, `app/src/main/java/com/example/musicflow/core/account/OwnerDemoSnapshot.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountHomePlan.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountReviewPlan.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountTaskGuide.kt`, `app/src/main/java/com/example/musicflow/core/account/AccountWorkspacePlan.kt`, `app/src/main/java/com/example/musicflow/feature/account/AccountOperationFeedback.kt`, `app/src/main/java/com/example/musicflow/feature/account/AccountRolePanel.kt`, `app/src/main/java/com/example/musicflow/feature/account/OwnerDemoDashboard.kt`, `admin-web/**`, `scripts/test-admin-web-ux-v15_4.js`
 
 **Downstream contract/smoke:** `ROLES_ADMIN/MusicFlowRolesUiTest#scopedPlatformAdminCannotAccessOwnerGrants`, `ROLES_ADMIN/MusicFlowRolesUiTest#failedAccessRefreshHidesPreviousAdminTools`.
 
@@ -681,6 +682,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 - `ROLES_ADMIN/AccountTaskUxV3UiTest#failedReloadClearsCachedAdminSearchResult`
 - `ROLES_ADMIN/AccountTaskUxV3UiTest#ownerReviewChoicesAreStackedAndSelectableAt320dpAnd200PercentFont`
 - `ROLES_ADMIN/AccountTaskUxV3UiTest#ownerReviewChoicesKeepHorizontalLayoutAtWideNormalFont`
+- `ROLES_ADMIN/AccountTaskUxV3UiTest#ownerRoleAndPermissionOptionsRemainSelectableAt320dpAnd200PercentFont`
 - `ROLES_ADMIN/AccountTaskUxV3UiTest#ownerStartsWithUserWorkAndOpensOverviewOnlyWhenAsked`
 
 **AccountWorkspacesUiTest** (`app/src/androidTest/java/com/example/musicflow/ui/AccountWorkspacesUiTest.kt`; android)
@@ -794,6 +796,7 @@ does not attest that they passed. IDs are `MODULE/Class#method` and do not renum
 **CreatorDraftStudioUiTest** (`app/src/androidTest/java/com/example/musicflow/ui/CreatorDraftStudioUiTest.kt`; android)
 
 - `CREATOR/CreatorDraftStudioUiTest#creatorCanStartDraftAndSeeCopyrightFields`
+- `CREATOR/CreatorDraftStudioUiTest#creatorExplainsLicenseChoicesAndKeepsRightsConfirmationExplicit`
 - `CREATOR/CreatorDraftStudioUiTest#moderatorReviewScreenDoesNotPublishWithoutDecision`
 
 **CreatorPrivateAttachmentUiTest** (`app/src/androidTest/java/com/example/musicflow/ui/CreatorPrivateAttachmentUiTest.kt`; android)

@@ -47,6 +47,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.input.KeyboardType
@@ -163,7 +165,9 @@ fun AccountRoute(
                         .onSuccess {
                             receipt = null
                             feedback = "Đã xóa biên nhận mô phỏng trên thiết bị."
-                        }.onFailure { feedback = it.message }
+                        }.onFailure {
+                            feedback = "Chưa xóa được biên nhận mô phỏng trên máy. Hãy thử lại."
+                        }
                 },
                 onClose = { billingOpen = false }
             )
@@ -460,7 +464,10 @@ fun AccountScreen(
                     description = it
                 )
             }
-            state.message?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+            state.message?.let {
+                Text(it, style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+            }
             // Do not advertise a disabled Google sign-in: it has no usable workflow
             // in this demo. OAuth implementation stays dormant until officially enabled.
         } else {
@@ -505,7 +512,10 @@ fun AccountScreen(
                     description = it
                 )
             }
-            state.message?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+            state.message?.let {
+                Text(it, style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+            }
             HorizontalDivider()
             OutlinedButton(
                 onClick = { profileExpanded = !profileExpanded },
@@ -560,6 +570,16 @@ fun AccountScreen(
             state.syncSummary?.let { summary ->
                 Text("Bài chưa liên kết: ${summary.pending.size}",
                     style = MaterialTheme.typography.titleMedium)
+                if (summary.pending.size > 30) {
+                    Text("Đang hiển thị 30/${summary.pending.size} bài cần liên kết. " +
+                        "Các mục khác vẫn được giữ trên đám mây; hãy đồng bộ trên thiết bị có tệp tương ứng.",
+                        style = MaterialTheme.typography.bodySmall)
+                }
+                if (summary.deviceSongs.size > 150 && summary.pending.isNotEmpty()) {
+                    Text("Mỗi danh sách chọn lại tệp chỉ hiện 150/${summary.deviceSongs.size} bài trên máy. " +
+                        "Nếu không thấy bài cần tìm, hãy kiểm tra thư viện trên thiết bị.",
+                        style = MaterialTheme.typography.bodySmall)
+                }
                 summary.pending.take(30).forEach { pending ->
                     var expanded by remember(pending) { mutableStateOf(false) }
                     Text("${pending.title} — ${pending.artist}")
@@ -582,6 +602,12 @@ fun AccountScreen(
                 }
                 Text("Bản sao trên đám mây (xóa không ảnh hưởng dữ liệu trên thiết bị)",
                     style = MaterialTheme.typography.titleMedium)
+                if (summary.cloudPlaylists.size > 30 || summary.cloudFavorites.size > 30) {
+                    Text("Đang hiển thị ${minOf(30, summary.cloudPlaylists.size)}/${summary.cloudPlaylists.size} danh sách phát và " +
+                        "${minOf(30, summary.cloudFavorites.size)}/${summary.cloudFavorites.size} mục yêu thích để quản lý. " +
+                        "Các mục còn lại không bị xóa.",
+                        style = MaterialTheme.typography.bodySmall)
+                }
                 summary.cloudPlaylists.take(30).forEach { playlist ->
                     TextButton(
                         enabled = !state.syncing,

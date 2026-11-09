@@ -34,6 +34,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
@@ -165,8 +167,10 @@ fun CommunityRoute(
                 }
                 if (busy) CircularProgressIndicator()
                 error?.let { Text(it,color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.testTag("community-error")) }
-                info?.let { Text(it,color = MaterialTheme.colorScheme.primary) }
+                    modifier = Modifier.testTag("community-error")
+                        .semantics { liveRegion = LiveRegionMode.Polite }) }
+                info?.let { Text(it,color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }) }
                 val current = snapshot
                 if (current != null) {
                     Text(
@@ -276,15 +280,24 @@ fun CommunityRoute(
                                     TextButton(onClick = {
                                         editId = comment.id
                                         commentInput = comment.body
-                                    },enabled = !busy) { Text("Sửa") }
+                                    },enabled = !busy,
+                                        modifier = Modifier.semantics {
+                                            contentDescription = "Sửa bình luận của ${comment.displayName}"
+                                        }) { Text("Sửa") }
                                     TextButton(onClick = {
                                         pendingDelete = comment.id
-                                    },enabled = !busy) { Text("Xóa") }
+                                    },enabled = !busy,
+                                        modifier = Modifier.semantics {
+                                            contentDescription = "Xóa bình luận của ${comment.displayName}"
+                                        }) { Text("Xóa") }
                                 } else if (current.authenticated) {
                                     TextButton(onClick = {
                                         pendingReport = comment.id
                                         reportReason = ""
-                                    },enabled = !busy) { Text("Báo cáo") }
+                                    },enabled = !busy,
+                                        modifier = Modifier.semantics {
+                                            contentDescription = "Báo cáo bình luận của ${comment.displayName}"
+                                        }) { Text("Báo cáo") }
                                 }
                             }
                         }

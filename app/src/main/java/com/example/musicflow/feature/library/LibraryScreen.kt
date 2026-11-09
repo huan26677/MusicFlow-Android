@@ -842,9 +842,9 @@ private fun ColumnScope.AlbumFavoritesContent(
                             modifier = Modifier.semantics {
                                 contentDescription =
                                     if (isFavorite) {
-                                        "Bỏ yêu thích album"
+                                            "Bỏ yêu thích album ${tracks.first().album}"
                                     } else {
-                                        "Yêu thích album"
+                                            "Yêu thích album ${tracks.first().album}"
                                     }
                             }
                         ) {
